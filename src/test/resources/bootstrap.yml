@@ -1,0 +1,3 @@
+spring:
+  application.name: testVaultApp
+  cloud.vault.token: token
