@@ -10,7 +10,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = VaultTests.TestApplication.class)
-@WebIntegrationTest()
+@WebIntegrationTest(randomPort = true)
 public class VaultTests {
 
 	@Test
