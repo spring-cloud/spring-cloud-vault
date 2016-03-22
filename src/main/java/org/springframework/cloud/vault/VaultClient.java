@@ -17,42 +17,54 @@
 package org.springframework.cloud.vault;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.Value;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.cloud.vault.VaultProperties.AppIdProperties;
+import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
+import org.springframework.http.*;
+import org.springframework.util.Assert;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 /**
+ * Vault client. This client reads data from Vault secret backends and can authenticate with
+ * Vault to obtain an access token.
+ *
  * @author Spencer Gibb
+ * @author Mark Paluch
  */
 @RequiredArgsConstructor
 public class VaultClient {
-	public static final String VAULT_TOKEN = "X-Vault-Token";
 
-//	protected static final ParameterizedTypeReference<Map<String, String>> typeRef = new ParameterizedTypeReference<Map<String, String>>() { };
+	public static final String API_VERSION = "v1";
+	public static final String VAULT_TOKEN = "X-Vault-Token";
 
 	@Setter
 	private RestTemplate rest = new RestTemplate();
 
+	@Setter
+	private AppIdUserIdMechanism appIdUserIdMechanism;
+
 	private final VaultProperties properties;
 
-	public Map<String, String> read(String key) {
-		String url = String.format("%s://%s:%s/v1/{backend}/{key}",
-				this.properties.getScheme(), this.properties.getHost(), this.properties.getPort());
+	public Map<String, String> read(String key, VaultToken vaultToken) {
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(VAULT_TOKEN, this.properties.getToken());
+		Assert.hasText(key, "Key must not be empty!");
+		Assert.notNull(vaultToken, "VaultToken must not be null!");
+
+		String url = buildUrl();
+
+		HttpHeaders headers = createHeaders(vaultToken);
 		try {
-			ResponseEntity<VaultResponse> response = this.rest.exchange(url, HttpMethod.GET,
-					new HttpEntity<>(headers), VaultResponse.class, this.properties.getBackend(), key);
+			ResponseEntity<VaultResponse> response = this.rest.exchange(url,
+					HttpMethod.GET, new HttpEntity<>(headers), VaultResponse.class,
+					this.properties.getBackend(), key);
 
 			HttpStatus status = response.getStatusCode();
 			if (status == HttpStatus.OK) {
@@ -66,5 +78,80 @@ public class VaultClient {
 		}
 
 		return Collections.emptyMap();
+	}
+
+	private HttpHeaders createHeaders(VaultToken vaultToken) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(VAULT_TOKEN, vaultToken.getToken());
+		return headers;
+	}
+
+	/**
+	 * Creates a token using a configured authentication mechanism.
+	 *
+	 * @return
+	 */
+	public VaultToken createToken() {
+
+		if (properties.getAuthentication() == AuthenticationMethod.APPID && appIdUserIdMechanism != null) {
+			AppIdProperties appId = properties.getAppId();
+			return createTokenUsingAppId(new AppIdTuple(properties.getApplicationName(), appIdUserIdMechanism.createUserId()), appId);
+		}
+
+		throw new UnsupportedOperationException(String.format(
+				"Cannot create a token for auth method %s", properties.getAuthentication()));
+	}
+
+	private VaultToken createTokenUsingAppId(AppIdTuple appIdTuple, AppIdProperties appId) {
+
+		String url = buildUrl();
+		Map<String, String> variables = new HashMap<>();
+		variables.put("backend", "auth/" + appId.getAppIdPath());
+		variables.put("key", "login");
+
+		Map<String, String> login = getAppIdLogin(appIdTuple);
+
+		try {
+			ResponseEntity<VaultResponse> response = this.rest.exchange(url,
+					HttpMethod.POST, new HttpEntity<>(login), VaultResponse.class,
+					variables);
+
+			HttpStatus status = response.getStatusCode();
+			if (!status.is2xxSuccessful()) {
+				throw new IllegalStateException("Cannot login using app-id");
+			}
+
+			VaultResponse body = response.getBody();
+			String token = (String) body.getAuth().get("client_token");
+
+			return VaultToken.of(token, body.getLeaseDuration());
+		} catch (HttpClientErrorException e) {
+
+			if (e.getStatusCode().equals(HttpStatus.BAD_REQUEST)) {
+				throw new IllegalStateException(String.format(
+						"Cannot login using app-id: %s", e.getResponseBodyAsString()));
+			}
+
+			throw e;
+		}
+	}
+
+	private Map<String, String> getAppIdLogin(AppIdTuple appIdTuple) {
+
+		Map<String, String> login = new HashMap<>();
+		login.put("app_id", appIdTuple.getAppId());
+		login.put("user_id", appIdTuple.getUserId());
+		return login;
+	}
+
+	private String buildUrl() {
+		return String.format("%s://%s:%s/%s/{backend}/{key}", this.properties.getScheme(),
+				this.properties.getHost(), this.properties.getPort(), API_VERSION);
+	}
+
+	@Value
+	private static class AppIdTuple{
+		private String appId;
+		private String userId;
 	}
 }

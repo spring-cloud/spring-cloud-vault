@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,23 @@
 
 package org.springframework.cloud.vault;
 
-import java.util.Map;
-
-import lombok.Data;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.IOException;
+import java.net.InetAddress;
 
 /**
- * @author Spencer Gibb
+ * Mechanism to generate a SHA-256 hashed and hex-encoded representation of the IP address. Can be calculated with
+ * {@code echo -n 192.168.99.1 | sha256sum}.
+ *
  * @author Mark Paluch
  */
-@Data
-public class VaultResponse {
-	private Map<String, Object> auth;
-	private Map<String, String> data;
-	private Map<String, String> metadata;
-	@JsonProperty("lease_duration")
-	private long leaseDuration;
-	@JsonProperty("lease_id")
-	private String leaseId;
-	private boolean renewable;
+public class IpAddressUserId implements AppIdUserIdMechanism {
+
+	@Override
+	public String createUserId() {
+		try {
+			return Sha256.toSha256(InetAddress.getLocalHost().getHostAddress());
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
 }

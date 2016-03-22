@@ -35,6 +35,7 @@ public class VaultPropertySourceLocator implements PropertySourceLocator {
 	private VaultClient vault;
 
 	private VaultProperties properties;
+	private transient final VaultState vaultState = new VaultState();
 
 	public VaultPropertySourceLocator(VaultClient vault, VaultProperties properties) {
 		this.vault = vault;
@@ -74,7 +75,7 @@ public class VaultPropertySourceLocator implements PropertySourceLocator {
 	}
 
 	private VaultPropertySource create(String context) {
-		return new VaultPropertySource(context, this.vault);
+		return new VaultPropertySource(context, this.vault, this.properties, this.vaultState);
 	}
 
 	private void addProfiles(List<String> contexts, String baseContext,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.vault;
+package org.springframework.cloud.vault.integration;
 
-import java.util.Map;
-
-import lombok.Data;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.junit.Rule;
+import org.springframework.cloud.vault.util.PrepareVault;
+import org.springframework.cloud.vault.util.VaultRule;
 
 /**
- * @author Spencer Gibb
+ * Base class for integration tests using Vault.
+ * 
  * @author Mark Paluch
  */
-@Data
-public class VaultResponse {
-	private Map<String, Object> auth;
-	private Map<String, String> data;
-	private Map<String, String> metadata;
-	@JsonProperty("lease_duration")
-	private long leaseDuration;
-	@JsonProperty("lease_id")
-	private String leaseId;
-	private boolean renewable;
+public abstract class AbstractIntegrationTests {
+
+	@Rule
+	public final VaultRule vaultRule = new VaultRule();
+
+	public final PrepareVault prepare() {
+		return vaultRule.prepare();
+	}
 }

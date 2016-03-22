@@ -22,33 +22,71 @@ import java.util.Set;
 
 import lombok.extern.apachecommons.CommonsLog;
 
+import org.springframework.cloud.vault.VaultProperties.AppIdProperties;
+import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
 import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.util.Assert;
 
 /**
  * @author Spencer Gibb
+ * @author Mark Paluch
  */
 @CommonsLog
 public class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 
+	private final VaultProperties vaultProperties;
+	
 	private String context;
-
 	private Map<String, String> properties = new LinkedHashMap<>();
+	
+	private transient VaultState vaultState;
 
-	public VaultPropertySource(String context, VaultClient source) {
+	public VaultPropertySource(String context, VaultClient source, VaultProperties properties, VaultState state) {
 		super(context, source);
 		this.context = context;
+		this.vaultProperties = properties;
+		this.vaultState = state;
 	}
 
 	public void init() {
+		
 		try {
-			Map<String, String> values = this.source.read(this.context);
+			Map<String, String> values = this.source.read(this.context, obtainToken());
 
 			if (values != null) {
 				this.properties.putAll(values);
 			}
 		} catch (Exception e) {
-			log.error("Unable to read properties from vault for key "+this.context, e);
+			log.error("Unable to read properties from vault for key " + this.context, e);
 		}
+	}
+
+	private VaultToken obtainToken() {
+
+		if (vaultState.getToken() != null) {
+			return vaultState.getToken();
+		}
+
+		if (vaultProperties.getAuthentication() == AuthenticationMethod.TOKEN) {
+
+			Assert.hasText(vaultProperties.getToken(), "Token must not be empty");
+			vaultState.setToken(VaultToken.of(vaultProperties.getToken()));
+
+			return vaultState.getToken();
+		}
+
+		if (vaultProperties.getAuthentication() == AuthenticationMethod.APPID) {
+
+			AppIdProperties appId = vaultProperties.getAppId();
+			Assert.hasText(vaultProperties.getApplicationName(), "AppId must not be empty");
+			Assert.hasText(appId.getAppIdPath(), "AppIdPath must not be empty");
+
+			vaultState.setToken(source.createToken());
+			return vaultState.getToken();
+		}
+
+		throw new IllegalStateException(
+				String.format("Authentication method %s not supported", vaultProperties.getAuthentication()));
 	}
 
 	@Override

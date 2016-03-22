@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,27 @@
 
 package org.springframework.cloud.vault;
 
-import java.util.Map;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Value;
 
-import lombok.Data;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.util.Assert;
 
 /**
- * @author Spencer Gibb
  * @author Mark Paluch
  */
-@Data
-public class VaultResponse {
-	private Map<String, Object> auth;
-	private Map<String, String> data;
-	private Map<String, String> metadata;
-	@JsonProperty("lease_duration")
+@Value
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class VaultToken {
+	private String token;
 	private long leaseDuration;
-	@JsonProperty("lease_id")
-	private String leaseId;
-	private boolean renewable;
+
+	public static VaultToken of(String token) {
+		return of(token, 0);
+	}
+
+	public static VaultToken of(String token, long leaseDuration) {
+		Assert.hasText(token, "Token must not be empty");
+		return new VaultToken(token, leaseDuration);
+	}
 }
