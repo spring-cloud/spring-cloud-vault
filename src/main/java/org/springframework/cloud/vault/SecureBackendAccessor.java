@@ -16,18 +16,26 @@
 
 package org.springframework.cloud.vault;
 
+import java.util.Map;
+
 /**
- * Interface to obtain a UserId for AppId authentication.
- *
+ * Accessor for a secure backend. Provides URL path variables and can transform
+ * properties.
  * @author Mark Paluch
  */
-public interface AppIdUserIdMechanism {
+public interface SecureBackendAccessor {
 
 	/**
-	 * Creates a UserId for AppId authentication.
-	 *
-	 * @return
+	 * 
+	 * @return URL template variables.
 	 */
-	String createUserId();
+	Map<String, String> variables();
+
+	/**
+	 * 
+	 * @param input must not be {@literal null}.
+	 * @return transformed properties.
+	 */
+	Map<String, String> transformProperties(Map<String, String> input);
 
 }

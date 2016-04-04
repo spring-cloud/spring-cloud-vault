@@ -14,4 +14,6 @@ _site/
 *.ipr
 *.iws
 .factorypath
-vault/
+download/
+vault/download
+vault/vault

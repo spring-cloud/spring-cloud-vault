@@ -17,17 +17,13 @@
 package org.springframework.cloud.vault;
 
 /**
- * Interface to obtain a UserId for AppId authentication.
- *
  * @author Mark Paluch
  */
-public interface AppIdUserIdMechanism {
+public class MyUserIdMechanism implements AppIdUserIdMechanism {
 
-	/**
-	 * Creates a UserId for AppId authentication.
-	 *
-	 * @return
-	 */
-	String createUserId();
-
+	@Override
+	public String createUserId() {
+		String userId = "";
+		return userId;
+	}
 }

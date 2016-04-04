@@ -16,9 +16,7 @@
 
 package org.springframework.cloud.vault;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import lombok.extern.apachecommons.CommonsLog;
 
@@ -35,7 +33,7 @@ import org.springframework.util.Assert;
 public class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 
 	private final VaultProperties vaultProperties;
-	
+
 	private String context;
 	private Map<String, String> properties = new LinkedHashMap<>();
 	
@@ -49,16 +47,49 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 	}
 
 	public void init() {
-		
-		try {
-			Map<String, String> values = this.source.read(this.context, obtainToken());
 
-			if (values != null) {
-				this.properties.putAll(values);
+		Assert.hasText(vaultProperties.getBackend(),
+				"No generic secret backend configured (spring.cloud.vault.backend)");
+
+		List<SecureBackendAccessor> accessors = getSecureBackendAccessors();
+
+		for (SecureBackendAccessor accessor : accessors) {
+			try {
+				Map<String, String> values = this.source.read(accessor, obtainToken());
+
+				if (values != null) {
+					this.properties.putAll(values);
+				}
 			}
-		} catch (Exception e) {
-			log.error("Unable to read properties from vault for key " + this.context, e);
+			catch (Exception e) {
+				log.error(String.format("Unable to read properties from vault for %s ",
+						accessor.variables()), e);
+			}
 		}
+	}
+
+	private List<SecureBackendAccessor> getSecureBackendAccessors() {
+
+		List<SecureBackendAccessor> accessors = new ArrayList<>();
+
+		accessors.add(SecureBackendAccessors.generic(vaultProperties.getBackend(),
+				this.context));
+
+		VaultProperties.MySql mySql = vaultProperties.getMysql();
+		if(mySql.isEnabled()){
+			accessors.add(SecureBackendAccessors.database(mySql));
+		}
+
+		VaultProperties.PostgreSql postgreSql = vaultProperties.getPostgresql();
+		if(postgreSql.isEnabled()){
+			accessors.add(SecureBackendAccessors.database(postgreSql));
+		}
+
+		VaultProperties.Cassandra cassandra = vaultProperties.getCassandra();
+		if(cassandra.isEnabled()){
+			accessors.add(SecureBackendAccessors.database(cassandra));
+		}
+		return accessors;
 	}
 
 	private VaultToken obtainToken() {
@@ -77,16 +108,18 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 
 		if (vaultProperties.getAuthentication() == AuthenticationMethod.APPID) {
 
-			AppIdProperties appId = vaultProperties.getAppId();
-			Assert.hasText(vaultProperties.getApplicationName(), "AppId must not be empty");
-			Assert.hasText(appId.getAppIdPath(), "AppIdPath must not be empty");
+			AppIdProperties appIdProperties = vaultProperties.getAppId();
+			Assert.hasText(vaultProperties.getApplicationName(),
+					"AppId must not be empty");
+			Assert.hasText(appIdProperties.getAppIdPath(), "AppIdPath must not be empty");
 
 			vaultState.setToken(source.createToken());
 			return vaultState.getToken();
 		}
 
 		throw new IllegalStateException(
-				String.format("Authentication method %s not supported", vaultProperties.getAuthentication()));
+				String.format("Authentication method %s not supported",
+						vaultProperties.getAuthentication()));
 	}
 
 	@Override

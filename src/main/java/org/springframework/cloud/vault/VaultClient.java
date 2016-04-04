@@ -53,9 +53,9 @@ public class VaultClient {
 
 	private final VaultProperties properties;
 
-	public Map<String, String> read(String key, VaultToken vaultToken) {
+	public Map<String, String> read(SecureBackendAccessor secureBackendAccessor, VaultToken vaultToken) {
 
-		Assert.hasText(key, "Key must not be empty!");
+		Assert.notNull(secureBackendAccessor, "SecureBackendAccessor must not be empty!");
 		Assert.notNull(vaultToken, "VaultToken must not be null!");
 
 		String url = buildUrl();
@@ -64,11 +64,13 @@ public class VaultClient {
 		try {
 			ResponseEntity<VaultResponse> response = this.rest.exchange(url,
 					HttpMethod.GET, new HttpEntity<>(headers), VaultResponse.class,
-					this.properties.getBackend(), key);
+					secureBackendAccessor.variables());
 
 			HttpStatus status = response.getStatusCode();
 			if (status == HttpStatus.OK) {
-				return response.getBody().getData();
+				if(response.getBody().getData() != null){
+					return secureBackendAccessor.transformProperties(response.getBody().getData());
+				}
 			}
 		} catch (HttpStatusCodeException e) {
 			if (e.getStatusCode() == HttpStatus.NOT_FOUND) {

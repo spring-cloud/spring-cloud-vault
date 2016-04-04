@@ -77,6 +77,12 @@ public class VaultProperties {
 
 	private AppIdProperties appId = new AppIdProperties();
 
+	private final MySql mysql = new MySql();
+
+	private final PostgreSql postgresql = new PostgreSql();
+
+	private final Cassandra cassandra = new Cassandra();
+
 	/**
 	 * Application name for AppId authentication.
 	 */
@@ -115,6 +121,132 @@ public class VaultProperties {
 		 */
 		@NotEmpty
 		private String userId = MAC_ADDRESS;
+	}
+
+	@Data
+	public static class MySql implements DatabaseSecretProperties {
+
+		/**
+		 * Enable mysql backend usage.
+		 */
+		private boolean enabled = false;
+
+		/**
+		 * Role name for credentials.
+		 */
+		private String role;
+
+		/**
+		 * mysql backend path.
+		 */
+		@NotEmpty
+		private String backend = "mysql";
+
+		/**
+		 * Target property for the obtained username.
+		 */
+		@NotEmpty
+		private String usernameProperty = "spring.datasource.username";
+
+		/**
+		 * Target property for the obtained username.
+		 */
+		@NotEmpty
+		private String passwordProperty = "spring.datasource.password";
+	}
+
+	@Data
+	public static class PostgreSql implements DatabaseSecretProperties {
+
+		/**
+		 * Enable postgresql backend usage.
+		 */
+		private boolean enabled = false;
+
+		/**
+		 * Role name for credentials.
+		 */
+		private String role;
+
+		/**
+		 * postgresql backend path.
+		 */
+		@NotEmpty
+		private String backend = "postgresql";
+
+		/**
+		 * Target property for the obtained username.
+		 */
+		@NotEmpty
+		private String usernameProperty = "spring.datasource.username";
+
+		/**
+		 * Target property for the obtained username.
+		 */
+		@NotEmpty
+		private String passwordProperty = "spring.datasource.password";
+	}
+
+	@Data
+	public static class Cassandra implements DatabaseSecretProperties {
+
+		/**
+		 * Enable cassandra backend usage.
+		 */
+		private boolean enabled = false;
+
+		/**
+		 * Role name for credentials.
+		 */
+		private String role;
+
+		/**
+		 * Cassandra backend path.
+		 */
+		@NotEmpty
+		private String backend = "cassandra";
+
+		/**
+		 * Target property for the obtained username.
+		 */
+		@NotEmpty
+		private String usernameProperty = "spring.data.cassandra.username";
+
+		/**
+		 * Target property for the obtained password.
+		 */
+		@NotEmpty
+		private String passwordProperty = "spring.data.cassandra.password";
+	}
+
+	/**
+	 * Configuration properties for database secrets.
+	 */
+	public interface DatabaseSecretProperties {
+
+		/**
+		 * Role name.
+		 *
+		 * @return
+		 */
+		String getRole();
+
+		/**
+		 * Backend path.
+		 *
+		 * @return
+		 */
+		String getBackend();
+
+		/**
+		 * Name of the target property for the obtained username.
+		 */
+		String getUsernameProperty();
+
+		/**
+		 * Name of the target property for the obtained password.
+		 */
+		String getPasswordProperty();
 	}
 
 	public enum AuthenticationMethod {

@@ -1,12 +1,33 @@
 language: java
+
+services:
+  - mysql
+  - postgresql
+
 jdk:
   - oraclejdk8
+
+before_script:
+  - mysql -e "CREATE USER 'spring' IDENTIFIED by 'vault';"
+  - mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO 'spring'@'%' WITH GRANT OPTION;";
+  - psql -U postgres -c "CREATE ROLE spring WITH LOGIN PASSWORD 'vault' CREATEROLE CREATEUSER;"
+  - sleep 30 # wait until Cassandra is up
+  - apache-cassandra-2.2.6/bin/cqlsh 127.0.0.1 -u cassandra -p cassandra -e "CREATE USER 'spring' WITH PASSWORD 'vault' SUPERUSER"
+
 install:
+  - mkdir -p download
+  - test -f download/apache-cassandra-2.2.6-bin.tar.gz || wget http://www-eu.apache.org/dist/cassandra/2.2.6/apache-cassandra-2.2.6-bin.tar.gz -O download/apache-cassandra-2.2.6-bin.tar.gz
+  - tar xzf download/apache-cassandra-2.2.6-bin.tar.gz
+  - cp -f src/test/resources/cassandra.yaml apache-cassandra-2.2.6/conf
+  - apache-cassandra-2.2.6/bin/cassandra
   - src/test/bash/install_vault.sh
   - src/test/bash/local_run_vault.sh &
+
 after_script: pkill vault
 script: mvn clean verify
+
 cache:
   directories:
     - '$HOME/.m2/repository'
     - '$HOME/vault/download'
+    - '$HOME/download'

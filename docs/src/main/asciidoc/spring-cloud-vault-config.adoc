@@ -1,0 +1,222 @@
+= Spring Cloud Vault
+:github: https://github.com/spring-cloud-incubator/spring-cloud-vault-config
+:githubmaster: {github}/tree/master
+:docslink: {githubmaster}/docs/src/main/asciidoc
+:toc:
+
+include::intro.adoc[]
+
+== Quick Start
+
+include::quickstart.adoc[]
+
+== Authentication methods
+
+Different organizations have different requirements for security
+and authentication. Vault reflects that need by shipping multiple authentication
+methods. Spring Cloud Vault supports token and AppId authentication.
+
+=== Token authentication
+
+Tokens are the core method for authentication within Vault.
+Token authentication requires a static token to be provided using the
+https://github.com/spring-cloud/spring-cloud-commons/blob/master/docs/src/main/asciidoc/spring-cloud-commons.adoc#the-bootstrap-application-context[Bootstrap Application Context].
+
+
+.bootstrap.yml
+----
+spring.cloud.vault:
+    enabled: true
+    token: 00000000-0000-0000-0000-000000000000
+----
+
+See also: https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
+
+=== AppId authentication
+
+Vault supports https://www.vaultproject.io/docs/auth/app-id.html[AppId]
+authentication that consists of two hard to guess tokens. The AppId
+defaults to `spring.application.name` that is statically configured.
+The second token is the UserId which is a part determined by the application,
+usually related to the runtime environment. IP address, Mac address or a
+Docker container name are good examples. Spring Cloud Vault Config supports
+IP address, Mac address and static UserId's (e.g. supplied via System properties).
+The IP and Mac address are represented as Hex-encoded SHA256 hash.
+
+IP address-based UserId's use the local host's IP address.
+
+[source,yaml]
+.bootstrap.yml using SHA256 IP-Address UserId's
+----
+spring.cloud.vault:
+    enabled: true
+    authentication: APPID
+    app-id:
+        user-id: IP_ADDRESS
+----
+
+The corresponding command to generate the IP address UserId from a command line is:
+
+----
+$ echo -n 192.168.99.1 | sha256sum
+----
+NOTE: Including the line break of `echo` leads to a different hash value
+so make sure to include the `-n` flag.
+
+Mac address-based UserId's obtain their network device from the
+localhost-bound device. The configuration also allows specifying
+a `network-interface` hint to pick the right device. The value of
+`network-interface` is optional and can be either an interface
+name or interface index (0-based).
+
+[source,yaml]
+.bootstrap.yml using SHA256 Mac-Address UserId's
+----
+spring.cloud.vault:
+    enabled: true
+    authentication: APPID
+    app-id:
+        user-id: MAC_ADDRESS
+        network-interface: eth0
+----
+
+The corresponding command to generate the IP address UserId from a command line is:
+
+----
+$ echo -n 0AFEDE1234AC | sha256sum
+----
+
+NOTE: The Mac address is specified uppercase and without colons.
+Including the line break of `echo` leads to a different hash value
+so make sure to include the `-n` flag.
+
+==== Custom UserId
+
+The UserId generation is an open mechanism. You can set `spring.cloud.vault.app-id.user-id`
+to any string and the configured value will be used as static UserId.
+
+A more advanced approach lets you set `spring.cloud.vault.app-id.user-id` to a
+classname. This class must be on your classpath and must implement
+the `org.springframework.cloud.vault.AppIdUserIdMechanism` interface
+and the `createUserId` method. Spring Cloud Vault will obtain the UserId
+by calling `createUserId` each time it authenticates using AppId to
+obtain a token.
+
+[source,yaml]
+.bootstrap.yml
+----
+spring.cloud.vault:
+    enabled: true
+    authentication: APPID
+    app-id:
+        user-id: com.examlple.MyUserIdMechanism
+----
+
+[source,yaml]
+MyUserIdMechanism.java
+----
+public class MyUserIdMechanism implements AppIdUserIdMechanism {
+
+	@Override
+	public String createUserId() {
+		String userId = ...
+		return userId;
+	}
+}
+----
+
+[[vault-client-database-backends]]
+== Database backends
+
+Vault supports several database secret backends to generate database
+credentials dynamically based on configured roles. This means,
+services that need to access a database no longer need to configure
+credentials: they can request them from Vault, and use Vault's leasing
+mechanism to more easily roll keys.
+
+Spring Cloud Vault integrates with these backends:
+
+* <<vault-client-database-cassandra>>
+* <<vault-client-database-mysql>>
+* <<vault-client-database-postgresql>>
+
+Using a database secret backend requires to enable the backend in the configuration.
+
+NOTE: Enabling multiple JDBC-compliant databases will generate credentials
+and store them by default in the same property keys hence property names for
+JDBC secrets need to be configured separately.
+
+[[vault-client-database-cassandra]]
+=== Apache Cassandra
+
+Spring Cloud Vault allows to obtain credentials for Apache Cassandra.
+The integration can be enabled by setting `spring.cloud.vault.cassandra.enabled=true`
+(default "false"). Username and password are stored in `spring.data.cassandra.username`
+and `spring.data.cassandra.password` so using Spring Boot will pick up the generated
+credentials without further configuration. You can configure the property names
+by setting `spring.cloud.vault.cassandra.username-property` and
+`spring.cloud.vault.cassandra.password-property`.
+
+[source,yaml]
+----
+spring.cloud.vault:
+    enabled: true
+    ...
+    cassandra:
+        enabled: true
+----
+
+See also: https://www.vaultproject.io/docs/secrets/cassandra/index.html[Vault Documentation: Setting up Apache Cassandra with Vault]
+
+[[vault-client-database-mysql]]
+=== MySQL
+
+Spring Cloud Vault allows to obtain credentials for MySQL.
+The integration can be enabled by setting `spring.cloud.vault.mysql.enabled=true`
+(default "false"). Username and password are stored in `spring.datasource.username`
+and `spring.datasource.password` so using Spring Boot will pick up the generated
+credentials without further configuration. You can configure the property names
+by setting `spring.cloud.vault.mysql.username-property` and
+`spring.cloud.vault.mysql.password-property`.
+
+[source,yaml]
+----
+spring.cloud.vault:
+    enabled: true
+    ...
+    mysql:
+        enabled: true
+----
+
+See also: https://www.vaultproject.io/docs/secrets/mysql/index.html[Vault Documentation: Setting up MySQL with Vault]
+
+[[vault-client-database-postgresql]]
+=== PostgreSQL
+
+Spring Cloud Vault allows to obtain credentials for PostgreSQL.
+The integration can be enabled by setting `spring.cloud.vault.postgresql.enabled=true`
+(default "false"). Username and password are stored in `spring.datasource.username`
+and `spring.datasource.password` so using Spring Boot will pick up the generated
+credentials without further configuration. You can configure the property names
+by setting `spring.cloud.vault.postgresql.username-property` and
+`spring.cloud.vault.postgresql.password-property`.
+
+[source,yaml]
+----
+spring.cloud.vault:
+    enabled: true
+    ...
+    postgresql:
+        enabled: true
+----
+
+See also: https://www.vaultproject.io/docs/secrets/postgresql/index.html[Vault Documentation: Setting up PostgreSQL with Vault]
+
+[[vault-client-fail-fast]]
+== Vault Client Fail Fast
+
+In some cases, it may be desirable to fail startup of a service if
+it cannot connect to the Vault Server.  If this is the desired
+behavior, set the bootstrap configuration property
+`spring.cloud.vault.failFast=true` and the client will halt with
+an Exception.

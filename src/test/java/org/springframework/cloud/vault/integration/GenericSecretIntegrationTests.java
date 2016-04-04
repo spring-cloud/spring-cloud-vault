@@ -16,13 +16,15 @@
 
 package org.springframework.cloud.vault.integration;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.cloud.vault.SecureBackendAccessors.generic;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.cloud.vault.SecureBackendAccessors;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.cloud.vault.VaultToken;
@@ -48,7 +50,7 @@ public class GenericSecretIntegrationTests extends AbstractIntegrationTests {
 	@Test
 	public void shouldReturnSecretsCorrectly() throws Exception {
 
-		Map<String, String> secretProperties = vaultClient.read("app-name",
+		Map<String, String> secretProperties = vaultClient.read(generic(vaultProperties, "app-name"),
 				createToken());
 
 		assertThat(secretProperties).containsAllEntriesOf(createExpectedMap());
@@ -57,7 +59,7 @@ public class GenericSecretIntegrationTests extends AbstractIntegrationTests {
 	@Test
 	public void shouldReturnNullIfNotFound() throws Exception {
 
-		Map<String, String> secretProperties = vaultClient.read("missing", createToken());
+		Map<String, String> secretProperties = vaultClient.read(generic(vaultProperties, "missing"), createToken());
 
 		assertThat(secretProperties).isNull();
 	}

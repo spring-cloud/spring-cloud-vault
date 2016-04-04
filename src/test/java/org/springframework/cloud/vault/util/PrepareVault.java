@@ -50,11 +50,13 @@ public class PrepareVault {
 	public final static String INITIALIZE_URL_TEMPLATE = "{baseuri}/sys/init";
 	public final static String MOUNT_AUTH_URL_TEMPLATE = "{baseuri}/sys/auth/{authBackend}";
 	public final static String SYS_AUTH_URL_TEMPLATE = "{baseuri}/sys/auth";
+	public final static String MOUNT_SECRET_URL_TEMPLATE = "{baseuri}/sys/mounts/{type}";
+	public final static String SYS_MOUNTS_URL_TEMPLATE = "{baseuri}/sys/mounts";
 	public final static String SEAL_STATUS_URL_TEMPLATE = "{baseuri}/sys/seal-status";
 	public final static String UNSEAL_URL_TEMPLATE = "{baseuri}/sys/unseal";
 	public final static String CREATE_TOKEN_URL_TEMPLATE = "{baseuri}/auth/token/create-orphan";
 	public final static String WRITE_URL_TEMPLATE = "{baseuri}/{path}";
-	public static final ParameterizedTypeReference<Map<String, Map<String, String>>> MAP_OF_MAPS_TYPE = new ParameterizedTypeReference<Map<String, Map<String, String>>>() {
+	public static final ParameterizedTypeReference<Map<String, Object>> MAP_OF_MAPS_TYPE = new ParameterizedTypeReference<Map<String, Object>>() {
 
 	};
 
@@ -211,27 +213,75 @@ public class PrepareVault {
 	public boolean hasAuth(String authBackend) {
 
 		Assert.hasText(authBackend, "AuthBackend must not be empty");
+		return hasMount(SYS_AUTH_URL_TEMPLATE, authBackend);
+	}
+
+	/**
+	 * Mount an secret backend.
+	 *
+	 * @param secretBackend
+	 */
+	public void mountSecret(String secretBackend) {
+
+		Assert.hasText(secretBackend, "SecretBackend must not be empty");
 
 		Map<String, String> parameters = parameters(vaultProperties);
-		parameters.put("authBackend", authBackend);
+		parameters.put("type", secretBackend);
 
-		HttpEntity<Map<String, String>> entity = new HttpEntity<>(authenticatedHeaders());
+		Map<String, String> requestEntity = Collections.singletonMap("type",
+				secretBackend);
 
-		ResponseEntity<Map<String, Map<String, String>>> responseEntity = restTemplate
-				.exchange(SYS_AUTH_URL_TEMPLATE, HttpMethod.GET, entity, MAP_OF_MAPS_TYPE,
-						parameters);
+		HttpEntity<Map<String, String>> entity = new HttpEntity<>(requestEntity,
+				authenticatedHeaders());
+
+		ResponseEntity<String> responseEntity = restTemplate.exchange(
+				MOUNT_SECRET_URL_TEMPLATE, HttpMethod.POST, entity, String.class,
+				parameters);
 
 		if (!responseEntity.getStatusCode().is2xxSuccessful()) {
 			throw new IllegalStateException(
-					"Cannot create mount auth backend: " + responseEntity.toString());
+					"Cannot create mount secret backend: " + responseEntity.toString());
 		}
 
-		Map<String, Map<String, String>> body = responseEntity.getBody();
-		for (Entry<String, Map<String, String>> entry : body.entrySet()) {
-			if (entry.getKey().contains(authBackend)
-					&& authBackend.equals(entry.getValue().get("type"))) {
-				return true;
+		responseEntity.getBody();
+	}
+
+	/**
+	 * Check whether a auth-backend is enabled.
+	 *
+	 * @param secretBackend
+	 * @return
+	 */
+	public boolean hasSecret(String secretBackend) {
+
+		Assert.hasText(secretBackend, "SecretBackend must not be empty");
+		return hasMount(SYS_MOUNTS_URL_TEMPLATE, secretBackend);
+	}
+
+	private boolean hasMount(String urlTemplate, String type) {
+		Map<String, String> parameters = parameters(vaultProperties);
+
+		HttpEntity<Map<String, String>> entity = new HttpEntity<>(authenticatedHeaders());
+
+		ResponseEntity<Map<String, Object>> responseEntity = restTemplate.exchange(
+				urlTemplate, HttpMethod.GET, entity, MAP_OF_MAPS_TYPE, parameters);
+
+		if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+			throw new IllegalStateException(
+					"Cannot enumerate mounts: " + responseEntity.toString());
+		}
+
+		Map<String, Object> body = responseEntity.getBody();
+		for (Entry<String, Object> entry : body.entrySet()) {
+
+			if (entry.getValue() instanceof Map) {
+				Map<String, Object> nested = (Map<String, Object>) entry.getValue();
+
+				if (entry.getKey().contains(type) && type.equals(nested.get("type"))) {
+					return true;
+				}
 			}
+
 		}
 
 		return false;
@@ -256,7 +306,19 @@ public class PrepareVault {
 	 * @param data
 	 */
 	public void write(String path, Map<String, ?> data) {
+		write(HttpMethod.POST, path, data);
+	}
 
+	/**
+	 * Write key-value data to a path in Vault.
+	 *
+	 * @param httpMethod
+	 * @param path
+	 * @param data
+	 */
+	public void write(HttpMethod httpMethod, String path, Map<String, ?> data) {
+
+		Assert.notNull(httpMethod, "HttpMethod must not be null");
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(data, "Data must not be null");
 
