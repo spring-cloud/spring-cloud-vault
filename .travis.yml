@@ -1,0 +1,12 @@
+language: java
+jdk:
+  - oraclejdk8
+install:
+  - src/test/bash/install_vault.sh
+  - src/test/bash/local_run_vault.sh &
+after_script: pkill vault
+script: mvn clean verify
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/vault/download'
