@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.vault;
 
+import static com.sun.org.apache.xalan.internal.xsltc.compiler.sym.error;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,11 +26,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.Value;
 
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.cloud.vault.VaultProperties.AppIdProperties;
 import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
 import org.springframework.http.*;
 import org.springframework.util.Assert;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
@@ -40,6 +44,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Mark Paluch
  */
 @RequiredArgsConstructor
+@CommonsLog
 public class VaultClient {
 
 	public static final String API_VERSION = "v1";
@@ -61,6 +66,10 @@ public class VaultClient {
 		String url = buildUrl();
 
 		HttpHeaders headers = createHeaders(vaultToken);
+		Exception error = null;
+		String errorBody = null;
+
+		log.info(String.format("Fetching config from server at: %s", url));
 		try {
 			ResponseEntity<VaultResponse> response = this.rest.exchange(url,
 					HttpMethod.GET, new HttpEntity<>(headers), VaultResponse.class,
@@ -68,16 +77,30 @@ public class VaultClient {
 
 			HttpStatus status = response.getStatusCode();
 			if (status == HttpStatus.OK) {
-				if(response.getBody().getData() != null){
+				if (response.getBody().getData() != null) {
 					return secureBackendAccessor.transformProperties(response.getBody().getData());
 				}
 			}
-		} catch (HttpStatusCodeException e) {
-			if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-				return null;
-			}
-			throw e;
 		}
+		catch (HttpServerErrorException e) {
+			error = e;
+			if (MediaType.APPLICATION_JSON.includes(e.getResponseHeaders()
+					.getContentType())) {
+				errorBody = e.getResponseBodyAsString();
+			}
+		}
+		catch (Exception e) {
+			error = e;
+		}
+
+		if (properties.isFailFast()) {
+			throw new IllegalStateException(
+					"Could not locate PropertySource and the fail fast property is set, failing",
+					error);
+		}
+
+		log.warn(String.format("Could not locate PropertySource: %s"
+				, (errorBody == null ? error==null ? "key not found" : error.getMessage() : errorBody)));
 
 		return Collections.emptyMap();
 	}

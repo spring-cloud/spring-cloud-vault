@@ -18,12 +18,12 @@ package org.springframework.cloud.vault;
 
 import java.util.*;
 
-import lombok.extern.apachecommons.CommonsLog;
-
 import org.springframework.cloud.vault.VaultProperties.AppIdProperties;
 import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.util.Assert;
+
+import lombok.extern.apachecommons.CommonsLog;
 
 /**
  * @author Spencer Gibb
@@ -36,10 +36,11 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 
 	private String context;
 	private Map<String, String> properties = new LinkedHashMap<>();
-	
+
 	private transient VaultState vaultState;
 
-	public VaultPropertySource(String context, VaultClient source, VaultProperties properties, VaultState state) {
+	public VaultPropertySource(String context, VaultClient source,
+			VaultProperties properties, VaultState state) {
 		super(context, source);
 		this.context = context;
 		this.vaultProperties = properties;
@@ -62,8 +63,19 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 				}
 			}
 			catch (Exception e) {
-				log.error(String.format("Unable to read properties from vault for %s ",
-						accessor.variables()), e);
+
+				String message = String.format(
+						"Unable to read properties from vault for %s ",
+						accessor.variables());
+				if (vaultProperties.isFailFast()) {
+					if (e instanceof RuntimeException) {
+						throw e;
+					}
+
+					throw new IllegalStateException(message, e);
+				}
+
+				log.error(message, e);
 			}
 		}
 	}
@@ -76,17 +88,17 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 				this.context));
 
 		VaultProperties.MySql mySql = vaultProperties.getMysql();
-		if(mySql.isEnabled()){
+		if (mySql.isEnabled()) {
 			accessors.add(SecureBackendAccessors.database(mySql));
 		}
 
 		VaultProperties.PostgreSql postgreSql = vaultProperties.getPostgresql();
-		if(postgreSql.isEnabled()){
+		if (postgreSql.isEnabled()) {
 			accessors.add(SecureBackendAccessors.database(postgreSql));
 		}
 
 		VaultProperties.Cassandra cassandra = vaultProperties.getCassandra();
-		if(cassandra.isEnabled()){
+		if (cassandra.isEnabled()) {
 			accessors.add(SecureBackendAccessors.database(cassandra));
 		}
 		return accessors;

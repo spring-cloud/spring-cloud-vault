@@ -71,6 +71,11 @@ public class VaultProperties {
 	private String profileSeparator = ",";
 
 	/**
+	 * Fail fast if data cannot be obtained from Vault.
+	 */
+	private boolean failFast = false;
+
+	/**
 	 * Static vault token. Required if {@link #authentication} is {@code TOKEN}.
 	 */
 	private String token;

@@ -29,6 +29,7 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Integration tests for {@link VaultClient} using the generic secret backend.
+ *
  * @author Mark Paluch
  */
 public class GenericSecretIntegrationTests extends AbstractIntegrationTests {
@@ -39,6 +40,7 @@ public class GenericSecretIntegrationTests extends AbstractIntegrationTests {
 	@Before
 	public void setUp() throws Exception {
 
+		vaultProperties.setFailFast(false);
 		prepare().writeSecret("app-name", (Map) createData());
 		vaultClient.setRest(new RestTemplate());
 	}
@@ -54,6 +56,17 @@ public class GenericSecretIntegrationTests extends AbstractIntegrationTests {
 
 	@Test
 	public void shouldReturnNullIfNotFound() throws Exception {
+
+		Map<String, String> secretProperties = vaultClient
+				.read(generic(vaultProperties, "missing"), createToken());
+
+		assertThat(secretProperties).isEmpty();
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void shouldFailOnFailFast() throws Exception {
+
+		vaultProperties.setFailFast(true);
 
 		Map<String, String> secretProperties = vaultClient
 				.read(generic(vaultProperties, "missing"), createToken());
@@ -85,5 +98,4 @@ public class GenericSecretIntegrationTests extends AbstractIntegrationTests {
 		data.put("boolean", "true");
 		return data;
 	}
-
 }
