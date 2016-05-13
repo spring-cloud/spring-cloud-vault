@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.vault;
+package org.springframework.cloud.vault.configclient;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -26,19 +26,13 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-/**
- * @author Mark Paluch
- */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = VaultAppIdTests.TestApplication.class)
-@IntegrationTest({"spring.cloud.vault.authentication=appid", "spring.cloud.vault.app-id.user-id=IP_ADDRESS", "spring.application.name=VaultAppIdTests"})
-public class VaultAppIdTests {
+@SpringApplicationConfiguration(classes = VaultTests.TestApplication.class)
+public class VaultTests {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -46,18 +40,8 @@ public class VaultAppIdTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		vaultRule.prepare().writeSecret(VaultAppIdTests.class.getSimpleName(), Collections.singletonMap("vault.value", "foo"));
-
-		VaultProperties vaultProperties = Settings.createVaultProperties();
-		vaultProperties.setAuthentication(VaultProperties.AuthenticationMethod.APPID);
-		vaultProperties.getAppId().setUserId(VaultProperties.AppIdProperties.IP_ADDRESS);
-
-		if (!vaultRule.prepare().hasAuth(vaultProperties.getAppId().getAppIdPath())) {
-			vaultRule.prepare().mountAuth(vaultProperties.getAppId().getAppIdPath());
-		}
-
-		vaultRule.prepare().mapAppId(VaultAppIdTests.class.getSimpleName());
-		vaultRule.prepare().mapUserId(VaultAppIdTests.class.getSimpleName(), new IpAddressUserId().createUserId());
+		vaultRule.prepare().writeSecret("testVaultApp",
+				Collections.singletonMap("vault.value", "foo"));
 	}
 
 	@Value("${vault.value}")

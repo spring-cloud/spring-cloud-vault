@@ -28,6 +28,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 
 /**
+ * {@link PropertySourceLocator} using {@link VaultClient}.
+ *
  * @author Spencer Gibb
  */
 public class VaultPropertySourceLocator implements PropertySourceLocator {

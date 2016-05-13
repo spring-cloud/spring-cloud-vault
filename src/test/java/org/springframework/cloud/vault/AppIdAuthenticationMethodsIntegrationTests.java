@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.vault.integration;
+package org.springframework.cloud.vault;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -26,7 +26,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.springframework.cloud.vault.*;
 import org.springframework.cloud.vault.VaultProperties.AppIdProperties;
 import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
 import org.springframework.cloud.vault.util.Settings;
@@ -58,7 +57,8 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 	@Test
 	public void loginUsingStaticUserIdShouldCreateAToken() throws Exception {
 
-		VaultProperties vaultProperties = prepareAppIdAuthenticationMethod("my-user-id", "myapp");
+		VaultProperties vaultProperties = prepareAppIdAuthenticationMethod("my-user-id",
+				"myapp");
 		VaultClient vaultClient = new VaultClient(vaultProperties);
 		vaultClient.setAppIdUserIdMechanism(new StaticUserId(vaultProperties));
 		assertThat(vaultClient.createToken()).isNotNull();
@@ -67,11 +67,11 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 	@Test
 	public void loginUsingMacAddressShouldCreateAToken() throws Exception {
 
-		VaultProperties vaultProperties = prepareAppIdAuthenticationMethod(AppIdProperties.MAC_ADDRESS, "myapp");
+		VaultProperties vaultProperties = prepareAppIdAuthenticationMethod(
+				AppIdProperties.MAC_ADDRESS, "myapp");
 		VaultClient vaultClient = new VaultClient(vaultProperties);
 
-		vaultClient.setAppIdUserIdMechanism(
-				new MacAddressUserId(vaultProperties));
+		vaultClient.setAppIdUserIdMechanism(new MacAddressUserId(vaultProperties));
 		assertThat(vaultClient.createToken()).isNotNull();
 	}
 

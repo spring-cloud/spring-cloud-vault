@@ -14,74 +14,73 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.vault;
+package org.springframework.cloud.vault.configclient;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.*;
 
-import javax.sql.DataSource;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+
 import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Collections;
 
+import javax.sql.DataSource;
+
+import com.mysql.jdbc.MySQLConnection;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.postgresql.jdbc.PgConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.cglib.proxy.Proxy;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * Integration tests using the postgresql secret backend.
+ * Integration tests using the mysql secret backend.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = VaultPostgreSqlTests.TestApplication.class)
-@IntegrationTest({ "spring.cloud.vault.postgresql.enabled=true",
-		"spring.cloud.vault.postgresql.role=readonly", "spring.datasource.url=jdbc:postgresql://localhost:5432/postgres?ssl=false" })
-public class VaultPostgreSqlTests {
+@SpringApplicationConfiguration(classes = VaultMySqlTests.TestApplication.class)
+@IntegrationTest({ "spring.cloud.vault.mysql.enabled=true",
+		"spring.cloud.vault.mysql.role=readonly",
+		"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false" })
+public class VaultMySqlTests {
 
-	private final static String POSTGRES_HOST = "localhost";
-	private final static int POSTGRES_PORT = 5432;
-
-	private final static String CONNECTION_URL = String.format(
-			"postgresql://spring:vault@%s:%d/postgres?sslmode=disable", POSTGRES_HOST,
-			POSTGRES_PORT);
-
-	private final static String CREATE_USER_AND_GRANT_SQL = "CREATE ROLE \"{{name}}\" WITH "
-			+ "LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';\n"
-			+ "GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";";
+	private final static int MYSQL_PORT = 3306;
+	private final static String MYSQL_HOST = "localhost";
+	private final static String ROOT_CREDENTIALS = String
+			.format("spring:vault@tcp(%s:%d)/", MYSQL_HOST, MYSQL_PORT);
+	private final static String CREATE_USER_AND_GRANT_SQL = "CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';"
+			+ "GRANT SELECT ON *.* TO '{{name}}'@'%';";
 
 	/**
-	 * Initialize the postgresql secret backend.
+	 * Initialize the mysql secret backend.
 	 *
 	 * @throws Exception
 	 */
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 
-		assumeTrue(CanConnect.to(new InetSocketAddress(POSTGRES_HOST, POSTGRES_PORT)));
+		assumeTrue(CanConnect.to(new InetSocketAddress(MYSQL_HOST, MYSQL_PORT)));
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		if (!vaultRule.prepare().hasSecret("postgresql")) {
-			vaultRule.prepare().mountSecret("postgresql");
+		if (!vaultRule.prepare().hasSecret("mysql")) {
+			vaultRule.prepare().mountSecret("mysql");
 		}
 
-		vaultRule.prepare().write("postgresql/config/connection",
-				Collections.singletonMap("connection_url", CONNECTION_URL));
+		vaultRule.prepare().write("mysql/config/connection",
+				Collections.singletonMap("connection_url", ROOT_CREDENTIALS));
 
-		vaultRule.prepare().write("postgresql/roles/readonly",
+		vaultRule.prepare().write("mysql/roles/readonly",
 				Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
 	}
 
@@ -97,17 +96,13 @@ public class VaultPostgreSqlTests {
 	@Test
 	public void shouldConnectUsingDataSource() throws SQLException {
 
-		Connection connection = dataSource.getConnection();
-
-		assertThat(connection.getSchema()).isEqualTo("public");
-		connection.close();
+		dataSource.getConnection().close();
 	}
 
 	@Test
 	public void shouldConnectUsingJdbcUrlConnection() throws SQLException {
 
-		String url = String.format("jdbc:postgresql://%s:%d/postgres?ssl=false",
-				POSTGRES_HOST, POSTGRES_PORT);
+		String url = String.format("jdbc:mysql://%s?useSSL=false", MYSQL_HOST);
 		DriverManager.getConnection(url, username, password).close();
 	}
 

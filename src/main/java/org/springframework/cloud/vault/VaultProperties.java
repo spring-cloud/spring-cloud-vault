@@ -16,11 +16,11 @@
 
 package org.springframework.cloud.vault;
 
-import lombok.Data;
-
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.constraints.Range;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import lombok.Data;
 
 /**
  * @author Spencer Gibb
@@ -77,11 +77,11 @@ public class VaultProperties {
 
 	private AppIdProperties appId = new AppIdProperties();
 
-	private final MySql mysql = new MySql();
+	private MySql mysql = new MySql();
 
-	private final PostgreSql postgresql = new PostgreSql();
+	private PostgreSql postgresql = new PostgreSql();
 
-	private final Cassandra cassandra = new Cassandra();
+	private Cassandra cassandra = new Cassandra();
 
 	/**
 	 * Application name for AppId authentication.
@@ -117,7 +117,8 @@ public class VaultProperties {
 		private String networkInterface = null;
 
 		/**
-		 * UserId mechanism. Can be either "MAC_ADDRESS", "IP_ADDRESS". Any other values are passed as UserId.
+		 * UserId mechanism. Can be either "MAC_ADDRESS", "IP_ADDRESS", a string or a
+		 * class name.
 		 */
 		@NotEmpty
 		private String userId = MAC_ADDRESS;
@@ -220,21 +221,21 @@ public class VaultProperties {
 	}
 
 	/**
-	 * Configuration properties for database secrets.
+	 * Configuration properties interface for database secrets.
 	 */
 	public interface DatabaseSecretProperties {
 
 		/**
 		 * Role name.
 		 *
-		 * @return
+		 * @return the role name
 		 */
 		String getRole();
 
 		/**
 		 * Backend path.
 		 *
-		 * @return
+		 * @return the backend path.
 		 */
 		String getBackend();
 

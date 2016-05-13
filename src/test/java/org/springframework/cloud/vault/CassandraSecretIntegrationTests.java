@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.vault.integration;
+package org.springframework.cloud.vault;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.Assume.*;
 import static org.springframework.cloud.vault.SecureBackendAccessors.*;
 
 import java.net.InetSocketAddress;
@@ -26,10 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.cloud.vault.VaultClient;
-import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.web.client.RestTemplate;

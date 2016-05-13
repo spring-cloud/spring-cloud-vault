@@ -23,16 +23,21 @@ import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
+ * Value object to bind HTTP API responses.
+ *
  * @author Spencer Gibb
  * @author Mark Paluch
  */
 @Data
 public class VaultResponse {
+
 	private Map<String, Object> auth;
 	private Map<String, String> data;
 	private Map<String, String> metadata;
+
 	@JsonProperty("lease_duration")
 	private long leaseDuration;
+
 	@JsonProperty("lease_id")
 	private String leaseId;
 	private boolean renewable;

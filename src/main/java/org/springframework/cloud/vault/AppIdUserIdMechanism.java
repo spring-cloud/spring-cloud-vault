@@ -26,8 +26,7 @@ public interface AppIdUserIdMechanism {
 	/**
 	 * Creates a UserId for AppId authentication.
 	 *
-	 * @return
+	 * @return the UserId.
 	 */
 	String createUserId();
-
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.vault.integration;
+package org.springframework.cloud.vault;
 
 import org.junit.Rule;
 import org.springframework.cloud.vault.util.PrepareVault;

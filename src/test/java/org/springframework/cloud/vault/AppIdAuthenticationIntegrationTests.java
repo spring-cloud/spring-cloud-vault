@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.vault.integration;
+package org.springframework.cloud.vault;
 
 import org.junit.Before;
-import org.springframework.cloud.vault.IpAddressUserId;
-import org.springframework.cloud.vault.VaultClient;
-import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.cloud.vault.VaultProperties.AppIdProperties;
 import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
-import org.springframework.cloud.vault.VaultToken;
 import org.springframework.cloud.vault.util.Settings;
 
 /**

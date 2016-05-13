@@ -19,9 +19,12 @@ package org.springframework.cloud.vault;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.util.Assert;
+
 /**
  * Collection of common used {@link SecureBackendAccessor accessors} to access secure
  * backends.
+ *
  * @author Mark Paluch
  */
 public class SecureBackendAccessors {
@@ -29,24 +32,30 @@ public class SecureBackendAccessors {
 	/**
 	 * Creates a {@link SecureBackendAccessor} for the {@code generic} secure backend.
 	 *
-	 * @param vaultProperties
-	 * @param key
-	 * @return
+	 * @param vaultProperties must not be {@literal null}.
+	 * @param key must not be {@literal null} and not empty.
+	 * @return the {@link SecureBackendAccessor}
 	 */
 	public static SecureBackendAccessor generic(VaultProperties vaultProperties,
 			String key) {
+
+		Assert.notNull(vaultProperties, "VaultProperties must not be null");
 		return generic(vaultProperties.getBackend(), key);
 	}
 
 	/**
 	 * Creates a {@link SecureBackendAccessor} for the {@code generic} secure backend.
 	 *
-	 * @param secretBackendPath
-	 * @param key
-	 * @return
+	 * @param secretBackendPath must not be {@literal null} and not empty.
+	 * @param key must not be {@literal null} and not empty.
+	 * @return the {@link SecureBackendAccessor}
 	 */
 	public static SecureBackendAccessor generic(final String secretBackendPath,
 			final String key) {
+
+		Assert.hasText(secretBackendPath, "Secret Backend Path must not be empty");
+		Assert.hasText(key, "Key must not be empty");
+
 		return new SecureBackendAccessor() {
 
 			@Override
@@ -65,19 +74,25 @@ public class SecureBackendAccessors {
 	}
 
 	/**
-	 * Creates a {@link SecureBackendAccessor} for a secure backend using {@link org.springframework.cloud.vault.VaultProperties.DatabaseSecretProperties}. This
-	 * accessor transforms Vault's username/password property names to names provided with
-	 * {@link VaultProperties.DatabaseSecretProperties#getUsernameProperty()} and
+	 * Creates a {@link SecureBackendAccessor} for a secure backend using
+	 * {@link org.springframework.cloud.vault.VaultProperties.DatabaseSecretProperties}.
+	 * This accessor transforms Vault's username/password property names to names provided
+	 * with {@link VaultProperties.DatabaseSecretProperties#getUsernameProperty()} and
 	 * {@link VaultProperties.DatabaseSecretProperties#getUsernameProperty()}.
 	 * 
-	 * @param properties
-	 * @return
+	 * @param properties must not be {@literal null}.
+	 * @return the {@link SecureBackendAccessor}
 	 */
-	public static SecureBackendAccessor database(final VaultProperties.DatabaseSecretProperties properties) {
+	public static SecureBackendAccessor database(
+			final VaultProperties.DatabaseSecretProperties properties) {
+
+		Assert.notNull(properties, "DatabaseSecretProperties must not be null");
+
 		return new SecureBackendAccessor() {
 
 			@Override
 			public Map<String, String> variables() {
+
 				Map<String, String> variables = new HashMap<>();
 				variables.put("backend", properties.getBackend());
 				variables.put("key", String.format("creds/%s", properties.getRole()));
@@ -95,5 +110,4 @@ public class SecureBackendAccessors {
 			}
 		};
 	}
-
 }

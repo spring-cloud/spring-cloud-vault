@@ -18,6 +18,7 @@ package org.springframework.cloud.vault;
 
 import java.util.Map;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -25,6 +26,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * @author Spencer Gibb
@@ -40,9 +42,11 @@ public class VaultBootstrapConfiguration {
 
 		VaultClient vaultClient = new VaultClient(vaultProperties());
 
-		Map<String, AppIdUserIdMechanism> appIdUserIdMechanisms = applicationContext.getBeansOfType(AppIdUserIdMechanism.class);
-		if(!appIdUserIdMechanisms.isEmpty()){
-			vaultClient.setAppIdUserIdMechanism(appIdUserIdMechanisms.values().iterator().next());
+		Map<String, AppIdUserIdMechanism> appIdUserIdMechanisms = applicationContext
+				.getBeansOfType(AppIdUserIdMechanism.class);
+		if (!appIdUserIdMechanisms.isEmpty()) {
+			vaultClient.setAppIdUserIdMechanism(
+					appIdUserIdMechanisms.values().iterator().next());
 		}
 
 		return vaultClient;
@@ -59,20 +63,30 @@ public class VaultBootstrapConfiguration {
 	public AppIdUserIdMechanism appIdUserIdMechanism(VaultProperties vaultProperties) {
 
 		String userId = vaultProperties.getAppId().getUserId();
-		Assert.hasText(userId, "UserId (spring.cloud.vault.app-id.user-id) must not be empty.");
+		Assert.hasText(userId,
+				"UserId (spring.cloud.vault.app-id.user-id) must not be empty.");
 
-		switch (userId.toUpperCase()) {
+		try {
+			Class<?> userIdClass = ClassUtils.forName(userId, null);
+			return (AppIdUserIdMechanism) BeanUtils.instantiateClass(userIdClass);
+		}
+		catch (ClassNotFoundException ex) {
+
+			switch (userId.toUpperCase()) {
 			case VaultProperties.AppIdProperties.IP_ADDRESS:
 				return new IpAddressUserId();
-			case  VaultProperties.AppIdProperties.MAC_ADDRESS:
+			case VaultProperties.AppIdProperties.MAC_ADDRESS:
 				return new MacAddressUserId(vaultProperties);
 			default:
 				return new StaticUserId(vaultProperties);
+			}
 		}
 	}
 
 	@Bean
-	public VaultPropertySourceLocator vaultPropertySourceLocator(ApplicationContext applicationContext) {
-		return new VaultPropertySourceLocator(vaultClient(applicationContext), vaultProperties());
+	public VaultPropertySourceLocator vaultPropertySourceLocator(
+			ApplicationContext applicationContext) {
+		return new VaultPropertySourceLocator(vaultClient(applicationContext),
+				vaultProperties());
 	}
 }

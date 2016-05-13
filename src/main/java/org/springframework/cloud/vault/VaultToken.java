@@ -16,26 +16,40 @@
 
 package org.springframework.cloud.vault;
 
+import org.springframework.util.Assert;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 
-import org.springframework.util.Assert;
-
 /**
+ * Value object for a Vault token.
+ *
  * @author Mark Paluch
  */
 @Value
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class VaultToken {
+
 	private String token;
 	private long leaseDuration;
 
+	/**
+	 * Creates a new {@link VaultToken}.
+	 * @param token must not be {@literal null}.
+	 * @return the created {@link VaultToken}
+	 */
 	public static VaultToken of(String token) {
 		return of(token, 0);
 	}
 
+	/**
+	 * Creates a new {@link VaultToken} with a {@code leaseDuration}.
+	 * @param token must not be {@literal null}.
+	 * @return the created {@link VaultToken}
+	 */
 	public static VaultToken of(String token, long leaseDuration) {
+
 		Assert.hasText(token, "Token must not be empty");
 		return new VaultToken(token, leaseDuration);
 	}

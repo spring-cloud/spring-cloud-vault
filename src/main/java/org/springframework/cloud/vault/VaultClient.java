@@ -83,6 +83,7 @@ public class VaultClient {
 	}
 
 	private HttpHeaders createHeaders(VaultToken vaultToken) {
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(VAULT_TOKEN, vaultToken.getToken());
 		return headers;
@@ -91,7 +92,7 @@ public class VaultClient {
 	/**
 	 * Creates a token using a configured authentication mechanism.
 	 *
-	 * @return
+	 * @return the {@link VaultToken}.
 	 */
 	public VaultToken createToken() {
 

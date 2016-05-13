@@ -24,7 +24,7 @@ import org.springframework.security.crypto.codec.Hex;
 import org.springframework.util.Assert;
 
 /**
- * Utility to generate SHA 256 checksums.
+ * Utility to generate a SHA 256 checksum.
  *
  * @author Mark Paluch
  */
@@ -33,28 +33,31 @@ class Sha256 {
 	/**
 	 * Generates a hex-encoded SHA256 checksum from the supplied {@code content}.
 	 *
-	 * @param content
-	 * @return
+	 * @param content must not be {@literal null} and not empty.
+	 * @return hex-encoded SHA256 checksum
 	 */
 	public static String toSha256(String content) {
 
-		Assert.hasText(content, "Content must not be empty!");
+		Assert.hasText(content, "Content must not be empty");
+
 		MessageDigest messageDigest = getMessageDigest("SHA-256");
 		byte[] digest = messageDigest.digest(content.getBytes(StandardCharsets.US_ASCII));
 		return new String(Hex.encode(digest));
 	}
 
 	/**
-	 * Get a MessageDigest instance for the given algorithm. Throws an IllegalArgumentException if <i>algorithm</i> is
-	 * unknown
+	 * Get a MessageDigest instance for the given algorithm. Throws an
+	 * IllegalArgumentException if <i>algorithm</i> is unknown
 	 *
 	 * @return MessageDigest instance
 	 * @throws IllegalArgumentException if NoSuchAlgorithmException is thrown
 	 */
-	private static MessageDigest getMessageDigest(String algorithm) throws IllegalArgumentException {
+	private static MessageDigest getMessageDigest(String algorithm)
+			throws IllegalArgumentException {
 		try {
 			return MessageDigest.getInstance(algorithm);
-		} catch (NoSuchAlgorithmException e) {
+		}
+		catch (NoSuchAlgorithmException e) {
 			throw new IllegalArgumentException("No such algorithm [" + algorithm + "]");
 		}
 	}
