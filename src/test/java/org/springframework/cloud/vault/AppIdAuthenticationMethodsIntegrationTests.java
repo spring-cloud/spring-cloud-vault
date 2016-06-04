@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault;
 
 import static org.assertj.core.api.Assertions.*;
@@ -50,6 +49,9 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 
 		VaultClient vaultClient = new VaultClient(
 				prepareAppIdAuthenticationMethod(AppIdProperties.IP_ADDRESS, "myapp"));
+
+		vaultClient.setRest(TestRestTemplateFactory.create(Settings.createVaultProperties()));
+
 		vaultClient.setAppIdUserIdMechanism(new IpAddressUserId());
 		assertThat(vaultClient.createToken()).isNotNull();
 	}
@@ -60,6 +62,8 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 		VaultProperties vaultProperties = prepareAppIdAuthenticationMethod("my-user-id",
 				"myapp");
 		VaultClient vaultClient = new VaultClient(vaultProperties);
+		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
+
 		vaultClient.setAppIdUserIdMechanism(new StaticUserId(vaultProperties));
 		assertThat(vaultClient.createToken()).isNotNull();
 	}
@@ -70,6 +74,7 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 		VaultProperties vaultProperties = prepareAppIdAuthenticationMethod(
 				AppIdProperties.MAC_ADDRESS, "myapp");
 		VaultClient vaultClient = new VaultClient(vaultProperties);
+		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
 
 		vaultClient.setAppIdUserIdMechanism(new MacAddressUserId(vaultProperties));
 		assertThat(vaultClient.createToken()).isNotNull();
@@ -86,12 +91,12 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 		vaultProperties.setApplicationName("foobar");
 
 		VaultClient vaultClient = new VaultClient(vaultProperties);
+		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
 		vaultClient.setAppIdUserIdMechanism(new MacAddressUserId(vaultProperties));
 
 		vaultClient.createToken();
 
 		fail("Missing IllegalStateException");
-
 	}
 
 	private VaultProperties prepareAppIdAuthenticationMethod(String userId, String appId)

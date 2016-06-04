@@ -13,37 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault;
 
-import static com.sun.org.apache.xalan.internal.xsltc.compiler.sym.error;
-
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.Value;
-
-import lombok.extern.apachecommons.CommonsLog;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.vault.VaultProperties.AppIdProperties;
 import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.Setter;
+import lombok.Value;
+import lombok.extern.apachecommons.CommonsLog;
+
 /**
- * Vault client. This client reads data from Vault secret backends and can authenticate with
- * Vault to obtain an access token.
+ * Vault client. This client reads data from Vault secret backends and can authenticate
+ * with Vault to obtain an access token.
  *
  * @author Spencer Gibb
  * @author Mark Paluch
  */
-@RequiredArgsConstructor
 @CommonsLog
 public class VaultClient {
 
@@ -56,9 +59,18 @@ public class VaultClient {
 	@Setter
 	private AppIdUserIdMechanism appIdUserIdMechanism;
 
+	private ClientHttpRequestFactory clientHttpRequestFactory;
 	private final VaultProperties properties;
 
-	public Map<String, String> read(SecureBackendAccessor secureBackendAccessor, VaultToken vaultToken) {
+	public VaultClient(VaultProperties properties) {
+
+		Assert.notNull(properties, "VaultProperties must not be null");
+
+		this.properties = properties;
+	}
+
+	public Map<String, String> read(SecureBackendAccessor secureBackendAccessor,
+			VaultToken vaultToken) {
 
 		Assert.notNull(secureBackendAccessor, "SecureBackendAccessor must not be empty!");
 		Assert.notNull(vaultToken, "VaultToken must not be null!");
@@ -69,23 +81,25 @@ public class VaultClient {
 		Exception error = null;
 		String errorBody = null;
 
-		log.info(String.format("Fetching config from server at: %s", url));
+		URI uri = this.rest.getUriTemplateHandler().expand(url, secureBackendAccessor.variables());
+		log.info(String.format("Fetching config from server at: %s", uri));
+
 		try {
-			ResponseEntity<VaultResponse> response = this.rest.exchange(url,
-					HttpMethod.GET, new HttpEntity<>(headers), VaultResponse.class,
-					secureBackendAccessor.variables());
+			ResponseEntity<VaultResponse> response = this.rest.exchange(uri,
+					HttpMethod.GET, new HttpEntity<>(headers), VaultResponse.class);
 
 			HttpStatus status = response.getStatusCode();
 			if (status == HttpStatus.OK) {
 				if (response.getBody().getData() != null) {
-					return secureBackendAccessor.transformProperties(response.getBody().getData());
+					return secureBackendAccessor
+							.transformProperties(response.getBody().getData());
 				}
 			}
 		}
 		catch (HttpServerErrorException e) {
 			error = e;
-			if (MediaType.APPLICATION_JSON.includes(e.getResponseHeaders()
-					.getContentType())) {
+			if (MediaType.APPLICATION_JSON
+					.includes(e.getResponseHeaders().getContentType())) {
 				errorBody = e.getResponseBodyAsString();
 			}
 		}
@@ -99,8 +113,11 @@ public class VaultClient {
 					error);
 		}
 
-		log.warn(String.format("Could not locate PropertySource: %s"
-				, (errorBody == null ? error==null ? "key not found" : error.getMessage() : errorBody)));
+		log.warn(
+				String.format("Could not locate PropertySource: %s",
+						(errorBody == null
+								? error == null ? "key not found" : error.getMessage()
+								: errorBody)));
 
 		return Collections.emptyMap();
 	}
@@ -119,16 +136,20 @@ public class VaultClient {
 	 */
 	public VaultToken createToken() {
 
-		if (properties.getAuthentication() == AuthenticationMethod.APPID && appIdUserIdMechanism != null) {
+		if (properties.getAuthentication() == AuthenticationMethod.APPID
+				&& appIdUserIdMechanism != null) {
 			AppIdProperties appId = properties.getAppId();
-			return createTokenUsingAppId(new AppIdTuple(properties.getApplicationName(), appIdUserIdMechanism.createUserId()), appId);
+			return createTokenUsingAppId(new AppIdTuple(properties.getApplicationName(),
+					appIdUserIdMechanism.createUserId()), appId);
 		}
 
-		throw new UnsupportedOperationException(String.format(
-				"Cannot create a token for auth method %s", properties.getAuthentication()));
+		throw new UnsupportedOperationException(
+				String.format("Cannot create a token for auth method %s",
+						properties.getAuthentication()));
 	}
 
-	private VaultToken createTokenUsingAppId(AppIdTuple appIdTuple, AppIdProperties appId) {
+	private VaultToken createTokenUsingAppId(AppIdTuple appIdTuple,
+			AppIdProperties appId) {
 
 		String url = buildUrl();
 		Map<String, String> variables = new HashMap<>();
@@ -151,7 +172,8 @@ public class VaultClient {
 			String token = (String) body.getAuth().get("client_token");
 
 			return VaultToken.of(token, body.getLeaseDuration());
-		} catch (HttpClientErrorException e) {
+		}
+		catch (HttpClientErrorException e) {
 
 			if (e.getStatusCode().equals(HttpStatus.BAD_REQUEST)) {
 				throw new IllegalStateException(String.format(
@@ -176,7 +198,7 @@ public class VaultClient {
 	}
 
 	@Value
-	private static class AppIdTuple{
+	private static class AppIdTuple {
 		private String appId;
 		private String userId;
 	}

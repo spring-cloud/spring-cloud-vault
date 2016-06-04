@@ -5,7 +5,7 @@ Spring Cloud Vault Config provides client-side support for externalized configur
 
 == Features
 
-=== Spring Cloud Vauld Config Client
+=== Spring Cloud Vault Config Client
 
 Specifically for Spring applications:
 
@@ -161,6 +161,12 @@ spring.cloud.vault:
 
 
 == Building
+
+==== Build requirements for Vault
+
+Spring Cloud Vault Config requires SSL certificates and a running
+Vault instance listening on `localhost:8200`. Certificates and the Vault
+setup are scripted, the scripts are located in `src/test/bash`.
 
 :jdkversion: 1.7
 

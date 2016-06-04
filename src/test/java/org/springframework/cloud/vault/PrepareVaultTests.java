@@ -13,13 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault;
 
 import org.junit.Test;
-import org.springframework.boot.test.TestRestTemplate;
-import org.springframework.cloud.vault.VaultProperties;
-import org.springframework.cloud.vault.VaultToken;
 import org.springframework.cloud.vault.util.PrepareVault;
 import org.springframework.cloud.vault.util.Settings;
 
@@ -31,7 +27,7 @@ import org.springframework.cloud.vault.util.Settings;
 public class PrepareVaultTests {
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
-	private PrepareVault prepareVault = new PrepareVault(new TestRestTemplate());
+	private PrepareVault prepareVault = new PrepareVault(TestRestTemplateFactory.create(vaultProperties));
 
 	@Test
 	public void initializeShouldCreateANewVault() throws Exception {

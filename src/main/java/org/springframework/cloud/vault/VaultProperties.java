@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -21,6 +20,7 @@ import org.hibernate.validator.constraints.Range;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import lombok.Data;
+import org.springframework.core.io.Resource;
 
 /**
  * @author Spencer Gibb
@@ -39,7 +39,7 @@ public class VaultProperties {
 	 * Vault server host.
 	 */
 	@NotEmpty
-	private String host = "127.0.0.1";
+	private String host = "localhost";
 
 	/**
 	 * Vault server port.
@@ -50,7 +50,7 @@ public class VaultProperties {
 	/**
 	 * Protocol scheme. Can be either "http" or "https".
 	 */
-	private String scheme = "http";
+	private String scheme = "https";
 
 	/**
 	 * Name of the default backend.
@@ -71,6 +71,16 @@ public class VaultProperties {
 	private String profileSeparator = ",";
 
 	/**
+	 * Connection timeout;
+	 */
+	private int connectionTimeout = 5000;
+
+	/**
+	 * Read timeout;
+	 */
+	private int readTimeout = 15000;
+
+	/**
 	 * Fail fast if data cannot be obtained from Vault.
 	 */
 	private boolean failFast = false;
@@ -81,6 +91,8 @@ public class VaultProperties {
 	private String token;
 
 	private AppIdProperties appId = new AppIdProperties();
+
+	private Ssl ssl = new Ssl();
 
 	private MySql mysql = new MySql();
 
@@ -127,6 +139,20 @@ public class VaultProperties {
 		 */
 		@NotEmpty
 		private String userId = MAC_ADDRESS;
+	}
+
+	@Data
+	public static class Ssl {
+
+		/**
+		 * Trust store that holds SSL certificates.
+		 */
+		private Resource trustStore;
+
+		/**
+		 * Password used to access the trust store.
+		 */
+		private String trustStorePassword;
 	}
 
 	@Data

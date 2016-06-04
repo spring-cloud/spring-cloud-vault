@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.util;
 
 import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.cloud.vault.VaultToken;
+import org.springframework.core.io.FileSystemResource;
 
 /**
  * Utility to retrieve settings during test.
@@ -33,8 +33,9 @@ public class Settings {
 	public static VaultProperties createVaultProperties() {
 
 		VaultProperties vaultProperties = new VaultProperties();
+		vaultProperties.getSsl().setTrustStorePassword("changeit");
+		vaultProperties.getSsl().setTrustStore(new FileSystemResource("work/keystore.jks"));
 		vaultProperties.setToken(token().getToken());
-		vaultProperties.setHost(System.getProperty("vault.host", "localhost"));
 
 		return vaultProperties;
 	}

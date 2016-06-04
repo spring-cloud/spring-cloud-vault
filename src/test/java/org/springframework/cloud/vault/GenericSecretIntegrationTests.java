@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault;
 
 import static org.assertj.core.api.Assertions.*;
@@ -25,7 +24,6 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.cloud.vault.util.Settings;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Integration tests for {@link VaultClient} using the generic secret backend.
@@ -34,15 +32,15 @@ import org.springframework.web.client.RestTemplate;
  */
 public class GenericSecretIntegrationTests extends AbstractIntegrationTests {
 
-	private VaultProperties vaultProperties = Settings.createVaultProperties();
-	private VaultClient vaultClient = new VaultClient(vaultProperties);
+	protected VaultProperties vaultProperties = Settings.createVaultProperties();
+	protected VaultClient vaultClient = new VaultClient(vaultProperties);
 
 	@Before
 	public void setUp() throws Exception {
 
 		vaultProperties.setFailFast(false);
 		prepare().writeSecret("app-name", (Map) createData());
-		vaultClient.setRest(new RestTemplate());
+		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
 	}
 
 	@Test
@@ -67,11 +65,7 @@ public class GenericSecretIntegrationTests extends AbstractIntegrationTests {
 	public void shouldFailOnFailFast() throws Exception {
 
 		vaultProperties.setFailFast(true);
-
-		Map<String, String> secretProperties = vaultClient
-				.read(generic(vaultProperties, "missing"), createToken());
-
-		assertThat(secretProperties).isNull();
+		vaultClient.read(generic(vaultProperties, "missing"), createToken());
 	}
 
 	/**

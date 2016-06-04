@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault;
 
 import org.junit.Before;
@@ -28,14 +27,10 @@ import org.springframework.cloud.vault.util.Settings;
  */
 public class AppIdAuthenticationIntegrationTests extends GenericSecretIntegrationTests {
 
-	private VaultClient vaultClient;
-
 	@Before
 	public void setUp() throws Exception {
 
-		super.setUp();
-
-		VaultProperties vaultProperties = Settings.createVaultProperties();
+		this.vaultProperties = Settings.createVaultProperties();
 
 		AppIdProperties appId = configureAppIdProperties();
 		vaultProperties.setApplicationName("myapp");
@@ -51,9 +46,9 @@ public class AppIdAuthenticationIntegrationTests extends GenericSecretIntegratio
 		prepare().mapAppId(vaultProperties.getApplicationName());
 		prepare().mapUserId(vaultProperties.getApplicationName(), userId);
 
-		vaultClient = new VaultClient(vaultProperties);
-		vaultClient.setAppIdUserIdMechanism(userIdMechanism);
-
+		this.vaultClient = new VaultClient(vaultProperties);
+		this.vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
+		this.vaultClient.setAppIdUserIdMechanism(userIdMechanism);
 	}
 
 	@Override

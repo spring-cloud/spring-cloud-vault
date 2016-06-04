@@ -3,7 +3,7 @@ include::intro.adoc[]
 
 == Features
 
-=== Spring Cloud Vauld Config Client
+=== Spring Cloud Vault Config Client
 
 Specifically for Spring applications:
 
@@ -17,6 +17,12 @@ Specifically for Spring applications:
 include::quickstart.adoc[]
 
 == Building
+
+==== Build requirements for Vault
+
+Spring Cloud Vault Config requires SSL certificates and a running
+Vault instance listening on `localhost:8200`. Certificates and the Vault
+setup are scripted, the scripts are located in `src/test/bash`.
 
 include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/master/docs/src/main/asciidoc/building.adoc[]
 

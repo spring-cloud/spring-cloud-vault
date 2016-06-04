@@ -13,6 +13,7 @@ install:
   - tar xzf download/apache-cassandra-2.2.6-bin.tar.gz
   - cp -f src/test/resources/cassandra.yaml apache-cassandra-2.2.6/conf
   - apache-cassandra-2.2.6/bin/cassandra
+  - src/test/bash/create_certificates.sh
   - src/test/bash/install_vault.sh
   - src/test/bash/local_run_vault.sh &
 

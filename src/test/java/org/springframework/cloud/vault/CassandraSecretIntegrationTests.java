@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault;
 
 import static org.assertj.core.api.Assertions.*;
@@ -25,11 +24,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.Settings;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Integration tests for {@link VaultClient} using the cassandra secret backend. This test
@@ -82,7 +81,7 @@ public class CassandraSecretIntegrationTests extends AbstractIntegrationTests {
 				String.format("%s/roles/%s", cassandra.getBackend(), cassandra.getRole()),
 				Collections.singletonMap("creation_cql", CREATE_USER_AND_GRANT_CQL));
 
-		vaultClient.setRest(new RestTemplate());
+		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
 	}
 
 	@Test

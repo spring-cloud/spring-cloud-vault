@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault;
 
 import static org.assertj.core.api.Assertions.*;
@@ -24,11 +23,11 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.Settings;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Integration tests for {@link VaultClient} using the mysql secret backend. This test
@@ -72,7 +71,7 @@ public class MySqlSecretIntegrationTests extends AbstractIntegrationTests {
 		prepare().write(String.format("%s/roles/%s", mySql.getBackend(), mySql.getRole()),
 				Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
 
-		vaultClient.setRest(new RestTemplate());
+		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
 	}
 
 	@Test

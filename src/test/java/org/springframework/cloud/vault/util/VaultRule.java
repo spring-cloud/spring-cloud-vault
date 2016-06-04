@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.util;
 
 import java.net.InetAddress;
@@ -21,7 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import org.junit.rules.ExternalResource;
-import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.cloud.vault.TestRestTemplateFactory;
 import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.cloud.vault.VaultToken;
 
@@ -33,14 +32,16 @@ import org.springframework.cloud.vault.VaultToken;
 public class VaultRule extends ExternalResource {
 
 	private final VaultProperties vaultProperties;
-	private final PrepareVault prepareVault = new PrepareVault(new TestRestTemplate());
+	private final PrepareVault prepareVault;
 
 	public VaultRule() {
 		this(Settings.createVaultProperties());
 	}
 
 	public VaultRule(VaultProperties vaultProperties) {
+
 		this.vaultProperties = vaultProperties;
+		this.prepareVault = new PrepareVault(TestRestTemplateFactory.create(vaultProperties));
 	}
 
 	@Override

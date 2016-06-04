@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault;
 
 import static org.assertj.core.api.Assertions.*;
@@ -28,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.Settings;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Integration tests for {@link VaultClient} using the postgresql secret backend. This
@@ -78,7 +76,7 @@ public class PostgreSqlSecretIntegrationTests extends AbstractIntegrationTests {
 						postgreSql.getRole()),
 				Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
 
-		vaultClient.setRest(new RestTemplate());
+		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
 	}
 
 	@Test
