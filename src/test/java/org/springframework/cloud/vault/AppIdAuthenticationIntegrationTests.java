@@ -32,6 +32,8 @@ public class AppIdAuthenticationIntegrationTests extends GenericSecretIntegratio
 
 		this.vaultProperties = Settings.createVaultProperties();
 
+		super.setUp();
+
 		AppIdProperties appId = configureAppIdProperties();
 		vaultProperties.setApplicationName("myapp");
 		vaultProperties.setAuthentication(AuthenticationMethod.APPID);
