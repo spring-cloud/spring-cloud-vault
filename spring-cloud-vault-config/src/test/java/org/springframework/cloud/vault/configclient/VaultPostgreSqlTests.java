@@ -42,7 +42,11 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * Integration tests using the postgresql secret backend.
+ * Integration tests using the postgresql secret backend. In case this test should fail because of SSL make sure you run
+ * the test within the spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is referenced with
+ * {@code ../work/keystore.jks}.
+ * 
+ * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = VaultPostgreSqlTests.TestApplication.class)

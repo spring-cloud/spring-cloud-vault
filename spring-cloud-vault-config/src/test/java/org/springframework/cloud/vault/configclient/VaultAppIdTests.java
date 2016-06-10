@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.configclient;
 
 import static org.assertj.core.api.Assertions.*;
@@ -35,6 +34,10 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
+ * Integration test using config infrastructure with AppId authentication. In case this test should fail because of SSL
+ * make sure you run the test within the spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore
+ * is referenced with {@code ../work/keystore.jks}.
+ * 
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)

@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.configclient;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assume.*;
 
 import java.net.InetSocketAddress;
@@ -43,7 +42,11 @@ import com.datastax.driver.core.PlainTextAuthProvider;
 import com.datastax.driver.core.Session;
 
 /**
- * Integration tests using the cassandra secret backend.
+ * Integration tests using the cassandra secret backend. In case this test should fail because of SSL make sure you run
+ * the test within the spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is referenced with
+ * {@code ../work/keystore.jks}.
+ * 
+ * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = VaultCassandraTests.TestApplication.class)
