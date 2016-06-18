@@ -20,8 +20,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.vault.VaultProperties.AppIdProperties;
 import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
 import org.springframework.http.HttpEntity;
@@ -81,7 +79,8 @@ public class VaultClient {
 		Exception error = null;
 		String errorBody = null;
 
-		URI uri = this.rest.getUriTemplateHandler().expand(url, secureBackendAccessor.variables());
+		URI uri = this.rest.getUriTemplateHandler().expand(url,
+				secureBackendAccessor.variables());
 		log.info(String.format("Fetching config from server at: %s", uri));
 
 		try {
@@ -96,11 +95,15 @@ public class VaultClient {
 				}
 			}
 		}
-		catch (HttpServerErrorException e) {
-			error = e;
+		catch (HttpServerErrorException | HttpClientErrorException e) {
+
 			if (MediaType.APPLICATION_JSON
 					.includes(e.getResponseHeaders().getContentType())) {
 				errorBody = e.getResponseBodyAsString();
+			}
+
+			if (e.getStatusCode() != HttpStatus.NOT_FOUND) {
+				error = e;
 			}
 		}
 		catch (Exception e) {

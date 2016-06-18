@@ -6,24 +6,22 @@
 ###########################################################################
 
 
-VAULT_VER="0.5.2"
+VAULT_VER="0.6.0"
 UNAME=$(uname -s |  tr '[:upper:]' '[:lower:]')
 VAULT_ZIP="vault_${VAULT_VER}_${UNAME}_amd64.zip"
 IGNORE_CERTS="${IGNORE_CERTS:-no}"
 
-
 # cleanup
-mkdir -p vault/download
-cd vault
+mkdir -p vault
 
 if [[ ! -f "download/${VAULT_ZIP}" ]] ; then
     cd download
     # install Vault
     if [[ "${IGNORE_CERTS}" == "no" ]] ; then
-      echo "Downloading consul with certs verification"
+      echo "Downloading Vault with certs verification"
       wget "https://releases.hashicorp.com/vault/${VAULT_VER}/${VAULT_ZIP}"
     else
-      echo "WARNING... Downloading consul WITHOUT certs verification"
+      echo "WARNING... Downloading Vault WITHOUT certs verification"
       wget "https://releases.hashicorp.com/vault/${VAULT_VER}/${VAULT_ZIP}" --no-check-certificate
     fi
 
@@ -34,11 +32,13 @@ if [[ ! -f "download/${VAULT_ZIP}" ]] ; then
     cd ..
 fi
 
+cd vault
+
 if [[ -f vault ]] ; then
   rm vault
 fi
 
-unzip download/${VAULT_ZIP}
+unzip ../download/${VAULT_ZIP}
 chmod a+x vault
 
 # check
