@@ -100,6 +100,8 @@ public class VaultProperties {
 
 	private Cassandra cassandra = new Cassandra();
 
+	private Consul consul = new Consul();
+
 	/**
 	 * Application name for AppId authentication.
 	 */
@@ -249,6 +251,32 @@ public class VaultProperties {
 		 */
 		@NotEmpty
 		private String passwordProperty = "spring.data.cassandra.password";
+	}
+
+	@Data
+	public static class Consul {
+
+		/**
+		 * Enable consul backend usage.
+		 */
+		private boolean enabled = false;
+
+		/**
+		 * Role name for credentials.
+		 */
+		private String role;
+
+		/**
+		 * Consul backend path.
+		 */
+		@NotEmpty
+		private String backend = "consul";
+
+		/**
+		 * Target property for the obtained token.
+		 */
+		@NotEmpty
+		private String tokenProperty = "spring.cloud.consul.token";
 	}
 
 	/**

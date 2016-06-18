@@ -2,7 +2,7 @@
 
 ###########################################################################
 # Download and Install Vault                                              #
-# This script is prepared for caching of the vault/download directory     #
+# This script is prepared for caching of the download directory           #
 ###########################################################################
 
 
@@ -26,7 +26,7 @@ if [[ ! -f "download/${VAULT_ZIP}" ]] ; then
     fi
 
     if [[ $? != 0 ]] ; then
-      echo "Cannot download vault"
+      echo "Cannot download Vault"
       exit 1
     fi
     cd ..

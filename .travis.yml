@@ -15,7 +15,9 @@ install:
   - apache-cassandra-2.2.6/bin/cassandra
   - src/test/bash/create_certificates.sh
   - src/test/bash/install_vault.sh
+  - src/test/bash/install_consul.sh
   - src/test/bash/local_run_vault.sh &
+  - src/test/bash/local_run_consul.sh &
 
 before_script:
   - mysql -e "CREATE USER 'spring' IDENTIFIED by 'vault';"

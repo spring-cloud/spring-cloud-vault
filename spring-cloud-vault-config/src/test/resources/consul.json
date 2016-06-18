@@ -1,0 +1,8 @@
+{
+  "log_level": "INFO",
+  "server": true,
+  "datacenter": "dc1",
+  "advertise_addr": "127.0.0.1",
+  "acl_datacenter": "dc1",
+  "acl_master_token": "consul-master-token"
+}

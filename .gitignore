@@ -15,7 +15,7 @@ _site/
 *.iws
 .factorypath
 download/
-vault/download
-vault/vault
+/vault/
+/consul/
 work
 build/

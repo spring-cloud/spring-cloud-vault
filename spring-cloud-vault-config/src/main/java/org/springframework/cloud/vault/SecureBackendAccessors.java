@@ -110,4 +110,40 @@ public class SecureBackendAccessors {
 			}
 		};
 	}
+
+	/**
+	 * Creates a {@link SecureBackendAccessor} for a secure backend using
+	 * {@link org.springframework.cloud.vault.VaultProperties.Consul}.
+	 * This accessor transforms Vault's token property names to names provided
+	 * with {@link VaultProperties.Consul#getTokenProperty()}.
+	 *
+	 * @param properties must not be {@literal null}.
+	 * @return the {@link SecureBackendAccessor}
+	 */
+	public static SecureBackendAccessor consul(
+			final VaultProperties.Consul properties) {
+
+		Assert.notNull(properties, "Consul properties must not be null");
+
+		return new SecureBackendAccessor() {
+
+			@Override
+			public Map<String, String> variables() {
+
+				Map<String, String> variables = new HashMap<>();
+				variables.put("backend", properties.getBackend());
+				variables.put("key", String.format("creds/%s", properties.getRole()));
+				return variables;
+			}
+
+			@Override
+			public Map<String, String> transformProperties(Map<String, String> input) {
+
+				Map<String, String> result = new HashMap();
+				result.put(properties.getTokenProperty(), input.get("token"));
+
+				return result;
+			}
+		};
+	}
 }

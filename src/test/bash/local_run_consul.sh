@@ -1,0 +1,18 @@
+#!/bin/bash
+
+###########################################################################
+# Start Consul on localhost:8500                                           #
+###########################################################################
+
+BASEDIR=`dirname $0`/../../..
+
+#!/bin/bash
+mkdir -p ${BASEDIR}/consul/config
+mkdir -p ${BASEDIR}/consul/data
+
+./consul/consul agent -server \
+            -bootstrap-expect 1 \
+            -data-dir ${BASEDIR}/consul/data \
+            -config-file=${BASEDIR}/spring-cloud-vault-config/src/test/resources/consul.json
+
+exit $?

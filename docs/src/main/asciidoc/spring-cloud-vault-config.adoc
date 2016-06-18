@@ -113,15 +113,15 @@ spring.cloud.vault:
 ----
 
 [source,yaml]
-MyUserIdMechanism.java
+.MyUserIdMechanism.java
 ----
 public class MyUserIdMechanism implements AppIdUserIdMechanism {
 
-	@Override
-	public String createUserId() {
-		String userId = ...
-		return userId;
-	}
+  @Override
+  public String createUserId() {
+    String userId = ...
+    return userId;
+  }
 }
 ----
 
@@ -151,7 +151,7 @@ JDBC secrets need to be configured separately.
 
 Spring Cloud Vault allows to obtain credentials for Apache Cassandra.
 The integration can be enabled by setting `spring.cloud.vault.cassandra.enabled=true`
-(default "false"). Username and password are stored in `spring.data.cassandra.username`
+(default `false`). Username and password are stored in `spring.data.cassandra.username`
 and `spring.data.cassandra.password` so using Spring Boot will pick up the generated
 credentials without further configuration. You can configure the property names
 by setting `spring.cloud.vault.cassandra.username-property` and
@@ -173,7 +173,7 @@ See also: https://www.vaultproject.io/docs/secrets/cassandra/index.html[Vault Do
 
 Spring Cloud Vault allows to obtain credentials for MySQL.
 The integration can be enabled by setting `spring.cloud.vault.mysql.enabled=true`
-(default "false"). Username and password are stored in `spring.datasource.username`
+(default `false`). Username and password are stored in `spring.datasource.username`
 and `spring.datasource.password` so using Spring Boot will pick up the generated
 credentials without further configuration. You can configure the property names
 by setting `spring.cloud.vault.mysql.username-property` and
@@ -195,7 +195,7 @@ See also: https://www.vaultproject.io/docs/secrets/mysql/index.html[Vault Docume
 
 Spring Cloud Vault allows to obtain credentials for PostgreSQL.
 The integration can be enabled by setting `spring.cloud.vault.postgresql.enabled=true`
-(default "false"). Username and password are stored in `spring.datasource.username`
+(default `false`). Username and password are stored in `spring.datasource.username`
 and `spring.datasource.password` so using Spring Boot will pick up the generated
 credentials without further configuration. You can configure the property names
 by setting `spring.cloud.vault.postgresql.username-property` and
@@ -211,6 +211,28 @@ spring.cloud.vault:
 ----
 
 See also: https://www.vaultproject.io/docs/secrets/postgresql/index.html[Vault Documentation: Setting up PostgreSQL with Vault]
+
+[[vault-client-consul]]
+== Consul
+
+Spring Cloud Vault allows to obtain credentials for Hashicorp Consil.
+The integration can be enabled by setting `spring.cloud.vault.consul.enabled=true`
+(default `false`). The obtained token is stored in `spring.cloud.consul.token`
+so using Spring Cloud Consul can pick up the generated
+credentials without further configuration. You can configure the property name
+by setting `spring.cloud.vault.consul.token-property`.
+
+[source,yaml]
+----
+spring.cloud.vault:
+    enabled: true
+    ...
+    consul:
+        enabled: true
+----
+
+See also: https://www.vaultproject.io/docs/secrets/consul/index.html[Vault Documentation: Setting up Consul with Vault]
+
 
 [[vault-client-fail-fast]]
 == Vault Client Fail Fast
