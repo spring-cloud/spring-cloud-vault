@@ -101,6 +101,11 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 		if (cassandra.isEnabled()) {
 			accessors.add(SecureBackendAccessors.database(cassandra));
 		}
+
+		VaultProperties.Consul consul = vaultProperties.getConsul();
+		if (consul.isEnabled()) {
+			accessors.add(SecureBackendAccessors.consul(consul));
+		}
 		return accessors;
 	}
 
