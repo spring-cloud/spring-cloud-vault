@@ -13,6 +13,7 @@ IGNORE_CERTS="${IGNORE_CERTS:-no}"
 
 # cleanup
 mkdir -p vault
+mkdir -p download
 
 if [[ ! -f "download/${VAULT_ZIP}" ]] ; then
     cd download

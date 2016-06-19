@@ -13,6 +13,7 @@ IGNORE_CERTS="${IGNORE_CERTS:-no}"
 
 # cleanup
 mkdir -p consul
+mkdir -p download
 
 if [[ ! -f "download/${CONSUL_ZIP}" ]] ; then
     cd download

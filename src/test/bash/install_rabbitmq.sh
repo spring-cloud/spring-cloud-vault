@@ -19,6 +19,7 @@ IGNORE_CERTS="${IGNORE_CERTS:-no}"
 
 # cleanup
 mkdir -p rabbitmq
+mkdir -p download
 
 if [[ ! -f "download/${RABBITMQ_ZIP}" ]] ; then
     cd download
