@@ -102,6 +102,8 @@ public class VaultProperties {
 
 	private Consul consul = new Consul();
 
+	private Rabbitmq rabbitmq = new Rabbitmq();
+
 	/**
 	 * Application name for AppId authentication.
 	 */
@@ -277,6 +279,38 @@ public class VaultProperties {
 		 */
 		@NotEmpty
 		private String tokenProperty = "spring.cloud.consul.token";
+	}
+
+	@Data
+	public static class Rabbitmq implements DatabaseSecretProperties {
+
+		/**
+		 * Enable rabbitmq backend usage.
+		 */
+		private boolean enabled = false;
+
+		/**
+		 * Role name for credentials.
+		 */
+		private String role;
+
+		/**
+		 * RabbitMQ backend path.
+		 */
+		@NotEmpty
+		private String backend = "rabbitmq";
+
+		/**
+		 * Target property for the obtained username.
+		 */
+		@NotEmpty
+		private String usernameProperty = "spring.rabbitmq.username";
+
+		/**
+		 * Target property for the obtained password.
+		 */
+		@NotEmpty
+		private String passwordProperty = "spring.rabbitmq.password";
 	}
 
 	/**

@@ -233,6 +233,28 @@ spring.cloud.vault:
 
 See also: https://www.vaultproject.io/docs/secrets/consul/index.html[Vault Documentation: Setting up Consul with Vault]
 
+[[vault-client-rabbitmq]]
+=== RabbitMQ
+
+Spring Cloud Vault allows to obtain credentials for RabbitMQ.
+The integration can be enabled by setting `spring.cloud.vault.rabbit.enabled=true`
+(default `false`). Username and password are stored in `spring.rabbit.username`
+and `spring.rabbit.password` so using Spring Boot will pick up the generated
+credentials without further configuration. You can configure the property names
+by setting `spring.cloud.vault.rabbit.username-property` and
+`spring.cloud.vault.rabbit.password-property`.
+
+[source,yaml]
+----
+spring.cloud.vault:
+    enabled: true
+    ...
+    rabbit:
+        enabled: true
+----
+
+See also: https://www.vaultproject.io/docs/secrets/rabbit/index.html[Vault Documentation: Setting up RabbitMQ with Vault]
+
 
 [[vault-client-fail-fast]]
 == Vault Client Fail Fast

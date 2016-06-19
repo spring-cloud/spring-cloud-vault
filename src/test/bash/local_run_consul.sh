@@ -6,7 +6,6 @@
 
 BASEDIR=`dirname $0`/../../..
 
-#!/bin/bash
 mkdir -p ${BASEDIR}/consul/config
 mkdir -p ${BASEDIR}/consul/data
 

@@ -106,6 +106,11 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 		if (consul.isEnabled()) {
 			accessors.add(SecureBackendAccessors.consul(consul));
 		}
+
+		VaultProperties.Rabbitmq rabbitmq = vaultProperties.getRabbitmq();
+		if (rabbitmq.isEnabled()) {
+			accessors.add(SecureBackendAccessors.database(rabbitmq));
+		}
 		return accessors;
 	}
 

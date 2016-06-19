@@ -3,6 +3,7 @@ language: java
 services:
   - mysql
   - postgresql
+  - rabbitmq
 
 jdk:
   - oraclejdk8
@@ -18,6 +19,8 @@ install:
   - src/test/bash/install_consul.sh
   - src/test/bash/local_run_vault.sh &
   - src/test/bash/local_run_consul.sh &
+  - sudo rabbitmq-plugins enable rabbitmq_management
+  - sudo service rabbitmq-server restart
 
 before_script:
   - mysql -e "CREATE USER 'spring' IDENTIFIED by 'vault';"

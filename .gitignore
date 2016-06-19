@@ -17,5 +17,6 @@ _site/
 download/
 /vault/
 /consul/
+/rabbitmq/
 work
 build/
