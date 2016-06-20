@@ -12,6 +12,6 @@ mkdir -p ${BASEDIR}/consul/data
 ./consul/consul agent -server \
             -bootstrap-expect 1 \
             -data-dir ${BASEDIR}/consul/data \
-            -config-file=${BASEDIR}/spring-cloud-vault-config/src/test/resources/consul.json
+            -config-file=${BASEDIR}/spring-cloud-vault-core/src/test/resources/consul.json
 
 exit $?
