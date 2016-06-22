@@ -5,16 +5,13 @@
 
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
-		<artifactId>spring-cloud-vault-config-parent</artifactId>
+		<artifactId>spring-cloud-vault-parent</artifactId>
 		<version>1.0.0.BUILD-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-vault-config-databases</artifactId>
-	<version>1.0.0.BUILD-SNAPSHOT</version>
-	<packaging>jar</packaging>
-
 	<name>Spring Cloud Vault Config Database support</name>
 	<description>Spring Cloud Vault Config Database support</description>
 
@@ -22,35 +19,19 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-vault-core</artifactId>
-			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-vault-core</artifactId>
-			<version>${project.version}</version>
 			<type>test-jar</type>
-			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-vault-config</artifactId>
-			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-configuration-processor</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>
@@ -68,24 +49,21 @@
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
-			<version>3.3.0</version>
-			<scope>test</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.38</version>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>9.4.1208.jre7</version>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>com.datastax.cassandra</groupId>
 			<artifactId>cassandra-driver-core</artifactId>

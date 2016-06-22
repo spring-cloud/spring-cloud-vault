@@ -1,0 +1,1 @@
+provides: spring-cloud-vault-core, spring-cloud-vault-config

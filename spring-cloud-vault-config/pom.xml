@@ -5,53 +5,32 @@
 
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
-		<artifactId>spring-cloud-vault-config-parent</artifactId>
+		<artifactId>spring-cloud-vault-parent</artifactId>
 		<version>1.0.0.BUILD-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-vault-config</artifactId>
-	<version>1.0.0.BUILD-SNAPSHOT</version>
-	<packaging>jar</packaging>
-
 	<name>Spring Cloud Vault Configuration Integration</name>
 	<description>Configuration Integration with Hashicorp Vault</description>
-
 
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-vault-core</artifactId>
-			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-vault-core</artifactId>
-			<version>${project.version}</version>
 			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.squareup.okhttp</groupId>
 			<artifactId>okhttp</artifactId>
 			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
 		</dependency>
 	</dependencies>
 

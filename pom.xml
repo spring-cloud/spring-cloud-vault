@@ -6,13 +6,13 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-build</artifactId>
-		<version>1.1.0.BUILD-SNAPSHOT</version>
+		<version>1.1.2.BUILD-SNAPSHOT</version>
 		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
 
 	<groupId>org.springframework.cloud</groupId>
-	<artifactId>spring-cloud-vault-config-parent</artifactId>
+	<artifactId>spring-cloud-vault-parent</artifactId>
 	<version>1.0.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
@@ -20,13 +20,23 @@
 	<description>Configuration Integration with Hashicorp Vault</description>
 
 	<modules>
+		<module>spring-cloud-vault-dependencies</module>
 		<module>spring-cloud-vault-core</module>
 		<module>spring-cloud-vault-config</module>
 		<module>spring-cloud-vault-config-databases</module>
 		<module>spring-cloud-vault-config-consul</module>
 		<module>spring-cloud-vault-config-rabbitmq</module>
+		<module>spring-cloud-vault-starter-config</module>
 		<module>docs</module>
 	</modules>
+
+	<scm>
+		<url>https://github.com/spring-cloud-incubator/spring-cloud-vault-config</url>
+		<connection>scm:git:git://github.com/spring-cloud-incubator/spring-cloud-vault-config.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/spring-cloud-incubator/spring-cloud-vault-config.git
+		</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -41,52 +51,40 @@
 		<dependencies>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-context</artifactId>
-				<version>1.1.0.BUILD-SNAPSHOT</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.assertj</groupId>
-				<artifactId>assertj-core</artifactId>
-				<version>3.3.0</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpclient</artifactId>
-				<version>${httpclient.version}</version>
-				<optional>true</optional>
-				<exclusions>
-					<exclusion>
-						<groupId>commons-logging</groupId>
-						<artifactId>commons-logging</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpcore</artifactId>
-				<version>${httpcore.version}</version>
-				<optional>true</optional>
-			</dependency>
-
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-all</artifactId>
-				<version>${netty.version}</version>
-				<optional>true</optional>
-			</dependency>
-
-			<dependency>
-				<groupId>com.squareup.okhttp</groupId>
-				<artifactId>okhttp</artifactId>
-				<version>${okhttp.version}</version>
-				<optional>true</optional>
+				<artifactId>spring-cloud-vault-dependencies</artifactId>
+				<version>${project.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+		</dependency>
+	</dependencies>
 
 	<repositories>
 		<repository>
