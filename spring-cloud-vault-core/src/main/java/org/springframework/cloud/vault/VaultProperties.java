@@ -53,24 +53,6 @@ public class VaultProperties {
 	private String scheme = "https";
 
 	/**
-	 * Name of the default backend.
-	 */
-	@NotEmpty
-	private String backend = "secret";
-
-	/**
-	 * Name of the default context.
-	 */
-	@NotEmpty
-	private String defaultContext = "application";
-
-	/**
-	 * Profile-separator to combine application name and profile.
-	 */
-	@NotEmpty
-	private String profileSeparator = ",";
-
-	/**
 	 * Connection timeout;
 	 */
 	private int connectionTimeout = 5000;

@@ -13,7 +13,7 @@
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-vault-starter-config</artifactId>
 
-	<name>Spring Cloud Vault ConfigStarter</name>
+	<name>Spring Cloud Vault Config Starter</name>
 	<description>Starter for exposing Spring Cloud Vault Config</description>
 
 	<url>http://projects.spring.io/spring-boot/</url>

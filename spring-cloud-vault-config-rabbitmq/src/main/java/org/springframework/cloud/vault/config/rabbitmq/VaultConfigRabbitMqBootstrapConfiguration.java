@@ -20,8 +20,8 @@ import java.util.Map;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.vault.SecureBackendAccessor;
-import org.springframework.cloud.vault.config.SecureBackendAccessorFactory;
 import org.springframework.cloud.vault.VaultSecretBackend;
+import org.springframework.cloud.vault.config.SecureBackendAccessorFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
@@ -80,6 +80,12 @@ public class VaultConfigRabbitMqBootstrapConfiguration {
 					variables.put("backend", properties.getBackend());
 					variables.put("key", String.format("creds/%s", properties.getRole()));
 					return variables;
+				}
+
+				@Override
+				public String getName() {
+					return String.format("%s with Role %s", properties.getBackend(),
+							properties.getRole());
 				}
 
 				@Override

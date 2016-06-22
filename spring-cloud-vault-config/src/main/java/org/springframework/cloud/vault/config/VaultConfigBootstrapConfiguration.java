@@ -48,14 +48,20 @@ public class VaultConfigBootstrapConfiguration implements ApplicationContextAwar
 	private Collection<SecureBackendAccessorFactory<? super VaultSecretBackend>> factories;
 
 	@Bean
+	public VaultGenericBackendProperties vaultGenericBackendProperties() {
+		return new VaultGenericBackendProperties();
+	}
+
+	@Bean
 	public VaultPropertySourceLocator vaultPropertySourceLocator(VaultClient vaultClient,
-			VaultProperties vaultProperties) {
+			VaultProperties vaultProperties,
+			VaultGenericBackendProperties vaultGenericBackendProperties) {
 
 		Collection<SecureBackendAccessor> backendAccessors = SecureBackendFactories
 				.createBackendAcessors(vaultSecretBackends, factories);
 
 		return new VaultPropertySourceLocator(vaultClient, vaultProperties,
-				backendAccessors);
+				vaultGenericBackendProperties, backendAccessors);
 	}
 
 	@Override

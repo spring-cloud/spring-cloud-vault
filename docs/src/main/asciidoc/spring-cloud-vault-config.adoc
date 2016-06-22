@@ -125,6 +125,83 @@ public class MyUserIdMechanism implements AppIdUserIdMechanism {
 }
 ----
 
+== Backends
+
+[[vault-client-generic]]
+=== Generic Backend
+
+Spring Cloud Vault supports at the basic level the generic secret backend.
+The generic secret backend allows storage of arbitrary values as key-value
+store. A single context can store one or many key-value tuples.
+Contexts can be organized hierarchically and so Spring Cloud Vault
+allows using the Application name set in `spring.application.name`
+and a default context name (`application`) in combination with active profiles.
+
+----
+/secret/{application}/{profile}
+/secret/{application}
+/secret/{defaultContext}/{profile}
+/secret/{defaultContext}
+----
+
+Spring Cloud Vault adds all active profiles to the list of possible context paths.
+No active profiles will skip accessing contexts with a profile name.
+
+[source,yaml]
+----
+spring.cloud.vault:
+    enabled: true
+    ...
+    generic:
+        enabled: true
+        default-context: application
+----
+
+See also: https://www.vaultproject.io/docs/secrets/generic/index.html[Vault Documentation: Using the generic secret backend]
+
+[[vault-client-consul]]
+=== Consul
+
+Spring Cloud Vault allows to obtain credentials for Hashicorp Consil.
+The integration can be enabled by setting `spring.cloud.vault.consul.enabled=true`
+(default `false`). The obtained token is stored in `spring.cloud.consul.token`
+so using Spring Cloud Consul can pick up the generated
+credentials without further configuration. You can configure the property name
+by setting `spring.cloud.vault.consul.token-property`.
+
+[source,yaml]
+----
+spring.cloud.vault:
+    enabled: true
+    ...
+    consul:
+        enabled: true
+----
+
+See also: https://www.vaultproject.io/docs/secrets/consul/index.html[Vault Documentation: Setting up Consul with Vault]
+
+[[vault-client-rabbitmq]]
+=== RabbitMQ
+
+Spring Cloud Vault allows to obtain credentials for RabbitMQ.
+The integration can be enabled by setting `spring.cloud.vault.rabbit.enabled=true`
+(default `false`). Username and password are stored in `spring.rabbit.username`
+and `spring.rabbit.password` so using Spring Boot will pick up the generated
+credentials without further configuration. You can configure the property names
+by setting `spring.cloud.vault.rabbit.username-property` and
+`spring.cloud.vault.rabbit.password-property`.
+
+[source,yaml]
+----
+spring.cloud.vault:
+    enabled: true
+    ...
+    rabbit:
+        enabled: true
+----
+
+See also: https://www.vaultproject.io/docs/secrets/rabbit/index.html[Vault Documentation: Setting up RabbitMQ with Vault]
+
 [[vault-client-database-backends]]
 == Database backends
 
@@ -211,49 +288,6 @@ spring.cloud.vault:
 ----
 
 See also: https://www.vaultproject.io/docs/secrets/postgresql/index.html[Vault Documentation: Setting up PostgreSQL with Vault]
-
-[[vault-client-consul]]
-== Consul
-
-Spring Cloud Vault allows to obtain credentials for Hashicorp Consil.
-The integration can be enabled by setting `spring.cloud.vault.consul.enabled=true`
-(default `false`). The obtained token is stored in `spring.cloud.consul.token`
-so using Spring Cloud Consul can pick up the generated
-credentials without further configuration. You can configure the property name
-by setting `spring.cloud.vault.consul.token-property`.
-
-[source,yaml]
-----
-spring.cloud.vault:
-    enabled: true
-    ...
-    consul:
-        enabled: true
-----
-
-See also: https://www.vaultproject.io/docs/secrets/consul/index.html[Vault Documentation: Setting up Consul with Vault]
-
-[[vault-client-rabbitmq]]
-=== RabbitMQ
-
-Spring Cloud Vault allows to obtain credentials for RabbitMQ.
-The integration can be enabled by setting `spring.cloud.vault.rabbit.enabled=true`
-(default `false`). Username and password are stored in `spring.rabbit.username`
-and `spring.rabbit.password` so using Spring Boot will pick up the generated
-credentials without further configuration. You can configure the property names
-by setting `spring.cloud.vault.rabbit.username-property` and
-`spring.cloud.vault.rabbit.password-property`.
-
-[source,yaml]
-----
-spring.cloud.vault:
-    enabled: true
-    ...
-    rabbit:
-        enabled: true
-----
-
-See also: https://www.vaultproject.io/docs/secrets/rabbit/index.html[Vault Documentation: Setting up RabbitMQ with Vault]
 
 
 [[vault-client-fail-fast]]

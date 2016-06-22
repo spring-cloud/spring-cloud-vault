@@ -13,13 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.config;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,68 +37,64 @@ import lombok.extern.apachecommons.CommonsLog;
  * @author Mark Paluch
  */
 @CommonsLog
-public class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
+class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 
 	private final VaultProperties vaultProperties;
+	private final SecureBackendAccessor secureBackendAccessor;
+	private final Map<String, String> properties = new LinkedHashMap<>();
+	private final transient VaultState vaultState;
 
-	private String context;
-	private Map<String, String> properties = new LinkedHashMap<>();
+	/**
+	 * Creates a new {@link VaultPropertySource}.
+	 *
+	 * @param vaultClient  must not be {@literal null}.
+	 * @param properties must not be {@literal null}.
+	 * @param state shared Vault state,  must not be {@literal null}.
+	 * @param secureBackendAccessor  must not be {@literal null}.
+	 */
+	public VaultPropertySource(VaultClient vaultClient,
+			VaultProperties properties, VaultState state,
+			SecureBackendAccessor secureBackendAccessor) {
 
-	private transient VaultState vaultState;
+		super(secureBackendAccessor.getName(), vaultClient);
 
-	public VaultPropertySource(String context, VaultClient source,
-			VaultProperties properties, VaultState state) {
-		super(context, source);
-		this.context = context;
+		Assert.notNull(vaultClient, "VaultClient must not be null!");
+		Assert.notNull(properties, "VaultProperties must not be null!");
+		Assert.notNull(state, "VaultState must not be null!");
+		Assert.notNull(secureBackendAccessor, "SecureBackendAccessor must not be null!");
+
 		this.vaultProperties = properties;
 		this.vaultState = state;
+		this.secureBackendAccessor = secureBackendAccessor;
 	}
 
-	public void init(Collection<SecureBackendAccessor> externalBackendAccessors) {
+	/**
+	 * Initialize property source and read properties from Vault.
+	 */
+	public void init() {
 
-		Assert.hasText(vaultProperties.getBackend(),
-				"No generic secret backend configured (spring.cloud.vault.backend)");
-
-		List<SecureBackendAccessor> accessors = getSecureBackendAccessors(
-				externalBackendAccessors);
-
-		for (SecureBackendAccessor accessor : accessors) {
-			try {
-				Map<String, String> values = this.source.read(accessor, obtainToken());
-
-				if (values != null) {
-					this.properties.putAll(values);
-				}
-			}
-			catch (Exception e) {
-
-				String message = String.format(
-						"Unable to read properties from vault for %s ",
-						accessor.variables());
-				if (vaultProperties.isFailFast()) {
-					if (e instanceof RuntimeException) {
-						throw e;
-					}
-
-					throw new IllegalStateException(message, e);
-				}
-
-				log.error(message, e);
+		try {
+			Map<String, String> values = this.source.read(this.secureBackendAccessor,
+					obtainToken());
+			if (values != null) {
+				this.properties.putAll(values);
 			}
 		}
-	}
+		catch (Exception e) {
 
-	private List<SecureBackendAccessor> getSecureBackendAccessors(
-			Collection<SecureBackendAccessor> externalBackendAccessors) {
+			String message = String.format(
+					"Unable to read properties from Vault using %s for %s ", getName(),
+					secureBackendAccessor.variables());
+			if (vaultProperties.isFailFast()) {
+				if (e instanceof RuntimeException) {
+					throw e;
+				}
 
-		List<SecureBackendAccessor> accessors = new ArrayList<>();
+				throw new IllegalStateException(message, e);
+			}
 
-		accessors.add(SecureBackendAccessors.generic(vaultProperties.getBackend(),
-				this.context));
-
-		accessors.addAll(externalBackendAccessors);
-
-		return accessors;
+			log.error(message, e);
+		}
 	}
 
 	private VaultToken obtainToken() {
@@ -113,7 +105,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 
 		if (vaultProperties.getAuthentication() == AuthenticationMethod.TOKEN) {
 
-			Assert.hasText(vaultProperties.getToken(), "Token must not be empty");
+			Assert.hasText(vaultProperties.getToken(), "Vault Token must not be empty");
 			vaultState.setToken(VaultToken.of(vaultProperties.getToken()));
 
 			return vaultState.getToken();

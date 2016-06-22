@@ -19,6 +19,8 @@ import org.springframework.cloud.vault.VaultSecretBackend;
 
 /**
  * Configuration properties interface for database secrets.
+ *
+ * @author Mark Paluch
  */
 public interface DatabaseSecretProperties extends VaultSecretBackend {
 

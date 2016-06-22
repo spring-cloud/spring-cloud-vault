@@ -23,17 +23,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.util.VaultRule;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Integration test using config infrastructure with token authentication. In case this
@@ -44,8 +40,9 @@ import org.springframework.web.client.RestTemplate;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = VaultConfigTests.TestApplication.class)
-public class VaultConfigTests {
+@SpringApplicationConfiguration(classes = VaultConfigGenericBackendDisabledTests.TestApplication.class)
+@IntegrationTest("spring.cloud.vault.generic.enabled=false")
+public class VaultConfigGenericBackendDisabledTests {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -57,46 +54,13 @@ public class VaultConfigTests {
 				Collections.singletonMap("vault.value", "foo"));
 	}
 
-	@Value("${vault.value}")
-	String configValue;
-
 	@Autowired
 	Environment environment;
 
-	@Autowired
-	ApplicationContext applicationContext;
-
 	@Test
-	public void contextLoads() {
-		assertThat(configValue).isEqualTo("foo");
-	}
+	public void shouldNotContainVaultProperties() {
 
-	@Test
-	public void shouldContainProperty() {
-
-		assertThat(environment.containsProperty("vault.value")).isTrue();
-		assertThat(environment.getProperty("vault.value")).isEqualTo("foo");
-	}
-
-	@Test
-	public void shouldContainVaultBeans() {
-
-		// Beans are registered in parent (bootstrap) context.
-		ApplicationContext parent = applicationContext.getParent();
-
-		assertThat(parent.getBeanNamesForType(VaultClient.class)).isNotEmpty();
-		assertThat(parent.getBeanNamesForType(VaultPropertySourceLocator.class))
-				.isNotEmpty();
-	}
-
-	@Test
-	public void shouldNotContainRestTemplateArtifacts() {
-
-		// Beans are registered in parent (bootstrap) context.
-		ApplicationContext parent = applicationContext.getParent();
-
-		assertThat(parent.getBeanNamesForType(RestTemplate.class)).isEmpty();
-		assertThat(parent.getBeanNamesForType(ClientHttpRequestFactory.class)).isEmpty();
+		assertThat(environment.containsProperty("vault.value")).isFalse();
 	}
 
 	@SpringBootApplication

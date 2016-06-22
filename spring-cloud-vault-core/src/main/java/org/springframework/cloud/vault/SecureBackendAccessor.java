@@ -38,4 +38,9 @@ public interface SecureBackendAccessor {
 	 */
 	Map<String, String> transformProperties(Map<String, String> input);
 
+	/**
+	 *
+	 * @return the name for this accessor.
+	 */
+	String getName();
 }

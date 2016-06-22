@@ -75,9 +75,9 @@ The HTTP service has resources in the form:
 
 ----
 /secret/{application}
-/secret/{application},{profile}
+/secret/{application}/{profile}
 /secret/{defaultContext}
-/secret/{defaultContext},{profile}
+/secret/{defaultContext}/{profile}
 ----
 
 where the "application" is injected as the `spring.application.name` in the

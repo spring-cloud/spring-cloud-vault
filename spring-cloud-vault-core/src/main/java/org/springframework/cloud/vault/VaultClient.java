@@ -28,7 +28,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -66,17 +65,25 @@ public class VaultClient {
 		this.properties = properties;
 	}
 
+	/**
+	 * Read secrets using the given {@link SecureBackendAccessor} and {@link VaultToken}.
+	 *
+	 * @param secureBackendAccessor must not be {@literal null}.
+	 * @param vaultToken must not be {@literal null}.
+	 * @return A {@link Map} containing properties.
+	 */
 	public Map<String, String> read(SecureBackendAccessor secureBackendAccessor,
 			VaultToken vaultToken) {
 
 		Assert.notNull(secureBackendAccessor, "SecureBackendAccessor must not be empty!");
-		Assert.notNull(vaultToken, "VaultToken must not be null!");
+		Assert.notNull(vaultToken, "Vault Token must not be null!");
 
 		String url = buildUrl();
 
 		HttpHeaders headers = createHeaders(vaultToken);
 		Exception error = null;
 		String errorBody = null;
+		HttpStatus status = null;
 
 		URI uri = this.rest.getUriTemplateHandler().expand(url,
 				secureBackendAccessor.variables());
@@ -86,7 +93,7 @@ public class VaultClient {
 			ResponseEntity<VaultResponse> response = this.rest.exchange(uri,
 					HttpMethod.GET, new HttpEntity<>(headers), VaultResponse.class);
 
-			HttpStatus status = response.getStatusCode();
+			status = response.getStatusCode();
 			if (status == HttpStatus.OK) {
 				if (response.getBody().getData() != null) {
 					return secureBackendAccessor
@@ -101,12 +108,25 @@ public class VaultClient {
 				errorBody = e.getResponseBodyAsString();
 			}
 
-			if (e.getStatusCode() != HttpStatus.NOT_FOUND) {
-				error = e;
-			}
+			status = e.getStatusCode();
+			error = e;
 		}
 		catch (Exception e) {
 			error = e;
+		}
+
+		if (status == HttpStatus.NOT_FOUND) {
+			log.info(String.format("Could not locate PropertySource: %s",
+					"key not found"));
+		}
+		else if (status != null) {
+			log.warn(String.format("Could not locate PropertySource: Status %d %s",
+					status.value(),
+					getErrorMessage(error, errorBody)));
+		}
+		else {
+			log.warn(String.format("Could not locate PropertySource: %s",
+					(getErrorMessage(error, errorBody))));
 		}
 
 		if (properties.isFailFast()) {
@@ -115,13 +135,13 @@ public class VaultClient {
 					error);
 		}
 
-		log.warn(
-				String.format("Could not locate PropertySource: %s",
-						(errorBody == null
-								? error == null ? "key not found" : error.getMessage()
-								: errorBody)));
-
 		return Collections.emptyMap();
+	}
+
+	protected String getErrorMessage(Exception error, String errorBody) {
+		return errorBody == null
+				? error == null ? "unknown reason" : error.getMessage()
+				: errorBody;
 	}
 
 	private HttpHeaders createHeaders(VaultToken vaultToken) {

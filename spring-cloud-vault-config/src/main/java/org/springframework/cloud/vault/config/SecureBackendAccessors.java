@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.cloud.vault.SecureBackendAccessor;
-import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.util.Assert;
 
 /**
@@ -30,20 +29,6 @@ import org.springframework.util.Assert;
  * @author Mark Paluch
  */
 class SecureBackendAccessors {
-
-	/**
-	 * Creates a {@link SecureBackendAccessor} for the {@code generic} secure backend.
-	 *
-	 * @param vaultProperties must not be {@literal null}.
-	 * @param key must not be {@literal null} and not empty.
-	 * @return the {@link SecureBackendAccessor}
-	 */
-	public static SecureBackendAccessor generic(VaultProperties vaultProperties,
-			String key) {
-
-		Assert.notNull(vaultProperties, "VaultProperties must not be null");
-		return generic(vaultProperties.getBackend(), key);
-	}
 
 	/**
 	 * Creates a {@link SecureBackendAccessor} for the {@code generic} secure backend.
@@ -66,6 +51,11 @@ class SecureBackendAccessors {
 				variables.put("backend", secretBackendPath);
 				variables.put("key", key);
 				return variables;
+			}
+
+			@Override
+			public String getName() {
+				return String.format("%s/%s", secretBackendPath, key);
 			}
 
 			@Override

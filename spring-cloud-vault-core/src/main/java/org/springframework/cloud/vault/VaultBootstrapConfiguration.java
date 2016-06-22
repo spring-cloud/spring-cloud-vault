@@ -49,17 +49,13 @@ public class VaultBootstrapConfiguration {
 	}
 
 	@Bean
-	@Qualifier("vault-RestTemplate")
-	public RestTemplate restTemplate() {
-		return new RestTemplate(
-				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory());
-	}
-
-	@Bean
 	public VaultClient vaultClient(ApplicationContext applicationContext) {
 
+		RestTemplate restTemplate = new RestTemplate(
+				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory());
+
 		VaultClient vaultClient = new VaultClient(vaultProperties());
-		vaultClient.setRest(restTemplate());
+		vaultClient.setRest(restTemplate);
 
 		Map<String, AppIdUserIdMechanism> appIdUserIdMechanisms = applicationContext
 				.getBeansOfType(AppIdUserIdMechanism.class);

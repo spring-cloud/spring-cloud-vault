@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.vault.config;
 
+import static org.springframework.cloud.vault.config.SecureBackendAccessors.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,12 +41,12 @@ import org.springframework.util.StringUtils;
  * @author Spencer Gibb
  * @author Mark Paluch
  */
-public class VaultPropertySourceLocator implements PropertySourceLocator {
+class VaultPropertySourceLocator implements PropertySourceLocator {
 
-	private VaultClient vaultClient;
-
-	private VaultProperties properties;
-	private final Collection<SecureBackendAccessor> backendAcessors;
+	private final VaultClient vaultClient;
+	private final VaultProperties properties;
+	private final VaultGenericBackendProperties genericBackendProperties;
+	private final Collection<SecureBackendAccessor> backendAccessors;
 
 	private transient final VaultState vaultState = new VaultState();
 
@@ -52,65 +54,118 @@ public class VaultPropertySourceLocator implements PropertySourceLocator {
 	 * Creates a new {@link VaultPropertySourceLocator}.
 	 * @param vaultClient must not be {@literal null}.
 	 * @param properties must not be {@literal null}.
+	 * @param genericBackendProperties must not be {@literal null}.
 	 * @param backendAccessors must not be {@literal null}.
 	 */
 	public VaultPropertySourceLocator(VaultClient vaultClient, VaultProperties properties,
+			VaultGenericBackendProperties genericBackendProperties,
 			Collection<SecureBackendAccessor> backendAccessors) {
 
 		Assert.notNull(vaultClient, "VaultClient must not be null");
 		Assert.notNull(properties, "VaultProperties must not be null");
 		Assert.notNull(backendAccessors, "BackendAccessors must not be null");
+		Assert.notNull(genericBackendProperties,
+				"VaultGenericBackendProperties must not be null");
 
 		this.vaultClient = vaultClient;
 		this.properties = properties;
-		this.backendAcessors = backendAccessors;
+		this.backendAccessors = backendAccessors;
+		this.genericBackendProperties = genericBackendProperties;
 	}
 
 	@Override
 	public PropertySource<?> locate(Environment environment) {
 
 		if (environment instanceof ConfigurableEnvironment) {
-			ConfigurableEnvironment env = (ConfigurableEnvironment) environment;
-			String appName = env.getProperty("spring.application.name");
-			List<String> profiles = Arrays.asList(env.getActiveProfiles());
 
-			List<String> contexts = new ArrayList<>();
+			CompositePropertySource propertySource = createCompositePropertySource(
+					(ConfigurableEnvironment) environment);
+			initialize(propertySource);
 
-			String defaultContext = this.properties.getDefaultContext();
-			contexts.add(defaultContext);
-			addProfiles(contexts, defaultContext, profiles);
-
-			String baseContext = appName;
-			contexts.add(baseContext);
-			addProfiles(contexts, baseContext, profiles);
-
-			Collections.reverse(contexts);
-
-			CompositePropertySource composite = new CompositePropertySource("vault");
-
-			for (String propertySourceContext : contexts) {
-
-				if(StringUtils.hasText(propertySourceContext)) {
-					VaultPropertySource propertySource = create(propertySourceContext);
-					propertySource.init(backendAcessors);
-					composite.addPropertySource(propertySource);
-				}
-			}
-
-			return composite;
+			return propertySource;
 		}
 		return null;
 	}
 
-	private VaultPropertySource create(String context) {
-		return new VaultPropertySource(context, this.vaultClient, this.properties,
-				this.vaultState);
+	private List<String> buildContexts(ConfigurableEnvironment env) {
+
+		String appName = env.getProperty("spring.application.name");
+		List<String> profiles = Arrays.asList(env.getActiveProfiles());
+		List<String> contexts = new ArrayList<>();
+
+		String defaultContext = genericBackendProperties.getDefaultContext();
+		if (StringUtils.hasText(defaultContext)) {
+			contexts.add(defaultContext);
+		}
+
+		addProfiles(contexts, defaultContext, profiles);
+
+		if (StringUtils.hasText(appName)) {
+
+			if (!contexts.contains(appName)) {
+				contexts.add(appName);
+			}
+
+			addProfiles(contexts, appName, profiles);
+		}
+
+		Collections.reverse(contexts);
+		return contexts;
+	}
+
+	protected CompositePropertySource createCompositePropertySource(
+			ConfigurableEnvironment environment) {
+
+		CompositePropertySource propertySource = new CompositePropertySource("vault");
+
+		if (genericBackendProperties.isEnabled()) {
+
+			List<String> contexts = buildContexts(environment);
+			for (String propertySourceContext : contexts) {
+
+				if (StringUtils.hasText(propertySourceContext)) {
+
+					VaultPropertySource vaultPropertySource = createVaultPropertySource(
+							generic(genericBackendProperties.getBackend(),
+									propertySourceContext));
+
+					propertySource.addPropertySource(vaultPropertySource);
+				}
+			}
+		}
+
+		for (SecureBackendAccessor backendAccessor : backendAccessors) {
+
+			VaultPropertySource vaultPropertySource = createVaultPropertySource(
+					backendAccessor);
+			propertySource.addPropertySource(vaultPropertySource);
+		}
+		return propertySource;
+	}
+
+	protected void initialize(CompositePropertySource propertySource) {
+
+		for (PropertySource<?> source : propertySource.getPropertySources()) {
+			((VaultPropertySource) source).init();
+		}
+	}
+
+	private VaultPropertySource createVaultPropertySource(
+			SecureBackendAccessor accessor) {
+		return new VaultPropertySource(this.vaultClient, this.properties, this.vaultState,
+				accessor);
 	}
 
 	private void addProfiles(List<String> contexts, String baseContext,
 			List<String> profiles) {
+
 		for (String profile : profiles) {
-			contexts.add(baseContext + this.properties.getProfileSeparator() + profile);
+			String context = baseContext
+					+ this.genericBackendProperties.getProfileSeparator() + profile;
+
+			if (!contexts.contains(context)) {
+				contexts.add(context);
+			}
 		}
 	}
 }

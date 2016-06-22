@@ -52,7 +52,7 @@ public class GenericSecretIntegrationTests extends AbstractIntegrationTests {
 	public void shouldReturnSecretsCorrectly() throws Exception {
 
 		Map<String, String> secretProperties = vaultClient
-				.read(generic(vaultProperties, "app-name"), createToken());
+				.read(generic("secret", "app-name"), createToken());
 
 		assertThat(secretProperties).containsAllEntriesOf(createExpectedMap());
 	}
@@ -61,7 +61,7 @@ public class GenericSecretIntegrationTests extends AbstractIntegrationTests {
 	public void shouldReturnNullIfNotFound() throws Exception {
 
 		Map<String, String> secretProperties = vaultClient
-				.read(generic(vaultProperties, "missing"), createToken());
+				.read(generic("secret", "missing"), createToken());
 
 		assertThat(secretProperties).isEmpty();
 	}
@@ -70,7 +70,7 @@ public class GenericSecretIntegrationTests extends AbstractIntegrationTests {
 	public void shouldFailOnFailFast() throws Exception {
 
 		vaultProperties.setFailFast(true);
-		vaultClient.read(generic(vaultProperties, "missing"), createToken());
+		vaultClient.read(generic("secret", "missing"), createToken());
 	}
 
 	/**
