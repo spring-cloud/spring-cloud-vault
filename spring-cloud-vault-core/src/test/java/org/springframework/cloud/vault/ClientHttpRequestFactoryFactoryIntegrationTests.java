@@ -22,10 +22,13 @@ import org.junit.Test;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.vault.util.Settings;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.Netty4ClientHttpRequestFactory;
 import org.springframework.http.client.OkHttpClientHttpRequestFactory;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -36,18 +39,16 @@ import org.springframework.web.client.RestTemplate;
 public class ClientHttpRequestFactoryFactoryIntegrationTests {
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
-	private String url = String.format("%s://%s:%d/v1/sys/health?sealedcode=200",
-			vaultProperties.getScheme(), vaultProperties.getHost(),
+	private String url = String.format("%s://%s:%d/v1/sys/health", vaultProperties.getScheme(), vaultProperties.getHost(),
 			vaultProperties.getPort());
 
 	@Test
 	public void httpComponentsClientShouldWork() throws Exception {
 
-		ClientHttpRequestFactory factory = HttpComponents
-				.usingHttpComponents(vaultProperties);
+		ClientHttpRequestFactory factory = HttpComponents.usingHttpComponents(vaultProperties);
 		RestTemplate template = new RestTemplate(factory);
 
-		String response = template.getForObject(url, String.class);
+		String response = request(template);
 
 		assertThat(factory).isInstanceOf(HttpComponentsClientHttpRequestFactory.class);
 		assertThat(response).isNotNull().contains("initialized");
@@ -55,15 +56,25 @@ public class ClientHttpRequestFactoryFactoryIntegrationTests {
 		((DisposableBean) factory).destroy();
 	}
 
+	private String request(RestTemplate template) {
+
+		// Uninitialized and sealed can cause status 500
+		try {
+			ResponseEntity<String> responseEntity = template.exchange(url, HttpMethod.GET, null, String.class);
+			return responseEntity.getBody();
+		} catch (HttpStatusCodeException e) {
+			return e.getResponseBodyAsString();
+		}
+	}
+
 	@Test
 	public void nettyClientShouldWork() throws Exception {
 
-		ClientHttpRequestFactory factory = Netty
-				.usingNetty(vaultProperties);
+		ClientHttpRequestFactory factory = Netty.usingNetty(vaultProperties);
 		((InitializingBean) factory).afterPropertiesSet();
 		RestTemplate template = new RestTemplate(factory);
 
-		String response = template.getForObject(url, String.class);
+		String response = request(template);
 
 		assertThat(factory).isInstanceOf(Netty4ClientHttpRequestFactory.class);
 		assertThat(response).isNotNull().contains("initialized");
@@ -74,11 +85,10 @@ public class ClientHttpRequestFactoryFactoryIntegrationTests {
 	@Test
 	public void okHttpClientShouldWork() throws Exception {
 
-		ClientHttpRequestFactory factory = OkHttp
-				.usingOkHttp(vaultProperties);
+		ClientHttpRequestFactory factory = OkHttp.usingOkHttp(vaultProperties);
 		RestTemplate template = new RestTemplate(factory);
 
-		String response = template.getForObject(url, String.class);
+		String response = request(template);
 
 		assertThat(factory).isInstanceOf(OkHttpClientHttpRequestFactory.class);
 		assertThat(response).isNotNull().contains("initialized");
