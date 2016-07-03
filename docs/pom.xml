@@ -6,10 +6,11 @@
 	<artifactId>spring-cloud-vault-config-docs</artifactId>
 	<version>1.1.0.BUILD-SNAPSHOT</version>
 	<parent>
+		<artifactId>spring-cloud-dependencies-parent</artifactId>
 		<groupId>org.springframework.cloud</groupId>
-		<artifactId>spring-cloud-build</artifactId>
-		<version>1.1.0.BUILD-SNAPSHOT</version>
+		<version>1.1.2.BUILD-SNAPSHOT</version>
 		<relativePath/>
+		<!-- lookup parent from repository -->
 	</parent>
 	<packaging>pom</packaging>
 	<name>Spring Cloud Vault Config Docs</name>
@@ -53,4 +54,23 @@
 			</build>
 		</profile>
 	</profiles>
+
+	<repositories>
+		<repository>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>https://repo.spring.io/snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 </project>
