@@ -1,0 +1,5 @@
+spring:
+  application.name: testVaultApp
+  cloud.vault.token: 00000000-0000-0000-0000-000000000000
+  cloud.vault.ssl.trust-store: file:../work/keystore.jks
+  cloud.vault.ssl.trust-store-password: changeit
