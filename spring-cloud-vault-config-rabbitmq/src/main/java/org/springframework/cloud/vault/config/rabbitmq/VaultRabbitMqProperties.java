@@ -41,7 +41,7 @@ public class VaultRabbitMqProperties implements VaultSecretBackend {
 	private String role;
 
 	/**
-	 * RabbitMQ backend path.
+	 * rabbitmq backend path.
 	 */
 	@NotEmpty
 	private String backend = "rabbitmq";

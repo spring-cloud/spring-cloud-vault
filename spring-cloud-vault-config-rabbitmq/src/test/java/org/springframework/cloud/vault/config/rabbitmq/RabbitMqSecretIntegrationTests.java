@@ -57,7 +57,7 @@ public class RabbitMqSecretIntegrationTests extends AbstractIntegrationTests {
 	private VaultRabbitMqProperties rabbitmq = new VaultRabbitMqProperties();
 
 	/**
-	 * Initialize the mysql secret backend.
+	 * Initialize the rabbitmq secret backend.
 	 *
 	 * @throws Exception
 	 */
