@@ -74,6 +74,8 @@ public class VaultProperties {
 
 	private AppIdProperties appId = new AppIdProperties();
 
+	private AwsEc2Properties awsEc2 = new AwsEc2Properties();
+
 	private Ssl ssl = new Ssl();
 
 	/**
@@ -89,12 +91,14 @@ public class VaultProperties {
 
 		/**
 		 * Property value for UserId generation using a Mac-Address.
+		 * 
 		 * @see MacAddressUserId
 		 */
 		public final static String MAC_ADDRESS = "MAC_ADDRESS";
 
 		/**
 		 * Property value for UserId generation using an IP-Address.
+		 * 
 		 * @see IpAddressUserId
 		 */
 		public final static String IP_ADDRESS = "IP_ADDRESS";
@@ -118,6 +122,32 @@ public class VaultProperties {
 	}
 
 	@Data
+	public static class AwsEc2Properties {
+
+		/**
+		 * URL of the AWS-EC2 PKCS7 identity document.
+		 */
+		@NotEmpty
+		private String identityDocument = "http://169.254.169.254/latest/dynamic/instance-identity/pkcs7";
+
+		/**
+		 * Mount path of the AWS-EC2 authentication backend.
+		 */
+		@NotEmpty
+		private String awsEc2Path = "aws-ec2";
+
+		/**
+		 * Name of the role, optional.
+		 */
+		private String role = "";
+
+		/**
+		 * Flag whether to generate and send a nonce.
+		 */
+		private boolean useNonce = true;
+	}
+
+	@Data
 	public static class Ssl {
 
 		/**
@@ -132,6 +162,6 @@ public class VaultProperties {
 	}
 
 	public enum AuthenticationMethod {
-		TOKEN, APPID,
+		TOKEN, APPID, AWS_EC2,
 	}
 }

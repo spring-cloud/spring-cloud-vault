@@ -19,11 +19,13 @@ import static org.springframework.cloud.vault.VaultClient.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
@@ -41,16 +43,16 @@ class DefaultClientAuthentication extends ClientAuthentication {
 	private final VaultProperties properties;
 	private final RestTemplate restTemplate;
 	private final AppIdUserIdMechanism appIdUserIdMechanism;
+	private char[] nonce;
 
 	/**
 	 * Creates a {@link DefaultClientAuthentication} using {@link VaultProperties} and
 	 * {@link RestTemplate}.
-	 * 
-	 * @param properties must not be {@literal null}
-	 * @param restTemplate must not be {@literal null}
+	 *
+	 * @param properties must not be {@literal null}.
+	 * @param restTemplate must not be {@literal null}.
 	 */
-	public DefaultClientAuthentication(VaultProperties properties,
-			RestTemplate restTemplate) {
+	DefaultClientAuthentication(VaultProperties properties, RestTemplate restTemplate) {
 
 		Assert.notNull(properties, "VaultProperties must not be null");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
@@ -64,12 +66,12 @@ class DefaultClientAuthentication extends ClientAuthentication {
 	 * Creates a {@link DefaultClientAuthentication} using {@link VaultProperties} and
 	 * {@link RestTemplate} for AppId authentication.
 	 *
-	 * @param properties must not be {@literal null}
-	 * @param restTemplate must not be {@literal null}
-	 * @param appIdUserIdMechanism must not be {@literal null}
+	 * @param properties must not be {@literal null}.
+	 * @param restTemplate must not be {@literal null}.
+	 * @param appIdUserIdMechanism must not be {@literal null}.
 	 */
-	public DefaultClientAuthentication(VaultProperties properties,
-			RestTemplate restTemplate, AppIdUserIdMechanism appIdUserIdMechanism) {
+	DefaultClientAuthentication(VaultProperties properties, RestTemplate restTemplate,
+			AppIdUserIdMechanism appIdUserIdMechanism) {
 
 		Assert.notNull(properties, "VaultProperties must not be null");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
@@ -85,9 +87,18 @@ class DefaultClientAuthentication extends ClientAuthentication {
 
 		if (properties.getAuthentication() == VaultProperties.AuthenticationMethod.APPID
 				&& appIdUserIdMechanism != null) {
+			log.info("Using AppId authentication to log into Vault");
+
 			VaultProperties.AppIdProperties appId = properties.getAppId();
 			return createTokenUsingAppId(new AppIdTuple(properties.getApplicationName(),
 					appIdUserIdMechanism.createUserId()), appId);
+		}
+
+		if (properties
+				.getAuthentication() == VaultProperties.AuthenticationMethod.AWS_EC2) {
+			log.info("Using AWS-EC2 authentication to log into Vault");
+
+			return createTokenUsingAwsEc2();
 		}
 
 		throw new UnsupportedOperationException(
@@ -128,6 +139,11 @@ class DefaultClientAuthentication extends ClientAuthentication {
 						String.format("Cannot login using app-id: %s",
 								VaultErrorMessage.getError(e.getResponseBodyAsString())));
 			}
+			if (e.getStatusCode().equals(HttpStatus.BAD_REQUEST)) {
+				throw new IllegalStateException(
+						String.format("Cannot login using app-id: %s",
+								VaultErrorMessage.getError(e.getResponseBodyAsString())));
+			}
 
 			throw e;
 		}
@@ -139,6 +155,87 @@ class DefaultClientAuthentication extends ClientAuthentication {
 		login.put("app_id", appIdTuple.getAppId());
 		login.put("user_id", appIdTuple.getUserId());
 		return login;
+	}
+
+	@SuppressWarnings("unchecked")
+	private VaultToken createTokenUsingAwsEc2() {
+
+		VaultProperties.AwsEc2Properties properties = this.properties.getAwsEc2();
+
+		String url = buildUrl();
+		Map<String, String> variables = new HashMap<>();
+		variables.put("backend", "auth/" + properties.getAwsEc2Path());
+		variables.put("key", "login");
+
+		try {
+
+			Map<String, String> login = getEc2Login(properties);
+
+			ResponseEntity<VaultResponse> response = restTemplate.postForEntity(url,
+					new HttpEntity<>(login), VaultResponse.class, variables);
+
+			HttpStatus status = response.getStatusCode();
+			if (!status.is2xxSuccessful()) {
+				throw new IllegalStateException("Cannot login using AWS-EC2");
+			}
+
+			VaultResponse body = response.getBody();
+			String token = (String) body.getAuth().get("client_token");
+
+			if (log.isDebugEnabled()) {
+
+				if (body.getAuth().get("metadata") instanceof Map) {
+					Map<Object, Object> metadata = (Map<Object, Object>) body.getAuth()
+							.get("metadata");
+					log.debug(String.format(
+							"Login successful using AWS-EC2 authentication for instance %s, AMI %s",
+							metadata.get("instance_id"), metadata.get("instance_id")));
+				}
+				else {
+					log.debug("Login successful using AWS-EC2 authentication");
+				}
+			}
+
+			return VaultToken.of(token, body.getLeaseDuration());
+		}
+		catch (HttpStatusCodeException e) {
+
+			if (e.getStatusCode().equals(HttpStatus.BAD_REQUEST)) {
+				throw new IllegalStateException(
+						String.format("Cannot login using AWS-EC2: %s",
+								VaultErrorMessage.getError(e.getResponseBodyAsString())));
+			}
+
+			throw e;
+		}
+	}
+
+	private Map<String, String> getEc2Login(VaultProperties.AwsEc2Properties properties) {
+
+		Map<String, String> login = new HashMap<>();
+
+		if (StringUtils.hasText(properties.getRole())) {
+			login.put("role", properties.getRole());
+		}
+
+		if (properties.isUseNonce()) {
+			if (this.nonce == null) {
+				this.nonce = createNonce();
+			}
+
+			login.put("nonce", new String(this.nonce));
+		}
+
+		String pkcs7 = restTemplate.getForObject(properties.getIdentityDocument(),
+				String.class);
+		if (StringUtils.hasText(pkcs7)) {
+			login.put("pkcs7", pkcs7.replaceAll("\\r", "").replace("\\n", ""));
+		}
+		return login;
+	}
+
+	private char[] createNonce() {
+		return UUID.randomUUID().toString().toCharArray();
 	}
 
 	@Value

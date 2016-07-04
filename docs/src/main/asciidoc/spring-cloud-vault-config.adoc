@@ -125,6 +125,63 @@ public class MyUserIdMechanism implements AppIdUserIdMechanism {
 }
 ----
 
+=== AWS-EC2 authentication
+
+The https://www.vaultproject.io/docs/auth/aws-ec2.html[aws-ec2]
+auth backend provides a secure introduction mechanism
+for AWS EC2 instances, allowing automated retrieval of a Vault
+token. Unlike most Vault authentication backends, this backend
+does not require first-deploying, or provisioning security-sensitive
+credentials (tokens, username/password, client certificates, etc).
+Instead, it treats AWS as a Trusted Third Party and uses the
+cryptographically signed dynamic metadata information that uniquely
+represents each EC2 instance.
+
+[source,yaml]
+.bootstrap.yml using AWS-EC2 Authentication
+----
+spring.cloud.vault:
+    enabled: true
+    authentication: AWS_EC2
+----
+
+AWS-EC2 authentication enables nonce by default to follow
+the Trust On First Use (TOFU) principle. Any unintended party that
+gains access to the PKCS#7 signed identity metadata can authenticate
+against Vault.
+
+During the first login, Spring Cloud Vault generates a nonce
+that is stored in the auth backend aside the instance Id.
+Re-authentication requires the same nonce to be sent. Any other
+party does not have the nonce and can raise an alert in Vault for
+further investigation.
+
+The nonce is kept in memory and is lost during application restart.
+
+[source,yaml]
+.bootstrap.yml with disabled nonce
+----
+spring.cloud.vault:
+    enabled: true
+    authentication: AWS_EC2
+    aws-ec2:
+        use-nonce: false
+----
+
+AWS-EC2 authentication roles are optional and default to the AMI.
+You can configure the authentication role by setting the
+`spring.cloud.vault.aws-ec2.role` property.
+
+[source,yaml]
+.bootstrap.yml with configured role
+----
+spring.cloud.vault:
+    enabled: true
+    authentication: AWS_EC2
+    aws-ec2:
+        role: application-server
+----
+
 == Backends
 
 [[vault-client-generic]]

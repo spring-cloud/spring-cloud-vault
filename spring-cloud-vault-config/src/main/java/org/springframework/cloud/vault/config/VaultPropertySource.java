@@ -116,6 +116,12 @@ class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 			return vaultState.getToken();
 		}
 
+		if (vaultProperties.getAuthentication() == AuthenticationMethod.AWS_EC2) {
+
+			vaultState.setToken(clientAuthentication.login());
+			return vaultState.getToken();
+		}
+
 		if (vaultProperties.getAuthentication() == AuthenticationMethod.APPID) {
 
 			AppIdProperties appIdProperties = vaultProperties.getAppId();

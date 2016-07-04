@@ -74,10 +74,10 @@ backend is enabled which accesses secret config settings via JSON endpoints.
 The HTTP service has resources in the form:
 
 ----
-/secret/{application}
 /secret/{application}/{profile}
-/secret/{defaultContext}
+/secret/{application}
 /secret/{defaultContext}/{profile}
+/secret/{defaultContext}
 ----
 
 where the "application" is injected as the `spring.application.name` in the
