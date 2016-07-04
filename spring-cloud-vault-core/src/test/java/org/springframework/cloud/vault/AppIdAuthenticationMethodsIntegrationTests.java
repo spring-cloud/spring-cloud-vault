@@ -28,6 +28,7 @@ import org.junit.rules.ExpectedException;
 import org.springframework.cloud.vault.VaultProperties.AppIdProperties;
 import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
 import org.springframework.cloud.vault.util.Settings;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Integration tests for {@link VaultClient} using various UserIds.
@@ -52,14 +53,15 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 	@Test
 	public void loginUsingIpAddressShouldCreateAToken() throws Exception {
 
-		VaultClient vaultClient = new VaultClient(
-				prepareAppIdAuthenticationMethod(AppIdProperties.IP_ADDRESS, "myapp"));
+		VaultProperties vaultProperties = prepareAppIdAuthenticationMethod(
+				AppIdProperties.IP_ADDRESS, "myapp");
+		RestTemplate restTemplate = TestRestTemplateFactory
+				.create(Settings.createVaultProperties());
 
-		vaultClient.setRest(
-				TestRestTemplateFactory.create(Settings.createVaultProperties()));
+		ClientAuthentication clientAuthentication = new DefaultClientAuthentication(
+				vaultProperties, restTemplate, new IpAddressUserId());
 
-		vaultClient.setAppIdUserIdMechanism(new IpAddressUserId());
-		assertThat(vaultClient.createToken()).isNotNull();
+		assertThat(clientAuthentication.login()).isNotNull();
 	}
 
 	@Test
@@ -67,11 +69,14 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 
 		VaultProperties vaultProperties = prepareAppIdAuthenticationMethod("my-user-id",
 				"myapp");
-		VaultClient vaultClient = new VaultClient(vaultProperties);
-		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
 
-		vaultClient.setAppIdUserIdMechanism(new StaticUserId(vaultProperties));
-		assertThat(vaultClient.createToken()).isNotNull();
+		RestTemplate restTemplate = TestRestTemplateFactory
+				.create(Settings.createVaultProperties());
+
+		ClientAuthentication clientAuthentication = new DefaultClientAuthentication(
+				vaultProperties, restTemplate, new StaticUserId(vaultProperties));
+
+		assertThat(clientAuthentication.login()).isNotNull();
 	}
 
 	@Test
@@ -79,11 +84,14 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 
 		VaultProperties vaultProperties = prepareAppIdAuthenticationMethod(
 				AppIdProperties.MAC_ADDRESS, "myapp");
-		VaultClient vaultClient = new VaultClient(vaultProperties);
-		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
 
-		vaultClient.setAppIdUserIdMechanism(new MacAddressUserId(vaultProperties));
-		assertThat(vaultClient.createToken()).isNotNull();
+		RestTemplate restTemplate = TestRestTemplateFactory
+				.create(Settings.createVaultProperties());
+
+		ClientAuthentication clientAuthentication = new DefaultClientAuthentication(
+				vaultProperties, restTemplate, new MacAddressUserId(vaultProperties));
+
+		assertThat(clientAuthentication.login()).isNotNull();
 	}
 
 	@Test
@@ -96,11 +104,11 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 				AppIdProperties.IP_ADDRESS, "myapp");
 		vaultProperties.setApplicationName("foobar");
 
-		VaultClient vaultClient = new VaultClient(vaultProperties);
-		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
-		vaultClient.setAppIdUserIdMechanism(new MacAddressUserId(vaultProperties));
+		ClientAuthentication clientAuthentication = new DefaultClientAuthentication(
+				vaultProperties, TestRestTemplateFactory.create(vaultProperties),
+				new MacAddressUserId(vaultProperties));
 
-		vaultClient.createToken();
+		clientAuthentication.login();
 
 		fail("Missing IllegalStateException");
 	}

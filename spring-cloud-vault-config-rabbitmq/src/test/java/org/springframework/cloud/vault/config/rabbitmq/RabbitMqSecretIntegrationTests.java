@@ -98,5 +98,4 @@ public class RabbitMqSecretIntegrationTests extends AbstractIntegrationTests {
 		assertThat(secretProperties).containsKeys("spring.rabbitmq.username",
 				"spring.rabbitmq.password");
 	}
-
 }

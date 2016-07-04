@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.cloud.vault.ClientAuthentication;
 import org.springframework.cloud.vault.SecureBackendAccessor;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
@@ -42,19 +43,21 @@ class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 	private final VaultProperties vaultProperties;
 	private final SecureBackendAccessor secureBackendAccessor;
 	private final Map<String, String> properties = new LinkedHashMap<>();
+	private final ClientAuthentication clientAuthentication;
 	private final transient VaultState vaultState;
 
 	/**
 	 * Creates a new {@link VaultPropertySource}.
 	 *
-	 * @param vaultClient  must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @param clientAuthentication mist not be {@literal null}.
 	 * @param properties must not be {@literal null}.
-	 * @param state shared Vault state,  must not be {@literal null}.
-	 * @param secureBackendAccessor  must not be {@literal null}.
+	 * @param state shared Vault state, must not be {@literal null}.
+	 * @param secureBackendAccessor must not be {@literal null}.
 	 */
 	public VaultPropertySource(VaultClient vaultClient,
-			VaultProperties properties, VaultState state,
-			SecureBackendAccessor secureBackendAccessor) {
+			ClientAuthentication clientAuthentication, VaultProperties properties,
+			VaultState state, SecureBackendAccessor secureBackendAccessor) {
 
 		super(secureBackendAccessor.getName(), vaultClient);
 
@@ -62,8 +65,10 @@ class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 		Assert.notNull(properties, "VaultProperties must not be null!");
 		Assert.notNull(state, "VaultState must not be null!");
 		Assert.notNull(secureBackendAccessor, "SecureBackendAccessor must not be null!");
+		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null!");
 
 		this.vaultProperties = properties;
+		this.clientAuthentication = clientAuthentication;
 		this.vaultState = state;
 		this.secureBackendAccessor = secureBackendAccessor;
 	}
@@ -106,7 +111,7 @@ class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 		if (vaultProperties.getAuthentication() == AuthenticationMethod.TOKEN) {
 
 			Assert.hasText(vaultProperties.getToken(), "Vault Token must not be empty");
-			vaultState.setToken(VaultToken.of(vaultProperties.getToken()));
+			vaultState.setToken(clientAuthentication.login());
 
 			return vaultState.getToken();
 		}
@@ -118,7 +123,7 @@ class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 					"AppId must not be empty");
 			Assert.hasText(appIdProperties.getAppIdPath(), "AppIdPath must not be empty");
 
-			vaultState.setToken(source.createToken());
+			vaultState.setToken(clientAuthentication.login());
 			return vaultState.getToken();
 		}
 

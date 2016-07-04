@@ -91,5 +91,4 @@ public class AwsSecretIntegrationTests extends AbstractIntegrationTests {
 		assertThat(secretProperties).containsKeys("cloud.aws.credentials.accessKey",
 				"cloud.aws.credentials.secretKey");
 	}
-
 }

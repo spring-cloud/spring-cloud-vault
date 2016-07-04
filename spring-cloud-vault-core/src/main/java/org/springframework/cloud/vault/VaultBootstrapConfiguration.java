@@ -16,12 +16,9 @@
 
 package org.springframework.cloud.vault;
 
-import java.util.Map;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -54,15 +51,10 @@ public class VaultBootstrapConfiguration {
 		RestTemplate restTemplate = new RestTemplate(
 				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory());
 
-		VaultClient vaultClient = new VaultClient(vaultProperties());
-		vaultClient.setRest(restTemplate);
+		VaultProperties vaultProperties = vaultProperties();
 
-		Map<String, AppIdUserIdMechanism> appIdUserIdMechanisms = applicationContext
-				.getBeansOfType(AppIdUserIdMechanism.class);
-		if (!appIdUserIdMechanisms.isEmpty()) {
-			vaultClient.setAppIdUserIdMechanism(
-					appIdUserIdMechanisms.values().iterator().next());
-		}
+		VaultClient vaultClient = new VaultClient(vaultProperties);
+		vaultClient.setRest(restTemplate);
 
 		return vaultClient;
 	}
@@ -101,7 +93,7 @@ public class VaultBootstrapConfiguration {
 	/**
 	 * Wrapper for {@link ClientHttpRequestFactory} to not expose the bean globally.
 	 */
-	static class ClientFactoryWrapper implements InitializingBean, DisposableBean {
+	public static class ClientFactoryWrapper implements InitializingBean, DisposableBean {
 
 		private final ClientHttpRequestFactory clientHttpRequestFactory;
 
