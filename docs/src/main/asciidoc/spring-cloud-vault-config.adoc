@@ -219,7 +219,7 @@ See also: https://www.vaultproject.io/docs/secrets/generic/index.html[Vault Docu
 [[vault-client-consul]]
 === Consul
 
-Spring Cloud Vault allows to obtain credentials for Hashicorp Consil.
+Spring Cloud Vault allows to obtain credentials for Hashicorp Consul.
 The integration can be enabled by setting `spring.cloud.vault.consul.enabled=true`
 (default `false`). The obtained token is stored in `spring.cloud.consul.token`
 so using Spring Cloud Consul can pick up the generated
