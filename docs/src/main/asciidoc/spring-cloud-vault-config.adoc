@@ -311,7 +311,7 @@ See also: https://www.vaultproject.io/docs/secrets/consul/index.html[Vault Docum
 
 Spring Cloud Vault can obtain credentials for RabbitMQ.
 
-The RabbitMQ integration requires the `spring-cloud-vault-config-consul`
+The RabbitMQ integration requires the `spring-cloud-vault-config-rabbitmq`
 dependency.
 
 [source,xml,indent=0]
@@ -354,6 +354,55 @@ spring.cloud.vault:
 * `password-property` sets the property name in which the RabbitMQ password is stored
 
 See also: https://www.vaultproject.io/docs/secrets/rabbit/index.html[Vault Documentation: Setting up RabbitMQ with Vault]
+
+[[vault-client-aws]]
+=== AWS
+
+Spring Cloud Vault can obtain credentials for AWS.
+
+The AWS integration requires the `spring-cloud-vault-config-aws`
+dependency.
+
+[source,xml,indent=0]
+.pom.xml
+----
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-vault-config-aws</artifactId>
+            <version>x.y.z</version>
+        </dependency>
+    </dependencies>
+----
+
+The integration can be enabled by setting
+`spring.cloud.vault.aws=true` (default `false`)
+and providing the role name with `spring.cloud.vault.aws.role=…`.
+
+The access key and secret key are stored in `cloud.aws.credentials.accessKey`
+and `cloud.aws.credentials.secretKey` so using Spring Cloud AWS will pick up the generated
+credentials without further configuration. You can configure the property names
+by setting `spring.cloud.vault.aws.access-key-property` and
+`spring.cloud.vault.aws.secret-key-property`.
+
+[source,yaml]
+----
+spring.cloud.vault:
+    aws:
+        enabled: true
+        role: readonly
+        backend: aws
+        access-key-property: cloud.aws.credentials.accessKey
+        secret-key-property: cloud.aws.credentials.secretKey
+----
+
+* `enabled` setting this value to `true` enables the AWS backend config usage
+* `role` sets the role name of the AWS role definition
+* `backend` sets the path of the AWS mount to use
+* `access-key-property` sets the property name in which the AWS access key is stored
+* `secret-key-property` sets the property name in which the AWS secret key is stored
+
+See also: https://www.vaultproject.io/docs/secrets/aws/index.html[Vault Documentation: Setting up AWS with Vault]
 
 [[vault-client-database-backends]]
 == Database backends
