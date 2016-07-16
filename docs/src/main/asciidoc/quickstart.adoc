@@ -87,7 +87,7 @@ the test cases). Example Maven configuration:
     <dependencies>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-vault-config</artifactId>
+            <artifactId>spring-cloud-vault-starter-config</artifactId>
             <version>x.y.z</version>
         </dependency>
         <dependency>
@@ -111,6 +111,7 @@ the test cases). Example Maven configuration:
 
 Then you can create a standard Spring Boot application, like this simple HTTP server:
 
+[source,java]
 ----
 @SpringBootApplication
 @RestController
@@ -129,15 +130,29 @@ public class Application {
 ----
 
 When it runs it will pick up the external configuration from the
-default local config server on port `8200` if it is running. To modify
-the startup behaviour you can change the location of the Vault server
+default local Vault server on port `8200` if it is running. To modify
+the startup behavior you can change the location of the Vault server
 using `bootstrap.properties` (like `application.properties` but for
 the bootstrap phase of an application context), e.g.
 
 [source,yaml]
+.bootstrap.yml
 ----
 spring.cloud.vault:
-    enabled: true
-    token: vault-token
+    host: localhost
+    port: 8200
+    scheme: http
+    connection-timeout: 5000
+    read-timeout: 15000
 ----
 
+* `host` sets the hostname of the Vault host. The host name will be used
+for SSL certificate validation
+* `port` sets the Vault port
+* `scheme` setting the scheme to `http` will use plain HTTP.
+Supported schemes are `http` and `https`.
+* `connection-timeout` sets the connection timeout in milliseconds
+* `read-timeout` sets the read timeout in milliseconds
+
+Enabling further integrations requires additional dependencies and
+configuration.

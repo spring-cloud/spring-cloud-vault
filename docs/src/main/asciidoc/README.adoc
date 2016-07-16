@@ -9,7 +9,8 @@ Specifically for Spring applications:
 
 * Bind to the Config Server and initialize Spring `Environment` with remote property sources
 * Obtain secrets secured with SSL
-* https://www.vaultproject.io/docs/auth/token.html[Token] and https://www.vaultproject.io/docs/auth/app-id.html[AppId] authentication
+* https://www.vaultproject.io/docs/auth/token.html[Token], https://www.vaultproject.io/docs/auth/app-id.html[AppId] authentication,
+and https://www.vaultproject.io/docs/auth/aws-ec2.html[AWS-EC2] authentication
 * Bootstrap application context: a parent context for the main application that can be trained to do anything
 
 == Quick Start

@@ -11,7 +11,8 @@ Specifically for Spring applications:
 
 * Bind to the Config Server and initialize Spring `Environment` with remote property sources
 * Obtain secrets secured with SSL
-* https://www.vaultproject.io/docs/auth/token.html[Token] and https://www.vaultproject.io/docs/auth/app-id.html[AppId] authentication
+* https://www.vaultproject.io/docs/auth/token.html[Token], https://www.vaultproject.io/docs/auth/app-id.html[AppId] authentication,
+and https://www.vaultproject.io/docs/auth/aws-ec2.html[AWS-EC2] authentication
 * Bootstrap application context: a parent context for the main application that can be trained to do anything
 
 == Quick Start
@@ -105,7 +106,7 @@ the test cases). Example Maven configuration:
     <dependencies>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-vault-config</artifactId>
+            <artifactId>spring-cloud-vault-starter-config</artifactId>
             <version>x.y.z</version>
         </dependency>
         <dependency>
@@ -129,6 +130,7 @@ the test cases). Example Maven configuration:
 
 Then you can create a standard Spring Boot application, like this simple HTTP server:
 
+[source,java]
 ----
 @SpringBootApplication
 @RestController
@@ -147,18 +149,32 @@ public class Application {
 ----
 
 When it runs it will pick up the external configuration from the
-default local config server on port `8200` if it is running. To modify
-the startup behaviour you can change the location of the Vault server
+default local Vault server on port `8200` if it is running. To modify
+the startup behavior you can change the location of the Vault server
 using `bootstrap.properties` (like `application.properties` but for
 the bootstrap phase of an application context), e.g.
 
 [source,yaml]
+.bootstrap.yml
 ----
 spring.cloud.vault:
-    enabled: true
-    token: vault-token
+    host: localhost
+    port: 8200
+    scheme: http
+    connection-timeout: 5000
+    read-timeout: 15000
 ----
 
+* `host` sets the hostname of the Vault host. The host name will be used
+for SSL certificate validation
+* `port` sets the Vault port
+* `scheme` setting the scheme to `http` will use plain HTTP.
+Supported schemes are `http` and `https`.
+* `connection-timeout` sets the connection timeout in milliseconds
+* `read-timeout` sets the read timeout in milliseconds
+
+Enabling further integrations requires additional dependencies and
+configuration.
 
 == Building
 
@@ -267,7 +283,7 @@ follow the guidelines below.
 
 === Sign the Contributor License Agreement
 Before we accept a non-trivial patch or pull request we will need you to sign the
-https://support.springsource.com/spring_committer_signup[contributor's agreement].
+https://cla.pivotal.io/sign/spring[Contributor License Agreement].
 Signing the contributor's agreement does not grant anyone commit rights to the main
 repository, but it does mean that we can accept your contributions, and you will get an
 author credit if we do.  Active contributors might be asked to join the core team, and
