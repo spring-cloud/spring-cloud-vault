@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.cloud.vault.SecureBackendAccessor;
-
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.cloud.vault.VaultSecretBackend;
 

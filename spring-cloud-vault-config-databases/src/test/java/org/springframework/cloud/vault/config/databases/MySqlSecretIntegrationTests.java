@@ -15,22 +15,25 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecureBackendAccessorFactory.forDatabase;
-
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.springframework.cloud.vault.AbstractIntegrationTests;
-import org.springframework.cloud.vault.TestRestTemplateFactory;
+import org.springframework.cloud.vault.ClientAuthentication;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
+import org.springframework.cloud.vault.config.VaultConfigOperations;
+import org.springframework.cloud.vault.config.VaultTemplate;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.Settings;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecureBackendAccessorFactory.*;
+
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Integration tests for {@link VaultClient} using the mysql secret backend. This test
@@ -42,13 +45,13 @@ public class MySqlSecretIntegrationTests extends AbstractIntegrationTests {
 
 	private final static int MYSQL_PORT = 3306;
 	private final static String MYSQL_HOST = "localhost";
-	private final static String ROOT_CREDENTIALS = String
-			.format("spring:vault@tcp(%s:%d)/", MYSQL_HOST, MYSQL_PORT);
+	private final static String ROOT_CREDENTIALS = String.format(
+			"spring:vault@tcp(%s:%d)/", MYSQL_HOST, MYSQL_PORT);
 	private final static String CREATE_USER_AND_GRANT_SQL = "CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';"
 			+ "GRANT SELECT ON *.* TO '{{name}}'@'%';";
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
-	private VaultClient vaultClient = new VaultClient(vaultProperties);
+	private VaultConfigOperations configOperations;
 	private VaultMySqlProperties mySql = new VaultMySqlProperties();
 
 	/**
@@ -71,20 +74,20 @@ public class MySqlSecretIntegrationTests extends AbstractIntegrationTests {
 		prepare().write(String.format("%s/config/connection", mySql.getBackend()),
 				Collections.singletonMap("connection_url", ROOT_CREDENTIALS));
 
-		prepare().write(String.format("%s/roles/%s", mySql.getBackend(), mySql.getRole()),
+		prepare().write(
+				String.format("%s/roles/%s", mySql.getBackend(), mySql.getRole()),
 				Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
 
-		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
+		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
+				ClientAuthentication.token(vaultProperties)).opsForConfig();
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() throws Exception {
 
-		Map<String, String> secretProperties = vaultClient.read(forDatabase(mySql),
-				Settings.token());
+		Map<String, String> secretProperties = configOperations.read(forDatabase(mySql));
 
 		assertThat(secretProperties).containsKeys("spring.datasource.username",
 				"spring.datasource.password");
 	}
-
 }

@@ -19,7 +19,6 @@ package org.springframework.cloud.vault.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.cloud.vault.SecureBackendAccessor;
 import org.springframework.util.Assert;
 
 /**

@@ -19,57 +19,42 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.cloud.vault.ClientAuthentication;
-import org.springframework.cloud.vault.SecureBackendAccessor;
-import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
-import org.springframework.cloud.vault.VaultProperties.AppIdProperties;
-import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
-import org.springframework.cloud.vault.VaultToken;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.util.Assert;
 
 import lombok.extern.apachecommons.CommonsLog;
 
 /**
- * A {@link EnumerablePropertySource} backed by {@link VaultClient}.
+ * A {@link EnumerablePropertySource} backed by {@link VaultConfigOperations}.
  *
  * @author Spencer Gibb
  * @author Mark Paluch
  */
 @CommonsLog
-class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
+class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations> {
 
 	private final VaultProperties vaultProperties;
 	private final SecureBackendAccessor secureBackendAccessor;
 	private final Map<String, String> properties = new LinkedHashMap<>();
-	private final ClientAuthentication clientAuthentication;
-	private final transient VaultState vaultState;
 
 	/**
 	 * Creates a new {@link VaultPropertySource}.
 	 *
-	 * @param vaultClient must not be {@literal null}.
-	 * @param clientAuthentication mist not be {@literal null}.
+	 * @param operations must not be {@literal null}.
 	 * @param properties must not be {@literal null}.
-	 * @param state shared Vault state, must not be {@literal null}.
 	 * @param secureBackendAccessor must not be {@literal null}.
 	 */
-	public VaultPropertySource(VaultClient vaultClient,
-			ClientAuthentication clientAuthentication, VaultProperties properties,
-			VaultState state, SecureBackendAccessor secureBackendAccessor) {
+	public VaultPropertySource(VaultConfigOperations operations,
+			VaultProperties properties, SecureBackendAccessor secureBackendAccessor) {
 
-		super(secureBackendAccessor.getName(), vaultClient);
+		super(secureBackendAccessor.getName(), operations);
 
-		Assert.notNull(vaultClient, "VaultClient must not be null!");
+		Assert.notNull(operations, "VaultConfigOperations must not be null!");
 		Assert.notNull(properties, "VaultProperties must not be null!");
-		Assert.notNull(state, "VaultState must not be null!");
 		Assert.notNull(secureBackendAccessor, "SecureBackendAccessor must not be null!");
-		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null!");
 
 		this.vaultProperties = properties;
-		this.clientAuthentication = clientAuthentication;
-		this.vaultState = state;
 		this.secureBackendAccessor = secureBackendAccessor;
 	}
 
@@ -79,8 +64,7 @@ class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 	public void init() {
 
 		try {
-			Map<String, String> values = this.source.read(this.secureBackendAccessor,
-					obtainToken());
+			Map<String, String> values = this.source.read(this.secureBackendAccessor);
 			if (values != null) {
 				this.properties.putAll(values);
 			}
@@ -100,42 +84,6 @@ class VaultPropertySource extends EnumerablePropertySource<VaultClient> {
 
 			log.error(message, e);
 		}
-	}
-
-	private VaultToken obtainToken() {
-
-		if (vaultState.getToken() != null) {
-			return vaultState.getToken();
-		}
-
-		if (vaultProperties.getAuthentication() == AuthenticationMethod.TOKEN) {
-
-			Assert.hasText(vaultProperties.getToken(), "Vault Token must not be empty");
-			vaultState.setToken(clientAuthentication.login());
-
-			return vaultState.getToken();
-		}
-
-		if (vaultProperties.getAuthentication() == AuthenticationMethod.AWS_EC2) {
-
-			vaultState.setToken(clientAuthentication.login());
-			return vaultState.getToken();
-		}
-
-		if (vaultProperties.getAuthentication() == AuthenticationMethod.APPID) {
-
-			AppIdProperties appIdProperties = vaultProperties.getAppId();
-			Assert.hasText(vaultProperties.getApplicationName(),
-					"AppId must not be empty");
-			Assert.hasText(appIdProperties.getAppIdPath(), "AppIdPath must not be empty");
-
-			vaultState.setToken(clientAuthentication.login());
-			return vaultState.getToken();
-		}
-
-		throw new IllegalStateException(
-				String.format("Authentication method %s not supported",
-						vaultProperties.getAuthentication()));
 	}
 
 	@Override

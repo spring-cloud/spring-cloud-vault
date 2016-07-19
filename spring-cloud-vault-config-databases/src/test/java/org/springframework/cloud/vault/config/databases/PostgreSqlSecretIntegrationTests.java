@@ -15,22 +15,25 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecureBackendAccessorFactory.*;
-
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.springframework.cloud.vault.AbstractIntegrationTests;
-import org.springframework.cloud.vault.TestRestTemplateFactory;
+import org.springframework.cloud.vault.ClientAuthentication;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
+import org.springframework.cloud.vault.config.VaultConfigOperations;
+import org.springframework.cloud.vault.config.VaultTemplate;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.Settings;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecureBackendAccessorFactory.*;
+
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Integration tests for {@link VaultClient} using the postgresql secret backend. This
@@ -52,7 +55,7 @@ public class PostgreSqlSecretIntegrationTests extends AbstractIntegrationTests {
 			+ "GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";";
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
-	private VaultClient vaultClient = new VaultClient(vaultProperties);
+	private VaultConfigOperations configOperations;
 	private VaultPostgreSqlProperties postgreSql = new VaultPostgreSqlProperties();
 
 	/**
@@ -80,14 +83,15 @@ public class PostgreSqlSecretIntegrationTests extends AbstractIntegrationTests {
 						postgreSql.getRole()),
 				Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
 
-		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
+		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
+				ClientAuthentication.token(vaultProperties)).opsForConfig();
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() throws Exception {
 
-		Map<String, String> secretProperties = vaultClient.read(forDatabase(postgreSql),
-				Settings.token());
+		Map<String, String> secretProperties = configOperations
+				.read(forDatabase(postgreSql));
 
 		assertThat(secretProperties).containsKeys("spring.datasource.username",
 				"spring.datasource.password");

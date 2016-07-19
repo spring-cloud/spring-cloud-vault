@@ -15,23 +15,26 @@
  */
 package org.springframework.cloud.vault.config.rabbitmq;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration.RabbitMqSecureBackendAccessorFactory.*;
-
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.springframework.cloud.vault.AbstractIntegrationTests;
-import org.springframework.cloud.vault.TestRestTemplateFactory;
+import org.springframework.cloud.vault.ClientAuthentication;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
+import org.springframework.cloud.vault.config.VaultConfigOperations;
+import org.springframework.cloud.vault.config.VaultTemplate;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.Settings;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration.RabbitMqSecureBackendAccessorFactory.*;
+
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Integration tests for {@link VaultClient} using the rabbitmq secret backend. This test
@@ -53,7 +56,7 @@ public class RabbitMqSecretIntegrationTests extends AbstractIntegrationTests {
 	private final static String VHOSTS_ROLE = "{\"/\":{\"write\": \".*\", \"read\": \".*\"}}";
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
-	private VaultClient vaultClient = new VaultClient(vaultProperties);
+	private VaultConfigOperations configOperations;
 	private VaultRabbitMqProperties rabbitmq = new VaultRabbitMqProperties();
 
 	/**
@@ -64,8 +67,8 @@ public class RabbitMqSecretIntegrationTests extends AbstractIntegrationTests {
 	@Before
 	public void setUp() throws Exception {
 
-		assumeTrue(CanConnect
-				.to(new InetSocketAddress(RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT)));
+		assumeTrue(CanConnect.to(new InetSocketAddress(RABBITMQ_HOST,
+				RABBITMQ_HTTP_MANAGEMENT_PORT)));
 
 		rabbitmq.setEnabled(true);
 		rabbitmq.setRole("readonly");
@@ -86,14 +89,15 @@ public class RabbitMqSecretIntegrationTests extends AbstractIntegrationTests {
 				String.format("%s/roles/%s", rabbitmq.getBackend(), rabbitmq.getRole()),
 				Collections.singletonMap("vhosts", VHOSTS_ROLE));
 
-		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
+		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
+				ClientAuthentication.token(vaultProperties)).opsForConfig();
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() throws Exception {
 
-		Map<String, String> secretProperties = vaultClient.read(forRabbitMq(rabbitmq),
-				Settings.token());
+		Map<String, String> secretProperties = configOperations
+				.read(forRabbitMq(rabbitmq));
 
 		assertThat(secretProperties).containsKeys("spring.rabbitmq.username",
 				"spring.rabbitmq.password");

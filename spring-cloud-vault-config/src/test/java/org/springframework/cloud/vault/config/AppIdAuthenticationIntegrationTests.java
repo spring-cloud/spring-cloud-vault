@@ -15,15 +15,15 @@
  */
 package org.springframework.cloud.vault.config;
 
-import org.junit.Before;
 import org.springframework.cloud.vault.ClientAuthentication;
 import org.springframework.cloud.vault.IpAddressUserId;
 import org.springframework.cloud.vault.TestRestTemplateFactory;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties.AppIdProperties;
 import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
-import org.springframework.cloud.vault.VaultToken;
 import org.springframework.cloud.vault.util.Settings;
+
+import org.junit.Before;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -32,8 +32,6 @@ import org.springframework.web.client.RestTemplate;
  * @author Mark Paluch
  */
 public class AppIdAuthenticationIntegrationTests extends GenericSecretIntegrationTests {
-
-	private ClientAuthentication clientAuthentication;
 
 	@Before
 	public void setUp() throws Exception {
@@ -56,17 +54,14 @@ public class AppIdAuthenticationIntegrationTests extends GenericSecretIntegratio
 		prepare().mapAppId(vaultProperties.getApplicationName());
 		prepare().mapUserId(vaultProperties.getApplicationName(), userId);
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(vaultProperties);
+		RestTemplate restTemplate = TestRestTemplateFactory
+				.create(vaultProperties);
 
-		this.clientAuthentication = ClientAuthentication.appId(vaultProperties,
-				restTemplate, userIdMechanism);
-		this.vaultClient = new VaultClient(vaultProperties);
-		this.vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
-	}
+		ClientAuthentication clientAuthentication = ClientAuthentication.appId(
+				vaultProperties, restTemplate, userIdMechanism);
 
-	@Override
-	protected VaultToken createToken() {
-		return clientAuthentication.login();
+		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
+				clientAuthentication).opsForConfig();
 	}
 
 	private AppIdProperties configureAppIdProperties() {

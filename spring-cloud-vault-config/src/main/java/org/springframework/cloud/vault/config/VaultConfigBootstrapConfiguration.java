@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.vault.config;
 
-import static org.springframework.cloud.vault.VaultBootstrapConfiguration.*;
-
 import java.util.Collection;
 import java.util.Map;
 
@@ -24,11 +22,11 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.vault.AppIdUserIdMechanism;
 import org.springframework.cloud.vault.ClientAuthentication;
-import org.springframework.cloud.vault.SecureBackendAccessor;
 import org.springframework.cloud.vault.VaultBootstrapConfiguration;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
@@ -38,6 +36,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+
+import static org.springframework.cloud.vault.VaultBootstrapConfiguration.*;
 
 /**
  * @author Mark Paluch
@@ -59,19 +59,26 @@ public class VaultConfigBootstrapConfiguration implements ApplicationContextAwar
 	}
 
 	@Bean
-	public VaultPropertySourceLocator vaultPropertySourceLocator(VaultClient vaultClient,
-			VaultProperties vaultProperties,
-			VaultGenericBackendProperties vaultGenericBackendProperties,
-			ClientFactoryWrapper clientFactoryWrapper) {
+	@ConditionalOnMissingBean
+	public VaultTemplate vaultOperations(VaultProperties properties,
+			ClientFactoryWrapper clientFactoryWrapper, VaultClient client) {
+
+		ClientAuthentication clientAuthentication = clientAuthentication(
+				applicationContext, clientFactoryWrapper, properties);
+
+		return new VaultTemplate(properties, client, clientAuthentication);
+	}
+
+	@Bean
+	public VaultPropertySourceLocator vaultPropertySourceLocator(
+			VaultOperations operations, VaultProperties vaultProperties,
+			VaultGenericBackendProperties vaultGenericBackendProperties) {
 
 		Collection<SecureBackendAccessor> backendAccessors = SecureBackendFactories
 				.createBackendAcessors(vaultSecretBackends, factories);
 
-		ClientAuthentication clientAuthentication = clientAuthentication(
-				applicationContext, clientFactoryWrapper, vaultProperties);
-
-		return new VaultPropertySourceLocator(vaultClient, clientAuthentication,
-				vaultProperties, vaultGenericBackendProperties, backendAccessors);
+		return new VaultPropertySourceLocator(operations.opsForConfig(), vaultProperties,
+				vaultGenericBackendProperties, backendAccessors);
 	}
 
 	private ClientAuthentication clientAuthentication(
@@ -82,12 +89,10 @@ public class VaultConfigBootstrapConfiguration implements ApplicationContextAwar
 				clientFactoryWrapper.getClientHttpRequestFactory());
 		ClientAuthentication clientAuthentication;
 
-		if (vaultProperties
-				.getAuthentication() == VaultProperties.AuthenticationMethod.TOKEN) {
+		if (vaultProperties.getAuthentication() == VaultProperties.AuthenticationMethod.TOKEN) {
 			clientAuthentication = ClientAuthentication.token(vaultProperties);
 		}
-		else if (vaultProperties
-				.getAuthentication() == VaultProperties.AuthenticationMethod.APPID) {
+		else if (vaultProperties.getAuthentication() == VaultProperties.AuthenticationMethod.APPID) {
 
 			Map<String, AppIdUserIdMechanism> appIdUserIdMechanisms = applicationContext
 					.getBeansOfType(AppIdUserIdMechanism.class);
@@ -117,10 +122,9 @@ public class VaultConfigBootstrapConfiguration implements ApplicationContextAwar
 	@PostConstruct
 	private void postConstruct() {
 
-		this.vaultSecretBackends = applicationContext
-				.getBeansOfType(VaultSecretBackend.class).values();
-		this.factories = (Collection) applicationContext
-				.getBeansOfType(SecureBackendAccessorFactory.class).values();
-
+		this.vaultSecretBackends = applicationContext.getBeansOfType(
+				VaultSecretBackend.class).values();
+		this.factories = (Collection) applicationContext.getBeansOfType(
+				SecureBackendAccessorFactory.class).values();
 	}
 }

@@ -21,6 +21,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.web.client.DefaultResponseErrorHandler;
 
 import lombok.SneakyThrows;
 
@@ -45,12 +46,13 @@ public class TestRestTemplateFactory {
 		initializeClientHttpRequestFactory(vaultProperties);
 
 		TestRestTemplate testRestTemplate = new TestRestTemplate();
+		testRestTemplate.setErrorHandler(new DefaultResponseErrorHandler());
 		testRestTemplate.setRequestFactory(factoryCache.get());
 
 		return testRestTemplate;
 	}
 
-	protected static void initializeClientHttpRequestFactory(
+	private static void initializeClientHttpRequestFactory(
 			VaultProperties vaultProperties) throws Exception {
 
 		if (factoryCache.get() != null) {

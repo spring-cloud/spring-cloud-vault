@@ -16,13 +16,11 @@
 package org.springframework.cloud.vault;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -30,120 +28,155 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.apachecommons.CommonsLog;
 
 /**
- * Vault client. This client reads data from Vault secret backends and can authenticate
- * with Vault to obtain an access token.
+ * Vault client. This client reads data from Vault.
  *
  * @author Spencer Gibb
  * @author Mark Paluch
  */
-@CommonsLog
 public class VaultClient {
 
 	public static final String API_VERSION = "v1";
 	public static final String VAULT_TOKEN = "X-Vault-Token";
 
 	@Setter
-	private RestTemplate rest = new RestTemplate();
+	@Getter
+	private RestTemplate restTemplate;
 
-	private final VaultProperties properties;
+	public VaultClient() {
+		this(new RestTemplate());
+	}
 
-	public VaultClient(VaultProperties properties) {
-
-		Assert.notNull(properties, "VaultProperties must not be null");
-
-		this.properties = properties;
+	public VaultClient(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
 	}
 
 	/**
-	 * Read secrets using the given {@link SecureBackendAccessor} and {@link VaultToken}.
+	 * Read data from the given Vault {@code uri} using the {@link VaultToken}.
 	 *
-	 * @param secureBackendAccessor must not be {@literal null}.
+	 * @param uri must not be {@literal null}.
 	 * @param vaultToken must not be {@literal null}.
 	 * @return A {@link Map} containing properties.
 	 */
-	public Map<String, String> read(SecureBackendAccessor secureBackendAccessor,
-			VaultToken vaultToken) {
+	public VaultClientResponse read(URI uri, VaultToken vaultToken) {
 
-		Assert.notNull(secureBackendAccessor, "SecureBackendAccessor must not be empty!");
+		Assert.notNull(uri, "URI must not be empty!");
 		Assert.notNull(vaultToken, "Vault Token must not be null!");
 
-		String url = buildUrl();
+		return exchange(uri, HttpMethod.GET, new HttpEntity<>(createHeaders(vaultToken)));
+	}
 
-		HttpHeaders headers = createHeaders(vaultToken);
-		Exception error = null;
-		String errorBody = null;
-		HttpStatus status = null;
+	/**
+	 * Write data to the given Vault {@code uri} using the {@link VaultToken}.
+	 *
+	 * @param uri must not be {@literal null}.
+	 * @param entity must not be {@literal null}.
+	 * @return A {@link Map} containing properties.
+	 */
+	public VaultClientResponse write(URI uri, Object entity) {
 
-		URI uri = this.rest.getUriTemplateHandler().expand(url,
-				secureBackendAccessor.variables());
-		log.info(String.format("Fetching config from server at: %s", uri));
+		Assert.notNull(uri, "URI must not be empty!");
+		Assert.notNull(entity, "Entity must not be null!");
+
+		return exchange(uri, HttpMethod.POST, new HttpEntity<>(entity));
+	}
+
+	/**
+	 * Write data to the given Vault {@code uri} using the {@link VaultToken}.
+	 *
+	 * @param uri must not be {@literal null}.
+	 * @param entity must not be {@literal null}.
+	 * @param vaultToken must not be {@literal null}.
+	 * @return A {@link Map} containing properties.
+	 */
+	public VaultClientResponse write(URI uri, Object entity, VaultToken vaultToken) {
+
+		Assert.notNull(uri, "URI must not be empty!");
+		Assert.notNull(entity, "Vault Token must not be null!");
+		Assert.notNull(vaultToken, "Vault Token must not be null!");
+
+		return exchange(uri, HttpMethod.POST, new HttpEntity<>(entity,
+				createHeaders(vaultToken)));
+	}
+
+	private VaultClientResponse exchange(URI uri, HttpMethod httpMethod,
+			HttpEntity<?> httpEntity) {
+
+		Assert.notNull(uri, "URI must not be empty!");
 
 		try {
-			ResponseEntity<VaultResponse> response = this.rest.exchange(uri,
-					HttpMethod.GET, new HttpEntity<>(headers), VaultResponse.class);
+			ResponseEntity<VaultResponse> response = this.restTemplate.exchange(uri,
+					httpMethod, httpEntity, VaultResponse.class);
 
-			status = response.getStatusCode();
-			if (status == HttpStatus.OK) {
-				if (response.getBody().getData() != null) {
-					return secureBackendAccessor
-							.transformProperties(response.getBody().getData());
-				}
-			}
+			return VaultClientResponse.of(response.getBody(), response.getStatusCode(),
+					uri, response.getStatusCode().getReasonPhrase());
 		}
 		catch (HttpServerErrorException | HttpClientErrorException e) {
 
-			if (MediaType.APPLICATION_JSON
-					.includes(e.getResponseHeaders().getContentType())) {
-				errorBody = e.getResponseBodyAsString();
+			String message = e.getResponseBodyAsString();
+
+			if (MediaType.APPLICATION_JSON.includes(e.getResponseHeaders()
+					.getContentType())) {
+				message = VaultErrorMessage.getError(message);
 			}
 
-			status = e.getStatusCode();
-			error = e;
+			return VaultClientResponse.of(null, e.getStatusCode(), uri, message);
 		}
-		catch (Exception e) {
-			error = e;
-		}
-
-		if (status == HttpStatus.NOT_FOUND) {
-			log.info(String.format("Could not locate PropertySource: %s",
-					"key not found"));
-		}
-		else if (status != null) {
-			log.warn(String.format("Could not locate PropertySource: Status %d %s",
-					status.value(), getErrorMessage(error, errorBody)));
-		}
-		else {
-			log.warn(String.format("Could not locate PropertySource: %s",
-					(getErrorMessage(error, errorBody))));
-		}
-
-		if (properties.isFailFast()) {
-			throw new IllegalStateException(
-					"Could not locate PropertySource and the fail fast property is set, failing",
-					error);
-		}
-
-		return Collections.emptyMap();
 	}
 
-	private String getErrorMessage(Exception error, String errorBody) {
-		return errorBody == null ? error == null ? "unknown reason" : error.getMessage()
-				: VaultErrorMessage.getError(errorBody);
+	/**
+	 * Build the Vault {@link URI} based on the given {@link VaultProperties} and
+	 * {@code path}.
+	 *
+	 * @param properties must not be {@literal null}.
+	 * @param path must not be empty or {@literal null}.
+	 * @return
+	 */
+	public static URI buildUri(VaultProperties properties, String path) {
+		return URI.create(createBaseUrlWithPath(properties, path));
+	}
+
+	/**
+	 * Build the Vault {@link URI} based on the given {@link VaultProperties} and
+	 * {@code pathTemplate}. URI template variables will be expanded using
+	 * {@code uriVariables}.
+	 * 
+	 * @param properties must not be {@literal null}.
+	 * @param pathTemplate must not be empty or {@literal null}.
+	 * @param uriVariables must not be {@literal null}.
+	 * @see org.springframework.web.util.UriComponentsBuilder
+	 * @return
+	 */
+	public URI buildUri(VaultProperties properties, String pathTemplate,
+			Map<String, ?> uriVariables) {
+
+		Assert.notNull(properties, "VaultProperties must not be null!");
+		Assert.hasText(pathTemplate, "Path must not be empty!");
+		Assert.notNull(properties, "Vault Token must not be null!");
+
+		return restTemplate.getUriTemplateHandler().expand(
+				createBaseUrlWithPath(properties, pathTemplate), uriVariables);
 	}
 
 	private HttpHeaders createHeaders(VaultToken vaultToken) {
+
+		Assert.notNull(vaultToken, "Vault Token must not be null!");
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(VAULT_TOKEN, vaultToken.getToken());
 		return headers;
 	}
 
-	private String buildUrl() {
-		return String.format("%s://%s:%s/%s/{backend}/{key}", this.properties.getScheme(),
-				this.properties.getHost(), this.properties.getPort(), API_VERSION);
+	private static String createBaseUrlWithPath(VaultProperties properties, String path) {
+
+		Assert.notNull(properties, "VaultProperties must not be null!");
+		Assert.hasText(path, "Path must not be empty!");
+
+		return String.format("%s://%s:%s/%s/%s", properties.getScheme(),
+				properties.getHost(), properties.getPort(), API_VERSION, path);
 	}
+
 }

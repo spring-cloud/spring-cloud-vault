@@ -15,22 +15,25 @@
  */
 package org.springframework.cloud.vault.config.aws;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrapConfiguration.AwsSecureBackendAccessorFactory.*;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.springframework.cloud.vault.AbstractIntegrationTests;
-import org.springframework.cloud.vault.TestRestTemplateFactory;
+import org.springframework.cloud.vault.ClientAuthentication;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
+import org.springframework.cloud.vault.config.VaultConfigOperations;
+import org.springframework.cloud.vault.config.VaultTemplate;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.util.StringUtils;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+import static org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrapConfiguration.AwsSecureBackendAccessorFactory.*;
+
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Integration tests for {@link VaultClient} using the aws secret backend. This test
@@ -48,7 +51,7 @@ public class AwsSecretIntegrationTests extends AbstractIntegrationTests {
 	private final static String ARN = "arn:aws:iam::aws:policy/ReadOnlyAccess";
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
-	private VaultClient vaultClient = new VaultClient(vaultProperties);
+	private VaultConfigOperations configOperations;
 	private VaultAwsProperties aws = new VaultAwsProperties();
 
 	/**
@@ -79,14 +82,14 @@ public class AwsSecretIntegrationTests extends AbstractIntegrationTests {
 		prepare().write(String.format("%s/roles/%s", aws.getBackend(), aws.getRole()),
 				Collections.singletonMap("arn", ARN));
 
-		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
+		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
+				ClientAuthentication.token(vaultProperties)).opsForConfig();
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() throws Exception {
 
-		Map<String, String> secretProperties = vaultClient.read(forAws(aws),
-				Settings.token());
+		Map<String, String> secretProperties = configOperations.read(forAws(aws));
 
 		assertThat(secretProperties).containsKeys("cloud.aws.credentials.accessKey",
 				"cloud.aws.credentials.secretKey");

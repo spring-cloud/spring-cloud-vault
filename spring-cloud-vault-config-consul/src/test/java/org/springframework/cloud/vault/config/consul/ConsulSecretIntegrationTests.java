@@ -15,22 +15,18 @@
  */
 package org.springframework.cloud.vault.config.consul;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration.ConsulSecureBackendAccessorFactory.*;
-
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.cloud.vault.AbstractIntegrationTests;
-import org.springframework.cloud.vault.TestRestTemplateFactory;
+import org.springframework.cloud.vault.ClientAuthentication;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
+import org.springframework.cloud.vault.config.VaultConfigOperations;
+import org.springframework.cloud.vault.config.VaultTemplate;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.core.ParameterizedTypeReference;
@@ -39,6 +35,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Base64Utils;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+import static org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration.ConsulSecureBackendAccessorFactory.*;
+
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Integration tests for {@link VaultClient} using the consul secret backend. This test
@@ -61,7 +64,7 @@ public class ConsulSecretIntegrationTests extends AbstractIntegrationTests {
 	};
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
-	private VaultClient vaultClient = new VaultClient(vaultProperties);
+	private VaultConfigOperations configOperations;
 	private VaultConsulProperties consul = new VaultConsulProperties();
 
 	private TestRestTemplate restTemplate = new TestRestTemplate();
@@ -103,14 +106,14 @@ public class ConsulSecretIntegrationTests extends AbstractIntegrationTests {
 				Collections.singletonMap("policy",
 						Base64Utils.encodeToString(POLICY.getBytes())));
 
-		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
+		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
+				ClientAuthentication.token(vaultProperties)).opsForConfig();
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() throws Exception {
 
-		Map<String, String> secretProperties = vaultClient.read(forConsul(consul),
-				Settings.token());
+		Map<String, String> secretProperties = configOperations.read(forConsul(consul));
 
 		assertThat(secretProperties).containsKeys("spring.cloud.consul.token");
 	}

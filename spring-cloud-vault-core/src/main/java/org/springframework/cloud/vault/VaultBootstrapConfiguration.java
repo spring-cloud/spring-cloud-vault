@@ -51,10 +51,8 @@ public class VaultBootstrapConfiguration {
 		RestTemplate restTemplate = new RestTemplate(
 				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory());
 
-		VaultProperties vaultProperties = vaultProperties();
-
-		VaultClient vaultClient = new VaultClient(vaultProperties);
-		vaultClient.setRest(restTemplate);
+		VaultClient vaultClient = new VaultClient();
+		vaultClient.setRestTemplate(restTemplate);
 
 		return vaultClient;
 	}

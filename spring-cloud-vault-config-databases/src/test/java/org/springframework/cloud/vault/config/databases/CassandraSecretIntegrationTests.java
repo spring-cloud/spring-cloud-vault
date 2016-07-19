@@ -15,23 +15,26 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecureBackendAccessorFactory.*;
-
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.springframework.cloud.vault.AbstractIntegrationTests;
-import org.springframework.cloud.vault.TestRestTemplateFactory;
+import org.springframework.cloud.vault.ClientAuthentication;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
+import org.springframework.cloud.vault.config.VaultConfigOperations;
+import org.springframework.cloud.vault.config.VaultTemplate;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.Settings;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecureBackendAccessorFactory.*;
+
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Integration tests for {@link VaultClient} using the cassandra secret backend. This test
@@ -52,7 +55,7 @@ public class CassandraSecretIntegrationTests extends AbstractIntegrationTests {
 			+ "GRANT SELECT ON ALL KEYSPACES TO {{username}};";
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
-	private VaultClient vaultClient = new VaultClient(vaultProperties);
+	private VaultConfigOperations configOperations;
 	private VaultCassandraProperties cassandra = new VaultCassandraProperties();
 
 	/**
@@ -80,18 +83,21 @@ public class CassandraSecretIntegrationTests extends AbstractIntegrationTests {
 		prepare().write(String.format("%s/config/connection", cassandra.getBackend()),
 				connection);
 
-		prepare().write(
-				String.format("%s/roles/%s", cassandra.getBackend(), cassandra.getRole()),
-				Collections.singletonMap("creation_cql", CREATE_USER_AND_GRANT_CQL));
+		prepare()
+				.write(String.format("%s/roles/%s", cassandra.getBackend(),
+						cassandra.getRole()),
+						Collections.singletonMap("creation_cql",
+								CREATE_USER_AND_GRANT_CQL));
 
-		vaultClient.setRest(TestRestTemplateFactory.create(vaultProperties));
+		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
+				ClientAuthentication.token(vaultProperties)).opsForConfig();
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() throws Exception {
 
-		Map<String, String> secretProperties = vaultClient.read(forDatabase(cassandra),
-				Settings.token());
+		Map<String, String> secretProperties = configOperations
+				.read(forDatabase(cassandra));
 
 		assertThat(secretProperties).containsKeys("spring.data.cassandra.username",
 				"spring.data.cassandra.password");

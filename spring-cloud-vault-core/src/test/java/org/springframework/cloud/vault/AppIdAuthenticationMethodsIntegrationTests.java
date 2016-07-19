@@ -15,20 +15,20 @@
  */
 package org.springframework.cloud.vault;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+
+import org.springframework.cloud.vault.VaultProperties.AppIdProperties;
+import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
+import org.springframework.cloud.vault.util.Settings;
+
+import static org.assertj.core.api.Assertions.*;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.springframework.cloud.vault.VaultProperties.AppIdProperties;
-import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
-import org.springframework.cloud.vault.util.Settings;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Integration tests for {@link VaultClient} using various UserIds.
@@ -55,11 +55,10 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 
 		VaultProperties vaultProperties = prepareAppIdAuthenticationMethod(
 				AppIdProperties.IP_ADDRESS, "myapp");
-		RestTemplate restTemplate = TestRestTemplateFactory
-				.create(Settings.createVaultProperties());
 
 		ClientAuthentication clientAuthentication = new DefaultClientAuthentication(
-				vaultProperties, restTemplate, new IpAddressUserId());
+				vaultProperties, TestRestTemplateFactory.create(vaultProperties),
+				new IpAddressUserId());
 
 		assertThat(clientAuthentication.login()).isNotNull();
 	}
@@ -70,11 +69,9 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 		VaultProperties vaultProperties = prepareAppIdAuthenticationMethod("my-user-id",
 				"myapp");
 
-		RestTemplate restTemplate = TestRestTemplateFactory
-				.create(Settings.createVaultProperties());
-
 		ClientAuthentication clientAuthentication = new DefaultClientAuthentication(
-				vaultProperties, restTemplate, new StaticUserId(vaultProperties));
+				vaultProperties, TestRestTemplateFactory.create(vaultProperties),
+				new StaticUserId(vaultProperties));
 
 		assertThat(clientAuthentication.login()).isNotNull();
 	}
@@ -85,11 +82,9 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 		VaultProperties vaultProperties = prepareAppIdAuthenticationMethod(
 				AppIdProperties.MAC_ADDRESS, "myapp");
 
-		RestTemplate restTemplate = TestRestTemplateFactory
-				.create(Settings.createVaultProperties());
-
 		ClientAuthentication clientAuthentication = new DefaultClientAuthentication(
-				vaultProperties, restTemplate, new MacAddressUserId(vaultProperties));
+				vaultProperties, TestRestTemplateFactory.create(vaultProperties),
+				new MacAddressUserId(vaultProperties));
 
 		assertThat(clientAuthentication.login()).isNotNull();
 	}

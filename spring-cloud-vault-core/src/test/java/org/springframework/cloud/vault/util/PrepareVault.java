@@ -31,6 +31,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -77,6 +78,15 @@ public class PrepareVault {
 	}
 
 	/**
+	 * Creates a new {@link VaultClient}.
+	 *
+	 * @return
+	 */
+	public VaultClient newVaultClient() {
+		return new VaultClient(restTemplate);
+	}
+
+	/**
 	 * Initialize Vault and unseal the vault.
 	 *
 	 * @return the root token.
@@ -97,8 +107,8 @@ public class PrepareVault {
 				new HttpEntity<>(initializeVault), VaultInitialized.class, parameters);
 
 		if (!initResponse.getStatusCode().is2xxSuccessful()) {
-			throw new IllegalStateException(
-					"Cannot initialize vault: " + initResponse.toString());
+			throw new IllegalStateException("Cannot initialize vault: "
+					+ initResponse.toString());
 		}
 		VaultInitialized initialized = initResponse.getBody();
 
@@ -144,8 +154,8 @@ public class PrepareVault {
 				parameters);
 
 		if (!createTokenResponse.getStatusCode().is2xxSuccessful()) {
-			throw new IllegalStateException(
-					"Cannot create token: " + createTokenResponse.toString());
+			throw new IllegalStateException("Cannot create token: "
+					+ createTokenResponse.toString());
 		}
 
 		AuthToken authToken = createTokenResponse.getBody().getAuth();
@@ -162,11 +172,19 @@ public class PrepareVault {
 
 		Map<String, String> parameters = parameters(vaultProperties);
 
-		ResponseEntity<String> exchange = restTemplate
-				.getForEntity(SEAL_STATUS_URL_TEMPLATE, String.class, parameters);
+		ResponseEntity<String> exchange = null;
+		try {
+			exchange = restTemplate.getForEntity(SEAL_STATUS_URL_TEMPLATE, String.class,
+					parameters);
 
-		if (exchange.getStatusCode().is2xxSuccessful()) {
-			return true;
+			if (exchange.getStatusCode().is2xxSuccessful()) {
+				return true;
+			}
+		}
+		catch (HttpStatusCodeException e) {
+			if (e.getStatusCode().is4xxClientError()) {
+				return false;
+			}
 		}
 
 		if (exchange.getStatusCode().is4xxClientError()) {
@@ -197,8 +215,8 @@ public class PrepareVault {
 				parameters);
 
 		if (!responseEntity.getStatusCode().is2xxSuccessful()) {
-			throw new IllegalStateException(
-					"Cannot create mount auth backend: " + responseEntity.toString());
+			throw new IllegalStateException("Cannot create mount auth backend: "
+					+ responseEntity.toString());
 		}
 
 		responseEntity.getBody();
@@ -239,8 +257,8 @@ public class PrepareVault {
 				parameters);
 
 		if (!responseEntity.getStatusCode().is2xxSuccessful()) {
-			throw new IllegalStateException(
-					"Cannot create mount secret backend: " + responseEntity.toString());
+			throw new IllegalStateException("Cannot create mount secret backend: "
+					+ responseEntity.toString());
 		}
 
 		responseEntity.getBody();
@@ -267,8 +285,8 @@ public class PrepareVault {
 				urlTemplate, HttpMethod.GET, entity, MAP_OF_MAPS_TYPE, parameters);
 
 		if (!responseEntity.getStatusCode().is2xxSuccessful()) {
-			throw new IllegalStateException(
-					"Cannot enumerate mounts: " + responseEntity.toString());
+			throw new IllegalStateException("Cannot enumerate mounts: "
+					+ responseEntity.toString());
 		}
 
 		Map<String, Object> body = responseEntity.getBody();
@@ -332,8 +350,8 @@ public class PrepareVault {
 				parameters);
 
 		if (!exchange.getStatusCode().is2xxSuccessful()) {
-			throw new IllegalStateException(
-					String.format("Cannot write to %s: %s", path, exchange.getBody()));
+			throw new IllegalStateException(String.format("Cannot write to %s: %s", path,
+					exchange.getBody()));
 		}
 	}
 
@@ -368,8 +386,8 @@ public class PrepareVault {
 		appIdData.put("value", "root"); // policy
 		appIdData.put("display_name", "this is my test application");
 
-		write(String.format("auth/%s/map/app-id/%s",
-				vaultProperties.getAppId().getAppIdPath(), appId), appIdData);
+		write(String.format("auth/%s/map/app-id/%s", vaultProperties.getAppId()
+				.getAppIdPath(), appId), appIdData);
 	}
 
 	private HttpHeaders authenticatedHeaders() {

@@ -17,6 +17,7 @@ package org.springframework.cloud.vault;
 
 import static org.springframework.cloud.vault.VaultClient.*;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;

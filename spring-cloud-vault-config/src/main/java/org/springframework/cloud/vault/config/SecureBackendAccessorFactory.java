@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.vault.config;
 
-import org.springframework.cloud.vault.SecureBackendAccessor;
 import org.springframework.cloud.vault.VaultSecretBackend;
 
 /**
