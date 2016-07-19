@@ -43,11 +43,12 @@ public abstract class ClientAuthentication {
 	 * Creates a generic authentication adapter.
 	 * 
 	 * @param vaultProperties must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
 	 * @return the {@link ClientAuthentication} adapter.
 	 */
 	public static ClientAuthentication create(VaultProperties vaultProperties,
-			RestTemplate restTemplate) {
-		return new DefaultClientAuthentication(vaultProperties, restTemplate);
+			VaultClient vaultClient) {
+		return new DefaultClientAuthentication(vaultProperties, vaultClient);
 	}
 
 	/**
@@ -57,21 +58,21 @@ public abstract class ClientAuthentication {
 	 * @return the {@link ClientAuthentication} adapter.
 	 */
 	public static ClientAuthentication appId(VaultProperties vaultProperties,
-			RestTemplate restTemplate) {
-		return new DefaultClientAuthentication(vaultProperties, restTemplate);
+			VaultClient vaultClient) {
+		return new DefaultClientAuthentication(vaultProperties, vaultClient);
 	}
 
 	/**
 	 * Creates an AppId-based authentication adapter.
 	 * 
 	 * @param vaultProperties must not be {@literal null}.
-	 * @param restTemplate must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
 	 * @param userIdMechanism must not be {@literal null}.
 	 * @return the {@link ClientAuthentication} adapter.
 	 */
 	public static ClientAuthentication appId(VaultProperties vaultProperties,
-			RestTemplate restTemplate, AppIdUserIdMechanism userIdMechanism) {
-		return new DefaultClientAuthentication(vaultProperties, restTemplate,
+			VaultClient vaultClient, AppIdUserIdMechanism userIdMechanism) {
+		return new DefaultClientAuthentication(vaultProperties, vaultClient,
 				userIdMechanism);
 	}
 }

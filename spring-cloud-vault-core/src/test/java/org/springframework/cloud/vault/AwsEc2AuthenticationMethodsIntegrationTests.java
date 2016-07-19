@@ -16,21 +16,22 @@
 
 package org.springframework.cloud.vault;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.boot.test.IntegrationTest;
+import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
+import org.springframework.cloud.vault.util.Settings;
+import org.springframework.util.StringUtils;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
-import org.springframework.cloud.vault.util.Settings;
-import org.springframework.util.StringUtils;
 
 /**
  * Integration tests for {@link VaultClient} using AWS-EC2 login. This test requires AWS
@@ -40,8 +41,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Mark Paluch
  */
-public class AwsEc2AuthenticationMethodsIntegrationTests
-		extends AbstractIntegrationTests {
+public class AwsEc2AuthenticationMethodsIntegrationTests extends AbstractIntegrationTests {
 
 	private final static String AWS_REGION = "eu-west-1";
 	private final static String AWS_AMI = "ami-f95ef58a";
@@ -76,8 +76,9 @@ public class AwsEc2AuthenticationMethodsIntegrationTests
 	public void loginShouldCreateAToken() throws Exception {
 
 		VaultProperties vaultProperties = prepareAwsEc2Authentication();
+
 		ClientAuthentication clientAuthentication = new DefaultClientAuthentication(
-				vaultProperties, TestRestTemplateFactory.create(vaultProperties));
+				vaultProperties, prepare().newVaultClient());
 
 		assertThat(clientAuthentication.login()).isNotNull();
 	}

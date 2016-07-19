@@ -35,9 +35,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
-
-import static org.springframework.cloud.vault.VaultBootstrapConfiguration.*;
 
 /**
  * @author Mark Paluch
@@ -60,11 +57,10 @@ public class VaultConfigBootstrapConfiguration implements ApplicationContextAwar
 
 	@Bean
 	@ConditionalOnMissingBean
-	public VaultTemplate vaultOperations(VaultProperties properties,
-			ClientFactoryWrapper clientFactoryWrapper, VaultClient client) {
+	public VaultOperations vaultOperations(VaultProperties properties, VaultClient client) {
 
 		ClientAuthentication clientAuthentication = clientAuthentication(
-				applicationContext, clientFactoryWrapper, properties);
+				applicationContext, properties, client);
 
 		return new VaultTemplate(properties, client, clientAuthentication);
 	}
@@ -82,11 +78,9 @@ public class VaultConfigBootstrapConfiguration implements ApplicationContextAwar
 	}
 
 	private ClientAuthentication clientAuthentication(
-			ApplicationContext applicationContext,
-			ClientFactoryWrapper clientFactoryWrapper, VaultProperties vaultProperties) {
+			ApplicationContext applicationContext, VaultProperties vaultProperties,
+			VaultClient client) {
 
-		RestTemplate restTemplate = new RestTemplate(
-				clientFactoryWrapper.getClientHttpRequestFactory());
 		ClientAuthentication clientAuthentication;
 
 		if (vaultProperties.getAuthentication() == VaultProperties.AuthenticationMethod.TOKEN) {
@@ -98,16 +92,15 @@ public class VaultConfigBootstrapConfiguration implements ApplicationContextAwar
 					.getBeansOfType(AppIdUserIdMechanism.class);
 			if (!appIdUserIdMechanisms.isEmpty()) {
 				clientAuthentication = ClientAuthentication.appId(vaultProperties,
-						restTemplate, appIdUserIdMechanisms.values().iterator().next());
+						client, appIdUserIdMechanisms.values().iterator().next());
 			}
 			else {
-				clientAuthentication = ClientAuthentication.appId(vaultProperties,
-						restTemplate);
+				clientAuthentication = ClientAuthentication
+						.appId(vaultProperties, client);
 			}
 		}
 		else {
-			clientAuthentication = ClientAuthentication.create(vaultProperties,
-					restTemplate);
+			clientAuthentication = ClientAuthentication.create(vaultProperties, client);
 		}
 
 		return clientAuthentication;

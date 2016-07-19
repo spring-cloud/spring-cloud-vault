@@ -57,8 +57,7 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 				AppIdProperties.IP_ADDRESS, "myapp");
 
 		ClientAuthentication clientAuthentication = new DefaultClientAuthentication(
-				vaultProperties, TestRestTemplateFactory.create(vaultProperties),
-				new IpAddressUserId());
+				vaultProperties, prepare().newVaultClient(), new IpAddressUserId());
 
 		assertThat(clientAuthentication.login()).isNotNull();
 	}
@@ -70,8 +69,8 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 				"myapp");
 
 		ClientAuthentication clientAuthentication = new DefaultClientAuthentication(
-				vaultProperties, TestRestTemplateFactory.create(vaultProperties),
-				new StaticUserId(vaultProperties));
+				vaultProperties, prepare().newVaultClient(), new StaticUserId(
+						vaultProperties));
 
 		assertThat(clientAuthentication.login()).isNotNull();
 	}
@@ -83,8 +82,8 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 				AppIdProperties.MAC_ADDRESS, "myapp");
 
 		ClientAuthentication clientAuthentication = new DefaultClientAuthentication(
-				vaultProperties, TestRestTemplateFactory.create(vaultProperties),
-				new MacAddressUserId(vaultProperties));
+				vaultProperties, prepare().newVaultClient(), new MacAddressUserId(
+						vaultProperties));
 
 		assertThat(clientAuthentication.login()).isNotNull();
 	}
@@ -100,8 +99,8 @@ public class AppIdAuthenticationMethodsIntegrationTests extends AbstractIntegrat
 		vaultProperties.setApplicationName("foobar");
 
 		ClientAuthentication clientAuthentication = new DefaultClientAuthentication(
-				vaultProperties, TestRestTemplateFactory.create(vaultProperties),
-				new MacAddressUserId(vaultProperties));
+				vaultProperties, prepare().newVaultClient(), new MacAddressUserId(
+						vaultProperties));
 
 		clientAuthentication.login();
 

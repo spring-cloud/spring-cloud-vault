@@ -15,19 +15,14 @@
  */
 package org.springframework.cloud.vault;
 
-import static org.springframework.cloud.vault.VaultClient.*;
-
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import lombok.Value;
@@ -42,7 +37,7 @@ import lombok.extern.apachecommons.CommonsLog;
 class DefaultClientAuthentication extends ClientAuthentication {
 
 	private final VaultProperties properties;
-	private final RestTemplate restTemplate;
+	private final VaultClient vaultClient;
 	private final AppIdUserIdMechanism appIdUserIdMechanism;
 	private char[] nonce;
 
@@ -51,15 +46,15 @@ class DefaultClientAuthentication extends ClientAuthentication {
 	 * {@link RestTemplate}.
 	 *
 	 * @param properties must not be {@literal null}.
-	 * @param restTemplate must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
 	 */
-	DefaultClientAuthentication(VaultProperties properties, RestTemplate restTemplate) {
+	DefaultClientAuthentication(VaultProperties properties, VaultClient vaultClient) {
 
 		Assert.notNull(properties, "VaultProperties must not be null");
-		Assert.notNull(restTemplate, "RestTemplate must not be null");
+		Assert.notNull(vaultClient, "RestTemplate must not be null");
 
 		this.properties = properties;
-		this.restTemplate = restTemplate;
+		this.vaultClient = vaultClient;
 		this.appIdUserIdMechanism = null;
 	}
 
@@ -68,18 +63,18 @@ class DefaultClientAuthentication extends ClientAuthentication {
 	 * {@link RestTemplate} for AppId authentication.
 	 *
 	 * @param properties must not be {@literal null}.
-	 * @param restTemplate must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
 	 * @param appIdUserIdMechanism must not be {@literal null}.
 	 */
-	DefaultClientAuthentication(VaultProperties properties, RestTemplate restTemplate,
+	DefaultClientAuthentication(VaultProperties properties, VaultClient vaultClient,
 			AppIdUserIdMechanism appIdUserIdMechanism) {
 
 		Assert.notNull(properties, "VaultProperties must not be null");
-		Assert.notNull(restTemplate, "RestTemplate must not be null");
+		Assert.notNull(vaultClient, "VaultClient must not be null");
 		Assert.notNull(appIdUserIdMechanism, "AppIdUserIdMechanism must not be null");
 
 		this.properties = properties;
-		this.restTemplate = restTemplate;
+		this.vaultClient = vaultClient;
 		this.appIdUserIdMechanism = appIdUserIdMechanism;
 	}
 
@@ -95,59 +90,39 @@ class DefaultClientAuthentication extends ClientAuthentication {
 					appIdUserIdMechanism.createUserId()), appId);
 		}
 
-		if (properties
-				.getAuthentication() == VaultProperties.AuthenticationMethod.AWS_EC2) {
+		if (properties.getAuthentication() == VaultProperties.AuthenticationMethod.AWS_EC2) {
 			log.info("Using AWS-EC2 authentication to log into Vault");
 
 			return createTokenUsingAwsEc2();
 		}
 
-		throw new UnsupportedOperationException(
-				String.format("Cannot create a token for auth method %s",
-						properties.getAuthentication()));
+		throw new UnsupportedOperationException(String.format(
+				"Cannot create a token for auth method %s",
+				properties.getAuthentication()));
 	}
 
 	private VaultToken createTokenUsingAppId(AppIdTuple appIdTuple,
 			VaultProperties.AppIdProperties appId) {
 
-		String url = buildUrl();
-		Map<String, String> variables = new HashMap<>();
-		variables.put("backend", "auth/" + appId.getAppIdPath());
-		variables.put("key", "login");
+		URI uri = vaultClient.buildUri(properties,
+				String.format("auth/%s/login", appId.getAppIdPath()));
 
 		Map<String, String> login = getAppIdLogin(appIdTuple);
 
-		try {
-			ResponseEntity<VaultResponse> response = restTemplate.postForEntity(url,
-					new HttpEntity<>(login), VaultResponse.class, variables);
+		VaultClientResponse response = vaultClient.write(uri, login);
 
-			HttpStatus status = response.getStatusCode();
-			if (!status.is2xxSuccessful()) {
-				throw new IllegalStateException("Cannot login using app-id");
-			}
-
-			VaultResponse body = response.getBody();
-			String token = (String) body.getAuth().get("client_token");
-
-			log.debug("Login successful using AppId authentication");
-
-			return VaultToken.of(token, body.getLeaseDuration());
+		HttpStatus status = response.getStatusCode();
+		if (!response.isSuccessful()) {
+			throw new IllegalStateException(String.format(
+					"Cannot login using app-id: %s", response.getMessage()));
 		}
-		catch (HttpStatusCodeException e) {
 
-			if (e.getStatusCode().equals(HttpStatus.BAD_REQUEST)) {
-				throw new IllegalStateException(
-						String.format("Cannot login using app-id: %s",
-								VaultErrorMessage.getError(e.getResponseBodyAsString())));
-			}
-			if (e.getStatusCode().equals(HttpStatus.BAD_REQUEST)) {
-				throw new IllegalStateException(
-						String.format("Cannot login using app-id: %s",
-								VaultErrorMessage.getError(e.getResponseBodyAsString())));
-			}
+		VaultResponse body = response.getBody();
+		String token = (String) body.getAuth().get("client_token");
 
-			throw e;
-		}
+		log.debug("Login successful using AppId authentication");
+
+		return VaultToken.of(token, body.getLeaseDuration());
 	}
 
 	private Map<String, String> getAppIdLogin(AppIdTuple appIdTuple) {
@@ -161,54 +136,38 @@ class DefaultClientAuthentication extends ClientAuthentication {
 	@SuppressWarnings("unchecked")
 	private VaultToken createTokenUsingAwsEc2() {
 
-		VaultProperties.AwsEc2Properties properties = this.properties.getAwsEc2();
+		VaultProperties.AwsEc2Properties awsEc2 = this.properties.getAwsEc2();
 
-		String url = buildUrl();
-		Map<String, String> variables = new HashMap<>();
-		variables.put("backend", "auth/" + properties.getAwsEc2Path());
-		variables.put("key", "login");
+		URI uri = vaultClient.buildUri(this.properties,
+				String.format("auth/%s/login", awsEc2.getAwsEc2Path()));
 
-		try {
+		Map<String, String> login = getEc2Login(awsEc2);
 
-			Map<String, String> login = getEc2Login(properties);
+		VaultClientResponse response = vaultClient.write(uri, login);
 
-			ResponseEntity<VaultResponse> response = restTemplate.postForEntity(url,
-					new HttpEntity<>(login), VaultResponse.class, variables);
-
-			HttpStatus status = response.getStatusCode();
-			if (!status.is2xxSuccessful()) {
-				throw new IllegalStateException("Cannot login using AWS-EC2");
-			}
-
-			VaultResponse body = response.getBody();
-			String token = (String) body.getAuth().get("client_token");
-
-			if (log.isDebugEnabled()) {
-
-				if (body.getAuth().get("metadata") instanceof Map) {
-					Map<Object, Object> metadata = (Map<Object, Object>) body.getAuth()
-							.get("metadata");
-					log.debug(String.format(
-							"Login successful using AWS-EC2 authentication for instance %s, AMI %s",
-							metadata.get("instance_id"), metadata.get("instance_id")));
-				}
-				else {
-					log.debug("Login successful using AWS-EC2 authentication");
-				}
-			}
-
-			return VaultToken.of(token, body.getLeaseDuration());
+		if (!response.isSuccessful()) {
+			throw new IllegalStateException(String.format(
+					"Cannot login using AWS-EC2: %s", response.getMessage()));
 		}
-		catch (HttpStatusCodeException e) {
 
-			if (e.getStatusCode().equals(HttpStatus.BAD_REQUEST)) {
-				throw new IllegalStateException(
-						String.format("Cannot login using AWS-EC2: %s",
-								VaultErrorMessage.getError(e.getResponseBodyAsString())));
+		VaultResponse body = response.getBody();
+		String token = (String) body.getAuth().get("client_token");
+
+		if (log.isDebugEnabled()) {
+
+			if (body.getAuth().get("metadata") instanceof Map) {
+				Map<Object, Object> metadata = (Map<Object, Object>) body.getAuth().get(
+						"metadata");
+				log.debug(String
+						.format("Login successful using AWS-EC2 authentication for instance %s, AMI %s",
+								metadata.get("instance_id"), metadata.get("instance_id")));
 			}
-
-			throw e;
+			else {
+				log.debug("Login successful using AWS-EC2 authentication");
+			}
 		}
+
+		return VaultToken.of(token, body.getLeaseDuration());
 	}
 
 	private Map<String, String> getEc2Login(VaultProperties.AwsEc2Properties properties) {
@@ -227,8 +186,8 @@ class DefaultClientAuthentication extends ClientAuthentication {
 			login.put("nonce", new String(this.nonce));
 		}
 
-		String pkcs7 = restTemplate.getForObject(properties.getIdentityDocument(),
-				String.class);
+		String pkcs7 = vaultClient.getRestTemplate().getForObject(
+				properties.getIdentityDocument(), String.class);
 		if (StringUtils.hasText(pkcs7)) {
 			login.put("pkcs7", pkcs7.replaceAll("\\r", "").replace("\\n", ""));
 		}
@@ -243,10 +202,5 @@ class DefaultClientAuthentication extends ClientAuthentication {
 	private static class AppIdTuple {
 		private String appId;
 		private String userId;
-	}
-
-	private String buildUrl() {
-		return String.format("%s://%s:%s/%s/{backend}/{key}", this.properties.getScheme(),
-				this.properties.getHost(), this.properties.getPort(), API_VERSION);
 	}
 }
