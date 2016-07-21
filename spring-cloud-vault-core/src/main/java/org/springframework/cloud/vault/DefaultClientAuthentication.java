@@ -16,11 +16,13 @@
 package org.springframework.cloud.vault;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
+import org.springframework.cloud.vault.VaultProperties.Ssl;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -90,6 +92,13 @@ class DefaultClientAuthentication extends ClientAuthentication {
 					appIdUserIdMechanism.createUserId()), appId);
 		}
 
+		if (properties.getAuthentication() == AuthenticationMethod.CERT
+				&& properties.getSsl() != null) {
+			log.info("Using TLS Certificate authentication to log into Vault");
+
+			return createTokenUsingTlsCertAuthentication(properties.getSsl());
+		}
+
 		if (properties.getAuthentication() == VaultProperties.AuthenticationMethod.AWS_EC2) {
 			log.info("Using AWS-EC2 authentication to log into Vault");
 
@@ -104,14 +113,13 @@ class DefaultClientAuthentication extends ClientAuthentication {
 	private VaultToken createTokenUsingAppId(AppIdTuple appIdTuple,
 			VaultProperties.AppIdProperties appId) {
 
-		URI uri = vaultClient.buildUri(properties,
+		URI uri = VaultClient.buildUri(properties,
 				String.format("auth/%s/login", appId.getAppIdPath()));
 
 		Map<String, String> login = getAppIdLogin(appIdTuple);
 
 		VaultClientResponse response = vaultClient.write(uri, login);
 
-		HttpStatus status = response.getStatusCode();
 		if (!response.isSuccessful()) {
 			throw new IllegalStateException(String.format(
 					"Cannot login using app-id: %s", response.getMessage()));
@@ -121,6 +129,26 @@ class DefaultClientAuthentication extends ClientAuthentication {
 		String token = (String) body.getAuth().get("client_token");
 
 		log.debug("Login successful using AppId authentication");
+
+		return VaultToken.of(token, body.getLeaseDuration());
+	}
+
+	private VaultToken createTokenUsingTlsCertAuthentication(Ssl ssl) {
+
+		URI uri = VaultClient.buildUri(properties,
+				String.format("auth/%s/login", ssl.getCertAuthPath()));
+
+		VaultClientResponse response = vaultClient.write(uri, Collections.emptyMap());
+
+		if (!response.isSuccessful()) {
+			throw new IllegalStateException(String.format(
+					"Cannot login using TLS certificates: %s", response.getMessage()));
+		}
+
+		VaultResponse body = response.getBody();
+		String token = (String) body.getAuth().get("client_token");
+
+		log.debug("Login successful using TLS certificates");
 
 		return VaultToken.of(token, body.getLeaseDuration());
 	}
@@ -138,7 +166,7 @@ class DefaultClientAuthentication extends ClientAuthentication {
 
 		VaultProperties.AwsEc2Properties awsEc2 = this.properties.getAwsEc2();
 
-		URI uri = vaultClient.buildUri(this.properties,
+		URI uri = VaultClient.buildUri(this.properties,
 				String.format("auth/%s/login", awsEc2.getAwsEc2Path()));
 
 		Map<String, String> login = getEc2Login(awsEc2);

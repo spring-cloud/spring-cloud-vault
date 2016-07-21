@@ -218,6 +218,37 @@ authentication method
 
 See also: https://www.vaultproject.io/docs/auth/aws-ec2.html[Vault Documentation: Using the aws-ec2 auth backend]
 
+=== TLS certificate authentication
+
+The `cert` auth backend allows authentication using SSL/TLS client
+certificates that are either signed by a CA or self-signed.
+
+To enable `cert` authentication you need to:
+
+1. Use SSL, see <<vault-client-ssl>>
+2. Configure a Java `Keystore` that contains the client
+certificate and the private key
+3. Set the `spring.cloud.vault.authentication` to `CERT`
+
+[source,yaml]
+.bootstrap.yml
+----
+spring.cloud.vault:
+    authentication: CERT
+    ssl:
+        key-store: classpath:keystore.jks
+        key-store-password: changeit
+        cert-auth-path: cert
+----
+
+* `key-store` sets the resource for the key-store. SSL-secured Vault
+communication will validate the Vault SSL certificate with the specified
+trust-store.
+* `key-store-password` sets the key-store password
+* `cert-auth-path` sets the path of the cert authentication mount to use
+
+See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the cert auth backend]
+
 == Backends
 
 [[vault-client-generic]]

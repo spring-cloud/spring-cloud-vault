@@ -20,13 +20,13 @@ import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
+import org.springframework.cloud.vault.VaultProperties.Ssl;
 import org.springframework.core.io.Resource;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -38,10 +38,14 @@ import org.springframework.util.StringUtils;
 
 import com.squareup.okhttp.OkHttpClient;
 
-import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
 import lombok.extern.apachecommons.CommonsLog;
+
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 
 /**
  * Factory for {@link ClientHttpRequestFactory} that supports Apache HTTP Components,
@@ -104,25 +108,48 @@ class ClientHttpRequestFactoryFactory {
 	private static SSLContext getSSLContext(VaultProperties.Ssl ssl)
 			throws GeneralSecurityException, IOException {
 
+		KeyManager[] keyManagers = ssl.getKeyStore() != null ? createKeyManagerFactory(
+				ssl.getKeyStore(), ssl.getKeyStorePassword()).getKeyManagers() : null;
+
+		TrustManager[] trustManagers = ssl.getTrustStore() != null ? createTrustManagerFactory(
+				ssl.getTrustStore(), ssl.getTrustStorePassword()).getTrustManagers()
+				: null;
+
 		SSLContext sslContext = SSLContext.getInstance("TLS");
-		sslContext.init(null, createTrustManagerFactory(ssl.getTrustStore(),
-				ssl.getTrustStorePassword()).getTrustManagers(), null);
+		sslContext.init(keyManagers, trustManagers, null);
 
 		return sslContext;
+	}
+
+	private static KeyManagerFactory createKeyManagerFactory(Resource keystoreFile,
+			String storePassword) throws GeneralSecurityException, IOException {
+
+		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+
+		try (InputStream inputStream = keystoreFile.getInputStream()) {
+			keyStore.load(inputStream,
+					StringUtils.hasText(storePassword) ? storePassword.toCharArray()
+							: null);
+		}
+
+		KeyManagerFactory keyManagerFactory = KeyManagerFactory
+				.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+		keyManagerFactory.init(keyStore,
+				StringUtils.hasText(storePassword) ? storePassword.toCharArray()
+						: new char[0]);
+
+		return keyManagerFactory;
 	}
 
 	private static TrustManagerFactory createTrustManagerFactory(Resource trustFile,
 			String storePassword) throws GeneralSecurityException, IOException {
 
 		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		InputStream inputStream = trustFile.getInputStream();
 
-		try {
-			trustStore.load(inputStream, StringUtils.hasText(storePassword)
-					? storePassword.toCharArray() : null);
-		}
-		finally {
-			inputStream.close();
+		try (InputStream inputStream = trustFile.getInputStream()) {
+			trustStore.load(inputStream,
+					StringUtils.hasText(storePassword) ? storePassword.toCharArray()
+							: null);
 		}
 
 		TrustManagerFactory trustManagerFactory = TrustManagerFactory
@@ -133,8 +160,14 @@ class ClientHttpRequestFactoryFactory {
 	}
 
 	private static boolean hasSslConfiguration(VaultProperties vaultProperties) {
-		return vaultProperties.getSsl() != null
-				&& vaultProperties.getSsl().getTrustStore() != null;
+
+		Ssl ssl = vaultProperties.getSsl();
+
+		if (ssl == null) {
+			return false;
+		}
+
+		return ssl.getTrustStore() != null || ssl.getKeyStore() != null;
 	}
 
 	/**
@@ -143,30 +176,31 @@ class ClientHttpRequestFactoryFactory {
 	 * @author Mark Paluch
 	 */
 	static class HttpComponents {
-		protected static ClientHttpRequestFactory usingHttpComponents(
-				VaultProperties vaultProperties)
-				throws GeneralSecurityException, IOException {
+
+		static ClientHttpRequestFactory usingHttpComponents(
+				VaultProperties vaultProperties) throws GeneralSecurityException,
+				IOException {
 
 			HttpClientBuilder httpClientBuilder = HttpClients.custom();
 
 			if (hasSslConfiguration(vaultProperties)) {
 
+				SSLContext sslContext = getSSLContext(vaultProperties.getSsl());
 				SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
-						getSSLContext(vaultProperties.getSsl()));
+						sslContext);
 				httpClientBuilder.setSSLSocketFactory(sslSocketFactory);
+				httpClientBuilder.setSSLContext(sslContext);
 			}
 
 			RequestConfig requestConfig = RequestConfig.custom() //
 					.setConnectTimeout(vaultProperties.getConnectionTimeout()) //
 					.setSocketTimeout(vaultProperties.getReadTimeout()) //
+					.setAuthenticationEnabled(true) //
 					.build();
 
 			httpClientBuilder.setDefaultRequestConfig(requestConfig);
 
-			HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(
-					httpClientBuilder.build());
-
-			return factory;
+			return new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build());
 		}
 	}
 
@@ -177,8 +211,7 @@ class ClientHttpRequestFactoryFactory {
 	 */
 	static class OkHttp {
 
-		protected static ClientHttpRequestFactory usingOkHttp(
-				VaultProperties vaultProperties)
+		static ClientHttpRequestFactory usingOkHttp(VaultProperties vaultProperties)
 				throws GeneralSecurityException, IOException {
 
 			final OkHttpClient okHttpClient = new OkHttpClient();
@@ -198,8 +231,8 @@ class ClientHttpRequestFactoryFactory {
 			};
 
 			if (hasSslConfiguration(vaultProperties)) {
-				okHttpClient.setSslSocketFactory(
-						getSSLContext(vaultProperties.getSsl()).getSocketFactory());
+				okHttpClient.setSslSocketFactory(getSSLContext(vaultProperties.getSsl())
+						.getSocketFactory());
 			}
 
 			requestFactory.setConnectTimeout(vaultProperties.getConnectionTimeout());
@@ -215,8 +248,8 @@ class ClientHttpRequestFactoryFactory {
 	 * @author Mark Paluch
 	 */
 	static class Netty {
-		protected static ClientHttpRequestFactory usingNetty(
-				VaultProperties vaultProperties)
+
+		static ClientHttpRequestFactory usingNetty(VaultProperties vaultProperties)
 				throws GeneralSecurityException, IOException {
 
 			VaultProperties.Ssl ssl = vaultProperties.getSsl();
@@ -225,14 +258,21 @@ class ClientHttpRequestFactoryFactory {
 
 			if (hasSslConfiguration(vaultProperties)) {
 
-				SslContext sslContext = SslContextBuilder //
-						.forClient() //
-						.trustManager(createTrustManagerFactory(ssl.getTrustStore(),
-								ssl.getTrustStorePassword())) //
-						.sslProvider(SslProvider.JDK) //
-						.build();
+				SslContextBuilder sslContextBuilder = SslContextBuilder //
+						.forClient();
 
-				requestFactory.setSslContext(sslContext);
+				if (ssl.getTrustStore() != null) {
+					sslContextBuilder.trustManager(createTrustManagerFactory(
+							ssl.getTrustStore(), ssl.getTrustStorePassword()));
+				}
+
+				if (ssl.getKeyStore() != null) {
+					sslContextBuilder.keyManager(createKeyManagerFactory(
+							ssl.getKeyStore(), ssl.getKeyStorePassword()));
+				}
+
+				requestFactory.setSslContext(sslContextBuilder.sslProvider(
+						SslProvider.JDK).build());
 			}
 
 			requestFactory.setConnectTimeout(vaultProperties.getConnectionTimeout());

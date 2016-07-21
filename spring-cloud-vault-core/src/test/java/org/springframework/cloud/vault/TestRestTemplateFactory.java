@@ -21,6 +21,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.util.Assert;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 
 import lombok.SneakyThrows;
@@ -37,23 +38,47 @@ public class TestRestTemplateFactory {
 	private final static AtomicReference<ClientHttpRequestFactory> factoryCache = new AtomicReference<>();
 
 	/**
-	 * @param vaultProperties
+	 * Create a new {@link TestRestTemplate} using the {@link VaultProperties}. The
+	 * underlying {@link ClientHttpRequestFactory} is cached. See
+	 * {@link #create(ClientHttpRequestFactory)} to create {@link TestRestTemplate} for a
+	 * given {@link ClientHttpRequestFactory}.
+	 *
+	 * @param vaultProperties must not be {@literal null}.
 	 * @return
 	 */
 	@SneakyThrows
 	public static TestRestTemplate create(VaultProperties vaultProperties) {
 
+		Assert.notNull(vaultProperties, "VaultProperties must not be null!");
+
 		initializeClientHttpRequestFactory(vaultProperties);
+		return create(factoryCache.get());
+	}
+
+	/**
+	 * Create a new {@link TestRestTemplate} using the {@link ClientHttpRequestFactory}.
+	 * The {@link TestRestTemplate} will throw
+	 * {@link org.springframework.web.client.HttpStatusCodeException exceptions} in error
+	 * cases and behave in that aspect like the regular
+	 * {@link org.springframework.web.client.RestTemplate}.
+	 *
+	 * @param requestFactory must not be {@literal null}.
+	 * @return
+	 */
+	@SneakyThrows
+	public static TestRestTemplate create(ClientHttpRequestFactory requestFactory) {
+
+		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null!");
 
 		TestRestTemplate testRestTemplate = new TestRestTemplate();
 		testRestTemplate.setErrorHandler(new DefaultResponseErrorHandler());
-		testRestTemplate.setRequestFactory(factoryCache.get());
+		testRestTemplate.setRequestFactory(requestFactory);
 
 		return testRestTemplate;
 	}
 
-	private static void initializeClientHttpRequestFactory(
-			VaultProperties vaultProperties) throws Exception {
+	private static void initializeClientHttpRequestFactory(VaultProperties vaultProperties)
+			throws Exception {
 
 		if (factoryCache.get() != null) {
 			return;

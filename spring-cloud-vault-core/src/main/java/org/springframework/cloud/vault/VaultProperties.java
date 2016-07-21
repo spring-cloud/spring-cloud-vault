@@ -151,6 +151,16 @@ public class VaultProperties {
 	public static class Ssl {
 
 		/**
+		 * Trust store that holds certificates and private keys.
+		 */
+		private Resource keyStore;
+
+		/**
+		 * Password used to access the key store.
+		 */
+		private String keyStorePassword;
+
+		/**
 		 * Trust store that holds SSL certificates.
 		 */
 		private Resource trustStore;
@@ -159,9 +169,15 @@ public class VaultProperties {
 		 * Password used to access the trust store.
 		 */
 		private String trustStorePassword;
+
+		/**
+		 * Mount path of the TLS cert authentication backend.
+		 */
+		@NotEmpty
+		private String certAuthPath = "cert";
 	}
 
 	public enum AuthenticationMethod {
-		TOKEN, APPID, AWS_EC2,
+		TOKEN, APPID, AWS_EC2, CERT
 	}
 }
