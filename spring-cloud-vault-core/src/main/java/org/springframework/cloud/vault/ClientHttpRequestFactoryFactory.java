@@ -220,7 +220,7 @@ class ClientHttpRequestFactoryFactory {
 					okHttpClient) {
 
 				@Override
-				public void destroy() throws Exception {
+				public void destroy() throws IOException {
 
 					if (okHttpClient.getCache() != null) {
 						okHttpClient.getCache().close();
