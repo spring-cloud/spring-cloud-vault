@@ -180,6 +180,8 @@ spring.cloud.vault:
     scheme: https
     connection-timeout: 5000
     read-timeout: 15000
+    config:
+        order: -10
 ----
 
 * `host` sets the hostname of the Vault host. The host name will be used
