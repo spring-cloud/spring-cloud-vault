@@ -78,6 +78,8 @@ public class VaultProperties {
 
 	private Ssl ssl = new Ssl();
 
+	private Config config = new Config();
+
 	/**
 	 * Application name for AppId authentication.
 	 */
@@ -175,6 +177,15 @@ public class VaultProperties {
 		 */
 		@NotEmpty
 		private String certAuthPath = "cert";
+	}
+
+	@Data
+	public static class Config {
+		/**
+		 * Used to force a PropertySourceLocator ordering.
+		 * This is useful to use Vault as an override on consul properties;
+		 */
+		private int order = 0;
 	}
 
 	public enum AuthenticationMethod {
