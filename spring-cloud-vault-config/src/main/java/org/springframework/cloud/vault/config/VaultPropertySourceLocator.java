@@ -29,6 +29,7 @@ import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -40,7 +41,7 @@ import static org.springframework.cloud.vault.config.SecureBackendAccessors.*;
  * @author Spencer Gibb
  * @author Mark Paluch
  */
-class VaultPropertySourceLocator implements PropertySourceLocator {
+class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrdered {
 
 	private final VaultConfigOperations operations;
 	private final VaultProperties properties;
@@ -83,6 +84,11 @@ class VaultPropertySourceLocator implements PropertySourceLocator {
 			return propertySource;
 		}
 		return null;
+	}
+
+	@Override
+	public int getOrder() {
+		return properties.getConfig().getOrder();
 	}
 
 	private List<String> buildContexts(ConfigurableEnvironment env) {
