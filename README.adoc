@@ -17,25 +17,42 @@ and https://www.vaultproject.io/docs/auth/aws-ec2.html[AWS-EC2] authentication
 
 == Quick Start
 
-Install Vault:
+*Prerequisites*
+
+To get started with Vault and this guide you need a
+*NIX-like operating systems that provides:
+
+* `wget`, `openssl` and `unzip`
+* at least Java 7 and a properly configured `JAVA_HOME` environment variable
+
+*Install Vault*
 
 ----
 $ src/test/bash/install_vault.sh
 ----
 
-Start the Vault server:
+*Create SSL certificates for Vault*
+
+----
+$ src/test/bash/create_certificates.sh
+----
+
+NOTE: `create_certificates.sh` creates certificates in `work/ca` and a JKS truststore `work/keystore.jsk`. If you want to run Spring Cloud Vault using this quickstart guide you need to configure the truststore the `spring.cloud.vault.ssl.trust-store` property to `file:work/keystore.jks`.
+
+*Start Vault server*
 
 ----
 $ src/test/bash/local_run_vault.sh
 ----
 
-Vault is started listening on `0.0.0.0:8200` using the `inmem` storage.
+Vault is started listening on `0.0.0.0:8200` using the `inmem` storage and
+`https`.
 Vault is sealed and not initialized when starting up
 so you need to initialize it first.
 
 ----
-$ export VAULT_ADDR="http://localhost:8200"
-$ export VAULT_TLS_SKIP=true
+$ export VAULT_ADDR="https://localhost:8200"
+$ export VAULT_SKIP_VERIFY=true # Don't do this for production
 $ vault init
 ----
 
@@ -160,7 +177,7 @@ the bootstrap phase of an application context), e.g.
 spring.cloud.vault:
     host: localhost
     port: 8200
-    scheme: http
+    scheme: https
     connection-timeout: 5000
     read-timeout: 15000
 ----
@@ -174,7 +191,12 @@ Supported schemes are `http` and `https`.
 * `read-timeout` sets the read timeout in milliseconds
 
 Enabling further integrations requires additional dependencies and
-configuration.
+configuration. Depending on how you have set up Vault you might need
+additional configuration like
+https://github.com/spring-cloud-incubator/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc#vault-client-ssl-configuration[SSL] and
+https://github.com/spring-cloud-incubator/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc#token-authentication[authentication]. Checkout these
+chapters in the
+https://github.com/spring-cloud-incubator/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc[reference guide].
 
 == Building
 
