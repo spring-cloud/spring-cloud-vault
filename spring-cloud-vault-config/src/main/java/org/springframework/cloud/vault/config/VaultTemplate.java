@@ -22,6 +22,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.vault.ClientAuthentication;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultClientResponse;
+import org.springframework.cloud.vault.VaultHealthResponse;
 import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.cloud.vault.VaultToken;
 import org.springframework.util.Assert;
@@ -111,5 +112,31 @@ public class VaultTemplate implements InitializingBean, VaultOperations {
 
 		URI uri = client.buildUri(properties, pathTemplate, variables);
 		return sessionCallback.doWithVault(uri, vaultSession);
+	}
+
+	private final static String HEALTH_URL_TEMPLATE = "sys/health";
+
+	/**
+	 * Query the current Vault service for it's health status
+	 *
+	 * @return A {@link VaultHealthResponse} containing the current service status.
+	 */
+	public VaultHealthResponse health() {
+		URI uri = client.buildUri(properties, HEALTH_URL_TEMPLATE);
+		return client.health(uri);
+	}
+
+	/**
+	 * Check whether Vault is available (vault created and unsealed).
+	 *
+	 * @return
+	 */
+	public boolean isAvailable() {
+		try{
+			VaultHealthResponse health = health();
+			return health.isInitialized() && !health.isSealed();
+		} catch(Exception e) {
+			return false;
+		}
 	}
 }
