@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.vault;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.net.URI;
 import java.util.Map;
 
@@ -26,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import lombok.Getter;
@@ -102,6 +105,29 @@ public class VaultClient {
 				createHeaders(vaultToken)));
 	}
 
+	/**
+	 * Query the current Vault service for it's health status
+	 *
+	 * @param uri must not be {@literal null}.
+	 * @return A {@link VaultHealthResponse} containing the current service status.
+	 */
+	public VaultHealthResponse health(URI uri) {
+		try {
+			ResponseEntity<VaultHealthResponse> healthResponse = this.restTemplate.exchange(
+					uri, HttpMethod.GET, null,
+					VaultHealthResponse.class);
+			return healthResponse.getBody();
+		} catch (HttpStatusCodeException responseError) {
+			try {
+				ObjectMapper mapper = new ObjectMapper();
+				return mapper.readValue(responseError.getResponseBodyAsString(), VaultHealthResponse.class);
+			}
+			catch (Exception jsonError) {
+				throw responseError;
+			}
+		}
+	}
+
 	private VaultClientResponse exchange(URI uri, HttpMethod httpMethod,
 			HttpEntity<?> httpEntity) {
 
@@ -143,7 +169,7 @@ public class VaultClient {
 	 * Build the Vault {@link URI} based on the given {@link VaultProperties} and
 	 * {@code pathTemplate}. URI template variables will be expanded using
 	 * {@code uriVariables}.
-	 * 
+	 *
 	 * @param properties must not be {@literal null}.
 	 * @param pathTemplate must not be empty or {@literal null}.
 	 * @param uriVariables must not be {@literal null}.

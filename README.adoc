@@ -198,6 +198,12 @@ https://github.com/spring-cloud-incubator/spring-cloud-vault-config/blob/master/
 chapters in the
 https://github.com/spring-cloud-incubator/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc[reference guide].
 
+If the application imports the `spring-boot-starter-actuator` project, the
+status of the vault server will be available via the `\health` endpoint.
+
+The vault health indicator can be enabled or disabled through the
+property `health.vault.enabled` (default `true`)
+
 == Building
 
 ==== Build requirements for Vault
@@ -205,6 +211,20 @@ https://github.com/spring-cloud-incubator/spring-cloud-vault-config/blob/master/
 Spring Cloud Vault Config requires SSL certificates and a running
 Vault instance listening on `localhost:8200`. Certificates and the Vault
 setup are scripted, the scripts are located in `src/test/bash`.
+
+The following scripts need to be run prior to building the project for the tests to pass.
+
+    $ ./src/test/bash/install_vault.sh
+    $ ./src/test/bash/create_certificates.sh
+    $ ./src/test/bash/local_run_vault.sh
+
+Changes to the documentation should be made to the adocs found under `docs/src/main/asciidoc/`
+
+README.adoc can be re-generated via the following
+
+    $ ./docs/src/main/ruby/generate_readme.sh > README.adoc
+
+This script requires ruby and the asciidoctor gem installed (`gem install asciidoctor`)
 
 :jdkversion: 1.7
 

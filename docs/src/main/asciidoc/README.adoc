@@ -25,6 +25,20 @@ Spring Cloud Vault Config requires SSL certificates and a running
 Vault instance listening on `localhost:8200`. Certificates and the Vault
 setup are scripted, the scripts are located in `src/test/bash`.
 
+The following scripts need to be run prior to building the project for the tests to pass.
+
+    $ ./src/test/bash/install_vault.sh
+    $ ./src/test/bash/create_certificates.sh
+    $ ./src/test/bash/local_run_vault.sh
+
+Changes to the documentation should be made to the adocs found under `docs/src/main/asciidoc/`
+
+README.adoc can be re-generated via the following
+
+    $ ./docs/src/main/ruby/generate_readme.sh > README.adoc
+
+This script requires ruby and the asciidoctor gem installed (`gem install asciidoctor`)
+
 include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/master/docs/src/main/asciidoc/building.adoc[]
 
 == Contributing
