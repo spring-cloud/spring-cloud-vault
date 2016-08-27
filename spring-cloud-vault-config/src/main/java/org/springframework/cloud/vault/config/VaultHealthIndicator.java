@@ -24,27 +24,34 @@ import org.springframework.cloud.vault.VaultHealthResponse;
  * @author Stuart Ingram
  */
 public class VaultHealthIndicator implements HealthIndicator {
+
 	@Autowired
 	private VaultTemplate vaultTemplate;
 
 	@Override
 	public Health health() {
+
 		try {
+
 			VaultHealthResponse vaultHealthResponse = vaultTemplate.health();
-			if(!vaultHealthResponse.isInitialized()) {
-				return Health.down().withDetail("Vault uninitialized",null).build();
-			} else if (vaultHealthResponse.isSealed()) {
-				return Health.down().withDetail("Vault sealed",null).build();
-			} else if (vaultHealthResponse.isStandby()) {
-				return Health.outOfService().withDetail("Vault in standby",null).build();
-			} else {
-				return Health.up().build();
+
+			if (!vaultHealthResponse.isInitialized()) {
+				return Health.down().withDetail("state", "Vault uninitialized").build();
 			}
+
+			if (vaultHealthResponse.isSealed()) {
+				return Health.down().withDetail("state", "Vault sealed").build();
+			}
+
+			if (vaultHealthResponse.isStandby()) {
+				return Health.outOfService().withDetail("state", "Vault in standby").build();
+			}
+
+			return Health.up().build();
 		}
-		catch(Exception e) {
+		catch (Exception e) {
 			return Health.down().build();
 		}
-
 	}
 
 }

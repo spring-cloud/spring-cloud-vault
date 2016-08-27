@@ -19,6 +19,7 @@ import java.net.URI;
 import java.util.Map;
 
 import org.springframework.cloud.vault.VaultClientResponse;
+import org.springframework.cloud.vault.VaultHealthResponse;
 
 /**
  * Interface that specified a basic set of Vault operations, implemented by
@@ -56,6 +57,13 @@ public interface VaultOperations {
 	 */
 	<T> T doWithVault(String pathTemplate, Map<String, ?> variables,
 			SessionCallback sessionCallback);
+
+	/**
+	 * Query the current Vault service for it's health status.
+	 *
+	 * @return A {@link VaultHealthResponse} containing the current service status.
+	 */
+	VaultHealthResponse health();
 
 	/**
 	 * Callback to execute actions within an authenticated {@link VaultSession}.

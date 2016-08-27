@@ -35,6 +35,8 @@ import org.springframework.util.Assert;
  */
 public class VaultTemplate implements InitializingBean, VaultOperations {
 
+	private final static String HEALTH_URL_TEMPLATE = "sys/health";
+
 	private final VaultProperties properties;
 	private final VaultClient client;
 	private final ClientAuthentication clientAuthentication;
@@ -100,7 +102,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations {
 
 		Assert.notNull(sessionCallback, "SessionCallback must not be null!");
 
-		URI uri = client.buildUri(properties, path);
+		URI uri = VaultClient.buildUri(properties, path);
 		return sessionCallback.doWithVault(uri, vaultSession);
 	}
 
@@ -114,29 +116,10 @@ public class VaultTemplate implements InitializingBean, VaultOperations {
 		return sessionCallback.doWithVault(uri, vaultSession);
 	}
 
-	private final static String HEALTH_URL_TEMPLATE = "sys/health";
-
-	/**
-	 * Query the current Vault service for it's health status
-	 *
-	 * @return A {@link VaultHealthResponse} containing the current service status.
-	 */
+	@Override
 	public VaultHealthResponse health() {
-		URI uri = client.buildUri(properties, HEALTH_URL_TEMPLATE);
-		return client.health(uri);
-	}
 
-	/**
-	 * Check whether Vault is available (vault created and unsealed).
-	 *
-	 * @return
-	 */
-	public boolean isAvailable() {
-		try{
-			VaultHealthResponse health = health();
-			return health.isInitialized() && !health.isSealed();
-		} catch(Exception e) {
-			return false;
-		}
+		URI uri = VaultClient.buildUri(properties, HEALTH_URL_TEMPLATE);
+		return client.health(uri);
 	}
 }
