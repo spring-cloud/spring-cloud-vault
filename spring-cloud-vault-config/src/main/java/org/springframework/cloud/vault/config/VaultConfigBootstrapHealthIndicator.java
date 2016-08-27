@@ -39,7 +39,8 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnExpression("${health.vault.enabled:true}")
 @AutoConfigureBefore({ EndpointAutoConfiguration.class })
 @AutoConfigureAfter({ HealthIndicatorAutoConfiguration.class })
-public class VaultConfigBootstrapHealthIndicator{
+public class VaultConfigBootstrapHealthIndicator {
+
 	@Bean
 	@ConditionalOnMissingBean(name = "vaultHealthIndicator")
 	public HealthIndicator vaultHealthIndicator() {

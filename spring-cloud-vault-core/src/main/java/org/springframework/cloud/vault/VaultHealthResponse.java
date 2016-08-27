@@ -21,16 +21,18 @@ import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Value object to bind HTTP API responses for sys/health
+ * Value object to bind HTTP API responses for sys/health.
  *
  * @author Stuart Ingram
  * @author Bill Koch
  */
 @Data
 public class VaultHealthResponse {
+
 	private boolean initialized;
 	private boolean sealed;
 	private boolean standby;
+
 	@JsonProperty("server_time_utc")
 	private int serverTimeUtc;
 }
