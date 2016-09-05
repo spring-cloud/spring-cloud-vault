@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.vault.config;
-
-import org.springframework.cloud.vault.VaultSecretBackend;
+package org.springframework.cloud.vault;
 
 /**
  * Factory to convert {@link VaultSecretBackend} instance to a

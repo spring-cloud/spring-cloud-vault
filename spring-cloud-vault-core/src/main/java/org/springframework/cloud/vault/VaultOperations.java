@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.vault.config;
+package org.springframework.cloud.vault;
 
 import java.net.URI;
 import java.util.Map;
-
-import org.springframework.cloud.vault.VaultClientResponse;
-import org.springframework.cloud.vault.VaultHealthResponse;
 
 /**
  * Interface that specified a basic set of Vault operations, implemented by
@@ -28,11 +25,6 @@ import org.springframework.cloud.vault.VaultHealthResponse;
  * @author Mark Paluch
  */
 public interface VaultOperations {
-
-	/**
-	 * @return the operations interface to interact with Vault configuration data.
-	 */
-	VaultConfigOperations opsForConfig();
 
 	/**
 	 * Executes a Vault {@link SessionCallback}. Allows to interact with Vault in an

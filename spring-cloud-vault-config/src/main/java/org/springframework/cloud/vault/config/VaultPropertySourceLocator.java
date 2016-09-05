@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.vault.config;
 
+import static org.springframework.cloud.vault.SecureBackendAccessors.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
+import org.springframework.cloud.vault.SecureBackendAccessor;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.core.env.CompositePropertySource;
@@ -31,8 +34,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import static org.springframework.cloud.vault.config.SecureBackendAccessors.*;
 
 /**
  * {@link PropertySourceLocator} using {@link VaultClient}.

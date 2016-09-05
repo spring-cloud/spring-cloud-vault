@@ -19,21 +19,21 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Map;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.cloud.vault.AbstractIntegrationTests;
 import org.springframework.cloud.vault.ClientAuthentication;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
+import org.springframework.cloud.vault.VaultTemplate;
 import org.springframework.cloud.vault.config.VaultConfigOperations;
-import org.springframework.cloud.vault.config.VaultTemplate;
+import org.springframework.cloud.vault.config.VaultConfigTemplate;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.Settings;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecureBackendAccessorFactory.*;
-
-import org.junit.Before;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecureBackendAccessorFactory.forDatabase;
 
 /**
  * Integration tests for {@link VaultClient} using the postgresql secret backend. This
@@ -83,8 +83,8 @@ public class PostgreSqlSecretIntegrationTests extends AbstractIntegrationTests {
 						postgreSql.getRole()),
 				Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
 
-		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
-				ClientAuthentication.token(vaultProperties)).opsForConfig();
+		VaultTemplate vaultTemplate = new VaultTemplate(vaultProperties, prepare().newVaultClient(), ClientAuthentication.token(vaultProperties));
+		configOperations = new VaultConfigTemplate(vaultTemplate, vaultProperties);
 	}
 
 	@Test

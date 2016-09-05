@@ -20,21 +20,21 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.cloud.vault.AbstractIntegrationTests;
 import org.springframework.cloud.vault.ClientAuthentication;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
+import org.springframework.cloud.vault.VaultTemplate;
 import org.springframework.cloud.vault.config.VaultConfigOperations;
-import org.springframework.cloud.vault.config.VaultTemplate;
+import org.springframework.cloud.vault.config.VaultConfigTemplate;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.Settings;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration.RabbitMqSecureBackendAccessorFactory.*;
-
-import org.junit.Before;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration.RabbitMqSecureBackendAccessorFactory.forRabbitMq;
 
 /**
  * Integration tests for {@link VaultClient} using the rabbitmq secret backend. This test
@@ -89,8 +89,8 @@ public class RabbitMqSecretIntegrationTests extends AbstractIntegrationTests {
 				String.format("%s/roles/%s", rabbitmq.getBackend(), rabbitmq.getRole()),
 				Collections.singletonMap("vhosts", VHOSTS_ROLE));
 
-		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
-				ClientAuthentication.token(vaultProperties)).opsForConfig();
+		VaultTemplate vaultTemplate = new VaultTemplate(vaultProperties, prepare().newVaultClient(), ClientAuthentication.token(vaultProperties));
+		configOperations = new VaultConfigTemplate(vaultTemplate, vaultProperties);
 	}
 
 	@Test

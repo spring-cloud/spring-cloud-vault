@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.cloud.vault.SecureBackendAccessor;
 import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.util.Assert;

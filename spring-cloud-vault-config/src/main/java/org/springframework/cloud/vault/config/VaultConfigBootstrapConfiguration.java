@@ -18,8 +18,6 @@ package org.springframework.cloud.vault.config;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -27,14 +25,21 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.vault.AppIdUserIdMechanism;
 import org.springframework.cloud.vault.ClientAuthentication;
+import org.springframework.cloud.vault.SecureBackendAccessor;
+import org.springframework.cloud.vault.SecureBackendAccessorFactory;
+import org.springframework.cloud.vault.SecureBackendFactories;
 import org.springframework.cloud.vault.VaultBootstrapConfiguration;
 import org.springframework.cloud.vault.VaultClient;
+import org.springframework.cloud.vault.VaultOperations;
 import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.cloud.vault.VaultSecretBackend;
+import org.springframework.cloud.vault.VaultTemplate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.PostConstruct;
 
 /**
  * @author Mark Paluch
@@ -58,22 +63,26 @@ public class VaultConfigBootstrapConfiguration implements ApplicationContextAwar
 	@Bean
 	@ConditionalOnMissingBean
 	public VaultOperations vaultOperations(VaultProperties properties, VaultClient client) {
-
 		ClientAuthentication clientAuthentication = clientAuthentication(
 				applicationContext, properties, client);
-
 		return new VaultTemplate(properties, client, clientAuthentication);
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
+	public VaultConfigOperations vaultConfigOperations(VaultOperations operations, VaultProperties properties) {
+		return new VaultConfigTemplate(operations, properties);
+	}
+
+	@Bean
 	public VaultPropertySourceLocator vaultPropertySourceLocator(
-			VaultOperations operations, VaultProperties vaultProperties,
+			VaultConfigOperations operations, VaultProperties vaultProperties,
 			VaultGenericBackendProperties vaultGenericBackendProperties) {
 
 		Collection<SecureBackendAccessor> backendAccessors = SecureBackendFactories
 				.createBackendAcessors(vaultSecretBackends, factories);
 
-		return new VaultPropertySourceLocator(operations.opsForConfig(), vaultProperties,
+		return new VaultPropertySourceLocator(operations, vaultProperties,
 				vaultGenericBackendProperties, backendAccessors);
 	}
 

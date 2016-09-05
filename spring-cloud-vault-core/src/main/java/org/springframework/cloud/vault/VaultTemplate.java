@@ -13,18 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.vault.config;
+package org.springframework.cloud.vault;
 
 import java.net.URI;
 import java.util.Map;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.cloud.vault.ClientAuthentication;
-import org.springframework.cloud.vault.VaultClient;
-import org.springframework.cloud.vault.VaultClientResponse;
-import org.springframework.cloud.vault.VaultHealthResponse;
-import org.springframework.cloud.vault.VaultProperties;
-import org.springframework.cloud.vault.VaultToken;
 import org.springframework.util.Assert;
 
 /**
@@ -90,11 +84,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations {
 		}
 
 		return vaultState.getToken();
-	}
-
-	@Override
-	public VaultConfigOperations opsForConfig() {
-		return new VaultConfigTemplate(this, properties);
 	}
 
 	@Override

@@ -15,15 +15,14 @@
  */
 package org.springframework.cloud.vault.config;
 
+import org.junit.Before;
 import org.springframework.cloud.vault.ClientAuthentication;
 import org.springframework.cloud.vault.IpAddressUserId;
-import org.springframework.cloud.vault.TestRestTemplateFactory;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties.AppIdProperties;
 import org.springframework.cloud.vault.VaultProperties.AuthenticationMethod;
+import org.springframework.cloud.vault.VaultTemplate;
 import org.springframework.cloud.vault.util.Settings;
-
-import org.junit.Before;
 
 /**
  * Integration tests for {@link VaultClient} using {@link AuthenticationMethod#APPID}.
@@ -32,6 +31,7 @@ import org.junit.Before;
  */
 public class AppIdAuthenticationIntegrationTests extends GenericSecretIntegrationTests {
 
+	@Override
 	@Before
 	public void setUp() throws Exception {
 
@@ -58,9 +58,10 @@ public class AppIdAuthenticationIntegrationTests extends GenericSecretIntegratio
 		ClientAuthentication clientAuthentication = ClientAuthentication.appId(
 				vaultProperties, vaultClient, userIdMechanism);
 
-		configOperations = new VaultTemplate(vaultProperties,
+		VaultTemplate template = new VaultTemplate(vaultProperties,
 				vaultClient,
-				clientAuthentication).opsForConfig();
+				clientAuthentication);
+		configOperations = new VaultConfigTemplate(template, vaultProperties);
 	}
 
 	private AppIdProperties configureAppIdProperties() {

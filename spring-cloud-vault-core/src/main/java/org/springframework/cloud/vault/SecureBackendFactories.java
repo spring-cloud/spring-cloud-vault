@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.vault.config;
+package org.springframework.cloud.vault;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import lombok.extern.apachecommons.CommonsLog;
-import org.springframework.cloud.vault.VaultSecretBackend;
 
 /**
  * @author Mark Paluch
