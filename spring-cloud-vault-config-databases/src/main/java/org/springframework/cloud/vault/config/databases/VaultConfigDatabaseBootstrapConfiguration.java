@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.vault.config.SecureBackendAccessor;
+import org.springframework.cloud.vault.SecureBackendAccessor;
+import org.springframework.cloud.vault.SecureBackendAccessorFactory;
 import org.springframework.cloud.vault.VaultSecretBackend;
-import org.springframework.cloud.vault.config.SecureBackendAccessorFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.vault.config;
+package org.springframework.cloud.vault;
 
 import java.util.Map;
 

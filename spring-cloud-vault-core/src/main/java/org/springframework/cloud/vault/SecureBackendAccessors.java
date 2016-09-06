@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.vault.config;
+package org.springframework.cloud.vault;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
  *
  * @author Mark Paluch
  */
-class SecureBackendAccessors {
+public class SecureBackendAccessors {
 
 	/**
 	 * Creates a {@link SecureBackendAccessor} for the {@code generic} secure backend.

@@ -15,26 +15,27 @@
  */
 package org.springframework.cloud.vault.config;
 
+import lombok.extern.apachecommons.CommonsLog;
+
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.springframework.cloud.vault.ClientAuthentication;
+import org.springframework.cloud.vault.SecureBackendAccessor;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultClientResponse;
+import org.springframework.cloud.vault.VaultOperations;
+import org.springframework.cloud.vault.VaultOperations.SessionCallback;
+import org.springframework.cloud.vault.VaultOperations.VaultSession;
 import org.springframework.cloud.vault.VaultProperties;
-import org.springframework.cloud.vault.config.VaultOperations.SessionCallback;
-import org.springframework.cloud.vault.config.VaultOperations.VaultSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
-import lombok.extern.apachecommons.CommonsLog;
-
-import org.apache.commons.logging.Log;
-
 /**
  * Central class to retrieve configuration from Vault.
- * 
+ *
  * @author Mark Paluch
  * @see VaultClient
  * @see ClientAuthentication
@@ -67,7 +68,7 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 
 		Assert.notNull(secureBackendAccessor, "SecureBackendAccessor must not be null!");
 
-		VaultClientResponse response = vaultOperations.doWithVault("{backend}/{key}",
+		VaultClientResponse response = (VaultClientResponse) vaultOperations.doWithVault("{backend}/{key}",
 				secureBackendAccessor.variables(), callback);
 
 		if (response.getStatusCode() == HttpStatus.OK) {

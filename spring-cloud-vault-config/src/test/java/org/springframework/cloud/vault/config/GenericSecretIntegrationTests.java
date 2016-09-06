@@ -15,20 +15,20 @@
  */
 package org.springframework.cloud.vault.config;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.cloud.vault.SecureBackendAccessors.generic;
+
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.cloud.vault.AbstractIntegrationTests;
 import org.springframework.cloud.vault.ClientAuthentication;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
+import org.springframework.cloud.vault.VaultTemplate;
 import org.springframework.cloud.vault.util.Settings;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.cloud.vault.config.SecureBackendAccessors.*;
-
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Integration tests for {@link VaultClient} using the generic secret backend.
@@ -44,10 +44,13 @@ public class GenericSecretIntegrationTests extends AbstractIntegrationTests {
 	public void setUp() throws Exception {
 
 		vaultProperties.setFailFast(false);
-		prepare().writeSecret("app-name", (Map) createData());
+		prepare().writeSecret("app-name", createData());
 
-		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
-				ClientAuthentication.token(vaultProperties)).opsForConfig();
+		VaultTemplate template = new VaultTemplate(vaultProperties,
+				prepare().newVaultClient(),
+				ClientAuthentication.token(vaultProperties));
+
+		configOperations = new VaultConfigTemplate(template, vaultProperties);
 	}
 
 	@Test

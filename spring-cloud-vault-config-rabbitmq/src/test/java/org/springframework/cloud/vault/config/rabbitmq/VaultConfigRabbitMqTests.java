@@ -16,7 +16,9 @@
 
 package org.springframework.cloud.vault.config.rabbitmq;
 
-import static org.junit.Assume.*;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 
 import java.net.InetSocketAddress;
 import java.util.Collections;
@@ -36,23 +38,21 @@ import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests using the rabbitmq secret backend. In case this test should fail
  * because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
- * 
+ *
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = VaultConfigRabbitMqTests.TestApplication.class)
 @IntegrationTest({ "spring.cloud.vault.rabbitmq.enabled=true",
-		"spring.cloud.vault.rabbitmq.role=readonly",
-		"spring.rabbitmq.address=localhost" })
+	"spring.cloud.vault.rabbitmq.role=readonly",
+"spring.rabbitmq.address=localhost" })
 public class VaultConfigRabbitMqTests {
 
 	private final static int RABBITMQ_HTTP_MANAGEMENT_PORT = 15672;

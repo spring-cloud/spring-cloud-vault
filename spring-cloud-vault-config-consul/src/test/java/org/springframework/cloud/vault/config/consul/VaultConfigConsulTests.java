@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.vault.config.consul;
 
-import static org.assertj.core.api.Java6Assertions.*;
-import static org.junit.Assume.*;
-
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -31,7 +28,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
@@ -45,18 +41,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+
 /**
  * Integration tests using the consul secret backend. In case this test should fail
  * because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
- * 
+ *
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = VaultConfigConsulTests.TestApplication.class)
 @IntegrationTest({ "spring.cloud.vault.consul.enabled=true",
-		"spring.cloud.vault.consul.role=readonly" })
+"spring.cloud.vault.consul.role=readonly" })
 public class VaultConfigConsulTests {
 
 	private final static String CONSUL_HOST = "localhost";

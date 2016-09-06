@@ -15,12 +15,10 @@
  */
 package org.springframework.cloud.vault.config;
 
-import java.net.URI;
 import java.util.Map;
 
-import org.springframework.cloud.vault.VaultClientResponse;
+import org.springframework.cloud.vault.SecureBackendAccessor;
 import org.springframework.cloud.vault.VaultProperties;
-import org.springframework.cloud.vault.VaultToken;
 
 /**
  * Interface that specified a basic set of Vault operations, implemented by

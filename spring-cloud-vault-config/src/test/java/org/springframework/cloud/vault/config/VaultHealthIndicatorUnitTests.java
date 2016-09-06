@@ -27,6 +27,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.cloud.vault.VaultHealthResponse;
+import org.springframework.cloud.vault.VaultTemplate;
 
 /**
  * @author Mark Paluch

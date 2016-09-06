@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.cloud.vault.VaultHealthResponse;
+import org.springframework.cloud.vault.VaultTemplate;
 
 /**
  * @author Stuart Ingram

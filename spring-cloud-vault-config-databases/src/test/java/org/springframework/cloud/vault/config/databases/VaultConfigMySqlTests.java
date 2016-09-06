@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import static org.junit.Assume.*;
-
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -37,18 +35,20 @@ import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import static org.junit.Assume.assumeTrue;
+
 /**
  * Integration tests using the mysql secret backend. In case this test should fail because of SSL make sure you run the
  * test within the spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is referenced with
  * {@code ../work/keystore.jks}.
- * 
+ *
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = VaultConfigMySqlTests.TestApplication.class)
 @IntegrationTest({ "spring.cloud.vault.mysql.enabled=true",
-		"spring.cloud.vault.mysql.role=readonly",
-		"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false" })
+	"spring.cloud.vault.mysql.role=readonly",
+"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false" })
 public class VaultConfigMySqlTests {
 
 	private final static int MYSQL_PORT = 3306;

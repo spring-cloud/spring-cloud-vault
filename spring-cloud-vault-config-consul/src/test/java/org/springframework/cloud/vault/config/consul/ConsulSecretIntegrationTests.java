@@ -20,13 +20,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.cloud.vault.AbstractIntegrationTests;
 import org.springframework.cloud.vault.ClientAuthentication;
 import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.VaultProperties;
+import org.springframework.cloud.vault.VaultTemplate;
 import org.springframework.cloud.vault.config.VaultConfigOperations;
-import org.springframework.cloud.vault.config.VaultTemplate;
+import org.springframework.cloud.vault.config.VaultConfigTemplate;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.core.ParameterizedTypeReference;
@@ -36,12 +39,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Base64Utils;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration.ConsulSecureBackendAccessorFactory.*;
-
-import org.junit.Before;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+import static org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration.ConsulSecureBackendAccessorFactory.forConsul;
 
 /**
  * Integration tests for {@link VaultClient} using the consul secret backend. This test
@@ -106,8 +106,8 @@ public class ConsulSecretIntegrationTests extends AbstractIntegrationTests {
 				Collections.singletonMap("policy",
 						Base64Utils.encodeToString(POLICY.getBytes())));
 
-		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
-				ClientAuthentication.token(vaultProperties)).opsForConfig();
+		VaultTemplate vaultTemplate = new VaultTemplate(vaultProperties, prepare().newVaultClient(), ClientAuthentication.token(vaultProperties));
+		configOperations = new VaultConfigTemplate(vaultTemplate, vaultProperties);
 	}
 
 	@Test

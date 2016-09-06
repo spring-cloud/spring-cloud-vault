@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.vault.config;
+package org.springframework.cloud.vault;
 
 import lombok.Data;
-import org.springframework.cloud.vault.VaultToken;
 
 /**
  * State of the Vault client.

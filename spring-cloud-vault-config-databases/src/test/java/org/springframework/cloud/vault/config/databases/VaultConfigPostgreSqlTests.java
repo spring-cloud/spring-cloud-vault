@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.vault.config.databases;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-
 import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -40,17 +37,20 @@ import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+
 /**
  * Integration tests using the postgresql secret backend. In case this test should fail because of SSL make sure you run
  * the test within the spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is referenced with
  * {@code ../work/keystore.jks}.
- * 
+ *
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = VaultConfigPostgreSqlTests.TestApplication.class)
 @IntegrationTest({ "spring.cloud.vault.postgresql.enabled=true",
-		"spring.cloud.vault.postgresql.role=readonly", "spring.datasource.url=jdbc:postgresql://localhost:5432/postgres?ssl=false" })
+	"spring.cloud.vault.postgresql.role=readonly", "spring.datasource.url=jdbc:postgresql://localhost:5432/postgres?ssl=false" })
 public class VaultConfigPostgreSqlTests {
 
 	private final static String POSTGRES_HOST = "localhost";
