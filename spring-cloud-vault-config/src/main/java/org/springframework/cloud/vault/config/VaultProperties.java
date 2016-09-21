@@ -193,6 +193,6 @@ public class VaultProperties {
 	}
 
 	public enum AuthenticationMethod {
-		TOKEN, APPID, AWS_EC2, CERT
+		TOKEN, APPID, AWS_EC2, CERT, CUBBYHOLE;
 	}
 }

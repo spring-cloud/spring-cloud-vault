@@ -250,6 +250,48 @@ trust-store.
 
 See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the cert auth backend]
 
+
+== Cubbyhole authentication
+
+Cubbyhole authentication uses Vault primitives to provide a secured authentication
+workflow. Cubbyhole authentication uses tokens as primary login method.
+An ephemeral token is used to obtain a second, login VaultToken from Vault's
+Cubbyhole secret backend. The login token is usually longer-lived and used to
+interact with Vault. The login token will be retrieved from a wrapped
+response stored at `/cubbyhole/response`.
+
+*Creating a wrapped token*
+
+NOTE: Response Wrapping for token creation requires Vault 0.6.0 or higher.
+
+.Crating and storing tokens
+====
+[source,shell]
+----
+$ vault token-create -wrap-ttl="10m"
+Key                            Value
+---                            -----
+wrapping_token:                397ccb93-ff6c-b17b-9389-380b01ca2645
+wrapping_token_ttl:            0h10m0s
+wrapping_token_creation_time:  2016-09-18 20:29:48.652957077 +0200 CEST
+wrapped_accessor:              46b6aebb-187f-932a-26d7-4f3d86a68319
+----
+====
+
+[source,yaml]
+.bootstrap.yml
+----
+spring.cloud.vault:
+    authentication: CUBBYHOLE
+    token: 397ccb93-ff6c-b17b-9389-380b01ca2645
+----
+
+See also:
+
+* https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
+* https://www.vaultproject.io/docs/secrets/cubbyhole/index.html[Vault Documentation:Cubbyhole Secret Backend]
+* https://www.vaultproject.io/docs/concepts/response-wrapping.html[Vault Documentation: Response Wrapping]
+
 == Backends
 
 [[vault-client-generic]]

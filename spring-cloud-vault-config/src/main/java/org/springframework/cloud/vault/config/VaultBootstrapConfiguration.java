@@ -38,6 +38,8 @@ import org.springframework.vault.authentication.AwsEc2Authentication;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.ClientCertificateAuthentication;
+import org.springframework.vault.authentication.CubbyholeAuthentication;
+import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
 import org.springframework.vault.authentication.DefaultSessionManager;
 import org.springframework.vault.authentication.IpAddressUserId;
 import org.springframework.vault.authentication.MacAddressUserId;
@@ -54,6 +56,7 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
+import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -73,7 +76,8 @@ public class VaultBootstrapConfiguration {
 	private final Collection<VaultSecretBackend> vaultSecretBackends;
 	private final Collection<SecureBackendAccessorFactory<? super VaultSecretBackend>> factories;
 
-	public VaultBootstrapConfiguration(ApplicationContext applicationContext, VaultProperties vaultProperties) {
+	public VaultBootstrapConfiguration(ApplicationContext applicationContext,
+			VaultProperties vaultProperties) {
 
 		this.applicationContext = applicationContext;
 		this.vaultProperties = vaultProperties;
@@ -98,7 +102,6 @@ public class VaultBootstrapConfiguration {
 				vaultGenericBackendProperties, backendAccessors);
 	}
 
-
 	@Bean
 	@ConditionalOnMissingBean
 	public ClientAuthentication clientAuthentication() {
@@ -108,8 +111,8 @@ public class VaultBootstrapConfiguration {
 		switch (vaultProperties.getAuthentication()) {
 
 		case TOKEN:
-			Assert.hasText("Token (spring.cloud.vault.token) must not be empty",
-					vaultProperties.getToken());
+			Assert.hasText(vaultProperties.getToken(),
+					"Token (spring.cloud.vault.token) must not be empty");
 			return new TokenAuthentication(vaultProperties.getToken());
 
 		case APPID:
@@ -120,6 +123,9 @@ public class VaultBootstrapConfiguration {
 
 		case AWS_EC2:
 			return awsEc2Authentication(vaultProperties, vaultClient);
+
+		case CUBBYHOLE:
+			return cubbyholeAuthentication(vaultClient);
 
 		}
 
@@ -187,6 +193,19 @@ public class VaultBootstrapConfiguration {
 
 		return new AwsEc2Authentication(authenticationOptions, vaultClient,
 				vaultClient.getRestTemplate());
+	}
+
+	private ClientAuthentication cubbyholeAuthentication(VaultClient vaultClient) {
+
+		Assert.hasText(vaultProperties.getToken(),
+				"Initial Token (spring.cloud.vault.token) for Cubbyhole authentication must not be empty");
+
+		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder() //
+				.wrapped() //
+				.initialToken(VaultToken.of(vaultProperties.getToken())) //
+				.build();
+
+		return new CubbyholeAuthentication(options, vaultClient);
 	}
 
 	/**
