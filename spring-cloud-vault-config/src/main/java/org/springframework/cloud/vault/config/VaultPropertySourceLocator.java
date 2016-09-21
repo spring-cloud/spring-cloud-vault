@@ -40,6 +40,7 @@ import static org.springframework.cloud.vault.config.SecureBackendAccessors.*;
  *
  * @author Spencer Gibb
  * @author Mark Paluch
+ * @author Jean-Philippe Bélanger
  */
 class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrdered {
 
