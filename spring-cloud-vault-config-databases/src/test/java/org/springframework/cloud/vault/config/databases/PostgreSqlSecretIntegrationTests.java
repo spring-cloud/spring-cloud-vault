@@ -15,33 +15,33 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.Map;
-
-import org.springframework.cloud.vault.AbstractIntegrationTests;
-import org.springframework.cloud.vault.ClientAuthentication;
-import org.springframework.cloud.vault.VaultClient;
-import org.springframework.cloud.vault.VaultProperties;
-import org.springframework.cloud.vault.config.VaultConfigOperations;
-import org.springframework.cloud.vault.config.VaultTemplate;
-import org.springframework.cloud.vault.util.CanConnect;
-import org.springframework.cloud.vault.util.Settings;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assume.*;
 import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecureBackendAccessorFactory.*;
 
+import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.cloud.vault.config.VaultConfigOperations;
+import org.springframework.cloud.vault.config.VaultConfigTemplate;
+import org.springframework.cloud.vault.config.VaultProperties;
+import org.springframework.cloud.vault.util.CanConnect;
+import org.springframework.cloud.vault.util.IntegrationTestSupport;
+import org.springframework.cloud.vault.util.Settings;
+import org.springframework.vault.core.VaultOperations;
 
 /**
- * Integration tests for {@link VaultClient} using the postgresql secret backend. This
- * test requires a running PostgreSQL instance, see {@link #CONNECTION_URL}.
+ * Integration tests for
+ * {@link org.springframework.cloud.vault.config.VaultConfigTemplate} using the postgresql
+ * secret backend. This test requires a running PostgreSQL instance, see
+ * {@link #CONNECTION_URL}.
  *
  * @author Mark Paluch
  */
-public class PostgreSqlSecretIntegrationTests extends AbstractIntegrationTests {
+public class PostgreSqlSecretIntegrationTests extends IntegrationTestSupport {
 
 	private final static String POSTGRES_HOST = "localhost";
 	private final static int POSTGRES_PORT = 5432;
@@ -71,20 +71,23 @@ public class PostgreSqlSecretIntegrationTests extends AbstractIntegrationTests {
 		postgreSql.setEnabled(true);
 		postgreSql.setRole("readonly");
 
-		if (!prepare().hasSecret(postgreSql.getBackend())) {
+		if (!prepare().hasSecretBackend(postgreSql.getBackend())) {
 			prepare().mountSecret(postgreSql.getBackend());
 		}
 
-		prepare().write(String.format("%s/config/connection", postgreSql.getBackend()),
+		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
+
+		vaultOperations.write(
+				String.format("%s/config/connection", postgreSql.getBackend()),
 				Collections.singletonMap("connection_url", CONNECTION_URL));
 
-		prepare().write(
+		vaultOperations.write(
 				String.format("%s/roles/%s", postgreSql.getBackend(),
 						postgreSql.getRole()),
 				Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
 
-		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
-				ClientAuthentication.token(vaultProperties)).opsForConfig();
+		configOperations = new VaultConfigTemplate(vaultOperations, vaultProperties);
+
 	}
 
 	@Test

@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.config;
+
+import static org.springframework.cloud.vault.config.SecureBackendAccessors.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,8 +24,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
-import org.springframework.cloud.vault.VaultClient;
-import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -33,10 +32,8 @@ import org.springframework.core.PriorityOrdered;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.cloud.vault.config.SecureBackendAccessors.*;
-
 /**
- * {@link PropertySourceLocator} using {@link VaultClient}.
+ * {@link PropertySourceLocator} using {@link VaultConfigTemplate}.
  *
  * @author Spencer Gibb
  * @author Mark Paluch
@@ -44,7 +41,7 @@ import static org.springframework.cloud.vault.config.SecureBackendAccessors.*;
  */
 class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrdered {
 
-	private final VaultConfigOperations operations;
+	private final VaultConfigTemplate operations;
 	private final VaultProperties properties;
 	private final VaultGenericBackendProperties genericBackendProperties;
 	private final Collection<SecureBackendAccessor> backendAccessors;
@@ -57,7 +54,7 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 	 * @param genericBackendProperties must not be {@literal null}.
 	 * @param backendAccessors must not be {@literal null}.
 	 */
-	public VaultPropertySourceLocator(VaultConfigOperations operations,
+	public VaultPropertySourceLocator(VaultConfigTemplate operations,
 			VaultProperties properties,
 			VaultGenericBackendProperties genericBackendProperties,
 			Collection<SecureBackendAccessor> backendAccessors) {
@@ -79,7 +76,8 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 
 		if (environment instanceof ConfigurableEnvironment) {
 
-			CompositePropertySource propertySource = createCompositePropertySource((ConfigurableEnvironment) environment);
+			CompositePropertySource propertySource = createCompositePropertySource(
+					(ConfigurableEnvironment) environment);
 			initialize(propertySource);
 
 			return propertySource;
@@ -130,8 +128,9 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 
 				if (StringUtils.hasText(propertySourceContext)) {
 
-					VaultPropertySource vaultPropertySource = createVaultPropertySource(generic(
-							genericBackendProperties.getBackend(), propertySourceContext));
+					VaultPropertySource vaultPropertySource = createVaultPropertySource(
+							generic(genericBackendProperties.getBackend(),
+									propertySourceContext));
 
 					propertySource.addPropertySource(vaultPropertySource);
 				}
@@ -140,7 +139,8 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 
 		for (SecureBackendAccessor backendAccessor : backendAccessors) {
 
-			VaultPropertySource vaultPropertySource = createVaultPropertySource(backendAccessor);
+			VaultPropertySource vaultPropertySource = createVaultPropertySource(
+					backendAccessor);
 			propertySource.addPropertySource(vaultPropertySource);
 		}
 		return propertySource;
@@ -153,7 +153,8 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 		}
 	}
 
-	private VaultPropertySource createVaultPropertySource(SecureBackendAccessor accessor) {
+	private VaultPropertySource createVaultPropertySource(
+			SecureBackendAccessor accessor) {
 		return new VaultPropertySource(this.operations, this.properties, accessor);
 	}
 

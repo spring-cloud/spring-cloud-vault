@@ -15,35 +15,33 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecureBackendAccessorFactory.*;
+
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.cloud.vault.AbstractIntegrationTests;
-import org.springframework.cloud.vault.ClientAuthentication;
-import org.springframework.cloud.vault.VaultClient;
-import org.springframework.cloud.vault.VaultProperties;
-import org.springframework.cloud.vault.config.VaultConfigOperations;
-import org.springframework.cloud.vault.config.VaultTemplate;
-import org.springframework.cloud.vault.util.CanConnect;
-import org.springframework.cloud.vault.util.Settings;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecureBackendAccessorFactory.*;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.cloud.vault.config.VaultConfigOperations;
+import org.springframework.cloud.vault.config.VaultConfigTemplate;
+import org.springframework.cloud.vault.config.VaultProperties;
+import org.springframework.cloud.vault.util.CanConnect;
+import org.springframework.cloud.vault.util.IntegrationTestSupport;
+import org.springframework.cloud.vault.util.Settings;
+import org.springframework.vault.core.VaultOperations;
 
 /**
- * Integration tests for {@link VaultClient} using the cassandra secret backend. This test
- * requires a running Cassandra instance, see {@link #CASSANDRA_HOST} and other
+ * Integration tests for {@link VaultConfigTemplate} using the cassandra secret backend.
+ * This test requires a running Cassandra instance, see {@link #CASSANDRA_HOST} and other
  * {@code CASSANDRA_*} properties.
  *
  * @author Mark Paluch
  */
-public class CassandraSecretIntegrationTests extends AbstractIntegrationTests {
+public class CassandraSecretIntegrationTests extends IntegrationTestSupport {
 
 	private final static String CASSANDRA_HOST = "localhost";
 	private final static int CASSANDRA_PORT = 9042;
@@ -71,26 +69,26 @@ public class CassandraSecretIntegrationTests extends AbstractIntegrationTests {
 		cassandra.setEnabled(true);
 		cassandra.setRole("readonly");
 
-		if (!prepare().hasSecret(cassandra.getBackend())) {
+		if (!prepare().hasSecretBackend(cassandra.getBackend())) {
 			prepare().mountSecret(cassandra.getBackend());
 		}
+
+		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
 		Map<String, String> connection = new HashMap<>();
 		connection.put("hosts", CASSANDRA_HOST);
 		connection.put("username", CASSANDRA_USERNAME);
 		connection.put("password", CASSANDRA_PASSWORD);
 
-		prepare().write(String.format("%s/config/connection", cassandra.getBackend()),
+		vaultOperations.write(
+				String.format("%s/config/connection", cassandra.getBackend()),
 				connection);
 
-		prepare()
-				.write(String.format("%s/roles/%s", cassandra.getBackend(),
-						cassandra.getRole()),
-						Collections.singletonMap("creation_cql",
-								CREATE_USER_AND_GRANT_CQL));
+		vaultOperations.write(
+				String.format("%s/roles/%s", cassandra.getBackend(), cassandra.getRole()),
+				Collections.singletonMap("creation_cql", CREATE_USER_AND_GRANT_CQL));
 
-		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
-				ClientAuthentication.token(vaultProperties)).opsForConfig();
+		configOperations = new VaultConfigTemplate(vaultOperations, vaultProperties);
 	}
 
 	@Test

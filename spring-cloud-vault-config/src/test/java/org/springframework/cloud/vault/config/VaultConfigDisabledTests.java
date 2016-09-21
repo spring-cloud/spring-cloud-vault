@@ -27,11 +27,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.vault.client.VaultClient;
 
 /**
  * Integration test using config infrastructure with token authentication. In case this
@@ -52,7 +52,7 @@ public class VaultConfigDisabledTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		vaultRule.prepare().writeSecret("testVaultApp",
+		vaultRule.prepare().getVaultOperations().write("secret/testVaultApp",
 				Collections.singletonMap("vault.value", "foo"));
 	}
 

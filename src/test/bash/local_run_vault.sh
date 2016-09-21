@@ -6,6 +6,6 @@
 
 BASEDIR=`dirname $0`/../../..
 
-./vault/vault server -config=${BASEDIR}/spring-cloud-vault-core/src/test/resources/vault.conf
+./vault/vault server -config=${BASEDIR}/src/test/bash/vault.conf
 
 exit $?

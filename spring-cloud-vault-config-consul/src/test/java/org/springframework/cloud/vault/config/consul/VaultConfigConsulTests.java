@@ -44,6 +44,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.vault.core.VaultOperations;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Integration tests using the consul secret backend. In case this test should fail
@@ -72,7 +74,7 @@ public class VaultConfigConsulTests {
 	};
 
 	/**
-	 * Initialize the rabbitmq secret backend.
+	 * Initialize the consul secret backend.
 	 *
 	 * @throws Exception
 	 */
@@ -84,27 +86,28 @@ public class VaultConfigConsulTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		if (!vaultRule.prepare().hasSecret("consul")) {
+		if (!vaultRule.prepare().hasSecretBackend("consul")) {
 			vaultRule.prepare().mountSecret("consul");
 		}
 
-		TestRestTemplate restTemplate = new TestRestTemplate();
+		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
+		RestTemplate restTemplate = new RestTemplate();
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("X-Consul-Token", CONSUL_ACL_MASTER_TOKEN);
 		HttpEntity<String> requestEntity = new HttpEntity<>(
 				"{\"Name\": \"sample\", \"Type\": \"management\"}", headers);
 		ResponseEntity<Map<String, String>> tokenResponse = restTemplate.exchange(
-				"http://{address}/v1/acl/create", HttpMethod.PUT, requestEntity,
-				STRING_MAP, CONNECTION_URL);
+				"http://{host}:{port}/v1/acl/create", HttpMethod.PUT, requestEntity,
+				STRING_MAP, CONSUL_HOST, CONSUL_PORT);
 
 		Map<String, String> consulAccess = new HashMap<>();
 		consulAccess.put("address", CONNECTION_URL);
 		consulAccess.put("token", tokenResponse.getBody().get("ID"));
 
-		vaultRule.prepare().write("consul/config/access", consulAccess);
+		vaultOperations.write("consul/config/access", consulAccess);
 
-		vaultRule.prepare().write("consul/roles/readonly", Collections
+		vaultOperations.write("consul/roles/readonly", Collections
 				.singletonMap("policy", Base64.encode(POLICY.getBytes())));
 	}
 

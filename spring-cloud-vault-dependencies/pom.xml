@@ -22,28 +22,29 @@
 	<properties>
 		<spring-cloud-context.version>1.1.2.BUILD-SNAPSHOT</spring-cloud-context.version>
 		<spring-boot.version>1.4.0.RELEASE</spring-boot.version>
+		<spring-vault.version>1.0.0.BUILD-SNAPSHOT</spring-vault.version>
 		<httpclient.version>4.5.2</httpclient.version>
 		<httpcore.version>4.4.4</httpcore.version>
 		<netty.version>4.1.0.Final</netty.version>
 		<okhttp.version>2.7.5</okhttp.version>
+		<slf4j.version>1.7.21</slf4j.version>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
+
+			<!-- Spring Vault -->
+			<dependency>
+				<groupId>org.springframework.vault</groupId>
+				<artifactId>spring-vault-core</artifactId>
+				<version>${spring-vault.version}</version>
+			</dependency>
 
 			<!-- Spring Cloud Vault -->
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-vault-core</artifactId>
 				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-vault-core</artifactId>
-				<version>${project.version}</version>
-				<type>test-jar</type>
-				<scope>test</scope>
 			</dependency>
 
 			<dependency>
@@ -117,6 +118,13 @@
 				<artifactId>okhttp</artifactId>
 				<version>${okhttp.version}</version>
 				<optional>true</optional>
+			</dependency>
+
+			<!-- Logging -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
 			</dependency>
 
 			<!-- Testing -->

@@ -15,46 +15,42 @@
  */
 package org.springframework.cloud.vault.config;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.cloud.vault.AbstractIntegrationTests;
-import org.springframework.cloud.vault.ClientAuthentication;
-import org.springframework.cloud.vault.VaultClient;
-import org.springframework.cloud.vault.VaultProperties;
-import org.springframework.cloud.vault.util.Settings;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.cloud.vault.config.SecureBackendAccessors.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.cloud.vault.util.IntegrationTestSupport;
+import org.springframework.cloud.vault.util.Settings;
 
 /**
- * Integration tests for {@link VaultClient} using the generic secret backend.
+ * Integration tests for {@link VaultConfigTemplate} using the generic secret backend.
  *
  * @author Mark Paluch
  */
-public class GenericSecretIntegrationTests extends AbstractIntegrationTests {
+public class GenericSecretIntegrationTests extends IntegrationTestSupport {
 
-	protected VaultProperties vaultProperties = Settings.createVaultProperties();
-	protected VaultConfigOperations configOperations;
+	private VaultProperties vaultProperties = Settings.createVaultProperties();
+	private VaultConfigOperations configOperations;
 
 	@Before
 	public void setUp() throws Exception {
 
 		vaultProperties.setFailFast(false);
-		prepare().writeSecret("app-name", (Map) createData());
+		prepare().getVaultOperations().write("secret/app-name", (Map) createData());
 
-		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
-				ClientAuthentication.token(vaultProperties)).opsForConfig();
+		configOperations = new VaultConfigTemplate(prepare().getVaultOperations(),
+				vaultProperties);
 	}
 
 	@Test
 	public void shouldReturnSecretsCorrectly() throws Exception {
 
-		Map<String, String> secretProperties = configOperations.read(generic("secret",
-				"app-name"));
+		Map<String, String> secretProperties = configOperations
+				.read(generic("secret", "app-name"));
 
 		assertThat(secretProperties).containsAllEntriesOf(createExpectedMap());
 	}
@@ -62,8 +58,8 @@ public class GenericSecretIntegrationTests extends AbstractIntegrationTests {
 	@Test
 	public void shouldReturnNullIfNotFound() throws Exception {
 
-		Map<String, String> secretProperties = configOperations.read(generic("secret",
-				"missing"));
+		Map<String, String> secretProperties = configOperations
+				.read(generic("secret", "missing"));
 
 		assertThat(secretProperties).isEmpty();
 	}

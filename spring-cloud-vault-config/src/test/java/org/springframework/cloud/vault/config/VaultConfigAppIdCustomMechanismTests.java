@@ -19,6 +19,8 @@ package org.springframework.cloud.vault.config;
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -29,14 +31,18 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.cloud.vault.AppIdUserIdMechanism;
 import org.springframework.cloud.vault.config.VaultConfigAppIdCustomMechanismTests.BootstrapConfiguration;
-import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.vault.authentication.AppIdAuthentication;
+import org.springframework.vault.authentication.AppIdAuthenticationOptions;
+import org.springframework.vault.authentication.AppIdUserIdMechanism;
+import org.springframework.vault.authentication.ClientAuthentication;
+import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.core.VaultOperations;
 
 /**
  * @author Mark Paluch
@@ -54,10 +60,6 @@ public class VaultConfigAppIdCustomMechanismTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		vaultRule.prepare().writeSecret(
-				VaultConfigAppIdCustomMechanismTests.class.getSimpleName(),
-				Collections.singletonMap("vault.value", "foo"));
-
 		VaultProperties vaultProperties = Settings.createVaultProperties();
 		vaultProperties.setAuthentication(VaultProperties.AuthenticationMethod.APPID);
 
@@ -65,12 +67,29 @@ public class VaultConfigAppIdCustomMechanismTests {
 			vaultRule.prepare().mountAuth(vaultProperties.getAppId().getAppIdPath());
 		}
 
-		vaultRule.prepare()
-				.mapAppId(VaultConfigAppIdCustomMechanismTests.class.getSimpleName());
-		vaultRule.prepare().mapUserId(
-				VaultConfigAppIdCustomMechanismTests.class.getSimpleName(),
-				new StaticUserIdMechanism().createUserId());
+		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
+		String appId = VaultConfigAppIdCustomMechanismTests.class.getSimpleName();
+
+		vaultOperations.write(
+				"secret/" + VaultConfigAppIdCustomMechanismTests.class.getSimpleName(),
+				Collections.singletonMap("vault.value", "foo"));
+
+		Map<String, String> appIdData = new HashMap<String, String>();
+		appIdData.put("value", "root"); // policy
+		appIdData.put("display_name", "this is my test application");
+
+		vaultOperations.write(String.format("auth/app-id/map/app-id/%s", appId),
+				appIdData);
+
+		Map<String, String> userIdData = new HashMap<String, String>();
+		userIdData.put("value", appId); // name of the app-id
+		userIdData.put("cidr_block", "0.0.0.0/0");
+
+		String userId = new StaticUserIdMechanism().createUserId();
+
+		vaultOperations.write(String.format("auth/app-id/map/user-id/%s", userId),
+				userIdData);
 	}
 
 	@Value("${vault.value}")
@@ -78,7 +97,6 @@ public class VaultConfigAppIdCustomMechanismTests {
 
 	@Test
 	public void contextLoads() {
-
 		assertThat(configValue).isEqualTo("foo");
 	}
 
@@ -93,10 +111,16 @@ public class VaultConfigAppIdCustomMechanismTests {
 	@Configuration
 	public static class BootstrapConfiguration {
 
-		@Bean
 		@ConditionalOnProperty("use.custom.config")
-		AppIdUserIdMechanism appIdUserIdMechanism() {
-			return new StaticUserIdMechanism();
+		@Bean
+		ClientAuthentication clientAuthentication(VaultClient vaultClient) {
+			return new AppIdAuthentication(
+					AppIdAuthenticationOptions
+							.builder()
+							.appId("VaultConfigAppIdCustomMechanismTests")
+							.userIdMechanism(new StaticUserIdMechanism()).build(),
+					vaultClient);
+
 		}
 	}
 

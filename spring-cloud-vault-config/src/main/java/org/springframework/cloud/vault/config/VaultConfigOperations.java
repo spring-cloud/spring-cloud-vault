@@ -15,12 +15,7 @@
  */
 package org.springframework.cloud.vault.config;
 
-import java.net.URI;
 import java.util.Map;
-
-import org.springframework.cloud.vault.VaultClientResponse;
-import org.springframework.cloud.vault.VaultProperties;
-import org.springframework.cloud.vault.VaultToken;
 
 /**
  * Interface that specified a basic set of Vault operations, implemented by
@@ -40,5 +35,4 @@ public interface VaultConfigOperations {
 	 * @throws IllegalStateException if {@link VaultProperties#isFailFast()} is enabled.
 	 */
 	Map<String, String> read(SecureBackendAccessor secureBackendAccessor);
-
 }

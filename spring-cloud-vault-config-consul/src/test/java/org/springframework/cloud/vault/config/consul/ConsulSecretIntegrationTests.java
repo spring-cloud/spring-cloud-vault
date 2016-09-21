@@ -15,19 +15,23 @@
  */
 package org.springframework.cloud.vault.config.consul;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+import static org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration.ConsulSecureBackendAccessorFactory.*;
+
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.boot.test.TestRestTemplate;
-import org.springframework.cloud.vault.AbstractIntegrationTests;
-import org.springframework.cloud.vault.ClientAuthentication;
-import org.springframework.cloud.vault.VaultClient;
-import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.cloud.vault.config.VaultConfigOperations;
-import org.springframework.cloud.vault.config.VaultTemplate;
+import org.springframework.cloud.vault.config.VaultConfigTemplate;
+import org.springframework.cloud.vault.config.VaultProperties;
 import org.springframework.cloud.vault.util.CanConnect;
+import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -35,21 +39,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Base64Utils;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration.ConsulSecureBackendAccessorFactory.*;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.springframework.vault.core.VaultOperations;
 
 /**
- * Integration tests for {@link VaultClient} using the consul secret backend. This test
- * requires a running Consul instance, see {@link #CONNECTION_URL}.
+ * Integration tests for {@link VaultConfigTemplate} using the consul secret backend. This
+ * test requires a running Consul instance, see {@link #CONNECTION_URL}.
  *
  * @author Mark Paluch
  */
-public class ConsulSecretIntegrationTests extends AbstractIntegrationTests {
+public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 
 	private final static String CONSUL_HOST = "localhost";
 	private final static int CONSUL_PORT = 8500;
@@ -82,9 +80,11 @@ public class ConsulSecretIntegrationTests extends AbstractIntegrationTests {
 		consul.setEnabled(true);
 		consul.setRole("readonly");
 
-		if (!prepare().hasSecret(consul.getBackend())) {
+		if (!prepare().hasSecretBackend(consul.getBackend())) {
 			prepare().mountSecret(consul.getBackend());
 		}
+
+		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("X-Consul-Token", CONSUL_ACL_MASTER_TOKEN);
@@ -98,16 +98,15 @@ public class ConsulSecretIntegrationTests extends AbstractIntegrationTests {
 		consulAccess.put("address", CONNECTION_URL);
 		consulAccess.put("token", tokenResponse.getBody().get("ID"));
 
-		prepare().write(String.format("%s/config/access", consul.getBackend()),
+		vaultOperations.write(String.format("%s/config/access", consul.getBackend()),
 				consulAccess);
 
-		prepare().write(
+		vaultOperations.write(
 				String.format("%s/roles/%s", consul.getBackend(), consul.getRole()),
 				Collections.singletonMap("policy",
 						Base64Utils.encodeToString(POLICY.getBytes())));
 
-		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
-				ClientAuthentication.token(vaultProperties)).opsForConfig();
+		configOperations = new VaultConfigTemplate(vaultOperations, vaultProperties);
 	}
 
 	@Test

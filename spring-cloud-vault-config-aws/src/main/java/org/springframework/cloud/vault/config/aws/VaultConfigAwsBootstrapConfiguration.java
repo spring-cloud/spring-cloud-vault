@@ -20,8 +20,8 @@ import java.util.Map;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.vault.config.SecureBackendAccessor;
-import org.springframework.cloud.vault.VaultSecretBackend;
 import org.springframework.cloud.vault.config.SecureBackendAccessorFactory;
+import org.springframework.cloud.vault.config.VaultSecretBackend;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
@@ -59,16 +59,15 @@ public class VaultConfigAwsBootstrapConfiguration {
 
 		/**
 		 * Creates a {@link SecureBackendAccessor} for a secure backend using
-		 * {@link VaultAwsProperties}. This accessor transforms Vault's
-		 * username/password property names to names provided with
+		 * {@link VaultAwsProperties}. This accessor transforms Vault's username/password
+		 * property names to names provided with
 		 * {@link VaultAwsProperties#getAccessKeyProperty()} and
 		 * {@link VaultAwsProperties#getSecretKeyProperty()}.
 		 *
 		 * @param properties must not be {@literal null}.
 		 * @return the {@link SecureBackendAccessor}
 		 */
-		public static SecureBackendAccessor forAws(
-				final VaultAwsProperties properties) {
+		public static SecureBackendAccessor forAws(final VaultAwsProperties properties) {
 			Assert.notNull(properties, "VaultAwsProperties must not be null");
 
 			return new SecureBackendAccessor() {
@@ -93,8 +92,10 @@ public class VaultConfigAwsBootstrapConfiguration {
 						Map<String, String> input) {
 
 					Map<String, String> result = new HashMap();
-					result.put(properties.getAccessKeyProperty(), input.get("access_key"));
-					result.put(properties.getSecretKeyProperty(), input.get("secret_key"));
+					result.put(properties.getAccessKeyProperty(),
+							input.get("access_key"));
+					result.put(properties.getSecretKeyProperty(),
+							input.get("secret_key"));
 
 					return result;
 				}

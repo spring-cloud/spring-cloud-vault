@@ -40,6 +40,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PlainTextAuthProvider;
 import com.datastax.driver.core.Session;
+import org.springframework.vault.core.VaultOperations;
 
 /**
  * Integration tests using the cassandra secret backend. In case this test should fail because of SSL make sure you run
@@ -76,19 +77,21 @@ public class VaultConfigCassandraTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		if (!vaultRule.prepare().hasSecret("cassandra")) {
+		if (!vaultRule.prepare().hasSecretBackend("cassandra")) {
 			vaultRule.prepare().mountSecret("cassandra");
 		}
+
+		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
 		Map<String, String> connection = new HashMap<>();
 		connection.put("hosts", CASSANDRA_HOST);
 		connection.put("username", CASSANDRA_USERNAME);
 		connection.put("password", CASSANDRA_PASSWORD);
 
-		vaultRule.prepare().write(String.format("%s/config/connection", "cassandra"),
+		vaultOperations.write(String.format("%s/config/connection", "cassandra"),
 				connection);
 
-		vaultRule.prepare().write("cassandra/roles/readonly",
+		vaultOperations.write("cassandra/roles/readonly",
 				Collections.singletonMap("creation_cql", CREATE_USER_AND_GRANT_CQL));
 	}
 

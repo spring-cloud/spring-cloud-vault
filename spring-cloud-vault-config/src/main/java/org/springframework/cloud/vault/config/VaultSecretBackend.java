@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.vault;
+package org.springframework.cloud.vault.config;
 
 /**
- * Interface to obtain a UserId for AppId authentication.
+ * A secret backend that can return secrets from Vault.
  *
  * @author Mark Paluch
  */
-public interface AppIdUserIdMechanism {
+public interface VaultSecretBackend {
 
 	/**
-	 * Creates a UserId for AppId authentication.
+	 * Backend path.
 	 *
-	 * @return the UserId.
+	 * @return the backend path.
 	 */
-	String createUserId();
+	String getBackend();
+
+	/**
+	 *
+	 * @return {@literal true} if the backend is enabled.
+	 */
+	boolean isEnabled();
 }

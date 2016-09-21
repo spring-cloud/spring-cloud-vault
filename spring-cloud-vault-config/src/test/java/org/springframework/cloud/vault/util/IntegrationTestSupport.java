@@ -14,25 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.vault;
+package org.springframework.cloud.vault.util;
 
-import lombok.Data;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.junit.Rule;
+import org.springframework.cloud.vault.util.PrepareVault;
+import org.springframework.cloud.vault.util.VaultRule;
 
 /**
- * Value object to bind HTTP API responses for sys/health.
- *
- * @author Stuart Ingram
- * @author Bill Koch
+ * Base class for integration tests using Vault.
+ * 
+ * @author Mark Paluch
  */
-@Data
-public class VaultHealthResponse {
+public abstract class IntegrationTestSupport {
 
-	private boolean initialized;
-	private boolean sealed;
-	private boolean standby;
+	@Rule
+	public final VaultRule vaultRule = new VaultRule();
 
-	@JsonProperty("server_time_utc")
-	private int serverTimeUtc;
+	public final PrepareVault prepare() {
+		return vaultRule.prepare();
+	}
 }

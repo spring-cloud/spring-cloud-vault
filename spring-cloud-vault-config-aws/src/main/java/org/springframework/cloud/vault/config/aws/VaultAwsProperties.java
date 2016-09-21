@@ -17,7 +17,7 @@ package org.springframework.cloud.vault.config.aws;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.vault.VaultSecretBackend;
+import org.springframework.cloud.vault.config.VaultSecretBackend;
 
 import lombok.Data;
 

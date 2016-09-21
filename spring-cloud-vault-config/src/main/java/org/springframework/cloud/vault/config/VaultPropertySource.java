@@ -19,20 +19,19 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.util.Assert;
 
-import lombok.extern.apachecommons.CommonsLog;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * A {@link EnumerablePropertySource} backed by {@link VaultConfigOperations}.
+ * A {@link EnumerablePropertySource} backed by {@link VaultConfigTemplate}.
  *
  * @author Spencer Gibb
  * @author Mark Paluch
  */
-@CommonsLog
-class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations> {
+@Slf4j
+class VaultPropertySource extends EnumerablePropertySource<VaultConfigTemplate> {
 
 	private final VaultProperties vaultProperties;
 	private final SecureBackendAccessor secureBackendAccessor;
@@ -45,12 +44,12 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations
 	 * @param properties must not be {@literal null}.
 	 * @param secureBackendAccessor must not be {@literal null}.
 	 */
-	public VaultPropertySource(VaultConfigOperations operations,
-			VaultProperties properties, SecureBackendAccessor secureBackendAccessor) {
+	public VaultPropertySource(VaultConfigTemplate operations, VaultProperties properties,
+			SecureBackendAccessor secureBackendAccessor) {
 
 		super(secureBackendAccessor.getName(), operations);
 
-		Assert.notNull(operations, "VaultConfigOperations must not be null!");
+		Assert.notNull(operations, "VaultConfigTemplate must not be null!");
 		Assert.notNull(properties, "VaultProperties must not be null!");
 		Assert.notNull(secureBackendAccessor, "SecureBackendAccessor must not be null!");
 

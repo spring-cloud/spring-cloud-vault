@@ -15,36 +15,30 @@
  */
 package org.springframework.cloud.vault.config;
 
-import java.net.URI;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.cloud.vault.ClientAuthentication;
-import org.springframework.cloud.vault.VaultClient;
-import org.springframework.cloud.vault.VaultClientResponse;
-import org.springframework.cloud.vault.VaultProperties;
-import org.springframework.cloud.vault.config.VaultOperations.SessionCallback;
-import org.springframework.cloud.vault.config.VaultOperations.VaultSession;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.vault.client.VaultResponseEntity;
+import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.support.VaultResponse;
 
-import lombok.extern.apachecommons.CommonsLog;
-
-import org.apache.commons.logging.Log;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Central class to retrieve configuration from Vault.
  * 
  * @author Mark Paluch
- * @see VaultClient
- * @see ClientAuthentication
+ * @see VaultOperations
  */
-@CommonsLog
+@Slf4j
 public class VaultConfigTemplate implements VaultConfigOperations {
 
 	private final VaultOperations vaultOperations;
 	private final VaultProperties properties;
-	private final VaultConfigSessionCallback callback;
 
 	/**
 	 * Creates a new {@link VaultConfigTemplate}.
@@ -52,38 +46,48 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param properties must not be {@literal null}.
 	 */
-	public VaultConfigTemplate(VaultOperations vaultOperations, VaultProperties properties) {
+	public VaultConfigTemplate(VaultOperations vaultOperations,
+			VaultProperties properties) {
 
 		Assert.notNull(vaultOperations, "VaultOperations must not be null!");
 		Assert.notNull(properties, "VaultProperties must not be null!");
 
 		this.vaultOperations = vaultOperations;
 		this.properties = properties;
-		this.callback = new VaultConfigSessionCallback(log);
 	}
 
-	@Override
-	public Map<String, String> read(SecureBackendAccessor secureBackendAccessor) {
+	public Map<String, String> read(final SecureBackendAccessor secureBackendAccessor) {
 
 		Assert.notNull(secureBackendAccessor, "SecureBackendAccessor must not be null!");
 
-		VaultClientResponse response = vaultOperations.doWithVault("{backend}/{key}",
-				secureBackendAccessor.variables(), callback);
+		VaultResponseEntity<VaultResponse> response = vaultOperations.doWithVault(
+				new VaultOperations.SessionCallback<VaultResponseEntity<VaultResponse>>() {
+					@Override
+					public VaultResponseEntity<VaultResponse> doWithVault(
+							VaultOperations.VaultSession session) {
+
+						return session.exchange("{backend}/{key}", HttpMethod.GET, null,
+								VaultResponse.class, secureBackendAccessor.variables());
+					}
+				});
+
+		log.info(String.format("Fetching config from Vault at: %s", response.getUri()));
 
 		if (response.getStatusCode() == HttpStatus.OK) {
-			return secureBackendAccessor
-					.transformProperties(response.getBody().getData());
+
+			Map<String, String> stringMap = toStringMap(response.getBody().getData());
+
+			return secureBackendAccessor.transformProperties(stringMap);
 		}
 
 		if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
-			log.info(String
-					.format("Could not locate PropertySource: %s", "key not found"));
+			log.info(String.format("Could not locate PropertySource: %s",
+					"key not found"));
 		}
 		else if (properties.isFailFast()) {
-			throw new IllegalStateException(
-					String.format(
-							"Could not locate PropertySource and the fail fast property is set, failing Status %d %s",
-							response.getStatusCode().value(), response.getMessage()));
+			throw new IllegalStateException(String.format(
+					"Could not locate PropertySource and the fail fast property is set, failing Status %d %s",
+					response.getStatusCode().value(), response.getMessage()));
 		}
 		else {
 			log.warn(String.format("Could not locate PropertySource: Status %d %s",
@@ -93,19 +97,17 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 		return Collections.emptyMap();
 	}
 
-	static class VaultConfigSessionCallback implements SessionCallback {
+	private Map<String, String> toStringMap(Map<String, Object> data) {
 
-		private final Log log;
+		Map<String, String> result = new HashMap<>();
+		for (String key : data.keySet()) {
+			Object value = data.get(key);
 
-		public VaultConfigSessionCallback(Log log) {
-			this.log = log;
+			if (value != null) {
+				result.put(key, value.toString());
+			}
 		}
 
-		@Override
-		public VaultClientResponse doWithVault(URI uri, VaultSession session) {
-			log.info(String.format("Fetching config from Vault at: %s", uri));
-			return session.read(uri);
-		}
+		return result;
 	}
-
 }

@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.vault;
+
+package org.springframework.cloud.vault.config;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.constraints.Range;
@@ -94,14 +95,14 @@ public class VaultProperties {
 		/**
 		 * Property value for UserId generation using a Mac-Address.
 		 * 
-		 * @see MacAddressUserId
+		 * @see org.springframework.vault.authentication.MacAddressUserId
 		 */
 		public final static String MAC_ADDRESS = "MAC_ADDRESS";
 
 		/**
 		 * Property value for UserId generation using an IP-Address.
 		 * 
-		 * @see IpAddressUserId
+		 * @see org.springframework.vault.authentication.IpAddressUserId
 		 */
 		public final static String IP_ADDRESS = "IP_ADDRESS";
 

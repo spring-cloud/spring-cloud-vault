@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.config;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -26,7 +26,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
-import org.springframework.cloud.vault.VaultHealthResponse;
+import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.core.VaultSysOperations;
+import org.springframework.vault.support.VaultHealth;
 
 /**
  * @author Mark Paluch
@@ -38,15 +40,26 @@ public class VaultHealthIndicatorUnitTests {
 	VaultHealthIndicator healthIndicator = new VaultHealthIndicator();
 
 	@Mock
-	VaultTemplate vaultTemplate;
+	VaultOperations vaultOperations;
+
+	@Mock
+	VaultSysOperations vaultSysOperations;
+
+	@Mock
+	VaultHealth healthResponse;
+
+	@Before
+	public void before() throws Exception {
+
+		when(vaultOperations.opsForSys()).thenReturn(vaultSysOperations);
+		when(vaultSysOperations.health()).thenReturn(healthResponse);
+	}
 
 	@Test
 	public void shouldReportHealthyService() throws Exception {
 
-		VaultHealthResponse healthResponse = new VaultHealthResponse();
-		healthResponse.setInitialized(true);
-
-		when(vaultTemplate.health()).thenReturn(healthResponse);
+		when(healthResponse.isInitialized()).thenReturn(true);
+		when(vaultOperations.opsForSys()).thenReturn(vaultSysOperations);
 
 		Health health = healthIndicator.health();
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
@@ -56,11 +69,8 @@ public class VaultHealthIndicatorUnitTests {
 	@Test
 	public void shouldReportSealedService() throws Exception {
 
-		VaultHealthResponse healthResponse = new VaultHealthResponse();
-		healthResponse.setInitialized(true);
-		healthResponse.setSealed(true);
-
-		when(vaultTemplate.health()).thenReturn(healthResponse);
+		when(healthResponse.isInitialized()).thenReturn(true);
+		when(healthResponse.isSealed()).thenReturn(true);
 
 		Health health = healthIndicator.health();
 
@@ -71,10 +81,6 @@ public class VaultHealthIndicatorUnitTests {
 	@Test
 	public void shouldReportUninitializedService() throws Exception {
 
-		VaultHealthResponse healthResponse = new VaultHealthResponse();
-
-		when(vaultTemplate.health()).thenReturn(healthResponse);
-
 		Health health = healthIndicator.health();
 
 		assertThat(health.getStatus()).isEqualTo(Status.DOWN);
@@ -84,11 +90,8 @@ public class VaultHealthIndicatorUnitTests {
 	@Test
 	public void shouldReportStandbyService() throws Exception {
 
-		VaultHealthResponse healthResponse = new VaultHealthResponse();
-		healthResponse.setInitialized(true);
-		healthResponse.setStandby(true);
-
-		when(vaultTemplate.health()).thenReturn(healthResponse);
+		when(healthResponse.isInitialized()).thenReturn(true);
+		when(healthResponse.isStandby()).thenReturn(true);
 
 		Health health = healthIndicator.health();
 
@@ -99,10 +102,11 @@ public class VaultHealthIndicatorUnitTests {
 	@Test
 	public void exceptionsShouldReportDownStatus() throws Exception {
 
-		when(vaultTemplate.health()).thenThrow(new IllegalStateException());
+		reset(vaultSysOperations);
+		when(vaultSysOperations.health()).thenThrow(new IllegalStateException());
 
 		Health health = healthIndicator.health();
 		assertThat(health.getStatus()).isEqualTo(Status.DOWN);
-		assertThat(health.getDetails()).isEmpty();
+		assertThat(health.getDetails()).containsKey("error");
 	}
 }

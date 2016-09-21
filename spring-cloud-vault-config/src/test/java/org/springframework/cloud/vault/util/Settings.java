@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.util;
 
 import java.io.File;
 
-import org.springframework.cloud.vault.VaultProperties;
-import org.springframework.cloud.vault.VaultToken;
+import org.springframework.cloud.vault.config.VaultProperties;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.vault.support.SslConfiguration;
+import org.springframework.vault.support.VaultToken;
 
 /**
  * Utility to retrieve settings during test.
@@ -37,11 +39,22 @@ public class Settings {
 
 		VaultProperties vaultProperties = new VaultProperties();
 		vaultProperties.getSsl().setTrustStorePassword("changeit");
-		vaultProperties.getSsl().setTrustStore(
-				new FileSystemResource(new File(workDir, "keystore.jks")));
+		vaultProperties.getSsl()
+				.setTrustStore(new FileSystemResource(new File(workDir, "keystore.jks")));
 		vaultProperties.setToken(token().getToken());
 
 		return vaultProperties;
+	}
+
+	/**
+	 * @return the vault properties.
+	 */
+	public static SslConfiguration createSslConfiguration() {
+
+		File workDir = findWorkDir();
+
+		return SslConfiguration.forTrustStore(
+				new FileSystemResource(new File(workDir, "keystore.jks")), "changeit");
 	}
 
 	/**
@@ -55,8 +68,8 @@ public class Settings {
 	}
 
 	/**
-	 * Find the {@code work} directory, starting at the given {@code directory}. Search
-	 * is performed by walking the parent directories.
+	 * Find the {@code work} directory, starting at the given {@code directory}. Search is
+	 * performed by walking the parent directories.
 	 * @return the {@link File} pointing to the {@code work} directory
 	 * @throws IllegalStateException If the {@code work} directory cannot be found.
 	 */

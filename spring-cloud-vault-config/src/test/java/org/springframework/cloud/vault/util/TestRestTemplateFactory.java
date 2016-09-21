@@ -13,79 +13,84 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.vault;
+
+package org.springframework.cloud.vault.util;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
+import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
+import org.springframework.vault.support.ClientOptions;
+import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.client.DefaultResponseErrorHandler;
-
-import lombok.SneakyThrows;
+import org.springframework.web.client.RestTemplate;
 
 /**
- * Factory for {@link TestRestTemplate}. The template caches the
+ * Factory for {@link RestTemplate}. The template caches the
  * {@link ClientHttpRequestFactory} once it was initialized. Changes to timeouts or the
  * SSL configuration won't be applied once a {@link ClientHttpRequestFactory} was created
  * for the first time.
+ * 
  * @author Mark Paluch
  */
 public class TestRestTemplateFactory {
 
-	private final static AtomicReference<ClientHttpRequestFactory> factoryCache = new AtomicReference<>();
+	private static final AtomicReference<ClientHttpRequestFactory> factoryCache = new AtomicReference<ClientHttpRequestFactory>();
 
 	/**
-	 * Create a new {@link TestRestTemplate} using the {@link VaultProperties}. The
+	 * Create a new {@link RestTemplate} using the {@link SslConfiguration}. The
 	 * underlying {@link ClientHttpRequestFactory} is cached. See
-	 * {@link #create(ClientHttpRequestFactory)} to create {@link TestRestTemplate} for a
+	 * {@link #create(ClientHttpRequestFactory)} to create {@link RestTemplate} for a
 	 * given {@link ClientHttpRequestFactory}.
 	 *
-	 * @param vaultProperties must not be {@literal null}.
+	 * @param sslConfiguration must not be {@literal null}.
 	 * @return
 	 */
-	@SneakyThrows
-	public static TestRestTemplate create(VaultProperties vaultProperties) {
+	public static RestTemplate create(SslConfiguration sslConfiguration) {
 
-		Assert.notNull(vaultProperties, "VaultProperties must not be null!");
+		Assert.notNull(sslConfiguration, "SslConfiguration must not be null!");
 
-		initializeClientHttpRequestFactory(vaultProperties);
-		return create(factoryCache.get());
+		try {
+			initializeClientHttpRequestFactory(sslConfiguration);
+			return create(factoryCache.get());
+		}
+		catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	/**
-	 * Create a new {@link TestRestTemplate} using the {@link ClientHttpRequestFactory}.
-	 * The {@link TestRestTemplate} will throw
+	 * Create a new {@link RestTemplate} using the {@link ClientHttpRequestFactory}. The
+	 * {@link RestTemplate} will throw
 	 * {@link org.springframework.web.client.HttpStatusCodeException exceptions} in error
-	 * cases and behave in that aspect like the regular
-	 * {@link org.springframework.web.client.RestTemplate}.
+	 * cases and behave in that aspect like the regular {@link RestTemplate}.
 	 *
 	 * @param requestFactory must not be {@literal null}.
 	 * @return
 	 */
-	@SneakyThrows
-	public static TestRestTemplate create(ClientHttpRequestFactory requestFactory) {
+	public static RestTemplate create(ClientHttpRequestFactory requestFactory) {
 
 		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null!");
 
-		TestRestTemplate testRestTemplate = new TestRestTemplate();
-		testRestTemplate.setErrorHandler(new DefaultResponseErrorHandler());
-		testRestTemplate.setRequestFactory(requestFactory);
+		RestTemplate RestTemplate = new RestTemplate();
+		RestTemplate.setErrorHandler(new DefaultResponseErrorHandler());
+		RestTemplate.setRequestFactory(requestFactory);
 
-		return testRestTemplate;
+		return RestTemplate;
 	}
 
-	private static void initializeClientHttpRequestFactory(VaultProperties vaultProperties)
-			throws Exception {
+	private static void initializeClientHttpRequestFactory(
+			SslConfiguration sslConfiguration) throws Exception {
 
 		if (factoryCache.get() != null) {
 			return;
 		}
 
 		final ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
-				.create(vaultProperties);
+				.create(new ClientOptions(), sslConfiguration);
 
 		if (factoryCache.compareAndSet(null, clientHttpRequestFactory)) {
 

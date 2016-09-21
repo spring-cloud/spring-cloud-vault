@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.vault.config;
 
-import org.springframework.cloud.vault.VaultSecretBackend;
-
 /**
  * Factory to convert {@link VaultSecretBackend} instance to a
  * {@link SecureBackendAccessor}.
