@@ -181,9 +181,12 @@ public class VaultProperties {
 
 	@Data
 	public static class Config {
+
 		/**
-		 * Used to force a PropertySourceLocator ordering.
-		 * This is useful to use Vault as an override on consul properties;
+		 * Used to set a {@link org.springframework.core.env.PropertySource} priority.
+		 * This is useful to use Vault as an override on other property sources.
+		 *
+		 * @see org.springframework.core.PriorityOrdered
 		 */
 		private int order = 0;
 	}

@@ -191,6 +191,7 @@ for SSL certificate validation
 Supported schemes are `http` and `https`.
 * `connection-timeout` sets the connection timeout in milliseconds
 * `read-timeout` sets the read timeout in milliseconds
+* `config.order` sets the order for the property source
 
 Enabling further integrations requires additional dependencies and
 configuration. Depending on how you have set up Vault you might need

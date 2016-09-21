@@ -161,6 +161,8 @@ spring.cloud.vault:
     scheme: https
     connection-timeout: 5000
     read-timeout: 15000
+    config:
+        order: -10
 ----
 
 * `host` sets the hostname of the Vault host. The host name will be used
@@ -170,6 +172,7 @@ for SSL certificate validation
 Supported schemes are `http` and `https`.
 * `connection-timeout` sets the connection timeout in milliseconds
 * `read-timeout` sets the read timeout in milliseconds
+* `config.order` sets the order for the property source
 
 Enabling further integrations requires additional dependencies and
 configuration. Depending on how you have set up Vault you might need
