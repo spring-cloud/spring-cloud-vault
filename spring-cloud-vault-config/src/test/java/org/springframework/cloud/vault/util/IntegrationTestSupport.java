@@ -17,8 +17,6 @@
 package org.springframework.cloud.vault.util;
 
 import org.junit.Rule;
-import org.springframework.cloud.vault.util.PrepareVault;
-import org.springframework.cloud.vault.util.VaultRule;
 
 /**
  * Base class for integration tests using Vault.

@@ -31,10 +31,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.core.ParameterizedTypeReference;
@@ -107,8 +105,8 @@ public class VaultConfigConsulTests {
 
 		vaultOperations.write("consul/config/access", consulAccess);
 
-		vaultOperations.write("consul/roles/readonly", Collections
-				.singletonMap("policy", Base64.encode(POLICY.getBytes())));
+		vaultOperations.write("consul/roles/readonly",
+				Collections.singletonMap("policy", Base64.encode(POLICY.getBytes())));
 	}
 
 	@Value("${spring.cloud.consul.token}")
