@@ -33,6 +33,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.StringUtils;
+import org.springframework.vault.core.VaultOperations;
 
 /**
  * Integration tests using the aws secret backend. In case this test should fail because
@@ -73,18 +74,20 @@ public class VaultConfigAwsTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		if (!vaultRule.prepare().hasSecret("aws")) {
+		if (!vaultRule.prepare().hasSecretBackend("aws")) {
 			vaultRule.prepare().mountSecret("aws");
 		}
+
+		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
 		Map<String, String> connection = new HashMap<>();
 		connection.put("region", AWS_REGION);
 		connection.put("access_key", AWS_ACCESS_KEY);
 		connection.put("secret_key", AWS_SECRET_KEY);
 
-		vaultRule.prepare().write("aws/config/root", connection);
+		vaultOperations.write("aws/config/root", connection);
 
-		vaultRule.prepare().write("aws/roles/readonly",
+		vaultOperations.write("aws/roles/readonly",
 				Collections.singletonMap("arn", ARN));
 	}
 

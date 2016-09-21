@@ -50,7 +50,7 @@ public class VaultConfigGenericBackendDisabledTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		vaultRule.prepare().writeSecret("testVaultApp",
+		vaultRule.prepare().getVaultOperations().write("secret/testVaultApp",
 				Collections.singletonMap("vault.value", "foo"));
 	}
 

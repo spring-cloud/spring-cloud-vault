@@ -18,7 +18,8 @@ package org.springframework.cloud.vault.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.cloud.vault.VaultHealthResponse;
+import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.support.VaultHealth;
 
 /**
  * @author Stuart Ingram
@@ -26,14 +27,14 @@ import org.springframework.cloud.vault.VaultHealthResponse;
 public class VaultHealthIndicator implements HealthIndicator {
 
 	@Autowired
-	private VaultTemplate vaultTemplate;
+	private VaultOperations vaultOperations;
 
 	@Override
 	public Health health() {
 
 		try {
 
-			VaultHealthResponse vaultHealthResponse = vaultTemplate.health();
+			VaultHealth vaultHealthResponse = vaultOperations.opsForSys().health();
 
 			if (!vaultHealthResponse.isInitialized()) {
 				return Health.down().withDetail("state", "Vault uninitialized").build();
@@ -44,14 +45,14 @@ public class VaultHealthIndicator implements HealthIndicator {
 			}
 
 			if (vaultHealthResponse.isStandby()) {
-				return Health.outOfService().withDetail("state", "Vault in standby").build();
+				return Health.outOfService().withDetail("state", "Vault in standby")
+						.build();
 			}
 
 			return Health.up().build();
 		}
 		catch (Exception e) {
-			return Health.down().build();
+			return Health.down(e).build();
 		}
 	}
-
 }

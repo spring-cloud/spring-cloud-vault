@@ -15,29 +15,28 @@
  */
 package org.springframework.cloud.vault.config;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.cloud.vault.util.Settings.*;
+
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.assertj.core.util.Files;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.cloud.vault.util.Settings.*;
-
-import org.assertj.core.util.Files;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.springframework.vault.core.VaultOperations;
 
 /**
  * Integration test using config infrastructure with TLS certificate authentication. In
@@ -61,15 +60,17 @@ public class VaultConfigTlsCertAuthenticationTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		vaultRule.prepare().writeSecret(
-				VaultConfigTlsCertAuthenticationTests.class.getSimpleName(),
-				Collections.singletonMap("vault.value", "foo"));
-
 		VaultProperties vaultProperties = Settings.createVaultProperties();
 
 		if (!vaultRule.prepare().hasAuth(vaultProperties.getSsl().getCertAuthPath())) {
 			vaultRule.prepare().mountAuth(vaultProperties.getSsl().getCertAuthPath());
 		}
+
+		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
+
+		vaultOperations.write(
+				"secret/" + VaultConfigTlsCertAuthenticationTests.class.getSimpleName(),
+				Collections.singletonMap("vault.value", "foo"));
 
 		File workDir = findWorkDir();
 
@@ -80,7 +81,7 @@ public class VaultConfigTlsCertAuthenticationTests {
 		role.put("certificate", certificate);
 		role.put("policies", "root");
 
-		vaultRule.prepare().write("auth/cert/certs/my-role", role);
+		vaultOperations.write("auth/cert/certs/my-role", role);
 	}
 
 	@Value("${vault.value}")

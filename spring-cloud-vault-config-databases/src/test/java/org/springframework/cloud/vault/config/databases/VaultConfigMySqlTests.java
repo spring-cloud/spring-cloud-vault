@@ -36,6 +36,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.vault.core.VaultOperations;
 
 /**
  * Integration tests using the mysql secret backend. In case this test should fail because of SSL make sure you run the
@@ -71,14 +72,16 @@ public class VaultConfigMySqlTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		if (!vaultRule.prepare().hasSecret("mysql")) {
+		if (!vaultRule.prepare().hasSecretBackend("mysql")) {
 			vaultRule.prepare().mountSecret("mysql");
 		}
 
-		vaultRule.prepare().write("mysql/config/connection",
+		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
+
+		vaultOperations.write("mysql/config/connection",
 				Collections.singletonMap("connection_url", ROOT_CREDENTIALS));
 
-		vaultRule.prepare().write("mysql/roles/readonly",
+		vaultOperations.write("mysql/roles/readonly",
 				Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
 	}
 

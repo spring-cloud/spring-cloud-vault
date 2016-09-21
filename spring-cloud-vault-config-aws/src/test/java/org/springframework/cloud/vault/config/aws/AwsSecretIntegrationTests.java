@@ -15,34 +15,32 @@
  */
 package org.springframework.cloud.vault.config.aws;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.cloud.vault.AbstractIntegrationTests;
-import org.springframework.cloud.vault.ClientAuthentication;
-import org.springframework.cloud.vault.VaultClient;
-import org.springframework.cloud.vault.VaultProperties;
-import org.springframework.cloud.vault.config.VaultConfigOperations;
-import org.springframework.cloud.vault.config.VaultTemplate;
-import org.springframework.cloud.vault.util.Settings;
-import org.springframework.util.StringUtils;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assume.*;
 import static org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrapConfiguration.AwsSecureBackendAccessorFactory.*;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.cloud.vault.config.VaultConfigOperations;
+import org.springframework.cloud.vault.config.VaultConfigTemplate;
+import org.springframework.cloud.vault.config.VaultProperties;
+import org.springframework.cloud.vault.util.IntegrationTestSupport;
+import org.springframework.cloud.vault.util.Settings;
+import org.springframework.util.StringUtils;
+import org.springframework.vault.core.VaultOperations;
 
 /**
- * Integration tests for {@link VaultClient} using the aws secret backend. This test
- * requires AWS credentials and a region, see {@link #AWS_ACCESS_KEY} and
+ * Integration tests for {@link VaultConfigTemplate} using the aws secret backend. This
+ * test requires AWS credentials and a region, see {@link #AWS_ACCESS_KEY} and
  * {@link #AWS_SECRET_KEY} to be provided externally.
  *
  * @author Mark Paluch
  */
-public class AwsSecretIntegrationTests extends AbstractIntegrationTests {
+public class AwsSecretIntegrationTests extends IntegrationTestSupport {
 
 	private final static String AWS_REGION = "eu-west-1";
 	private final static String AWS_ACCESS_KEY = System.getProperty("aws.access.key");
@@ -68,22 +66,25 @@ public class AwsSecretIntegrationTests extends AbstractIntegrationTests {
 		aws.setEnabled(true);
 		aws.setRole("readonly");
 
-		if (!prepare().hasSecret(aws.getBackend())) {
+		if (!prepare().hasSecretBackend(aws.getBackend())) {
 			prepare().mountSecret(aws.getBackend());
 		}
+
+		VaultOperations vaultOperations = prepare().getVaultOperations();
 
 		Map<String, String> connection = new HashMap<>();
 		connection.put("region", AWS_REGION);
 		connection.put("access_key", AWS_ACCESS_KEY);
 		connection.put("secret_key", AWS_SECRET_KEY);
 
-		prepare().write(String.format("%s/config/root", aws.getBackend()), connection);
+		vaultOperations.write(String.format("%s/config/root", aws.getBackend()),
+				connection);
 
-		prepare().write(String.format("%s/roles/%s", aws.getBackend(), aws.getRole()),
+		vaultOperations.write(
+				String.format("%s/roles/%s", aws.getBackend(), aws.getRole()),
 				Collections.singletonMap("arn", ARN));
 
-		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
-				ClientAuthentication.token(vaultProperties)).opsForConfig();
+		configOperations = new VaultConfigTemplate(vaultOperations, vaultProperties);
 	}
 
 	@Test

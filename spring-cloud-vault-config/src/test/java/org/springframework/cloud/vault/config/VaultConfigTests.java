@@ -27,12 +27,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.cloud.vault.VaultClient;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -53,7 +53,7 @@ public class VaultConfigTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		vaultRule.prepare().writeSecret("testVaultApp",
+		vaultRule.prepare().getVaultOperations().write("secret/testVaultApp",
 				Collections.singletonMap("vault.value", "foo"));
 	}
 

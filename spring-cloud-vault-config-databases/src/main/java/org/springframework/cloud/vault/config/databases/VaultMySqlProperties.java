@@ -2,9 +2,9 @@ package org.springframework.cloud.vault.config.databases;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.vault.VaultSecretBackend;
 
 import lombok.Data;
+import org.springframework.cloud.vault.config.VaultSecretBackend;
 
 /**
  * Configuration properties for Vault using the MySQL integration.

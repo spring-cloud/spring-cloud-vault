@@ -29,11 +29,13 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.vault.core.VaultOperations;
 
 /**
- * Integration test using config infrastructure with token authentication. In case this test should fail because of SSL
- * make sure you run the test within the spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore
- * is referenced with {@code ../work/keystore.jks}.
+ * Integration test using config infrastructure with token authentication. In case this
+ * test should fail because of SSL make sure you run the test within the
+ * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
+ * referenced with {@code ../work/keystore.jks}.
  * 
  * @author Mark Paluch
  */
@@ -48,11 +50,13 @@ public class VaultConfigWithContextTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		vaultRule.prepare().writeSecret("testVaultApp/my-profile",
+		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
+
+		vaultOperations.write("secret/testVaultApp/my-profile",
 				Collections.singletonMap("vault.value", "hello"));
 
-		vaultRule.prepare().writeSecret("testVaultApp",
-				Collections.singletonMap("vault.value", "worls"));
+		vaultOperations.write("secret/testVaultApp",
+				Collections.singletonMap("vault.value", "world"));
 	}
 
 	@Value("${vault.value}")
@@ -60,7 +64,6 @@ public class VaultConfigWithContextTests {
 
 	@Test
 	public void contextLoads() {
-
 		assertThat(configValue).isEqualTo("hello");
 	}
 

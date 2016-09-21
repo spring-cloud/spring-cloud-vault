@@ -15,34 +15,31 @@
  */
 package org.springframework.cloud.vault.config.rabbitmq;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration.RabbitMqSecureBackendAccessorFactory.*;
+
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.cloud.vault.AbstractIntegrationTests;
-import org.springframework.cloud.vault.ClientAuthentication;
-import org.springframework.cloud.vault.VaultClient;
-import org.springframework.cloud.vault.VaultProperties;
-import org.springframework.cloud.vault.config.VaultConfigOperations;
-import org.springframework.cloud.vault.config.VaultTemplate;
-import org.springframework.cloud.vault.util.CanConnect;
-import org.springframework.cloud.vault.util.Settings;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration.RabbitMqSecureBackendAccessorFactory.*;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.cloud.vault.config.VaultConfigTemplate;
+import org.springframework.cloud.vault.config.VaultProperties;
+import org.springframework.cloud.vault.util.CanConnect;
+import org.springframework.cloud.vault.util.IntegrationTestSupport;
+import org.springframework.cloud.vault.util.Settings;
+import org.springframework.vault.core.VaultOperations;
 
 /**
- * Integration tests for {@link VaultClient} using the rabbitmq secret backend. This test
- * requires a running RabbitMQ instance, see {@link #RABBITMQ_URI}.
+ * Integration tests for {@link VaultConfigTemplate} using the rabbitmq secret backend.
+ * This test requires a running RabbitMQ instance, see {@link #RABBITMQ_URI}.
  *
  * @author Mark Paluch
  */
-public class RabbitMqSecretIntegrationTests extends AbstractIntegrationTests {
+public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 
 	private final static int RABBITMQ_HTTP_MANAGEMENT_PORT = 15672;
 	private final static String RABBITMQ_HOST = "localhost";
@@ -56,7 +53,7 @@ public class RabbitMqSecretIntegrationTests extends AbstractIntegrationTests {
 	private final static String VHOSTS_ROLE = "{\"/\":{\"write\": \".*\", \"read\": \".*\"}}";
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
-	private VaultConfigOperations configOperations;
+	private VaultConfigTemplate configOperations;
 	private VaultRabbitMqProperties rabbitmq = new VaultRabbitMqProperties();
 
 	/**
@@ -67,13 +64,13 @@ public class RabbitMqSecretIntegrationTests extends AbstractIntegrationTests {
 	@Before
 	public void setUp() throws Exception {
 
-		assumeTrue(CanConnect.to(new InetSocketAddress(RABBITMQ_HOST,
-				RABBITMQ_HTTP_MANAGEMENT_PORT)));
+		assumeTrue(CanConnect
+				.to(new InetSocketAddress(RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT)));
 
 		rabbitmq.setEnabled(true);
 		rabbitmq.setRole("readonly");
 
-		if (!prepare().hasSecret(rabbitmq.getBackend())) {
+		if (!prepare().hasSecretBackend(rabbitmq.getBackend())) {
 			prepare().mountSecret(rabbitmq.getBackend());
 		}
 
@@ -82,15 +79,16 @@ public class RabbitMqSecretIntegrationTests extends AbstractIntegrationTests {
 		connection.put("username", RABBITMQ_USERNAME);
 		connection.put("password", RABBITMQ_PASSWORD);
 
-		prepare().write(String.format("%s/config/connection", rabbitmq.getBackend()),
-				connection);
+		VaultOperations vaultOperations = prepare().getVaultOperations();
 
-		prepare().write(
+		vaultOperations.write(
+				String.format("%s/config/connection", rabbitmq.getBackend()), connection);
+
+		vaultOperations.write(
 				String.format("%s/roles/%s", rabbitmq.getBackend(), rabbitmq.getRole()),
 				Collections.singletonMap("vhosts", VHOSTS_ROLE));
 
-		configOperations = new VaultTemplate(vaultProperties, prepare().newVaultClient(),
-				ClientAuthentication.token(vaultProperties)).opsForConfig();
+		configOperations = new VaultConfigTemplate(vaultOperations, vaultProperties);
 	}
 
 	@Test

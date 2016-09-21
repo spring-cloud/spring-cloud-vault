@@ -19,13 +19,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import lombok.extern.apachecommons.CommonsLog;
-import org.springframework.cloud.vault.VaultSecretBackend;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Mark Paluch
  */
-@CommonsLog
+@Slf4j
 public class SecureBackendFactories {
 
 	public static Collection<SecureBackendAccessor> createBackendAcessors(

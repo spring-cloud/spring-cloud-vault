@@ -21,7 +21,6 @@
 
 	<modules>
 		<module>spring-cloud-vault-dependencies</module>
-		<module>spring-cloud-vault-core</module>
 		<module>spring-cloud-vault-config</module>
 		<module>spring-cloud-vault-config-databases</module>
 		<module>spring-cloud-vault-config-consul</module>
@@ -52,6 +51,14 @@
 				<version>${project.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-vault-config</artifactId>
+				<version>${project.version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

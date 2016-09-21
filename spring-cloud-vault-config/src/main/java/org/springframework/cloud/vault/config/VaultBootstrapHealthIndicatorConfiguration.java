@@ -25,7 +25,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.vault.VaultBootstrapConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,13 +32,12 @@ import org.springframework.context.annotation.Configuration;
  * @author Stuart Ingram
  */
 @Configuration
-@EnableConfigurationProperties
 @ConditionalOnBean(VaultBootstrapConfiguration.class)
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @ConditionalOnExpression("${health.vault.enabled:true}")
 @AutoConfigureBefore({ EndpointAutoConfiguration.class })
-@AutoConfigureAfter({ HealthIndicatorAutoConfiguration.class })
-public class VaultConfigBootstrapHealthIndicator {
+@AutoConfigureAfter({ VaultBootstrapConfiguration.class, HealthIndicatorAutoConfiguration.class })
+public class VaultBootstrapHealthIndicatorConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean(name = "vaultHealthIndicator")

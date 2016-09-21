@@ -18,6 +18,8 @@ package org.springframework.cloud.vault.config;
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,16 +29,17 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.cloud.vault.IpAddressUserId;
-import org.springframework.cloud.vault.VaultProperties;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.vault.authentication.IpAddressUserId;
+import org.springframework.vault.core.VaultOperations;
 
 /**
- * Integration test using config infrastructure with AppId authentication. In case this test should fail because of SSL
- * make sure you run the test within the spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore
- * is referenced with {@code ../work/keystore.jks}.
+ * Integration test using config infrastructure with AppId authentication. In case this
+ * test should fail because of SSL make sure you run the test within the
+ * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
+ * referenced with {@code ../work/keystore.jks}.
  * 
  * @author Mark Paluch
  */
@@ -53,9 +56,6 @@ public class VaultConfigAppIdTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		vaultRule.prepare().writeSecret(VaultConfigAppIdTests.class.getSimpleName(),
-				Collections.singletonMap("vault.value", "foo"));
-
 		VaultProperties vaultProperties = Settings.createVaultProperties();
 		vaultProperties.setAuthentication(VaultProperties.AuthenticationMethod.APPID);
 		vaultProperties.getAppId().setUserId(VaultProperties.AppIdProperties.IP_ADDRESS);
@@ -64,9 +64,29 @@ public class VaultConfigAppIdTests {
 			vaultRule.prepare().mountAuth(vaultProperties.getAppId().getAppIdPath());
 		}
 
-		vaultRule.prepare().mapAppId(VaultConfigAppIdTests.class.getSimpleName());
-		vaultRule.prepare().mapUserId(VaultConfigAppIdTests.class.getSimpleName(),
-				new IpAddressUserId().createUserId());
+		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
+
+		String appId = VaultConfigAppIdTests.class.getSimpleName();
+
+		vaultOperations.write(
+				"secret/" + VaultConfigAppIdTests.class.getSimpleName(),
+				Collections.singletonMap("vault.value", "foo"));
+
+		Map<String, String> appIdData = new HashMap<String, String>();
+		appIdData.put("value", "root"); // policy
+		appIdData.put("display_name", "this is my test application");
+
+		vaultOperations.write(String.format("auth/app-id/map/app-id/%s", appId),
+				appIdData);
+
+		Map<String, String> userIdData = new HashMap<String, String>();
+		userIdData.put("value", appId); // name of the app-id
+		userIdData.put("cidr_block", "0.0.0.0/0");
+
+		String userId = new IpAddressUserId().createUserId();
+
+		vaultOperations.write(String.format("auth/app-id/map/user-id/%s", userId),
+				userIdData);
 	}
 
 	@Value("${vault.value}")

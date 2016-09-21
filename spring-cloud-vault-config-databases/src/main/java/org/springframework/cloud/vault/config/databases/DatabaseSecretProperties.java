@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import org.springframework.cloud.vault.VaultSecretBackend;
+import org.springframework.cloud.vault.config.VaultSecretBackend;
 
 /**
  * Configuration properties interface for database secrets.

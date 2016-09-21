@@ -39,18 +39,21 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.vault.core.VaultOperations;
 
 /**
- * Integration tests using the postgresql secret backend. In case this test should fail because of SSL make sure you run
- * the test within the spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is referenced with
- * {@code ../work/keystore.jks}.
+ * Integration tests using the postgresql secret backend. In case this test should fail
+ * because of SSL make sure you run the test within the
+ * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
+ * referenced with {@code ../work/keystore.jks}.
  * 
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = VaultConfigPostgreSqlTests.TestApplication.class)
 @IntegrationTest({ "spring.cloud.vault.postgresql.enabled=true",
-		"spring.cloud.vault.postgresql.role=readonly", "spring.datasource.url=jdbc:postgresql://localhost:5432/postgres?ssl=false" })
+		"spring.cloud.vault.postgresql.role=readonly",
+		"spring.datasource.url=jdbc:postgresql://localhost:5432/postgres?ssl=false" })
 public class VaultConfigPostgreSqlTests {
 
 	private final static String POSTGRES_HOST = "localhost";
@@ -77,14 +80,16 @@ public class VaultConfigPostgreSqlTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		if (!vaultRule.prepare().hasSecret("postgresql")) {
+		if (!vaultRule.prepare().hasSecretBackend("postgresql")) {
 			vaultRule.prepare().mountSecret("postgresql");
 		}
 
-		vaultRule.prepare().write("postgresql/config/connection",
+		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
+
+		vaultOperations.write("postgresql/config/connection",
 				Collections.singletonMap("connection_url", CONNECTION_URL));
 
-		vaultRule.prepare().write("postgresql/roles/readonly",
+		vaultOperations.write("postgresql/roles/readonly",
 				Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
 	}
 
