@@ -24,11 +24,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
-import org.springframework.core.PriorityOrdered;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 

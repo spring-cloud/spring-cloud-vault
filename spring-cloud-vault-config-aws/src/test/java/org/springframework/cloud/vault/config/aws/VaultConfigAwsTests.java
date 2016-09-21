@@ -87,8 +87,7 @@ public class VaultConfigAwsTests {
 
 		vaultOperations.write("aws/config/root", connection);
 
-		vaultOperations.write("aws/roles/readonly",
-				Collections.singletonMap("arn", ARN));
+		vaultOperations.write("aws/roles/readonly", Collections.singletonMap("arn", ARN));
 	}
 
 	@Value("${cloud.aws.credentials.accessKey}")

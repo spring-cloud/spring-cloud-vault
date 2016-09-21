@@ -36,16 +36,17 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.vault.core.VaultOperations;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PlainTextAuthProvider;
 import com.datastax.driver.core.Session;
-import org.springframework.vault.core.VaultOperations;
 
 /**
- * Integration tests using the cassandra secret backend. In case this test should fail because of SSL make sure you run
- * the test within the spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is referenced with
- * {@code ../work/keystore.jks}.
+ * Integration tests using the cassandra secret backend. In case this test should fail
+ * because of SSL make sure you run the test within the
+ * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
+ * referenced with {@code ../work/keystore.jks}.
  * 
  * @author Mark Paluch
  */
@@ -111,7 +112,8 @@ public class VaultConfigCassandraTests {
 
 	@Test
 	public void shouldUseAuthenticationSet() throws SQLException {
-		assertThat(cluster.getConfiguration().getProtocolOptions().getAuthProvider()).isInstanceOf(PlainTextAuthProvider.class);
+		assertThat(cluster.getConfiguration().getProtocolOptions().getAuthProvider())
+				.isInstanceOf(PlainTextAuthProvider.class);
 	}
 
 	@Test

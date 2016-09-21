@@ -16,13 +16,12 @@
 
 package org.springframework.cloud.vault.config;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 
 /**
  * Tests for fail fast option.

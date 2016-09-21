@@ -35,11 +35,11 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.vault.core.VaultOperations;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import org.springframework.vault.core.VaultOperations;
 
 /**
  * Integration tests using the rabbitmq secret backend. In case this test should fail
@@ -93,8 +93,7 @@ public class VaultConfigRabbitMqTests {
 		connection.put("username", RABBITMQ_USERNAME);
 		connection.put("password", RABBITMQ_PASSWORD);
 
-		vaultOperations.write(String.format("rabbitmq/config/connection"),
-				connection);
+		vaultOperations.write(String.format("rabbitmq/config/connection"), connection);
 
 		vaultOperations.write(String.format("rabbitmq/roles/readonly"),
 				Collections.singletonMap("vhosts", VHOSTS_ROLE));
