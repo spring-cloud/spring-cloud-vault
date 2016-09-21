@@ -31,8 +31,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.core.ParameterizedTypeReference;
@@ -54,8 +53,8 @@ import org.springframework.web.client.RestTemplate;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = VaultConfigConsulTests.TestApplication.class)
-@IntegrationTest({ "spring.cloud.vault.consul.enabled=true",
+@SpringBootTest(classes = VaultConfigConsulTests.TestApplication.class, properties = {
+		"spring.cloud.vault.consul.enabled=true",
 		"spring.cloud.vault.consul.role=readonly" })
 public class VaultConfigConsulTests {
 

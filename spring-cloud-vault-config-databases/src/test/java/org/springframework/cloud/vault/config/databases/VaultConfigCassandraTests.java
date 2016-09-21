@@ -31,8 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -51,8 +50,8 @@ import com.datastax.driver.core.Session;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = VaultConfigCassandraTests.TestApplication.class)
-@IntegrationTest({ "spring.cloud.vault.cassandra.enabled=true",
+@SpringBootTest(classes = VaultConfigCassandraTests.TestApplication.class, properties = {
+		"spring.cloud.vault.cassandra.enabled=true",
 		"spring.cloud.vault.cassandra.role=readonly" })
 public class VaultConfigCassandraTests {
 

@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
@@ -44,7 +44,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = VaultConfigTests.TestApplication.class)
+@SpringBootTest(classes = VaultConfigTests.TestApplication.class)
 public class VaultConfigTests {
 
 	@BeforeClass

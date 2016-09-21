@@ -31,8 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -47,9 +46,8 @@ import org.springframework.vault.core.VaultOperations;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = VaultConfigMySqlTests.TestApplication.class)
-@IntegrationTest({ "spring.cloud.vault.mysql.enabled=true",
-		"spring.cloud.vault.mysql.role=readonly",
+@SpringBootTest(classes = VaultConfigMySqlTests.TestApplication.class, properties = {
+		"spring.cloud.vault.mysql.enabled=true", "spring.cloud.vault.mysql.role=readonly",
 		"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false" })
 public class VaultConfigMySqlTests {
 

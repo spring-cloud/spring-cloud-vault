@@ -25,8 +25,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -40,8 +39,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = VaultConfigGenericBackendDisabledTests.TestApplication.class)
-@IntegrationTest("spring.cloud.vault.generic.enabled=false")
+@SpringBootTest(classes = VaultConfigGenericBackendDisabledTests.TestApplication.class, properties = "spring.cloud.vault.generic.enabled=false")
 public class VaultConfigGenericBackendDisabledTests {
 
 	@BeforeClass
