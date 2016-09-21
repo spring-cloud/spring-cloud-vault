@@ -25,8 +25,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
@@ -42,8 +41,7 @@ import org.springframework.vault.client.VaultClient;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = VaultConfigDisabledTests.TestApplication.class)
-@IntegrationTest("spring.cloud.vault.enabled=false")
+@SpringBootTest(classes = VaultConfigDisabledTests.TestApplication.class, properties = "spring.cloud.vault.enabled=false")
 public class VaultConfigDisabledTests {
 
 	@BeforeClass

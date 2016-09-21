@@ -34,8 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -50,8 +49,8 @@ import org.springframework.vault.core.VaultOperations;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = VaultConfigPostgreSqlTests.TestApplication.class)
-@IntegrationTest({ "spring.cloud.vault.postgresql.enabled=true",
+@SpringBootTest(classes = VaultConfigPostgreSqlTests.TestApplication.class, properties = {
+		"spring.cloud.vault.postgresql.enabled=true",
 		"spring.cloud.vault.postgresql.role=readonly",
 		"spring.datasource.url=jdbc:postgresql://localhost:5432/postgres?ssl=false" })
 public class VaultConfigPostgreSqlTests {

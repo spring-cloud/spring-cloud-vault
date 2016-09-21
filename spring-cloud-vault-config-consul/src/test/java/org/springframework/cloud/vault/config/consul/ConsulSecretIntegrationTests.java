@@ -40,6 +40,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Base64Utils;
 import org.springframework.vault.core.VaultOperations;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Integration tests for {@link VaultConfigTemplate} using the consul secret backend. This
@@ -64,8 +65,7 @@ public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
 	private VaultConfigOperations configOperations;
 	private VaultConsulProperties consul = new VaultConsulProperties();
-
-	private TestRestTemplate restTemplate = new TestRestTemplate();
+	private RestTemplate restTemplate = new RestTemplate();
 
 	/**
 	 * Initialize the postgresql secret backend.

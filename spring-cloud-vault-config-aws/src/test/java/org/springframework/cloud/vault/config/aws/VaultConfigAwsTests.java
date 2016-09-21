@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.StringUtils;
@@ -42,16 +42,15 @@ import org.springframework.vault.core.VaultOperations;
  * referenced with {@code ../work/keystore.jks}.
  * <p>
  * This test requires AWS credentials and a region, see {@link #AWS_ACCESS_KEY},
- * {@link #AWS_SECRET_KEY} and the {@link IntegrationTest} properties to be provided
+ * {@link #AWS_SECRET_KEY} and the {@link SpringBootTest} properties to be provided
  * externally.
  *
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = VaultConfigAwsTests.TestApplication.class)
-@IntegrationTest({ "spring.cloud.vault.aws.enabled=true",
-		"spring.cloud.vault.aws.role=readonly", "cloud.aws.region.auto=false",
-		"cloud.aws.region.static=eu-west-1" })
+@SpringBootTest(classes = VaultConfigAwsTests.TestApplication.class, properties = {
+		"spring.cloud.vault.aws.enabled=true", "spring.cloud.vault.aws.role=readonly",
+		"cloud.aws.region.auto=false", "cloud.aws.region.static=eu-west-1" })
 public class VaultConfigAwsTests {
 
 	private final static String AWS_REGION = "eu-west-1";

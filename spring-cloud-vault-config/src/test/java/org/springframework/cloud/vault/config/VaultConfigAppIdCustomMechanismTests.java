@@ -29,8 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.config.VaultConfigAppIdCustomMechanismTests.BootstrapConfiguration;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.VaultRule;
@@ -48,10 +47,10 @@ import org.springframework.vault.core.VaultOperations;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = { BootstrapConfiguration.class,
-		VaultConfigAppIdCustomMechanismTests.TestApplication.class })
-@IntegrationTest({ "spring.cloud.vault.authentication=appid", "use.custom.config=true",
-		"spring.application.name=VaultConfigAppIdCustomMechanismTests" })
+@SpringBootTest(classes = { BootstrapConfiguration.class,
+		VaultConfigAppIdCustomMechanismTests.TestApplication.class }, properties = {
+				"spring.cloud.vault.authentication=appid", "use.custom.config=true",
+				"spring.application.name=VaultConfigAppIdCustomMechanismTests" })
 public class VaultConfigAppIdCustomMechanismTests {
 
 	@BeforeClass
@@ -115,8 +114,7 @@ public class VaultConfigAppIdCustomMechanismTests {
 		@Bean
 		ClientAuthentication clientAuthentication(VaultClient vaultClient) {
 			return new AppIdAuthentication(
-					AppIdAuthenticationOptions
-							.builder()
+					AppIdAuthenticationOptions.builder()
 							.appId("VaultConfigAppIdCustomMechanismTests")
 							.userIdMechanism(new StaticUserIdMechanism()).build(),
 					vaultClient);

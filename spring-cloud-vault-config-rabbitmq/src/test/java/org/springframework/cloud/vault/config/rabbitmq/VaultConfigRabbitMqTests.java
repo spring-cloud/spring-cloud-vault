@@ -30,8 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -50,8 +49,8 @@ import com.rabbitmq.client.ConnectionFactory;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = VaultConfigRabbitMqTests.TestApplication.class)
-@IntegrationTest({ "spring.cloud.vault.rabbitmq.enabled=true",
+@SpringBootTest(classes = VaultConfigRabbitMqTests.TestApplication.class, properties = {
+		"spring.cloud.vault.rabbitmq.enabled=true",
 		"spring.cloud.vault.rabbitmq.role=readonly",
 		"spring.rabbitmq.address=localhost" })
 public class VaultConfigRabbitMqTests {

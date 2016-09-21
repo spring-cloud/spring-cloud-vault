@@ -27,8 +27,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -44,8 +43,8 @@ import org.springframework.vault.core.VaultOperations;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = VaultConfigAppIdTests.TestApplication.class)
-@IntegrationTest({ "spring.cloud.vault.authentication=appid",
+@SpringBootTest(classes = VaultConfigAppIdTests.TestApplication.class, properties = {
+		"spring.cloud.vault.authentication=appid",
 		"spring.cloud.vault.app-id.user-id=IP_ADDRESS",
 		"spring.application.name=VaultConfigAppIdTests" })
 public class VaultConfigAppIdTests {
@@ -68,8 +67,7 @@ public class VaultConfigAppIdTests {
 
 		String appId = VaultConfigAppIdTests.class.getSimpleName();
 
-		vaultOperations.write(
-				"secret/" + VaultConfigAppIdTests.class.getSimpleName(),
+		vaultOperations.write("secret/" + VaultConfigAppIdTests.class.getSimpleName(),
 				Collections.singletonMap("vault.value", "foo"));
 
 		Map<String, String> appIdData = new HashMap<String, String>();
