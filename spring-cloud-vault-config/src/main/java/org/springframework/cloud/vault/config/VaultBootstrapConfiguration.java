@@ -159,8 +159,10 @@ public class VaultBootstrapConfiguration {
 		catch (ClassNotFoundException ex) {
 
 			switch (appId.getUserId().toUpperCase()) {
+
 			case VaultProperties.AppIdProperties.IP_ADDRESS:
 				return new IpAddressUserId();
+
 			case VaultProperties.AppIdProperties.MAC_ADDRESS:
 
 				if (StringUtils.hasText(appId.getNetworkInterface())) {
@@ -248,15 +250,12 @@ public class VaultBootstrapConfiguration {
 	@ConditionalOnMissingBean
 	public VaultClient vaultClient() {
 
-		RestTemplate restTemplate = new RestTemplate(
-				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory());
-
 		VaultEndpoint vaultEndpoint = new VaultEndpoint();
 		vaultEndpoint.setHost(vaultProperties.getHost());
 		vaultEndpoint.setPort(vaultProperties.getPort());
 		vaultEndpoint.setScheme(vaultProperties.getScheme());
 
-		return new VaultClient(restTemplate, vaultEndpoint);
+		return new VaultClient(clientHttpRequestFactoryWrapper().getClientHttpRequestFactory(), vaultEndpoint);
 	}
 
 	/**

@@ -16,11 +16,16 @@
 
 package org.springframework.cloud.vault.util;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.support.ClientOptions;
@@ -75,11 +80,22 @@ public class TestRestTemplateFactory {
 
 		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null!");
 
-		RestTemplate RestTemplate = new RestTemplate();
-		RestTemplate.setErrorHandler(new DefaultResponseErrorHandler());
-		RestTemplate.setRequestFactory(requestFactory);
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setErrorHandler(new DefaultResponseErrorHandler());
+		restTemplate.setRequestFactory(requestFactory);
 
-		return RestTemplate;
+		restTemplate.getInterceptors().add(new ClientHttpRequestInterceptor() {
+
+			@Override
+			public ClientHttpResponse intercept(HttpRequest httpRequest, byte[] bytes,
+					ClientHttpRequestExecution clientHttpRequestExecution)
+					throws IOException {
+
+				return clientHttpRequestExecution.execute(httpRequest, bytes);
+			}
+		});
+
+		return restTemplate;
 	}
 
 	private static void initializeClientHttpRequestFactory(
