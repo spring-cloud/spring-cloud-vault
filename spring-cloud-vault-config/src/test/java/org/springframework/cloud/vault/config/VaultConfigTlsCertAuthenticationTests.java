@@ -67,6 +67,15 @@ public class VaultConfigTlsCertAuthenticationTests {
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
+		String rules = "{ \"name\": \"testpolicy\",\n" //
+				+ "  \"path\": {\n" //
+				+ "    \"*\": {  \"policy\": \"read\" }\n" //
+				+ "  }\n" //
+				+ "}";
+
+		vaultOperations.write("sys/policy/testpolicy",
+				Collections.singletonMap("rules", rules));
+
 		vaultOperations.write(
 				"secret/" + VaultConfigTlsCertAuthenticationTests.class.getSimpleName(),
 				Collections.singletonMap("vault.value", "foo"));
@@ -78,7 +87,7 @@ public class VaultConfigTlsCertAuthenticationTests {
 
 		Map<String, String> role = new HashMap<>();
 		role.put("certificate", certificate);
-		role.put("policies", "root");
+		role.put("policies", "testpolicy");
 
 		vaultOperations.write("auth/cert/certs/my-role", role);
 	}

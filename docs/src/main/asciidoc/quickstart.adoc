@@ -18,7 +18,7 @@ $ src/test/bash/install_vault.sh
 $ src/test/bash/create_certificates.sh
 ----
 
-NOTE: `create_certificates.sh` creates certificates in `work/ca` and a JKS truststore `work/keystore.jsk`. If you want to run Spring Cloud Vault using this quickstart guide you need to configure the truststore the `spring.cloud.vault.ssl.trust-store` property to `file:work/keystore.jks`.
+NOTE: `create_certificates.sh` creates certificates in `work/ca` and a JKS truststore `work/keystore.jks`. If you want to run Spring Cloud Vault using this quickstart guide you need to configure the truststore the `spring.cloud.vault.ssl.trust-store` property to `file:work/keystore.jks`.
 
 *Start Vault server*
 

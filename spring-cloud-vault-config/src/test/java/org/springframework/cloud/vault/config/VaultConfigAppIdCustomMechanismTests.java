@@ -68,6 +68,15 @@ public class VaultConfigAppIdCustomMechanismTests {
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
+		String rules = "{ \"name\": \"testpolicy\",\n" //
+				+ "  \"path\": {\n" //
+				+ "    \"*\": {  \"policy\": \"read\" }\n" //
+				+ "  }\n" //
+				+ "}";
+
+		vaultOperations.write("sys/policy/testpolicy",
+				Collections.singletonMap("rules", rules));
+
 		String appId = VaultConfigAppIdCustomMechanismTests.class.getSimpleName();
 
 		vaultOperations.write(
@@ -75,7 +84,7 @@ public class VaultConfigAppIdCustomMechanismTests {
 				Collections.singletonMap("vault.value", "foo"));
 
 		Map<String, String> appIdData = new HashMap<String, String>();
-		appIdData.put("value", "root"); // policy
+		appIdData.put("value", "testpolicy"); // policy
 		appIdData.put("display_name", "this is my test application");
 
 		vaultOperations.write(String.format("auth/app-id/map/app-id/%s", appId),
