@@ -30,27 +30,14 @@ import org.springframework.util.Assert;
  * @author Mark Paluch
  */
 @Configuration
-@EnableConfigurationProperties
+@EnableConfigurationProperties({ VaultMySqlProperties.class,
+		VaultPostgreSqlProperties.class, VaultCassandraProperties.class,
+		VaultMongoProperties.class })
 public class VaultConfigDatabaseBootstrapConfiguration {
 
 	@Bean
 	public SecureBackendAccessorFactory<DatabaseSecretProperties> secureBackendAccessorFactory() {
 		return new DatabaseSecureBackendAccessorFactory();
-	}
-
-	@Bean
-	public VaultMySqlProperties mySqlProperties() {
-		return new VaultMySqlProperties();
-	}
-
-	@Bean
-	public VaultPostgreSqlProperties postgreSqlProperties() {
-		return new VaultPostgreSqlProperties();
-	}
-
-	@Bean
-	public VaultCassandraProperties cassandraProperties() {
-		return new VaultCassandraProperties();
 	}
 
 	static class DatabaseSecureBackendAccessorFactory
@@ -102,7 +89,7 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 				public Map<String, String> transformProperties(
 						Map<String, String> input) {
 
-					Map<String, String> result = new HashMap();
+					Map<String, String> result = new HashMap<>();
 					result.put(properties.getUsernameProperty(), input.get("username"));
 					result.put(properties.getPasswordProperty(), input.get("password"));
 
