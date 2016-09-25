@@ -4,6 +4,15 @@ services:
   - mysql
   - postgresql
   - rabbitmq
+  - mongodb
+
+addons:
+  apt:
+    sources:
+    - mongodb-3.0-precise
+    packages:
+    - mongodb-org-server
+    - mongodb-org-shell
 
 jdk:
   - oraclejdk8
@@ -26,6 +35,8 @@ before_script:
   - mysql -e "CREATE USER 'spring' IDENTIFIED by 'vault';"
   - mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO 'spring'@'%' WITH GRANT OPTION;";
   - psql -U postgres -c "CREATE ROLE spring WITH LOGIN PASSWORD 'vault' CREATEROLE CREATEUSER;"
+  - |-
+    mongo admin --eval  "db.createUser({user: 'spring', pwd:'vault', roles:['root']});"
   - sleep 30 # wait until Cassandra is up
   - apache-cassandra-2.2.6/bin/cqlsh localhost -u cassandra -p cassandra -e "CREATE USER 'spring' WITH PASSWORD 'vault' SUPERUSER"
 

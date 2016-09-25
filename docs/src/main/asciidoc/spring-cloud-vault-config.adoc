@@ -490,6 +490,7 @@ mechanism to more easily roll keys.
 Spring Cloud Vault integrates with these backends:
 
 * <<vault-client-database-cassandra>>
+* <<vault-client-database-mongodb>>
 * <<vault-client-database-mysql>>
 * <<vault-client-database-postgresql>>
 
@@ -546,6 +547,40 @@ spring.cloud.vault:
 * `password-property` sets the property name in which the Cassandra password is stored
 
 See also: https://www.vaultproject.io/docs/secrets/cassandra/index.html[Vault Documentation: Setting up Apache Cassandra with Vault]
+
+[[vault-client-database-mongodb]]
+=== MongoDB
+
+Spring Cloud Vault can obtain credentials for MongoDB.
+The integration can be enabled by setting
+`spring.cloud.vault.mongodb.enabled=true` (default `false`) and
+providing the role name with `spring.cloud.vault.mongodb.role=…`.
+
+Username and password are stored in `spring.data.mongodb.username`
+and `spring.data.mongodb.password` so using Spring Boot will
+pick up the generated credentials without further configuration.
+You can configure the property names by setting
+`spring.cloud.vault.mongodb.username-property` and
+`spring.cloud.vault.mongodb.password-property`.
+
+[source,yaml]
+----
+spring.cloud.vault:
+    mongodb:
+        enabled: true
+        role: readonly
+        backend: mongodb
+        username-property: spring.data.mongodb.username
+        password-property: spring.data.mongodb.password
+----
+
+* `enabled` setting this value to `true` enables the MongodB backend config usage
+* `role` sets the role name of the MongoDB role definition
+* `backend` sets the path of the MongoDB mount to use
+* `username-property` sets the property name in which the MongoDB username is stored
+* `password-property` sets the property name in which the MongoDB password is stored
+
+See also: https://www.vaultproject.io/docs/secrets/mongodb/index.html[Vault Documentation: Setting up MongoDB with Vault]
 
 [[vault-client-database-mysql]]
 === MySQL
