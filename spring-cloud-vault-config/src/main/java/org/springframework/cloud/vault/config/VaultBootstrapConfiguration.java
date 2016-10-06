@@ -40,7 +40,7 @@ import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.ClientCertificateAuthentication;
 import org.springframework.vault.authentication.CubbyholeAuthentication;
 import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
-import org.springframework.vault.authentication.DefaultSessionManager;
+import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.authentication.IpAddressUserId;
 import org.springframework.vault.authentication.MacAddressUserId;
 import org.springframework.vault.authentication.SessionManager;
@@ -289,11 +289,11 @@ public class VaultBootstrapConfiguration {
 	 *
 	 * @return the {@link SessionManager} for Vault session management.
 	 * @see SessionManager
-	 * @see DefaultSessionManager
+	 * @see SimpleSessionManager
 	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public SessionManager sessionManager(ClientAuthentication clientAuthentication) {
-		return new DefaultSessionManager(clientAuthentication);
+		return new SimpleSessionManager(clientAuthentication);
 	}
 }
