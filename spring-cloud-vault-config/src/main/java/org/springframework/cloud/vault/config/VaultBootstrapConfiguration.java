@@ -27,6 +27,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -40,8 +41,8 @@ import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.ClientCertificateAuthentication;
 import org.springframework.vault.authentication.CubbyholeAuthentication;
 import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
-import org.springframework.vault.authentication.DefaultSessionManager;
 import org.springframework.vault.authentication.IpAddressUserId;
+import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.MacAddressUserId;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.StaticUserId;
@@ -57,7 +58,6 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for Spring Vault support.
@@ -82,10 +82,10 @@ public class VaultBootstrapConfiguration {
 		this.applicationContext = applicationContext;
 		this.vaultProperties = vaultProperties;
 
-		this.vaultSecretBackends = applicationContext
-				.getBeansOfType(VaultSecretBackend.class).values();
-		this.factories = (Collection) applicationContext
-				.getBeansOfType(SecureBackendAccessorFactory.class).values();
+		this.vaultSecretBackends = applicationContext.getBeansOfType(
+				VaultSecretBackend.class).values();
+		this.factories = (Collection) applicationContext.getBeansOfType(
+				SecureBackendAccessorFactory.class).values();
 	}
 
 	@Bean
@@ -129,9 +129,9 @@ public class VaultBootstrapConfiguration {
 
 		}
 
-		throw new UnsupportedOperationException(
-				String.format("Client authentication %s not supported",
-						vaultProperties.getAuthentication()));
+		throw new UnsupportedOperationException(String.format(
+				"Client authentication %s not supported",
+				vaultProperties.getAuthentication()));
 	}
 
 	private ClientAuthentication appIdAuthentication(VaultProperties vaultProperties,
@@ -167,8 +167,8 @@ public class VaultBootstrapConfiguration {
 
 				if (StringUtils.hasText(appId.getNetworkInterface())) {
 					try {
-						return new MacAddressUserId(
-								Integer.parseInt(appId.getNetworkInterface()));
+						return new MacAddressUserId(Integer.parseInt(appId
+								.getNetworkInterface()));
 					}
 					catch (NumberFormatException e) {
 						return new MacAddressUserId(appId.getNetworkInterface());
@@ -238,8 +238,8 @@ public class VaultBootstrapConfiguration {
 			sslConfiguration = SslConfiguration.NONE;
 		}
 
-		return new ClientFactoryWrapper(
-				ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration));
+		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(
+				clientOptions, sslConfiguration));
 	}
 
 	/**
@@ -255,7 +255,8 @@ public class VaultBootstrapConfiguration {
 		vaultEndpoint.setPort(vaultProperties.getPort());
 		vaultEndpoint.setScheme(vaultProperties.getScheme());
 
-		return new VaultClient(clientHttpRequestFactoryWrapper().getClientHttpRequestFactory(), vaultEndpoint);
+		return new VaultClient(clientHttpRequestFactoryWrapper()
+				.getClientHttpRequestFactory(), vaultEndpoint);
 	}
 
 	/**
@@ -289,11 +290,12 @@ public class VaultBootstrapConfiguration {
 	 *
 	 * @return the {@link SessionManager} for Vault session management.
 	 * @see SessionManager
-	 * @see DefaultSessionManager
+	 * @see LifecycleAwareSessionManager
 	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public SessionManager sessionManager(ClientAuthentication clientAuthentication) {
-		return new DefaultSessionManager(clientAuthentication);
+		return new LifecycleAwareSessionManager(clientAuthentication,
+				new SimpleAsyncTaskExecutor("Spring-Cloud-Vault-"), vaultClient());
 	}
 }
