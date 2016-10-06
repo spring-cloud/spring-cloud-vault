@@ -54,7 +54,7 @@ public class PrepareVault {
 		int requiredKeys = 2;
 
 		VaultInitializationResponse initialized = vaultOperations.opsForSys()
-				.initialize(new VaultInitializationRequest(createKeys, requiredKeys));
+				.initialize(VaultInitializationRequest.create(createKeys, requiredKeys));
 
 		for (int i = 0; i < requiredKeys; i++) {
 
@@ -66,7 +66,7 @@ public class PrepareVault {
 			}
 		}
 
-		return VaultToken.of(initialized.getRootToken());
+		return initialized.getRootToken();
 	}
 
 	/**
