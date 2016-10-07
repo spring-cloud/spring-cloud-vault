@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
 
@@ -50,7 +51,7 @@ public class GenericSecretIntegrationTests extends IntegrationTestSupport {
 	public void shouldReturnSecretsCorrectly() throws Exception {
 
 		Map<String, String> secretProperties = configOperations
-				.read(generic("secret", "app-name"));
+				.read(generic("secret", "app-name")).getData();
 
 		assertThat(secretProperties).containsAllEntriesOf(createExpectedMap());
 	}
@@ -58,10 +59,9 @@ public class GenericSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void shouldReturnNullIfNotFound() throws Exception {
 
-		Map<String, String> secretProperties = configOperations
-				.read(generic("secret", "missing"));
+		Secrets secrets = configOperations.read(generic("secret", "missing"));
 
-		assertThat(secretProperties).isEmpty();
+		assertThat(secrets).isNull();
 	}
 
 	private Map<String, Object> createData() {

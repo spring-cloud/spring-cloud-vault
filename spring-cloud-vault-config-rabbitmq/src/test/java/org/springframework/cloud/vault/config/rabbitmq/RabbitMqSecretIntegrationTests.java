@@ -95,7 +95,7 @@ public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 	public void shouldCreateCredentialsCorrectly() throws Exception {
 
 		Map<String, String> secretProperties = configOperations
-				.read(forRabbitMq(rabbitmq));
+				.read(forRabbitMq(rabbitmq)).getData();
 
 		assertThat(secretProperties).containsKeys("spring.rabbitmq.username",
 				"spring.rabbitmq.password");

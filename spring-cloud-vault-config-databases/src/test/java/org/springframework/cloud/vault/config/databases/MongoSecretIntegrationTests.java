@@ -89,7 +89,7 @@ public class MongoSecretIntegrationTests extends IntegrationTestSupport {
 	public void shouldCreateCredentialsCorrectly() throws Exception {
 
 		Map<String, String> secretProperties = configOperations
-				.read(forDatabase(mongodb));
+				.read(forDatabase(mongodb)).getData();
 
 		assertThat(secretProperties).containsKeys("spring.data.mongodb.username",
 				"spring.data.mongodb.password");

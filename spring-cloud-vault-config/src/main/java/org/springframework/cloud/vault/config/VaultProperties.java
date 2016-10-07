@@ -18,6 +18,7 @@ package org.springframework.cloud.vault.config;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.constraints.Range;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 
@@ -190,6 +191,21 @@ public class VaultProperties {
 		 * @see org.springframework.core.PriorityOrdered
 		 */
 		private int order = 0;
+
+		private Lifecycle lifecycle = new Lifecycle();
+	}
+
+	/**
+	 * Configuration to Vault lifecycle management (renewal, revocation of tokens and
+	 * secrets).
+	 */
+	@Data
+	public static class Lifecycle {
+
+		/**
+		 * Enable lifecycle management.
+		 */
+		private boolean enabled = true;
 	}
 
 	public enum AuthenticationMethod {

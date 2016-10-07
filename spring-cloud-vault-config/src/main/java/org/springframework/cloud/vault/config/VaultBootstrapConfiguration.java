@@ -20,15 +20,20 @@ import java.net.URI;
 import java.util.Collection;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -45,6 +50,7 @@ import org.springframework.vault.authentication.IpAddressUserId;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.MacAddressUserId;
 import org.springframework.vault.authentication.SessionManager;
+import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.authentication.StaticUserId;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.client.VaultClient;
@@ -71,32 +77,47 @@ import org.springframework.vault.support.VaultToken;
 		VaultGenericBackendProperties.class })
 public class VaultBootstrapConfiguration {
 
-	private final ApplicationContext applicationContext;
+	private final ConfigurableApplicationContext applicationContext;
+
 	private final VaultProperties vaultProperties;
+
 	private final Collection<VaultSecretBackend> vaultSecretBackends;
+
 	private final Collection<SecureBackendAccessorFactory<? super VaultSecretBackend>> factories;
 
-	public VaultBootstrapConfiguration(ApplicationContext applicationContext,
+	public VaultBootstrapConfiguration(ConfigurableApplicationContext applicationContext,
 			VaultProperties vaultProperties) {
 
 		this.applicationContext = applicationContext;
 		this.vaultProperties = vaultProperties;
 
-		this.vaultSecretBackends = applicationContext.getBeansOfType(
-				VaultSecretBackend.class).values();
-		this.factories = (Collection) applicationContext.getBeansOfType(
-				SecureBackendAccessorFactory.class).values();
+		this.vaultSecretBackends = applicationContext
+				.getBeansOfType(VaultSecretBackend.class).values();
+		this.factories = (Collection) applicationContext
+				.getBeansOfType(SecureBackendAccessorFactory.class).values();
 	}
 
 	@Bean
 	public VaultPropertySourceLocator vaultPropertySourceLocator(
 			VaultOperations operations, VaultProperties vaultProperties,
-			VaultGenericBackendProperties vaultGenericBackendProperties) {
+			VaultGenericBackendProperties vaultGenericBackendProperties,
+			ObjectProvider<TaskSchedulerWrapper<? extends TaskScheduler>> taskSchedulerProvider) {
 
 		Collection<SecureBackendAccessor> backendAccessors = SecureBackendFactories
 				.createBackendAcessors(vaultSecretBackends, factories);
 		VaultConfigTemplate vaultConfigTemplate = new VaultConfigTemplate(operations,
 				vaultProperties);
+
+		if (vaultProperties.getConfig().getLifecycle().isEnabled()) {
+
+			// This is to destroy bootstrap resources
+			// otherwise, the bootstrap context is not shut down cleanly
+			applicationContext.registerShutdownHook();
+
+			return new LeasingVaultPropertySourceLocator(vaultConfigTemplate,
+					vaultProperties, vaultGenericBackendProperties, backendAccessors,
+					taskSchedulerProvider.getObject().getTaskScheduler());
+		}
 
 		return new VaultPropertySourceLocator(vaultConfigTemplate, vaultProperties,
 				vaultGenericBackendProperties, backendAccessors);
@@ -129,9 +150,9 @@ public class VaultBootstrapConfiguration {
 
 		}
 
-		throw new UnsupportedOperationException(String.format(
-				"Client authentication %s not supported",
-				vaultProperties.getAuthentication()));
+		throw new UnsupportedOperationException(
+				String.format("Client authentication %s not supported",
+						vaultProperties.getAuthentication()));
 	}
 
 	private ClientAuthentication appIdAuthentication(VaultProperties vaultProperties,
@@ -167,8 +188,8 @@ public class VaultBootstrapConfiguration {
 
 				if (StringUtils.hasText(appId.getNetworkInterface())) {
 					try {
-						return new MacAddressUserId(Integer.parseInt(appId
-								.getNetworkInterface()));
+						return new MacAddressUserId(
+								Integer.parseInt(appId.getNetworkInterface()));
 					}
 					catch (NumberFormatException e) {
 						return new MacAddressUserId(appId.getNetworkInterface());
@@ -238,8 +259,8 @@ public class VaultBootstrapConfiguration {
 			sslConfiguration = SslConfiguration.NONE;
 		}
 
-		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(
-				clientOptions, sslConfiguration));
+		return new ClientFactoryWrapper(
+				ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration));
 	}
 
 	/**
@@ -255,8 +276,9 @@ public class VaultBootstrapConfiguration {
 		vaultEndpoint.setPort(vaultProperties.getPort());
 		vaultEndpoint.setScheme(vaultProperties.getScheme());
 
-		return new VaultClient(clientHttpRequestFactoryWrapper()
-				.getClientHttpRequestFactory(), vaultEndpoint);
+		return new VaultClient(
+				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory(),
+				vaultEndpoint);
 	}
 
 	/**
@@ -277,25 +299,80 @@ public class VaultBootstrapConfiguration {
 	 *
 	 * @return
 	 * @see #vaultClientFactory()
-	 * @see #sessionManager(ClientAuthentication)
 	 */
 	@Bean
 	@ConditionalOnMissingBean
-	public VaultTemplate vaultTemplate(ClientAuthentication clientAuthentication) {
-		return new VaultTemplate(vaultClientFactory(),
-				sessionManager(clientAuthentication));
+	public VaultTemplate vaultTemplate(ClientAuthentication clientAuthentication,
+			SessionManager sessionManager) {
+		return new VaultTemplate(vaultClientFactory(), sessionManager);
 	}
 
 	/**
+	 * Creates a new {@link TaskSchedulerWrapper} that encapsulates a bean implementing
+	 * {@link TaskScheduler} and {@link AsyncTaskExecutor}.
 	 *
+	 * @return
+	 * @see ThreadPoolTaskScheduler
+	 */
+	@Bean
+	@ConditionalOnMissingBean(TaskSchedulerWrapper.class)
+	public TaskSchedulerWrapper<ThreadPoolTaskScheduler> vaultTaskScheduler() {
+
+		ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+		threadPoolTaskScheduler.setPoolSize(2);
+		threadPoolTaskScheduler.setThreadNamePrefix("Spring-Cloud-Vault-");
+
+		return new TaskSchedulerWrapper<>(threadPoolTaskScheduler);
+	}
+
+	/**
 	 * @return the {@link SessionManager} for Vault session management.
 	 * @see SessionManager
 	 * @see LifecycleAwareSessionManager
 	 */
 	@Bean
 	@ConditionalOnMissingBean
-	public SessionManager sessionManager(ClientAuthentication clientAuthentication) {
-		return new LifecycleAwareSessionManager(clientAuthentication,
-				new SimpleAsyncTaskExecutor("Spring-Cloud-Vault-"), vaultClient());
+	public SessionManager sessionManager(ClientAuthentication clientAuthentication,
+			ObjectProvider<TaskSchedulerWrapper<? extends AsyncTaskExecutor>> asyncTaskExecutorProvider) {
+
+		if (vaultProperties.getConfig().getLifecycle().isEnabled()) {
+			return new LifecycleAwareSessionManager(clientAuthentication,
+					asyncTaskExecutorProvider.getObject().getTaskScheduler(),
+					vaultClient());
+		}
+
+		return new SimpleSessionManager(clientAuthentication);
+	}
+
+	/**
+	 * Wrapper to keep {@link TaskScheduler} local to Spring Cloud Vault.
+	 * @param <T>
+	 */
+	public static class TaskSchedulerWrapper<T extends AsyncTaskExecutor & TaskScheduler>
+			implements InitializingBean, DisposableBean {
+
+		private final T taskScheduler;
+
+		public TaskSchedulerWrapper(T taskScheduler) {
+			this.taskScheduler = taskScheduler;
+		}
+
+		T getTaskScheduler() {
+			return taskScheduler;
+		}
+
+		@Override
+		public void destroy() throws Exception {
+			if (taskScheduler instanceof DisposableBean) {
+				((DisposableBean) taskScheduler).destroy();
+			}
+		}
+
+		@Override
+		public void afterPropertiesSet() throws Exception {
+			if (taskScheduler instanceof InitializingBean) {
+				((InitializingBean) taskScheduler).afterPropertiesSet();
+			}
+		}
 	}
 }

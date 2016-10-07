@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.vault.config;
 
-import java.util.Map;
+import org.springframework.vault.core.VaultOperations;
 
 /**
  * Interface that specified a basic set of Vault operations, implemented by
@@ -26,7 +26,7 @@ import java.util.Map;
 public interface VaultConfigOperations {
 
 	/**
-	 * Read configuration from a secure backend encapsulated within a
+	 * Read secrets from a secret backend encapsulated within a
 	 * {@link SecureBackendAccessor}. Reading data using this method is suitable for
 	 * secret backends that do not require a request body.
 	 *
@@ -34,5 +34,11 @@ public interface VaultConfigOperations {
 	 * @return the configuration data. May be empty but never {@literal null}.
 	 * @throws IllegalStateException if {@link VaultProperties#isFailFast()} is enabled.
 	 */
-	Map<String, String> read(SecureBackendAccessor secureBackendAccessor);
+	Secrets read(SecureBackendAccessor secureBackendAccessor);
+
+	/**
+	 *
+	 * @return the underlying {@link VaultOperations}.
+	 */
+	VaultOperations getVaultOperations();
 }
