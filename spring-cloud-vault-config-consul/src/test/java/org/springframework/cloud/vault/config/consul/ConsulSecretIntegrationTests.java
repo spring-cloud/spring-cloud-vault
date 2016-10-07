@@ -112,7 +112,8 @@ public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void shouldCreateCredentialsCorrectly() throws Exception {
 
-		Map<String, String> secretProperties = configOperations.read(forConsul(consul));
+		Map<String, String> secretProperties = configOperations.read(forConsul(consul))
+				.getData();
 
 		assertThat(secretProperties).containsKeys("spring.cloud.consul.token");
 	}

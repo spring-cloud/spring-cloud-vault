@@ -15,16 +15,11 @@
  */
 package org.springframework.cloud.vault.config;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.core.VaultOperations;
-import org.springframework.vault.support.VaultResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,18 +51,18 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 		this.properties = properties;
 	}
 
-	public Map<String, String> read(final SecureBackendAccessor secureBackendAccessor) {
+	public Secrets read(final SecureBackendAccessor secureBackendAccessor) {
 
 		Assert.notNull(secureBackendAccessor, "SecureBackendAccessor must not be null!");
 
-		VaultResponseEntity<VaultResponse> response = vaultOperations.doWithVault(
-				new VaultOperations.SessionCallback<VaultResponseEntity<VaultResponse>>() {
+		VaultResponseEntity<Secrets> response = vaultOperations.doWithVault(
+				new VaultOperations.SessionCallback<VaultResponseEntity<Secrets>>() {
 					@Override
-					public VaultResponseEntity<VaultResponse> doWithVault(
+					public VaultResponseEntity<Secrets> doWithVault(
 							VaultOperations.VaultSession session) {
 
 						return session.exchange("{backend}/{key}", HttpMethod.GET, null,
-								VaultResponse.class, secureBackendAccessor.variables());
+								Secrets.class, secureBackendAccessor.variables());
 					}
 				});
 
@@ -75,9 +70,10 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 
 		if (response.getStatusCode() == HttpStatus.OK) {
 
-			Map<String, String> stringMap = toStringMap(response.getBody().getData());
+			Secrets secrets = response.getBody();
+			secrets.setData(secureBackendAccessor.transformProperties(secrets.getData()));
 
-			return secureBackendAccessor.transformProperties(stringMap);
+			return secrets;
 		}
 
 		if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
@@ -94,20 +90,10 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 					response.getStatusCode().value(), response.getMessage()));
 		}
 
-		return Collections.emptyMap();
+		return null;
 	}
 
-	private Map<String, String> toStringMap(Map<String, Object> data) {
-
-		Map<String, String> result = new HashMap<>();
-		for (String key : data.keySet()) {
-			Object value = data.get(key);
-
-			if (value != null) {
-				result.put(key, value.toString());
-			}
-		}
-
-		return result;
+	public VaultOperations getVaultOperations() {
+		return vaultOperations;
 	}
 }

@@ -94,7 +94,7 @@ public class PostgreSqlSecretIntegrationTests extends IntegrationTestSupport {
 	public void shouldCreateCredentialsCorrectly() throws Exception {
 
 		Map<String, String> secretProperties = configOperations
-				.read(forDatabase(postgreSql));
+				.read(forDatabase(postgreSql)).getData();
 
 		assertThat(secretProperties).containsKeys("spring.datasource.username",
 				"spring.datasource.password");

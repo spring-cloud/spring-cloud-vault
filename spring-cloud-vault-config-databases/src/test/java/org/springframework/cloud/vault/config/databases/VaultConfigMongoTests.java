@@ -18,7 +18,6 @@ package org.springframework.cloud.vault.config.databases;
 import static org.junit.Assume.*;
 
 import java.net.InetSocketAddress;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,6 +28,7 @@ import org.bson.Document;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -43,8 +43,8 @@ import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 
 /**
- * Integration tests using the mongodb secret backend. In case this test should fail because
- * of SSL make sure you run the test within the
+ * Integration tests using the mongodb secret backend. In case this test should fail
+ * because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
  * 
@@ -65,7 +65,7 @@ public class VaultConfigMongoTests {
 	private final static String ROLES = "[ \"readWrite\", { \"role\": \"read\", \"db\": \"admin\" } ]";
 
 	/**
-	 * Initialize the mysql secret backend.
+	 * Initialize the mongo secret backend.
 	 *
 	 * @throws Exception
 	 */
@@ -103,7 +103,7 @@ public class VaultConfigMongoTests {
 	MongoClient mongoClient;
 
 	@Test
-	public void shouldConnectUsingDataSource() throws SQLException {
+	public void shouldConnectUsingDataSource() {
 
 		MongoDatabase mongoDatabase = mongoClient.getDatabase("admin");
 
@@ -123,7 +123,7 @@ public class VaultConfigMongoTests {
 	public static class TestApplication {
 
 		public static void main(String[] args) {
-			SpringApplication.run(TestApplication.class, args);
+			SpringApplication.run(TestApplication.class, args).registerShutdownHook();
 		}
 	}
 }

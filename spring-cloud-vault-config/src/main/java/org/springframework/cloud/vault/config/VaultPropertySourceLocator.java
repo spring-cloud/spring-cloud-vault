@@ -116,10 +116,10 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 		return contexts;
 	}
 
-	protected CompositePropertySource createCompositePropertySource(
+	private CompositePropertySource createCompositePropertySource(
 			ConfigurableEnvironment environment) {
 
-		CompositePropertySource propertySource = new CompositePropertySource("vault");
+		List<PropertySource<?>> propertySources = new ArrayList<>();
 
 		if (genericBackendProperties.isEnabled()) {
 
@@ -132,7 +132,7 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 							generic(genericBackendProperties.getBackend(),
 									propertySourceContext));
 
-					propertySource.addPropertySource(vaultPropertySource);
+					propertySources.add(vaultPropertySource);
 				}
 			}
 		}
@@ -141,11 +141,41 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 
 			VaultPropertySource vaultPropertySource = createVaultPropertySource(
 					backendAccessor);
-			propertySource.addPropertySource(vaultPropertySource);
+			propertySources.add(vaultPropertySource);
 		}
-		return propertySource;
+
+		return doCreateCompositePropertySource(propertySources);
 	}
 
+	// -------------------------------------------------------------------------
+	// Implementation hooks and helper methods
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Create a {@link CompositePropertySource} given a {@link List} of
+	 * {@link PropertySource}s.
+	 *
+	 * @param propertySources the property sources.
+	 * @return the {@link CompositePropertySource} to use.
+	 */
+	protected CompositePropertySource doCreateCompositePropertySource(
+			List<PropertySource<?>> propertySources) {
+
+		CompositePropertySource compositePropertySource = new CompositePropertySource(
+				"vault");
+
+		for (PropertySource<?> propertySource : propertySources) {
+			compositePropertySource.addPropertySource(propertySource);
+		}
+
+		return compositePropertySource;
+	}
+
+	/**
+	 * Initialize nested {@link PropertySource}s inside the
+	 * {@link CompositePropertySource}.
+	 * @param propertySource the {@link CompositePropertySource} to initialize.
+	 */
 	protected void initialize(CompositePropertySource propertySource) {
 
 		for (PropertySource<?> source : propertySource.getPropertySources()) {
@@ -153,7 +183,14 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 		}
 	}
 
-	private VaultPropertySource createVaultPropertySource(
+	/**
+	 * Create {@link VaultPropertySource} initialized with a
+	 * {@link SecureBackendAccessor}.
+	 *
+	 * @param accessor the {@link SecureBackendAccessor}.
+	 * @return the {@link VaultPropertySource} to use.
+	 */
+	protected VaultPropertySource createVaultPropertySource(
 			SecureBackendAccessor accessor) {
 		return new VaultPropertySource(this.operations, this.properties, accessor);
 	}

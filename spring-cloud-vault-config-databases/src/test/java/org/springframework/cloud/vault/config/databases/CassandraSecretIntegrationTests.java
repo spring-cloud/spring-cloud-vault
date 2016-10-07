@@ -95,7 +95,7 @@ public class CassandraSecretIntegrationTests extends IntegrationTestSupport {
 	public void shouldCreateCredentialsCorrectly() throws Exception {
 
 		Map<String, String> secretProperties = configOperations
-				.read(forDatabase(cassandra));
+				.read(forDatabase(cassandra)).getData();
 
 		assertThat(secretProperties).containsKeys("spring.data.cassandra.username",
 				"spring.data.cassandra.password");

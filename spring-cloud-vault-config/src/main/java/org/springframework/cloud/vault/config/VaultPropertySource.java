@@ -36,6 +36,7 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigTemplate> 
 	private final VaultProperties vaultProperties;
 	private final SecureBackendAccessor secureBackendAccessor;
 	private final Map<String, String> properties = new LinkedHashMap<>();
+	private Secrets secrets;
 
 	/**
 	 * Creates a new {@link VaultPropertySource}.
@@ -63,9 +64,9 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigTemplate> 
 	public void init() {
 
 		try {
-			Map<String, String> values = this.source.read(this.secureBackendAccessor);
-			if (values != null) {
-				this.properties.putAll(values);
+			this.secrets = this.source.read(this.secureBackendAccessor);
+			if (this.secrets != null) {
+				this.properties.putAll(secrets.getData());
 			}
 		}
 		catch (Exception e) {
@@ -83,6 +84,10 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigTemplate> 
 
 			log.error(message, e);
 		}
+	}
+
+	Secrets getSecrets() {
+		return secrets;
 	}
 
 	@Override

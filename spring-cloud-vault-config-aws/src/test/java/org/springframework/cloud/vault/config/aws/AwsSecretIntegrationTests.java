@@ -90,7 +90,8 @@ public class AwsSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void shouldCreateCredentialsCorrectly() throws Exception {
 
-		Map<String, String> secretProperties = configOperations.read(forAws(aws));
+		Map<String, String> secretProperties = configOperations.read(forAws(aws))
+				.getData();
 
 		assertThat(secretProperties).containsKeys("cloud.aws.credentials.accessKey",
 				"cloud.aws.credentials.secretKey");
