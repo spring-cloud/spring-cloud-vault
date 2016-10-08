@@ -19,8 +19,10 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultSysOperations;
+import org.springframework.vault.support.VaultHealth;
 import org.springframework.vault.support.VaultInitializationRequest;
 import org.springframework.vault.support.VaultInitializationResponse;
 import org.springframework.vault.support.VaultMount;
@@ -152,5 +154,28 @@ public class PrepareVault {
 
 	public VaultOperations getVaultOperations() {
 		return vaultOperations;
+	}
+
+	/**
+	 * @return Vault version from the health check. Versions beginning from Vault 0.6.2
+	 * will expose a version number.
+	 */
+	public Version getVersion() {
+
+		VaultHealth health = getVaultOperations().opsForSys().health();
+
+		if (StringUtils.hasText(health.getVersion())) {
+
+			String version = health.getVersion();
+
+			// Migration code for Vault 0.6.1
+			if (version.startsWith("Vault v")) {
+				version = version.substring(7);
+			}
+
+			return Version.parse(version);
+		}
+
+		return Version.parse("0.0.0");
 	}
 }

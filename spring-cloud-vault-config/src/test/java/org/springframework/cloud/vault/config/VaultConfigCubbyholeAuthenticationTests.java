@@ -16,6 +16,7 @@
 package org.springframework.cloud.vault.config;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
 
 import java.util.Collections;
 
@@ -23,11 +24,13 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
+import org.springframework.cloud.vault.util.Version;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -37,8 +40,8 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 
 /**
- * Integration test using config infrastructure with Cubbyhole authentication. In case this
- * test should fail because of SSL make sure you run the test within the
+ * Integration test using config infrastructure with Cubbyhole authentication. In case
+ * this test should fail because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
  * 
@@ -55,6 +58,9 @@ public class VaultConfigCubbyholeAuthenticationTests {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
+
+		assumeTrue(vaultRule.prepare().getVersion()
+				.isGreaterThanOrEqualTo(Version.parse("0.6.1")));
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 

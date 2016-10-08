@@ -26,12 +26,14 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.cloud.vault.config.VaultConfigOperations;
 import org.springframework.cloud.vault.config.VaultConfigTemplate;
 import org.springframework.cloud.vault.config.VaultProperties;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
+import org.springframework.cloud.vault.util.Version;
 import org.springframework.vault.core.VaultOperations;
 
 /**
@@ -61,6 +63,7 @@ public class MongoSecretIntegrationTests extends IntegrationTestSupport {
 	public void setUp() throws Exception {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(MONGODB_HOST, MONGODB_PORT)));
+		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.2")));
 
 		mongodb.setEnabled(true);
 		mongodb.setRole("readonly");
@@ -88,8 +91,8 @@ public class MongoSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void shouldCreateCredentialsCorrectly() throws Exception {
 
-		Map<String, String> secretProperties = configOperations
-				.read(forDatabase(mongodb)).getData();
+		Map<String, String> secretProperties = configOperations.read(forDatabase(mongodb))
+				.getData();
 
 		assertThat(secretProperties).containsKeys("spring.data.mongodb.username",
 				"spring.data.mongodb.password");
