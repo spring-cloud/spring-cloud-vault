@@ -27,10 +27,10 @@ env:
 
 install:
   - mkdir -p download
-  - test -f download/apache-cassandra-2.2.6-bin.tar.gz || wget http://www-eu.apache.org/dist/cassandra/2.2.6/apache-cassandra-2.2.6-bin.tar.gz -O download/apache-cassandra-2.2.6-bin.tar.gz
-  - tar xzf download/apache-cassandra-2.2.6-bin.tar.gz
-  - cp -f spring-cloud-vault-config-databases/src/test/resources/cassandra.yaml apache-cassandra-2.2.6/conf
-  - apache-cassandra-2.2.6/bin/cassandra
+  - test -f download/apache-cassandra-2.2.8-bin.tar.gz || wget https://archive.apache.org/dist/cassandra/2.2.8/apache-cassandra-2.2.8-bin.tar.gz -O download/apache-cassandra-2.2.8-bin.tar.gz
+  - tar xzf download/apache-cassandra-2.2.8-bin.tar.gz
+  - cp -f spring-cloud-vault-config-databases/src/test/resources/cassandra.yaml apache-cassandra-2.2.8/conf
+  - apache-cassandra-2.2.8/bin/cassandra
   - src/test/bash/create_certificates.sh
   - src/test/bash/install_vault.sh
   - src/test/bash/install_consul.sh
@@ -46,12 +46,12 @@ before_script:
   - |-
     mongo admin --eval  "db.createUser({user: 'spring', pwd:'vault', roles:['root']});"
   - sleep 30 # wait until Cassandra is up
-  - apache-cassandra-2.2.6/bin/cqlsh localhost -u cassandra -p cassandra -e "CREATE USER 'spring' WITH PASSWORD 'vault' SUPERUSER"
+  - apache-cassandra-2.2.8/bin/cqlsh localhost -u cassandra -p cassandra -e "CREATE USER 'spring' WITH PASSWORD 'vault' SUPERUSER"
 
 script: mvn clean verify
 
 after_script:
-  - apache-cassandra-2.2.6/bin/nodetool stopdaemon
+  - apache-cassandra-2.2.8/bin/nodetool stopdaemon
   - pkill vault
 
 cache:
