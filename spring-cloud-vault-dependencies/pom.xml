@@ -11,12 +11,11 @@
 		<!-- lookup parent from repository -->
 	</parent>
 
-	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-vault-dependencies</artifactId>
 	<version>1.0.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>spring-cloud-vault-dependencies</name>
+	<name>Spring Cloud Vault Dependencies</name>
 	<description>Spring Cloud Vault Dependencies</description>
 
 	<properties>

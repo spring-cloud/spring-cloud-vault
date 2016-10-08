@@ -10,7 +10,6 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-vault-starter-config</artifactId>
 
 	<name>Spring Cloud Vault Config Starter</name>

@@ -10,7 +10,6 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-vault-config-databases</artifactId>
 	<name>Spring Cloud Vault Config Database support</name>
 	<description>Spring Cloud Vault Config Database support</description>

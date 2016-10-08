@@ -11,12 +11,11 @@
 		<!-- lookup parent from repository -->
 	</parent>
 
-	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-vault-parent</artifactId>
 	<version>1.0.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>spring-cloud-vault-config</name>
+	<name>Spring Cloud Vault</name>
 	<description>Configuration Integration with Hashicorp Vault</description>
 
 	<modules>
