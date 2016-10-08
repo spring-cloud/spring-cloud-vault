@@ -10,7 +10,6 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-vault-config-consul</artifactId>
 	<name>Spring Cloud Vault Config Consul support</name>
 	<description>Spring Cloud Vault Config Consul support</description>

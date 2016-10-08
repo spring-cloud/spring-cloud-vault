@@ -10,7 +10,6 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-vault-config-rabbitmq</artifactId>
 	<packaging>jar</packaging>
 

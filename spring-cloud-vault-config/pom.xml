@@ -10,7 +10,6 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-vault-config</artifactId>
 	<name>Spring Cloud Vault Configuration Integration</name>
 	<description>Configuration Integration with Hashicorp Vault</description>
