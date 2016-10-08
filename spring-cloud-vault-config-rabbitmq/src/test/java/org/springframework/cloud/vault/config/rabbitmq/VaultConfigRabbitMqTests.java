@@ -33,6 +33,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
+import org.springframework.cloud.vault.util.Version;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
@@ -80,6 +81,9 @@ public class VaultConfigRabbitMqTests {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
+
+		assumeTrue(vaultRule.prepare().getVersion()
+				.isGreaterThanOrEqualTo(Version.parse("0.6.2")));
 
 		if (!vaultRule.prepare().hasSecretBackend("rabbitmq")) {
 			vaultRule.prepare().mountSecret("rabbitmq");

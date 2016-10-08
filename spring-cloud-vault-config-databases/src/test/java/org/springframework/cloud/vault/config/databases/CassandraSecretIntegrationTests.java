@@ -20,12 +20,12 @@ import static org.junit.Assume.*;
 import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory.*;
 
 import java.net.InetSocketAddress;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.cloud.vault.config.VaultConfigOperations;
 import org.springframework.cloud.vault.config.VaultConfigTemplate;
 import org.springframework.cloud.vault.config.VaultProperties;
@@ -84,9 +84,14 @@ public class CassandraSecretIntegrationTests extends IntegrationTestSupport {
 				String.format("%s/config/connection", cassandra.getBackend()),
 				connection);
 
+		Map<String, String> role = new HashMap<>();
+
+		role.put("creation_cql", CREATE_USER_AND_GRANT_CQL);
+		role.put("consistency", "All");
+
 		vaultOperations.write(
 				String.format("%s/roles/%s", cassandra.getBackend(), cassandra.getRole()),
-				Collections.singletonMap("creation_cql", CREATE_USER_AND_GRANT_CQL));
+				role);
 
 		configOperations = new VaultConfigTemplate(vaultOperations, vaultProperties);
 	}

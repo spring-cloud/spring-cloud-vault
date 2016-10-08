@@ -20,13 +20,13 @@ import static org.junit.Assume.*;
 
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -91,8 +91,12 @@ public class VaultConfigCassandraTests {
 		vaultOperations.write(String.format("%s/config/connection", "cassandra"),
 				connection);
 
-		vaultOperations.write("cassandra/roles/readonly",
-				Collections.singletonMap("creation_cql", CREATE_USER_AND_GRANT_CQL));
+		Map<String, String> role = new HashMap<>();
+
+		role.put("creation_cql", CREATE_USER_AND_GRANT_CQL);
+		role.put("consistency", "All");
+
+		vaultOperations.write("cassandra/roles/readonly", role);
 	}
 
 	@Value("${spring.data.cassandra.username}")

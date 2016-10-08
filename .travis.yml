@@ -17,6 +17,14 @@ addons:
 jdk:
   - oraclejdk8
 
+env:
+  matrix:
+    - VAULT_VER=0.5.2
+    - VAULT_VER=0.5.3
+    - VAULT_VER=0.6.0
+    - VAULT_VER=0.6.1
+    - VAULT_VER=0.6.2
+
 install:
   - mkdir -p download
   - test -f download/apache-cassandra-2.2.6-bin.tar.gz || wget http://www-eu.apache.org/dist/cassandra/2.2.6/apache-cassandra-2.2.6-bin.tar.gz -O download/apache-cassandra-2.2.6-bin.tar.gz

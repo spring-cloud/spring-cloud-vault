@@ -31,6 +31,7 @@ import org.springframework.cloud.vault.config.VaultProperties;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
+import org.springframework.cloud.vault.util.Version;
 import org.springframework.vault.core.VaultOperations;
 
 /**
@@ -66,6 +67,7 @@ public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 
 		assumeTrue(CanConnect
 				.to(new InetSocketAddress(RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT)));
+		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.2")));
 
 		rabbitmq.setEnabled(true);
 		rabbitmq.setRole("readonly");
