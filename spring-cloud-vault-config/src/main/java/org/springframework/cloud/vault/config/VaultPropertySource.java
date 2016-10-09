@@ -31,31 +31,33 @@ import lombok.extern.slf4j.Slf4j;
  * @author Mark Paluch
  */
 @Slf4j
-class VaultPropertySource extends EnumerablePropertySource<VaultConfigTemplate> {
+class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations> {
 
-	private final VaultProperties vaultProperties;
-	private final SecureBackendAccessor secureBackendAccessor;
+	private final boolean failFast;
+
+	private final SecretBackendMetadata secretBackendMetadata;
+
 	private final Map<String, String> properties = new LinkedHashMap<>();
+
 	private Secrets secrets;
 
 	/**
 	 * Creates a new {@link VaultPropertySource}.
 	 *
 	 * @param operations must not be {@literal null}.
-	 * @param properties must not be {@literal null}.
-	 * @param secureBackendAccessor must not be {@literal null}.
+	 * @param failFast fail if properties could not be read because of access errors.
+	 * @param secretBackendMetadata must not be {@literal null}.
 	 */
-	public VaultPropertySource(VaultConfigTemplate operations, VaultProperties properties,
-			SecureBackendAccessor secureBackendAccessor) {
+	public VaultPropertySource(VaultConfigOperations operations, boolean failFast,
+			SecretBackendMetadata secretBackendMetadata) {
 
-		super(secureBackendAccessor.getName(), operations);
+		super(secretBackendMetadata.getName(), operations);
 
 		Assert.notNull(operations, "VaultConfigTemplate must not be null!");
-		Assert.notNull(properties, "VaultProperties must not be null!");
-		Assert.notNull(secureBackendAccessor, "SecureBackendAccessor must not be null!");
+		Assert.notNull(secretBackendMetadata, "SecretBackendMetadata must not be null!");
 
-		this.vaultProperties = properties;
-		this.secureBackendAccessor = secureBackendAccessor;
+		this.failFast = failFast;
+		this.secretBackendMetadata = secretBackendMetadata;
 	}
 
 	/**
@@ -64,22 +66,19 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigTemplate> 
 	public void init() {
 
 		try {
-			this.secrets = this.source.read(this.secureBackendAccessor);
+			this.secrets = this.source.read(this.secretBackendMetadata);
 			if (this.secrets != null) {
 				this.properties.putAll(secrets.getData());
 			}
 		}
-		catch (Exception e) {
+		catch (RuntimeException e) {
 
 			String message = String.format(
 					"Unable to read properties from Vault using %s for %s ", getName(),
-					secureBackendAccessor.variables());
-			if (vaultProperties.isFailFast()) {
-				if (e instanceof RuntimeException) {
-					throw e;
-				}
+					secretBackendMetadata.getVariables());
 
-				throw new IllegalStateException(message, e);
+			if (failFast) {
+				throw e;
 			}
 
 			log.error(message, e);

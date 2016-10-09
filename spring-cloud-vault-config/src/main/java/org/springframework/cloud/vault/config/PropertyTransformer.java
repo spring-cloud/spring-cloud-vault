@@ -13,26 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.config;
 
+import java.util.Map;
+
 /**
- * A secret backend that can return secrets from Vault.
+ * Strategy interface to transform properties to a new key-value {@link Map}. Property
+ * transformation can remap property names, adjust values or change the property map
+ * entirely.
+ * <p>
+ * Implementors usually transform property names to target property names by retaining the
+ * value.
  *
  * @author Mark Paluch
  */
-public interface VaultSecretBackend {
+public interface PropertyTransformer {
 
 	/**
-	 * Backend path.
+	 * Transform properties by creating a new map using the transformed property set.
 	 *
-	 * @return the backend path.
+	 * @param input must not be {@literal null}.
+	 * @return transformed properties.
 	 */
-	String getBackend();
-
-	/**
-	 *
-	 * @return {@literal true} if the backend is enabled.
-	 */
-	boolean isEnabled();
+	Map<String, String> transformProperties(Map<String, String> input);
 }

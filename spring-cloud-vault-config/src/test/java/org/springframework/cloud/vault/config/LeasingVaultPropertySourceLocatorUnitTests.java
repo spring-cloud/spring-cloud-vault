@@ -60,7 +60,7 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 
 		propertySourceLocator = new LeasingVaultPropertySourceLocator(operations,
 				new VaultProperties(), new VaultGenericBackendProperties(),
-				Collections.<SecureBackendAccessor> emptyList(), taskScheduler);
+				Collections.<SecretBackendMetadata> emptyList(), taskScheduler);
 	}
 
 	@Test
@@ -71,7 +71,7 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 
 		propertySourceLocator = new LeasingVaultPropertySourceLocator(operations,
 				vaultProperties, new VaultGenericBackendProperties(),
-				Collections.<SecureBackendAccessor> emptyList(), taskScheduler);
+				Collections.<SecretBackendMetadata> emptyList(), taskScheduler);
 
 		assertThat(propertySourceLocator.getOrder()).isEqualTo(10);
 	}

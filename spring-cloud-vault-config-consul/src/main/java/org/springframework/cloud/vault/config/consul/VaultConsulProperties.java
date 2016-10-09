@@ -17,7 +17,7 @@ package org.springframework.cloud.vault.config.consul;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.vault.config.VaultSecretBackend;
+import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 
 import lombok.Data;
 
@@ -28,7 +28,7 @@ import lombok.Data;
  */
 @ConfigurationProperties("spring.cloud.vault.consul")
 @Data
-public class VaultConsulProperties implements VaultSecretBackend {
+public class VaultConsulProperties implements VaultSecretBackendDescriptor {
 
 	/**
 	 * Enable consul backend usage.

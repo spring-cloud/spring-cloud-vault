@@ -81,20 +81,21 @@ public class VaultBootstrapConfiguration {
 
 	private final VaultProperties vaultProperties;
 
-	private final Collection<VaultSecretBackend> vaultSecretBackends;
+	private final Collection<VaultSecretBackendDescriptor> vaultSecretBackendDescriptors;
 
-	private final Collection<SecureBackendAccessorFactory<? super VaultSecretBackend>> factories;
+	private final Collection<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> factories;
 
+	@SuppressWarnings("unchecked")
 	public VaultBootstrapConfiguration(ConfigurableApplicationContext applicationContext,
 			VaultProperties vaultProperties) {
 
 		this.applicationContext = applicationContext;
 		this.vaultProperties = vaultProperties;
 
-		this.vaultSecretBackends = applicationContext
-				.getBeansOfType(VaultSecretBackend.class).values();
+		this.vaultSecretBackendDescriptors = applicationContext
+				.getBeansOfType(VaultSecretBackendDescriptor.class).values();
 		this.factories = (Collection) applicationContext
-				.getBeansOfType(SecureBackendAccessorFactory.class).values();
+				.getBeansOfType(SecretBackendMetadataFactory.class).values();
 	}
 
 	@Bean
@@ -103,8 +104,8 @@ public class VaultBootstrapConfiguration {
 			VaultGenericBackendProperties vaultGenericBackendProperties,
 			ObjectProvider<TaskSchedulerWrapper<? extends TaskScheduler>> taskSchedulerProvider) {
 
-		Collection<SecureBackendAccessor> backendAccessors = SecureBackendFactories
-				.createBackendAcessors(vaultSecretBackends, factories);
+		Collection<SecretBackendMetadata> backendAccessors = SecretBackendFactories
+				.createSecretBackendMetadata(vaultSecretBackendDescriptors, factories);
 		VaultConfigTemplate vaultConfigTemplate = new VaultConfigTemplate(operations,
 				vaultProperties);
 
@@ -121,114 +122,6 @@ public class VaultBootstrapConfiguration {
 
 		return new VaultPropertySourceLocator(vaultConfigTemplate, vaultProperties,
 				vaultGenericBackendProperties, backendAccessors);
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public ClientAuthentication clientAuthentication() {
-
-		VaultClient vaultClient = vaultClient();
-
-		switch (vaultProperties.getAuthentication()) {
-
-		case TOKEN:
-			Assert.hasText(vaultProperties.getToken(),
-					"Token (spring.cloud.vault.token) must not be empty");
-			return new TokenAuthentication(vaultProperties.getToken());
-
-		case APPID:
-			return appIdAuthentication(vaultProperties, vaultClient);
-
-		case CERT:
-			return new ClientCertificateAuthentication(vaultClient);
-
-		case AWS_EC2:
-			return awsEc2Authentication(vaultProperties, vaultClient);
-
-		case CUBBYHOLE:
-			return cubbyholeAuthentication(vaultClient);
-
-		}
-
-		throw new UnsupportedOperationException(
-				String.format("Client authentication %s not supported",
-						vaultProperties.getAuthentication()));
-	}
-
-	private ClientAuthentication appIdAuthentication(VaultProperties vaultProperties,
-			VaultClient vaultClient) {
-
-		VaultProperties.AppIdProperties appId = vaultProperties.getAppId();
-		Assert.hasText(appId.getUserId(),
-				"UserId (spring.cloud.vault.app-id.user-id) must not be empty");
-
-		AppIdAuthenticationOptions authenticationOptions = AppIdAuthenticationOptions
-				.builder().appId(vaultProperties.getApplicationName()) //
-				.path(appId.getAppIdPath()) //
-				.userIdMechanism(getClientAuthentication(appId)).build();
-
-		return new AppIdAuthentication(authenticationOptions, vaultClient);
-	}
-
-	private AppIdUserIdMechanism getClientAuthentication(
-			VaultProperties.AppIdProperties appId) {
-
-		try {
-			Class<?> userIdClass = ClassUtils.forName(appId.getUserId(), null);
-			return (AppIdUserIdMechanism) BeanUtils.instantiateClass(userIdClass);
-		}
-		catch (ClassNotFoundException ex) {
-
-			switch (appId.getUserId().toUpperCase()) {
-
-			case VaultProperties.AppIdProperties.IP_ADDRESS:
-				return new IpAddressUserId();
-
-			case VaultProperties.AppIdProperties.MAC_ADDRESS:
-
-				if (StringUtils.hasText(appId.getNetworkInterface())) {
-					try {
-						return new MacAddressUserId(
-								Integer.parseInt(appId.getNetworkInterface()));
-					}
-					catch (NumberFormatException e) {
-						return new MacAddressUserId(appId.getNetworkInterface());
-					}
-				}
-
-				return new MacAddressUserId();
-			default:
-				return new StaticUserId(appId.getUserId());
-			}
-		}
-	}
-
-	private ClientAuthentication awsEc2Authentication(VaultProperties vaultProperties,
-			VaultClient vaultClient) {
-
-		VaultProperties.AwsEc2Properties awsEc2 = vaultProperties.getAwsEc2();
-
-		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions
-				.builder().role(awsEc2.getRole()) //
-				.path(awsEc2.getAwsEc2Path()) //
-				.identityDocumentUri(URI.create(awsEc2.getIdentityDocument())) //
-				.build();
-
-		return new AwsEc2Authentication(authenticationOptions, vaultClient,
-				vaultClient.getRestTemplate());
-	}
-
-	private ClientAuthentication cubbyholeAuthentication(VaultClient vaultClient) {
-
-		Assert.hasText(vaultProperties.getToken(),
-				"Initial Token (spring.cloud.vault.token) for Cubbyhole authentication must not be empty");
-
-		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder() //
-				.wrapped() //
-				.initialToken(VaultToken.of(vaultProperties.getToken())) //
-				.build();
-
-		return new CubbyholeAuthentication(options, vaultClient);
 	}
 
 	/**
@@ -342,6 +235,114 @@ public class VaultBootstrapConfiguration {
 		}
 
 		return new SimpleSessionManager(clientAuthentication);
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public ClientAuthentication clientAuthentication() {
+
+		VaultClient vaultClient = vaultClient();
+
+		switch (vaultProperties.getAuthentication()) {
+
+		case TOKEN:
+			Assert.hasText(vaultProperties.getToken(),
+					"Token (spring.cloud.vault.token) must not be empty");
+			return new TokenAuthentication(vaultProperties.getToken());
+
+		case APPID:
+			return appIdAuthentication(vaultProperties, vaultClient);
+
+		case CERT:
+			return new ClientCertificateAuthentication(vaultClient);
+
+		case AWS_EC2:
+			return awsEc2Authentication(vaultProperties, vaultClient);
+
+		case CUBBYHOLE:
+			return cubbyholeAuthentication(vaultClient);
+
+		}
+
+		throw new UnsupportedOperationException(
+				String.format("Client authentication %s not supported",
+						vaultProperties.getAuthentication()));
+	}
+
+	private ClientAuthentication appIdAuthentication(VaultProperties vaultProperties,
+			VaultClient vaultClient) {
+
+		VaultProperties.AppIdProperties appId = vaultProperties.getAppId();
+		Assert.hasText(appId.getUserId(),
+				"UserId (spring.cloud.vault.app-id.user-id) must not be empty");
+
+		AppIdAuthenticationOptions authenticationOptions = AppIdAuthenticationOptions
+				.builder().appId(vaultProperties.getApplicationName()) //
+				.path(appId.getAppIdPath()) //
+				.userIdMechanism(getClientAuthentication(appId)).build();
+
+		return new AppIdAuthentication(authenticationOptions, vaultClient);
+	}
+
+	private AppIdUserIdMechanism getClientAuthentication(
+			VaultProperties.AppIdProperties appId) {
+
+		try {
+			Class<?> userIdClass = ClassUtils.forName(appId.getUserId(), null);
+			return (AppIdUserIdMechanism) BeanUtils.instantiateClass(userIdClass);
+		}
+		catch (ClassNotFoundException ex) {
+
+			switch (appId.getUserId().toUpperCase()) {
+
+			case VaultProperties.AppIdProperties.IP_ADDRESS:
+				return new IpAddressUserId();
+
+			case VaultProperties.AppIdProperties.MAC_ADDRESS:
+
+				if (StringUtils.hasText(appId.getNetworkInterface())) {
+					try {
+						return new MacAddressUserId(
+								Integer.parseInt(appId.getNetworkInterface()));
+					}
+					catch (NumberFormatException e) {
+						return new MacAddressUserId(appId.getNetworkInterface());
+					}
+				}
+
+				return new MacAddressUserId();
+			default:
+				return new StaticUserId(appId.getUserId());
+			}
+		}
+	}
+
+	private ClientAuthentication awsEc2Authentication(VaultProperties vaultProperties,
+			VaultClient vaultClient) {
+
+		VaultProperties.AwsEc2Properties awsEc2 = vaultProperties.getAwsEc2();
+
+		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions
+				.builder().role(awsEc2.getRole()) //
+				.path(awsEc2.getAwsEc2Path()) //
+				.identityDocumentUri(URI.create(awsEc2.getIdentityDocument())) //
+				.build();
+
+		return new AwsEc2Authentication(authenticationOptions, vaultClient,
+				vaultClient.getRestTemplate());
+	}
+
+	private ClientAuthentication cubbyholeAuthentication(VaultClient vaultClient) {
+
+		Assert.hasText(vaultProperties.getToken(),
+				"Initial Token (spring.cloud.vault.token) for Cubbyhole authentication must not be empty");
+
+		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder() //
+				.wrapped() //
+				.initialToken(VaultToken.of(vaultProperties.getToken())) //
+				.build();
+
+		return new CubbyholeAuthentication(options, vaultClient);
 	}
 
 	/**

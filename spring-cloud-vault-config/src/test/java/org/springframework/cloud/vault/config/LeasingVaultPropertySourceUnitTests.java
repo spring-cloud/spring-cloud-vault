@@ -53,7 +53,7 @@ public class LeasingVaultPropertySourceUnitTests {
 	private VaultOperations vaultOperations;
 
 	@Mock
-	private SecureBackendAccessor secureBackendAccessor;
+	private SecretBackendMetadata secretBackendMetadata;
 
 	@Mock
 	private TaskScheduler taskScheduler;
@@ -66,11 +66,11 @@ public class LeasingVaultPropertySourceUnitTests {
 	@Before
 	public void before() throws Exception {
 
-		when(secureBackendAccessor.getName()).thenReturn("test");
+		when(secretBackendMetadata.getName()).thenReturn("test");
 		when(configOperations.getVaultOperations()).thenReturn(vaultOperations);
 
 		propertySource = new LeasingVaultPropertySource(configOperations,
-				new VaultProperties(), secureBackendAccessor, taskScheduler);
+				false, secretBackendMetadata, taskScheduler);
 	}
 
 	@Test
@@ -87,7 +87,7 @@ public class LeasingVaultPropertySourceUnitTests {
 		Secrets secrets = new Secrets();
 		secrets.setData(Collections.singletonMap("key", "value"));
 
-		when(configOperations.read(secureBackendAccessor)).thenReturn(secrets);
+		when(configOperations.read(secretBackendMetadata)).thenReturn(secrets);
 
 		propertySource.init();
 
@@ -103,7 +103,7 @@ public class LeasingVaultPropertySourceUnitTests {
 		secrets.setRenewable(false);
 		secrets.setData(Collections.singletonMap("key", "value"));
 
-		when(configOperations.read(secureBackendAccessor)).thenReturn(secrets);
+		when(configOperations.read(secretBackendMetadata)).thenReturn(secrets);
 
 		propertySource.init();
 
@@ -116,7 +116,7 @@ public class LeasingVaultPropertySourceUnitTests {
 
 		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class)))
 				.thenReturn(scheduledFuture);
-		when(configOperations.read(secureBackendAccessor)).thenReturn(createSecrets());
+		when(configOperations.read(secretBackendMetadata)).thenReturn(createSecrets());
 
 		propertySource.init();
 
@@ -237,7 +237,7 @@ public class LeasingVaultPropertySourceUnitTests {
 
 		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class)))
 				.thenReturn(scheduledFuture);
-		when(configOperations.read(secureBackendAccessor)).thenReturn(createSecrets());
+		when(configOperations.read(secretBackendMetadata)).thenReturn(createSecrets());
 		propertySource.init();
 		when(vaultOperations.doWithVault(any(VaultOperations.SessionCallback.class)))
 				.thenReturn(getResponseEntity("new_lease", true, 70, HttpStatus.OK));

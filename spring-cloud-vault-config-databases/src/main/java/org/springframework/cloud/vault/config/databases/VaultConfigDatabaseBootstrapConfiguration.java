@@ -19,14 +19,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.vault.config.SecureBackendAccessor;
-import org.springframework.cloud.vault.config.SecureBackendAccessorFactory;
-import org.springframework.cloud.vault.config.VaultSecretBackend;
+import org.springframework.cloud.vault.config.PropertyNameTransformer;
+import org.springframework.cloud.vault.config.PropertyTransformer;
+import org.springframework.cloud.vault.config.SecretBackendMetadata;
+import org.springframework.cloud.vault.config.SecretBackendMetadataFactory;
+import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
 
 /**
+ * Bootstrap configuration providing support for the Database secret backends such as
+ * MySQL, PostreSQL, Apache Cassandra and MongoDB.
+ *
  * @author Mark Paluch
  */
 @Configuration
@@ -36,42 +41,49 @@ import org.springframework.util.Assert;
 public class VaultConfigDatabaseBootstrapConfiguration {
 
 	@Bean
-	public SecureBackendAccessorFactory<DatabaseSecretProperties> secureBackendAccessorFactory() {
-		return new DatabaseSecureBackendAccessorFactory();
+	public SecretBackendMetadataFactory<DatabaseSecretProperties> secretBackendMetadataFactory() {
+		return new DatabaseSecretBackendMetadataFactory();
 	}
 
-	static class DatabaseSecureBackendAccessorFactory
-			implements SecureBackendAccessorFactory<DatabaseSecretProperties> {
+	static class DatabaseSecretBackendMetadataFactory
+			implements SecretBackendMetadataFactory<DatabaseSecretProperties> {
 
 		@Override
-		public SecureBackendAccessor createSecureBackendAccessor(
-				DatabaseSecretProperties configurationProperties) {
-			return forDatabase(configurationProperties);
+		public SecretBackendMetadata createMetadata(
+				DatabaseSecretProperties backendDescriptor) {
+			return forDatabase(backendDescriptor);
 		}
 
 		@Override
-		public boolean supports(VaultSecretBackend secretBackend) {
-			return secretBackend instanceof DatabaseSecretProperties;
+		public boolean supports(VaultSecretBackendDescriptor backendDescriptor) {
+			return backendDescriptor instanceof DatabaseSecretProperties;
 		}
 
 		/**
-		 * Creates a {@link SecureBackendAccessor} for a secure backend using
+		 * Creates a {@link SecretBackendMetadata} for a secret backend using
 		 * {@link DatabaseSecretProperties}. This accessor transforms Vault's
 		 * username/password property names to names provided with
 		 * {@link DatabaseSecretProperties#getUsernameProperty()} and
 		 * {@link DatabaseSecretProperties#getPasswordProperty()}.
 		 *
 		 * @param properties must not be {@literal null}.
-		 * @return the {@link SecureBackendAccessor}
+		 * @return the {@link SecretBackendMetadata}
 		 */
-		public static SecureBackendAccessor forDatabase(
+		public static SecretBackendMetadata forDatabase(
 				final DatabaseSecretProperties properties) {
+
 			Assert.notNull(properties, "DatabaseSecretProperties must not be null");
 
-			return new SecureBackendAccessor() {
+			final PropertyNameTransformer transformer = new PropertyNameTransformer();
+			transformer.addKeyTransformation("username",
+					properties.getUsernameProperty());
+			transformer.addKeyTransformation("password",
+					properties.getPasswordProperty());
+
+			return new SecretBackendMetadata() {
 
 				@Override
-				public Map<String, String> variables() {
+				public Map<String, String> getVariables() {
 
 					Map<String, String> variables = new HashMap<>();
 					variables.put("backend", properties.getBackend());
@@ -86,14 +98,8 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 				}
 
 				@Override
-				public Map<String, String> transformProperties(
-						Map<String, String> input) {
-
-					Map<String, String> result = new HashMap<>();
-					result.put(properties.getUsernameProperty(), input.get("username"));
-					result.put(properties.getPasswordProperty(), input.get("password"));
-
-					return result;
+				public PropertyTransformer getPropertyTransformer() {
+					return transformer;
 				}
 			};
 		}

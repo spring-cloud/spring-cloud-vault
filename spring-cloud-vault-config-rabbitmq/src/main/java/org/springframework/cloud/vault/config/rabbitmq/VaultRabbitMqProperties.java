@@ -17,7 +17,7 @@ package org.springframework.cloud.vault.config.rabbitmq;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.vault.config.VaultSecretBackend;
+import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 
 import lombok.Data;
 
@@ -28,7 +28,7 @@ import lombok.Data;
  */
 @ConfigurationProperties("spring.cloud.vault.rabbitmq")
 @Data
-public class VaultRabbitMqProperties implements VaultSecretBackend {
+public class VaultRabbitMqProperties implements VaultSecretBackendDescriptor {
 
 	/**
 	 * Enable rabbitmq backend usage.

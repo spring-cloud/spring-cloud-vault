@@ -19,65 +19,73 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.vault.config.SecureBackendAccessor;
-import org.springframework.cloud.vault.config.SecureBackendAccessorFactory;
-import org.springframework.cloud.vault.config.VaultSecretBackend;
+import org.springframework.cloud.vault.config.PropertyNameTransformer;
+import org.springframework.cloud.vault.config.PropertyTransformer;
+import org.springframework.cloud.vault.config.SecretBackendMetadata;
+import org.springframework.cloud.vault.config.SecretBackendMetadataFactory;
+import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
 
 /**
+ * Bootstrap configuration providing support for the AWS secret backend.
+ *
  * @author Mark Paluch
  */
 @Configuration
-@EnableConfigurationProperties
+@EnableConfigurationProperties(VaultAwsProperties.class)
 public class VaultConfigAwsBootstrapConfiguration {
 
 	@Bean
-	public SecureBackendAccessorFactory<VaultAwsProperties> secureBackendAccessorFactory() {
-		return new AwsSecureBackendAccessorFactory();
+	public SecretBackendMetadataFactory<VaultAwsProperties> secretBackendMetadataFactory() {
+		return new AwsSecretBackendMetadataFactory();
 	}
 
-	@Bean
-	public VaultAwsProperties awsProperties() {
-		return new VaultAwsProperties();
-	}
-
-	static class AwsSecureBackendAccessorFactory
-			implements SecureBackendAccessorFactory<VaultAwsProperties> {
+	static class AwsSecretBackendMetadataFactory
+			implements SecretBackendMetadataFactory<VaultAwsProperties> {
 
 		@Override
-		public SecureBackendAccessor createSecureBackendAccessor(
-				VaultAwsProperties properties) {
-			return forAws(properties);
+		public SecretBackendMetadata createMetadata(
+				VaultAwsProperties backendDescriptor) {
+			return forAws(backendDescriptor);
 		}
 
 		@Override
-		public boolean supports(VaultSecretBackend secretBackend) {
-			return secretBackend instanceof VaultAwsProperties;
+		public boolean supports(VaultSecretBackendDescriptor backendDescriptor) {
+			return backendDescriptor instanceof VaultAwsProperties;
 		}
 
 		/**
-		 * Creates a {@link SecureBackendAccessor} for a secure backend using
+		 * Creates {@link SecretBackendMetadata} for a secret backend using
 		 * {@link VaultAwsProperties}. This accessor transforms Vault's username/password
 		 * property names to names provided with
 		 * {@link VaultAwsProperties#getAccessKeyProperty()} and
 		 * {@link VaultAwsProperties#getSecretKeyProperty()}.
 		 *
 		 * @param properties must not be {@literal null}.
-		 * @return the {@link SecureBackendAccessor}
+		 * @return the {@link SecretBackendMetadata}
 		 */
-		public static SecureBackendAccessor forAws(final VaultAwsProperties properties) {
+		public static SecretBackendMetadata forAws(final VaultAwsProperties properties) {
+
 			Assert.notNull(properties, "VaultAwsProperties must not be null");
 
-			return new SecureBackendAccessor() {
+			final PropertyNameTransformer transformer = new PropertyNameTransformer();
+			transformer.addKeyTransformation("access_key",
+					properties.getAccessKeyProperty());
+			transformer.addKeyTransformation("secret_key",
+					properties.getSecretKeyProperty());
+
+			return new SecretBackendMetadata() {
 
 				@Override
-				public Map<String, String> variables() {
+				public Map<String, String> getVariables() {
 
 					Map<String, String> variables = new HashMap<>();
+
 					variables.put("backend", properties.getBackend());
 					variables.put("key", String.format("creds/%s", properties.getRole()));
+
 					return variables;
 				}
 
@@ -88,16 +96,8 @@ public class VaultConfigAwsBootstrapConfiguration {
 				}
 
 				@Override
-				public Map<String, String> transformProperties(
-						Map<String, String> input) {
-
-					Map<String, String> result = new HashMap();
-					result.put(properties.getAccessKeyProperty(),
-							input.get("access_key"));
-					result.put(properties.getSecretKeyProperty(),
-							input.get("secret_key"));
-
-					return result;
+				public PropertyTransformer getPropertyTransformer() {
+					return transformer;
 				}
 			};
 		}
