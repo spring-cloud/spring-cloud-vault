@@ -16,7 +16,7 @@
 package org.springframework.cloud.vault.config;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.cloud.vault.config.SecureBackendAccessors.*;
+import static org.springframework.cloud.vault.config.GenericSecretBackendMetadata.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +51,7 @@ public class GenericSecretIntegrationTests extends IntegrationTestSupport {
 	public void shouldReturnSecretsCorrectly() throws Exception {
 
 		Map<String, String> secretProperties = configOperations
-				.read(generic("secret", "app-name")).getData();
+				.read(create("secret", "app-name")).getData();
 
 		assertThat(secretProperties).containsAllEntriesOf(createExpectedMap());
 	}
@@ -59,7 +59,7 @@ public class GenericSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void shouldReturnNullIfNotFound() throws Exception {
 
-		Secrets secrets = configOperations.read(generic("secret", "missing"));
+		Secrets secrets = configOperations.read(create("secret", "missing"));
 
 		assertThat(secrets).isNull();
 	}

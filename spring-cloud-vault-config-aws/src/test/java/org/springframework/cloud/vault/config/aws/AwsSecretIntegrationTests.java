@@ -17,7 +17,7 @@ package org.springframework.cloud.vault.config.aws;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrapConfiguration.AwsSecureBackendAccessorFactory.*;
+import static org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrapConfiguration.AwsSecretBackendMetadataFactory.*;
 
 import java.util.Collections;
 import java.util.HashMap;

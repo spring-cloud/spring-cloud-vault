@@ -17,7 +17,7 @@ package org.springframework.cloud.vault.config.rabbitmq;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration.RabbitMqSecureBackendAccessorFactory.*;
+import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration.RabbitMqSecretBackendMetadataFactory.*;
 
 import java.net.InetSocketAddress;
 import java.util.Collections;

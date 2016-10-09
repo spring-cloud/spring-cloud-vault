@@ -19,65 +19,69 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.vault.config.SecureBackendAccessor;
-import org.springframework.cloud.vault.config.SecureBackendAccessorFactory;
-import org.springframework.cloud.vault.config.VaultSecretBackend;
+import org.springframework.cloud.vault.config.PropertyNameTransformer;
+import org.springframework.cloud.vault.config.PropertyTransformer;
+import org.springframework.cloud.vault.config.SecretBackendMetadata;
+import org.springframework.cloud.vault.config.SecretBackendMetadataFactory;
+import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
 
 /**
+ * Bootstrap configuration providing support for the Consul secret backend.
+ *
  * @author Mark Paluch
  */
 @Configuration
-@EnableConfigurationProperties
+@EnableConfigurationProperties(VaultConsulProperties.class)
 public class VaultConfigConsulBootstrapConfiguration {
 
 	@Bean
-	public SecureBackendAccessorFactory<VaultConsulProperties> secureBackendAccessorFactory() {
-		return new ConsulSecureBackendAccessorFactory();
+	public SecretBackendMetadataFactory<VaultConsulProperties> secretBackendAccessorFactory() {
+		return new ConsulSecretBackendMetadataFactory();
 	}
 
-	@Bean
-	public VaultConsulProperties vaultConsulProperties() {
-		return new VaultConsulProperties();
-	}
-
-	static class ConsulSecureBackendAccessorFactory
-			implements SecureBackendAccessorFactory<VaultConsulProperties> {
+	static class ConsulSecretBackendMetadataFactory
+			implements SecretBackendMetadataFactory<VaultConsulProperties> {
 
 		@Override
-		public SecureBackendAccessor createSecureBackendAccessor(
-				VaultConsulProperties properties) {
-			return forConsul(properties);
+		public SecretBackendMetadata createMetadata(
+				VaultConsulProperties backendDescriptor) {
+			return forConsul(backendDescriptor);
 		}
 
 		@Override
-		public boolean supports(VaultSecretBackend secretBackend) {
-			return secretBackend instanceof VaultConsulProperties;
+		public boolean supports(VaultSecretBackendDescriptor backendDescriptor) {
+			return backendDescriptor instanceof VaultConsulProperties;
 		}
 
 		/**
-		 * Creates a {@link SecureBackendAccessor} for a secure backend using
+		 * Creates a {@link SecretBackendMetadata} for a secret backend using
 		 * {@link VaultConsulProperties}. This accessor transforms Vault's token property
 		 * names to names provided with {@link VaultConsulProperties#getTokenProperty()}.
 		 *
 		 * @param properties must not be {@literal null}.
-		 * @return the {@link SecureBackendAccessor}
+		 * @return the {@link SecretBackendMetadata}
 		 */
-		public static SecureBackendAccessor forConsul(
+		public static SecretBackendMetadata forConsul(
 				final VaultConsulProperties properties) {
 
 			Assert.notNull(properties, "VaultConsulProperties must not be null");
 
-			return new SecureBackendAccessor() {
+			final PropertyNameTransformer transformer = new PropertyNameTransformer();
+			transformer.addKeyTransformation("token", properties.getTokenProperty());
+
+			return new SecretBackendMetadata() {
 
 				@Override
-				public Map<String, String> variables() {
+				public Map<String, String> getVariables() {
 
 					Map<String, String> variables = new HashMap<>();
+
 					variables.put("backend", properties.getBackend());
 					variables.put("key", String.format("creds/%s", properties.getRole()));
+
 					return variables;
 				}
 
@@ -88,13 +92,8 @@ public class VaultConfigConsulBootstrapConfiguration {
 				}
 
 				@Override
-				public Map<String, String> transformProperties(
-						Map<String, String> input) {
-
-					Map<String, String> result = new HashMap();
-					result.put(properties.getTokenProperty(), input.get("token"));
-
-					return result;
+				public PropertyTransformer getPropertyTransformer() {
+					return transformer;
 				}
 			};
 		}

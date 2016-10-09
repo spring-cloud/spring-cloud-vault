@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.vault.config;
 
-import static org.springframework.cloud.vault.config.SecureBackendAccessors.*;
+import static org.springframework.cloud.vault.config.GenericSecretBackendMetadata.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,10 +41,10 @@ import org.springframework.util.StringUtils;
  */
 class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrdered {
 
-	private final VaultConfigTemplate operations;
+	private final VaultConfigOperations operations;
 	private final VaultProperties properties;
 	private final VaultGenericBackendProperties genericBackendProperties;
-	private final Collection<SecureBackendAccessor> backendAccessors;
+	private final Collection<SecretBackendMetadata> backendAccessors;
 
 	/**
 	 * Creates a new {@link VaultPropertySourceLocator}.
@@ -54,10 +54,10 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 	 * @param genericBackendProperties must not be {@literal null}.
 	 * @param backendAccessors must not be {@literal null}.
 	 */
-	public VaultPropertySourceLocator(VaultConfigTemplate operations,
+	public VaultPropertySourceLocator(VaultConfigOperations operations,
 			VaultProperties properties,
 			VaultGenericBackendProperties genericBackendProperties,
-			Collection<SecureBackendAccessor> backendAccessors) {
+			Collection<SecretBackendMetadata> backendAccessors) {
 
 		Assert.notNull(operations, "VaultConfigOperations must not be null");
 		Assert.notNull(properties, "VaultProperties must not be null");
@@ -129,7 +129,7 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 				if (StringUtils.hasText(propertySourceContext)) {
 
 					VaultPropertySource vaultPropertySource = createVaultPropertySource(
-							generic(genericBackendProperties.getBackend(),
+							create(genericBackendProperties.getBackend(),
 									propertySourceContext));
 
 					propertySources.add(vaultPropertySource);
@@ -137,7 +137,7 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 			}
 		}
 
-		for (SecureBackendAccessor backendAccessor : backendAccessors) {
+		for (SecretBackendMetadata backendAccessor : backendAccessors) {
 
 			VaultPropertySource vaultPropertySource = createVaultPropertySource(
 					backendAccessor);
@@ -185,14 +185,15 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 
 	/**
 	 * Create {@link VaultPropertySource} initialized with a
-	 * {@link SecureBackendAccessor}.
+	 * {@link SecretBackendMetadata}.
 	 *
-	 * @param accessor the {@link SecureBackendAccessor}.
+	 * @param accessor the {@link SecretBackendMetadata}.
 	 * @return the {@link VaultPropertySource} to use.
 	 */
 	protected VaultPropertySource createVaultPropertySource(
-			SecureBackendAccessor accessor) {
-		return new VaultPropertySource(this.operations, this.properties, accessor);
+			SecretBackendMetadata accessor) {
+		return new VaultPropertySource(this.operations, this.properties.isFailFast(),
+				accessor);
 	}
 
 	private void addProfiles(List<String> contexts, String baseContext,

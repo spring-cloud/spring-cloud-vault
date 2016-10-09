@@ -36,7 +36,7 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 	private final VaultProperties properties;
 
 	/**
-	 * Creates a new {@link VaultConfigTemplate}.
+	 * Create a new {@link VaultConfigTemplate} given {@link VaultOperations}.
 	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param properties must not be {@literal null}.
@@ -51,9 +51,10 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 		this.properties = properties;
 	}
 
-	public Secrets read(final SecureBackendAccessor secureBackendAccessor) {
+	@Override
+	public Secrets read(final SecretBackendMetadata secretBackendMetadata) {
 
-		Assert.notNull(secureBackendAccessor, "SecureBackendAccessor must not be null!");
+		Assert.notNull(secretBackendMetadata, "SecureBackendAccessor must not be null!");
 
 		VaultResponseEntity<Secrets> response = vaultOperations.doWithVault(
 				new VaultOperations.SessionCallback<VaultResponseEntity<Secrets>>() {
@@ -62,7 +63,7 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 							VaultOperations.VaultSession session) {
 
 						return session.exchange("{backend}/{key}", HttpMethod.GET, null,
-								Secrets.class, secureBackendAccessor.variables());
+								Secrets.class, secretBackendMetadata.getVariables());
 					}
 				});
 
@@ -71,7 +72,14 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 		if (response.getStatusCode() == HttpStatus.OK) {
 
 			Secrets secrets = response.getBody();
-			secrets.setData(secureBackendAccessor.transformProperties(secrets.getData()));
+
+			PropertyTransformer propertyTransformer = secretBackendMetadata
+					.getPropertyTransformer();
+
+			if (propertyTransformer != null) {
+				secrets.setData(
+						propertyTransformer.transformProperties(secrets.getData()));
+			}
 
 			return secrets;
 		}

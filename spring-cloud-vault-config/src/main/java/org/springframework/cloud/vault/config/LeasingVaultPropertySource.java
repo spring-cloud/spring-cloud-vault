@@ -66,15 +66,15 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 	 * Creates a new {@link VaultPropertySource}.
 	 *
 	 * @param operations must not be {@literal null}.
-	 * @param properties must not be {@literal null}.
-	 * @param secureBackendAccessor must not be {@literal null}.
+	 * @param failFast fail if properties could not be read because of access errors.
+	 * @param secretBackendMetadata must not be {@literal null}.
 	 * @param taskScheduler must not be {@literal null}.
 	 */
-	public LeasingVaultPropertySource(VaultConfigTemplate operations,
-			VaultProperties properties, SecureBackendAccessor secureBackendAccessor,
+	public LeasingVaultPropertySource(VaultConfigOperations operations, boolean failFast,
+			SecretBackendMetadata secretBackendMetadata,
 			TaskScheduler taskScheduler) {
 
-		super(operations, properties, secureBackendAccessor);
+		super(operations, failFast, secretBackendMetadata);
 
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
 

@@ -19,28 +19,32 @@ package org.springframework.cloud.vault.config;
 import java.util.Map;
 
 /**
- * Accessor for a secure backend. Provides URL path variables and can transform
- * properties.
+ * Interface specifying the API to obtain URL variables and optionally a
+ * {@link PropertyTransformer}. Typically used by {@link VaultPropertySource}.
+ *
  * @author Mark Paluch
+ * @see PropertyTransformer
  */
-public interface SecureBackendAccessor {
+public interface SecretBackendMetadata {
 
 	/**
-	 * 
-	 * @return URL template variables.
-	 */
-	Map<String, String> variables();
-
-	/**
-	 * 
-	 * @param input must not be {@literal null}.
-	 * @return transformed properties.
-	 */
-	Map<String, String> transformProperties(Map<String, String> input);
-
-	/**
+	 * Return a readable name of this secret backend.
 	 *
-	 * @return the name for this accessor.
+	 * @return the name of this secret backend.
 	 */
 	String getName();
+
+	/**
+	 * Return a {@link PropertyTransformer} to post-process properties retrieved from
+	 * Vault.
+	 *
+	 * @return the property transformer or {@literal null} if there's no property
+	 * transformer.
+	 */
+	PropertyTransformer getPropertyTransformer();
+
+	/**
+	 * @return URL template variables.
+	 */
+	Map<String, String> getVariables();
 }

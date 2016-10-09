@@ -17,7 +17,7 @@ package org.springframework.cloud.vault.config.consul;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration.ConsulSecureBackendAccessorFactory.*;
+import static org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration.ConsulSecretBackendMetadataFactory.*;
 
 import java.net.InetSocketAddress;
 import java.util.Collections;
@@ -26,7 +26,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.boot.test.TestRestTemplate;
+
 import org.springframework.cloud.vault.config.VaultConfigOperations;
 import org.springframework.cloud.vault.config.VaultConfigTemplate;
 import org.springframework.cloud.vault.config.VaultProperties;

@@ -13,28 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 /**
- * Factory to convert {@link VaultSecretBackend} instance to a
- * {@link SecureBackendAccessor}.
+ * Interface to be implemented by objects that describe a Vault secret backend.
+ *
+ * <p>
+ * Typically used by {@link SecretBackendMetadataFactory} to provide path and
+ * configuration to create a {@link SecretBackendMetadata} object.
  *
  * @author Mark Paluch
+ * @see SecretBackendMetadataFactory
+ * @see SecretBackendMetadata
  */
-public interface SecureBackendAccessorFactory<T extends VaultSecretBackend> {
+public interface VaultSecretBackendDescriptor {
 
 	/**
-	 * Converts a {@link VaultSecretBackend} into a {@link SecureBackendAccessor}.
-	 * @param configurationProperties
-	 * @return the {@link SecureBackendAccessor}.
+	 * Backend path without leading/trailing slashes.
+	 *
+	 * @return the backend path such as {@code secret} or {@code mysql}.
 	 */
-	SecureBackendAccessor createSecureBackendAccessor(T configurationProperties);
+	String getBackend();
 
 	/**
-	 * Checks whether the {@link VaultSecretBackend} is supported by this
-	 * {@link SecureBackendAccessorFactory}.
-	 * @param secretBackend must not be {@literal null}.
-	 * @return {@literal true} if the given {@link VaultSecretBackend} is supported
+	 * @return {@literal true} if the backend is enabled.
 	 */
-	boolean supports(VaultSecretBackend secretBackend);
+	boolean isEnabled();
 }

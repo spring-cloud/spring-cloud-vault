@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocator
 		implements DisposableBean {
 
-	private final VaultConfigTemplate operations;
+	private final VaultConfigOperations operations;
 
 	private final VaultProperties properties;
 
@@ -53,10 +53,10 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocator
 	 * @param backendAccessors must not be {@literal null}.
 	 * @param taskScheduler must not be {@literal null}.
 	 */
-	public LeasingVaultPropertySourceLocator(VaultConfigTemplate operations,
+	public LeasingVaultPropertySourceLocator(VaultConfigOperations operations,
 			VaultProperties properties,
 			VaultGenericBackendProperties genericBackendProperties,
-			Collection<SecureBackendAccessor> backendAccessors,
+			Collection<SecretBackendMetadata> backendAccessors,
 			TaskScheduler taskScheduler) {
 
 		super(operations, properties, genericBackendProperties, backendAccessors);
@@ -72,9 +72,10 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocator
 
 	@Override
 	protected VaultPropertySource createVaultPropertySource(
-			SecureBackendAccessor accessor) {
+			SecretBackendMetadata accessor) {
+
 		LeasingVaultPropertySource propertySource = new LeasingVaultPropertySource(
-				this.operations, this.properties, accessor, taskScheduler);
+				this.operations, this.properties.isFailFast(), accessor, taskScheduler);
 
 		locatedPropertySources.add(propertySource);
 

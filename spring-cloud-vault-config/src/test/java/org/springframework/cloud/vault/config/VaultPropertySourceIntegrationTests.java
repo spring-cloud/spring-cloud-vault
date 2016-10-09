@@ -21,6 +21,7 @@ import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
 
@@ -44,7 +45,7 @@ public class VaultPropertySourceIntegrationTests extends IntegrationTestSupport 
 
 		VaultPropertySource propertySource = new VaultPropertySource(
 				new VaultConfigTemplate(prepare().getVaultOperations(), vaultProperties),
-				vaultProperties, SecureBackendAccessors.generic("secret", "myapp"));
+				false, GenericSecretBackendMetadata.create("secret", "myapp"));
 
 		propertySource.init();
 
