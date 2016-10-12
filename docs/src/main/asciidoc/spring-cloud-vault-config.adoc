@@ -41,6 +41,7 @@ authentication method
 
 See also: https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
 
+[[vault.authentication.appid]]
 === AppId authentication
 
 Vault supports https://www.vaultproject.io/docs/auth/app-id.html[AppId]
@@ -143,6 +144,46 @@ public class MyUserIdMechanism implements AppIdUserIdMechanism {
 ----
 
 See also: https://www.vaultproject.io/docs/auth/app-id.html[Vault Documentation: Using the App ID auth backend]
+
+== AppRole authentication
+
+https://www.vaultproject.io/docs/auth/app-id.html[AppRole] is intended for machine
+authentication, like the deprecated (since Vault 0.6.1) <<vault.authentication.appid>>.
+AppRole authentication consists of two hard to guess (secret) tokens: RoleId and SecretId.
+
+Spring Vault supports AppRole authentication by providing either RoleId only
+or together with a provided SecretId (push or pull mode).
+
+RoleId and optionally SecretId must be provided by configuration,
+Spring Vault will not look up these or create a custom SecretId.
+
+[source,yaml]
+.bootstrap.yml with AppRole authentication properties
+----
+spring.cloud.vault:
+    authentication: APPROLE
+    app-role:
+        role-id: bde2076b-cccb-3cf0-d57e-bca7b1e83a52
+----
+
+* `role-id` sets the RoleId.
+
+[source,yaml]
+.bootstrap.yml with all AppRole authentication properties
+----
+spring.cloud.vault:
+    authentication: APPROLE
+    app-role:
+        role-id: bde2076b-cccb-3cf0-d57e-bca7b1e83a52
+        secret-id: 1696536f-1976-73b1-b241-0b4213908d39
+        app-auth-path: approle
+----
+
+* `role-id` sets the RoleId.
+* `secret-id` sets the SecretId. SecretId can be omitted if AppRole is configured without requiring SecretId (See `bind_secret_id`)
+* `approle-path` sets the path of the approle authentication mount to use
+
+See also: https://www.vaultproject.io/docs/auth/approle.html[Vault Documentation: Using the AppRole auth backend]
 
 === AWS-EC2 authentication
 
