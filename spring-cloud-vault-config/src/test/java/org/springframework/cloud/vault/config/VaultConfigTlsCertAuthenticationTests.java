@@ -97,7 +97,6 @@ public class VaultConfigTlsCertAuthenticationTests {
 
 	@Test
 	public void contextLoads() {
-
 		assertThat(configValue).isEqualTo("foo");
 	}
 

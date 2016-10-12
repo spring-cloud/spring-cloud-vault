@@ -15,13 +15,8 @@
  */
 package org.springframework.cloud.vault.config;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.util.Collections;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -35,9 +30,16 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.web.client.RestTemplate;
 
+import static org.assertj.core.api.Assertions.*;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 /**
- * Integration test using config infrastructure with token authentication. In case this
- * test should fail because of SSL make sure you run the test within the
+ * Integration test using config infrastructure with token authentication.
+ * <p>
+ * In case this test should fail because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
  * 
@@ -53,8 +55,11 @@ public class VaultConfigTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		vaultRule.prepare().getVaultOperations().write("secret/testVaultApp",
-				Collections.singletonMap("vault.value", "foo"));
+		vaultRule
+				.prepare()
+				.getVaultOperations()
+				.write("secret/testVaultApp",
+						Collections.singletonMap("vault.value", "foo"));
 	}
 
 	@Value("${vault.value}")

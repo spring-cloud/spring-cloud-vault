@@ -15,15 +15,7 @@
  */
 package org.springframework.cloud.vault.config;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-
 import java.util.Collections;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -39,9 +31,18 @@ import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 /**
- * Integration test using config infrastructure with Cubbyhole authentication. In case
- * this test should fail because of SSL make sure you run the test within the
+ * Integration test using config infrastructure with Cubbyhole authentication.
+ * <p>
+ * In case this test should fail because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
  * 
@@ -64,12 +65,13 @@ public class VaultConfigCubbyholeAuthenticationTests {
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
-		vaultOperations.write(
-				"secret/" + VaultConfigCubbyholeAuthenticationTests.class.getSimpleName(),
-				Collections.singletonMap("vault.value", "foo"));
+		vaultOperations
+				.write("secret/"
+						+ VaultConfigCubbyholeAuthenticationTests.class.getSimpleName(),
+						Collections.singletonMap("vault.value", "foo"));
 
-		VaultResponseEntity<VaultResponse> entity = vaultOperations.doWithVault(
-				new VaultOperations.SessionCallback<VaultResponseEntity<VaultResponse>>() {
+		VaultResponseEntity<VaultResponse> entity = vaultOperations
+				.doWithVault(new VaultOperations.SessionCallback<VaultResponseEntity<VaultResponse>>() {
 					@Override
 					public VaultResponseEntity<VaultResponse> doWithVault(
 							VaultOperations.VaultSession session) {
@@ -97,7 +99,6 @@ public class VaultConfigCubbyholeAuthenticationTests {
 
 	@Test
 	public void contextLoads() {
-
 		assertThat(configValue).isEqualTo("foo");
 	}
 
