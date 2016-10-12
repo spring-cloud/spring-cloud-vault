@@ -76,6 +76,8 @@ public class VaultProperties {
 
 	private AppIdProperties appId = new AppIdProperties();
 
+	private AppRoleProperties appRole = new AppRoleProperties();
+
 	private AwsEc2Properties awsEc2 = new AwsEc2Properties();
 
 	private Ssl ssl = new Ssl();
@@ -123,6 +125,25 @@ public class VaultProperties {
 		 */
 		@NotEmpty
 		private String userId = MAC_ADDRESS;
+	}
+
+	@Data
+	public static class AppRoleProperties {
+
+		/**
+		 * Mount path of the AppId authentication backend.
+		 */
+		private String appRolePath = "approle";
+
+		/**
+		 * The RoleId.
+		 */
+		private String roleId = null;
+
+		/**
+		 * The SecretId.
+		 */
+		private String secretId = null;
 	}
 
 	@Data
@@ -209,6 +230,6 @@ public class VaultProperties {
 	}
 
 	public enum AuthenticationMethod {
-		TOKEN, APPID, AWS_EC2, CERT, CUBBYHOLE;
+		TOKEN, APPID, APPROLE, AWS_EC2, CERT, CUBBYHOLE;
 	}
 }

@@ -37,22 +37,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.authentication.AppIdAuthentication;
-import org.springframework.vault.authentication.AppIdAuthenticationOptions;
-import org.springframework.vault.authentication.AppIdUserIdMechanism;
-import org.springframework.vault.authentication.AwsEc2Authentication;
-import org.springframework.vault.authentication.AwsEc2AuthenticationOptions;
-import org.springframework.vault.authentication.ClientAuthentication;
-import org.springframework.vault.authentication.ClientCertificateAuthentication;
-import org.springframework.vault.authentication.CubbyholeAuthentication;
-import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
-import org.springframework.vault.authentication.IpAddressUserId;
-import org.springframework.vault.authentication.LifecycleAwareSessionManager;
-import org.springframework.vault.authentication.MacAddressUserId;
-import org.springframework.vault.authentication.SessionManager;
-import org.springframework.vault.authentication.SimpleSessionManager;
-import org.springframework.vault.authentication.StaticUserId;
-import org.springframework.vault.authentication.TokenAuthentication;
+import org.springframework.vault.authentication.*;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
@@ -92,15 +77,16 @@ public class VaultBootstrapConfiguration {
 		this.applicationContext = applicationContext;
 		this.vaultProperties = vaultProperties;
 
-		this.vaultSecretBackendDescriptors = applicationContext
-				.getBeansOfType(VaultSecretBackendDescriptor.class).values();
-		this.factories = (Collection) applicationContext
-				.getBeansOfType(SecretBackendMetadataFactory.class).values();
+		this.vaultSecretBackendDescriptors = applicationContext.getBeansOfType(
+				VaultSecretBackendDescriptor.class).values();
+		this.factories = (Collection) applicationContext.getBeansOfType(
+				SecretBackendMetadataFactory.class).values();
 	}
 
 	@Bean
 	public VaultPropertySourceLocator vaultPropertySourceLocator(
-			VaultOperations operations, VaultProperties vaultProperties,
+			VaultOperations operations,
+			VaultProperties vaultProperties,
 			VaultGenericBackendProperties vaultGenericBackendProperties,
 			ObjectProvider<TaskSchedulerWrapper<? extends TaskScheduler>> taskSchedulerProvider) {
 
@@ -152,8 +138,8 @@ public class VaultBootstrapConfiguration {
 			sslConfiguration = SslConfiguration.NONE;
 		}
 
-		return new ClientFactoryWrapper(
-				ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration));
+		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(
+				clientOptions, sslConfiguration));
 	}
 
 	/**
@@ -169,9 +155,8 @@ public class VaultBootstrapConfiguration {
 		vaultEndpoint.setPort(vaultProperties.getPort());
 		vaultEndpoint.setScheme(vaultProperties.getScheme());
 
-		return new VaultClient(
-				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory(),
-				vaultEndpoint);
+		return new VaultClient(clientHttpRequestFactoryWrapper()
+				.getClientHttpRequestFactory(), vaultEndpoint);
 	}
 
 	/**
@@ -225,7 +210,8 @@ public class VaultBootstrapConfiguration {
 	 */
 	@Bean
 	@ConditionalOnMissingBean
-	public SessionManager sessionManager(ClientAuthentication clientAuthentication,
+	public SessionManager sessionManager(
+			ClientAuthentication clientAuthentication,
 			ObjectProvider<TaskSchedulerWrapper<? extends AsyncTaskExecutor>> asyncTaskExecutorProvider) {
 
 		if (vaultProperties.getConfig().getLifecycle().isEnabled()) {
@@ -253,6 +239,9 @@ public class VaultBootstrapConfiguration {
 		case APPID:
 			return appIdAuthentication(vaultProperties, vaultClient);
 
+		case APPROLE:
+			return appRoleAuthentication(vaultProperties, vaultClient);
+
 		case CERT:
 			return new ClientCertificateAuthentication(vaultClient);
 
@@ -264,9 +253,9 @@ public class VaultBootstrapConfiguration {
 
 		}
 
-		throw new UnsupportedOperationException(
-				String.format("Client authentication %s not supported",
-						vaultProperties.getAuthentication()));
+		throw new UnsupportedOperationException(String.format(
+				"Client authentication %s not supported",
+				vaultProperties.getAuthentication()));
 	}
 
 	private ClientAuthentication appIdAuthentication(VaultProperties vaultProperties,
@@ -302,8 +291,8 @@ public class VaultBootstrapConfiguration {
 
 				if (StringUtils.hasText(appId.getNetworkInterface())) {
 					try {
-						return new MacAddressUserId(
-								Integer.parseInt(appId.getNetworkInterface()));
+						return new MacAddressUserId(Integer.parseInt(appId
+								.getNetworkInterface()));
 					}
 					catch (NumberFormatException e) {
 						return new MacAddressUserId(appId.getNetworkInterface());
@@ -315,6 +304,23 @@ public class VaultBootstrapConfiguration {
 				return new StaticUserId(appId.getUserId());
 			}
 		}
+	}
+
+	private ClientAuthentication appRoleAuthentication(VaultProperties vaultProperties,
+			VaultClient vaultClient) {
+
+		VaultProperties.AppRoleProperties appRole = vaultProperties.getAppRole();
+		Assert.hasText(appRole.getRoleId(),
+				"RoleId (spring.cloud.vault.app-role.role-id) must not be empty");
+
+		AppRoleAuthenticationOptions.AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions
+				.builder().path(appRole.getAppRolePath()).roleId(appRole.getRoleId());
+
+		if (StringUtils.hasText(appRole.getSecretId())) {
+			builder = builder.secretId(appRole.getSecretId());
+		}
+
+		return new AppRoleAuthentication(builder.build(), vaultClient);
 	}
 
 	private ClientAuthentication awsEc2Authentication(VaultProperties vaultProperties,
