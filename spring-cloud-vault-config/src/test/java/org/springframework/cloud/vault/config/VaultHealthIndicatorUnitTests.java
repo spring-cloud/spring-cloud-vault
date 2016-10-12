@@ -15,6 +15,12 @@
  */
 package org.springframework.cloud.vault.config;
 
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.Status;
+import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.core.VaultSysOperations;
+import org.springframework.vault.support.VaultHealth;
+
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -24,13 +30,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.Status;
-import org.springframework.vault.core.VaultOperations;
-import org.springframework.vault.core.VaultSysOperations;
-import org.springframework.vault.support.VaultHealth;
 
 /**
+ * Unit tests for {@link VaultHealthIndicator}.
+ *
  * @author Mark Paluch
  */
 @RunWith(MockitoJUnitRunner.class)

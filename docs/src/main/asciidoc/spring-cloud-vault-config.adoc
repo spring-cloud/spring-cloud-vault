@@ -11,6 +11,7 @@ include::intro.adoc[]
 
 include::quickstart.adoc[]
 
+[[vault.config.authentication]]
 == Authentication methods
 
 Different organizations have different requirements for security
@@ -41,7 +42,7 @@ authentication method
 
 See also: https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
 
-[[vault.authentication.appid]]
+[[vault.config.authentication.appid]]
 === AppId authentication
 
 Vault supports https://www.vaultproject.io/docs/auth/app-id.html[AppId]
@@ -148,7 +149,7 @@ See also: https://www.vaultproject.io/docs/auth/app-id.html[Vault Documentation:
 == AppRole authentication
 
 https://www.vaultproject.io/docs/auth/app-id.html[AppRole] is intended for machine
-authentication, like the deprecated (since Vault 0.6.1) <<vault.authentication.appid>>.
+authentication, like the deprecated (since Vault 0.6.1) <<vault.config.authentication.appid>>.
 AppRole authentication consists of two hard to guess (secret) tokens: RoleId and SecretId.
 
 Spring Vault supports AppRole authentication by providing either RoleId only
@@ -267,10 +268,10 @@ certificates that are either signed by a CA or self-signed.
 
 To enable `cert` authentication you need to:
 
-1. Use SSL, see <<vault-client-ssl>>
+1. Use SSL, see <<vault.config.ssl>>
 2. Configure a Java `Keystore` that contains the client
 certificate and the private key
-3. Set the `spring.cloud.vault.authentication` to `CERT`
+3. Set the `spring.cloud.vault.config.authentication` to `CERT`
 
 [source,yaml]
 .bootstrap.yml
@@ -283,14 +284,7 @@ spring.cloud.vault:
         cert-auth-path: cert
 ----
 
-* `key-store` sets the resource for the key-store. SSL-secured Vault
-communication will validate the Vault SSL certificate with the specified
-trust-store.
-* `key-store-password` sets the key-store password
-* `cert-auth-path` sets the path of the cert authentication mount to use
-
-See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the cert auth backend]
-
+See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the Cert auth backend]
 
 == Cubbyhole authentication
 
@@ -330,12 +324,13 @@ spring.cloud.vault:
 See also:
 
 * https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
-* https://www.vaultproject.io/docs/secrets/cubbyhole/index.html[Vault Documentation:Cubbyhole Secret Backend]
+* https://www.vaultproject.io/docs/secrets/cubbyhole/index.html[Vault Documentation: Cubbyhole Secret Backend]
 * https://www.vaultproject.io/docs/concepts/response-wrapping.html[Vault Documentation: Response Wrapping]
 
-== Backends
+[[vault.config.backends]]
+== Secret Backends
 
-[[vault-client-generic]]
+[[vault.config.backends.generic]]
 === Generic Backend
 
 Spring Cloud Vault supports at the basic level the generic secret
@@ -376,7 +371,7 @@ profile name in property sources with profiles
 
 See also: https://www.vaultproject.io/docs/secrets/generic/index.html[Vault Documentation: Using the generic secret backend]
 
-[[vault-client-consul]]
+[[vault.config.backends.consul]]
 === Consul
 
 Spring Cloud Vault can obtain credentials for Hashicorp Consul.
@@ -421,7 +416,7 @@ spring.cloud.vault:
 
 See also: https://www.vaultproject.io/docs/secrets/consul/index.html[Vault Documentation: Setting up Consul with Vault]
 
-[[vault-client-rabbitmq]]
+[[vault.config.backends.rabbitmq]]
 === RabbitMQ
 
 Spring Cloud Vault can obtain credentials for RabbitMQ.
@@ -470,7 +465,7 @@ spring.cloud.vault:
 
 See also: https://www.vaultproject.io/docs/secrets/rabbit/index.html[Vault Documentation: Setting up RabbitMQ with Vault]
 
-[[vault-client-aws]]
+[[vault.config.backends.aws]]
 === AWS
 
 Spring Cloud Vault can obtain credentials for AWS.
@@ -519,7 +514,7 @@ spring.cloud.vault:
 
 See also: https://www.vaultproject.io/docs/secrets/aws/index.html[Vault Documentation: Setting up AWS with Vault]
 
-[[vault-client-database-backends]]
+[[vault.config.backends.database-backends]]
 == Database backends
 
 Vault supports several database secret backends to generate database
@@ -530,10 +525,10 @@ mechanism to more easily roll keys.
 
 Spring Cloud Vault integrates with these backends:
 
-* <<vault-client-database-cassandra>>
-* <<vault-client-database-mongodb>>
-* <<vault-client-database-mysql>>
-* <<vault-client-database-postgresql>>
+* <<vault.config.backends.cassandra>>
+* <<vault.config.backends.mongodb>>
+* <<vault.config.backends.mysql>>
+* <<vault.config.backends.postgresql>>
 
 Using a database secret backend requires to enable the
 backend in the configuration and the `spring-cloud-vault-config-databases`
@@ -555,7 +550,7 @@ NOTE: Enabling multiple JDBC-compliant databases will generate credentials
 and store them by default in the same property keys hence property names for
 JDBC secrets need to be configured separately.
 
-[[vault-client-database-cassandra]]
+[[vault.config.backends.cassandra]]
 === Apache Cassandra
 
 Spring Cloud Vault can obtain credentials for Apache Cassandra.
@@ -589,7 +584,7 @@ spring.cloud.vault:
 
 See also: https://www.vaultproject.io/docs/secrets/cassandra/index.html[Vault Documentation: Setting up Apache Cassandra with Vault]
 
-[[vault-client-database-mongodb]]
+[[vault.config.backends.mongodb]]
 === MongoDB
 
 Spring Cloud Vault can obtain credentials for MongoDB.
@@ -623,7 +618,7 @@ spring.cloud.vault:
 
 See also: https://www.vaultproject.io/docs/secrets/mongodb/index.html[Vault Documentation: Setting up MongoDB with Vault]
 
-[[vault-client-database-mysql]]
+[[vault.config.backends.mysql]]
 === MySQL
 
 Spring Cloud Vault can obtain credentials for MySQL.
@@ -657,7 +652,7 @@ spring.cloud.vault:
 
 See also: https://www.vaultproject.io/docs/secrets/mysql/index.html[Vault Documentation: Setting up MySQL with Vault]
 
-[[vault-client-database-postgresql]]
+[[vault.config.backends.postgresql]]
 === PostgreSQL
 
 Spring Cloud Vault can obtain credentials for PostgreSQL.
@@ -691,7 +686,7 @@ spring.cloud.vault:
 
 See also: https://www.vaultproject.io/docs/secrets/postgresql/index.html[Vault Documentation: Setting up PostgreSQL with Vault]
 
-[[vault-client-fail-fast]]
+[[vault.config.fail-fast]]
 == Vault Client Fail Fast
 
 In some cases, it may be desirable to fail startup of a service if
@@ -706,7 +701,7 @@ spring.cloud.vault:
     fail-fast: true
 ----
 
-[[vault-client-ssl]]
+[[vault.config.ssl]]
 == Vault Client SSL configuration
 
 SSL can be configured declaratively by setting various properties.

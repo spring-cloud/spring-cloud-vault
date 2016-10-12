@@ -27,19 +27,19 @@ import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.cloud.vault.util.Version;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.vault.authentication.IpAddressUserId;
 import org.springframework.vault.core.VaultOperations;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.Assume.*;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Integration test using config infrastructure with AppRole authentication. In case this
- * test should fail because of SSL make sure you run the test within the
+ * Integration test using config infrastructure with AppRole authentication.
+ * <p>
+ * In case this test should fail because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
  * 
@@ -106,7 +106,6 @@ public class VaultConfigAppRoleTests {
 
 	@Test
 	public void contextLoads() {
-
 		assertThat(configValue).isEqualTo("foo");
 	}
 
