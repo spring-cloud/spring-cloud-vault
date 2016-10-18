@@ -22,7 +22,8 @@ import java.util.Collection;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -40,8 +41,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.*;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
+import org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
 import org.springframework.vault.core.DefaultVaultClientFactory;
 import org.springframework.vault.core.VaultClientFactory;
 import org.springframework.vault.core.VaultOperations;
@@ -60,25 +61,24 @@ import org.springframework.vault.support.VaultToken;
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @EnableConfigurationProperties({ VaultProperties.class,
 		VaultGenericBackendProperties.class })
-public class VaultBootstrapConfiguration {
+public class VaultBootstrapConfiguration implements InitializingBean {
 
-	private final ConfigurableApplicationContext applicationContext;
+	@Autowired
+	private ConfigurableApplicationContext applicationContext;
 
-	private final VaultProperties vaultProperties;
+	@Autowired
+	private VaultProperties vaultProperties;
 
-	private final Collection<VaultSecretBackendDescriptor> vaultSecretBackendDescriptors;
+	private Collection<VaultSecretBackendDescriptor> vaultSecretBackendDescriptors;
 
-	private final Collection<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> factories;
+	private Collection<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> factories;
 
-	@SuppressWarnings("unchecked")
-	public VaultBootstrapConfiguration(ConfigurableApplicationContext applicationContext,
-			VaultProperties vaultProperties) {
-
-		this.applicationContext = applicationContext;
-		this.vaultProperties = vaultProperties;
+	@Override
+	public void afterPropertiesSet() throws Exception {
 
 		this.vaultSecretBackendDescriptors = applicationContext.getBeansOfType(
 				VaultSecretBackendDescriptor.class).values();
+
 		this.factories = (Collection) applicationContext.getBeansOfType(
 				SecretBackendMetadataFactory.class).values();
 	}
@@ -88,7 +88,7 @@ public class VaultBootstrapConfiguration {
 			VaultOperations operations,
 			VaultProperties vaultProperties,
 			VaultGenericBackendProperties vaultGenericBackendProperties,
-			ObjectProvider<TaskSchedulerWrapper<? extends TaskScheduler>> taskSchedulerProvider) {
+			ObjectFactory<TaskSchedulerWrapper<? extends TaskScheduler>> taskSchedulerFactory) {
 
 		Collection<SecretBackendMetadata> backendAccessors = SecretBackendFactories
 				.createSecretBackendMetadata(vaultSecretBackendDescriptors, factories);
@@ -103,7 +103,7 @@ public class VaultBootstrapConfiguration {
 
 			return new LeasingVaultPropertySourceLocator(vaultConfigTemplate,
 					vaultProperties, vaultGenericBackendProperties, backendAccessors,
-					taskSchedulerProvider.getObject().getTaskScheduler());
+					taskSchedulerFactory.getObject().getTaskScheduler());
 		}
 
 		return new VaultPropertySourceLocator(vaultConfigTemplate, vaultProperties,
@@ -212,11 +212,11 @@ public class VaultBootstrapConfiguration {
 	@ConditionalOnMissingBean
 	public SessionManager sessionManager(
 			ClientAuthentication clientAuthentication,
-			ObjectProvider<TaskSchedulerWrapper<? extends AsyncTaskExecutor>> asyncTaskExecutorProvider) {
+			ObjectFactory<TaskSchedulerWrapper<? extends AsyncTaskExecutor>> asyncTaskExecutorFactory) {
 
 		if (vaultProperties.getConfig().getLifecycle().isEnabled()) {
 			return new LifecycleAwareSessionManager(clientAuthentication,
-					asyncTaskExecutorProvider.getObject().getTaskScheduler(),
+					asyncTaskExecutorFactory.getObject().getTaskScheduler(),
 					vaultClient());
 		}
 
