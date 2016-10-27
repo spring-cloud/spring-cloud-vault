@@ -91,13 +91,14 @@ To use these features in an application, just build it as a Spring
 Boot application that depends on spring-cloud-vault-config (e.g. see
 the test cases). Example Maven configuration:
 
-[source,xml,indent=0]
 .pom.xml
+====
+[source,xml,indent=0]
 ----
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.3.3.RELEASE</version>
+        <version>1.4.1.RELEASE</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
@@ -125,9 +126,11 @@ the test cases). Example Maven configuration:
 
     <!-- repositories also needed for snapshots and milestones -->
 ----
+====
 
 Then you can create a standard Spring Boot application, like this simple HTTP server:
 
+====
 [source,java]
 ----
 @SpringBootApplication
@@ -145,6 +148,7 @@ public class Application {
 
 }
 ----
+====
 
 When it runs it will pick up the external configuration from the
 default local Vault server on port `8200` if it is running. To modify
@@ -152,8 +156,9 @@ the startup behavior you can change the location of the Vault server
 using `bootstrap.properties` (like `application.properties` but for
 the bootstrap phase of an application context), e.g.
 
-[source,yaml]
 .bootstrap.yml
+====
+[source,yaml]
 ----
 spring.cloud.vault:
     host: localhost
@@ -164,6 +169,7 @@ spring.cloud.vault:
     config:
         order: -10
 ----
+====
 
 * `host` sets the hostname of the Vault host. The host name will be used
 for SSL certificate validation
@@ -177,10 +183,10 @@ Supported schemes are `http` and `https`.
 Enabling further integrations requires additional dependencies and
 configuration. Depending on how you have set up Vault you might need
 additional configuration like
-https://github.com/spring-cloud-incubator/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc#vault-client-ssl-configuration[SSL] and
-https://github.com/spring-cloud-incubator/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc#token-authentication[authentication]. Checkout these
+https://github.com/spring-cloud/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc#vault-client-ssl-configuration[SSL] and
+https://github.com/spring-cloud/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc#token-authentication[authentication]. Checkout these
 chapters in the
-https://github.com/spring-cloud-incubator/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc[reference guide].
+https://github.com/spring-cloud/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc[reference guide].
 
 If the application imports the `spring-boot-starter-actuator` project, the
 status of the vault server will be available via the `\health` endpoint.
