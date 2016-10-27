@@ -428,17 +428,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_client_side_usage">Client Side Usage</a></li>
 <li><a href="#vault.config.authentication">Authentication methods</a>
 <ul class="sectlevel2">
-<li><a href="#_token_authentication">Token authentication</a></li>
+<li><a href="#vault.config.authentication.token">Token authentication</a></li>
 <li><a href="#vault.config.authentication.appid">AppId authentication</a></li>
+<li><a href="#_approle_authentication">AppRole authentication</a></li>
+<li><a href="#vault.config.authentication.awsec2">AWS-EC2 authentication</a></li>
+<li><a href="#vault.config.authentication.clientcert">TLS certificate authentication</a></li>
+<li><a href="#vault.config.authentication.cubbyhole">Cubbyhole authentication</a></li>
 </ul>
 </li>
-<li><a href="#_approle_authentication">AppRole authentication</a>
-<ul class="sectlevel2">
-<li><a href="#_aws_ec2_authentication">AWS-EC2 authentication</a></li>
-<li><a href="#_tls_certificate_authentication">TLS certificate authentication</a></li>
-</ul>
-</li>
-<li><a href="#_cubbyhole_authentication">Cubbyhole authentication</a></li>
 <li><a href="#vault.config.backends">Secret Backends</a>
 <ul class="sectlevel2">
 <li><a href="#vault.config.backends.generic">Generic Backend</a></li>
@@ -759,7 +756,7 @@ and authentication. Vault reflects that need by shipping multiple authentication
 methods. Spring Cloud Vault supports token and AppId authentication.</p>
 </div>
 <div class="sect2">
-<h3 id="_token_authentication">Token authentication</h3>
+<h3 id="vault.config.authentication.token">Token authentication</h3>
 <div class="paragraph">
 <p>Tokens are the core method for authentication within Vault.
 Token authentication requires a static token to be provided using the
@@ -970,11 +967,8 @@ obtain a token.</p>
 </div>
 </div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_approle_authentication">AppRole authentication</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_approle_authentication">AppRole authentication</h3>
 <div class="paragraph">
 <p><a href="https://www.vaultproject.io/docs/auth/app-id.html">AppRole</a> is intended for machine
 authentication, like the deprecated (since Vault 0.6.1) <a href="#vault.config.authentication.appid">AppId authentication</a>.
@@ -1039,8 +1033,9 @@ Spring Vault will not look up these or create a custom SecretId.</p>
 <div class="paragraph">
 <p>See also: <a href="https://www.vaultproject.io/docs/auth/approle.html">Vault Documentation: Using the AppRole auth backend</a></p>
 </div>
+</div>
 <div class="sect2">
-<h3 id="_aws_ec2_authentication">AWS-EC2 authentication</h3>
+<h3 id="vault.config.authentication.awsec2">AWS-EC2 authentication</h3>
 <div class="paragraph">
 <p>The <a href="https://www.vaultproject.io/docs/auth/aws-ec2.html">aws-ec2</a>
 auth backend provides a secure introduction mechanism
@@ -1151,7 +1146,7 @@ authentication method</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_tls_certificate_authentication">TLS certificate authentication</h3>
+<h3 id="vault.config.authentication.clientcert">TLS certificate authentication</h3>
 <div class="paragraph">
 <p>The <code>cert</code> auth backend allows authentication using SSL/TLS client
 certificates that are either signed by a CA or self-signed.</p>
@@ -1192,11 +1187,8 @@ certificate and the private key</p>
 <p>See also: <a href="https://www.vaultproject.io/docs/auth/cert.html">Vault Documentation: Using the Cert auth backend</a></p>
 </div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_cubbyhole_authentication">Cubbyhole authentication</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="vault.config.authentication.cubbyhole">Cubbyhole authentication</h3>
 <div class="paragraph">
 <p>Cubbyhole authentication uses Vault primitives to provide a secured authentication
 workflow. Cubbyhole authentication uses tokens as primary login method.
@@ -1263,6 +1255,7 @@ wrapped_accessor:              46b6aebb-187f-932a-26d7-4f3d86a68319</code></pre>
 <p><a href="https://www.vaultproject.io/docs/concepts/response-wrapping.html">Vault Documentation: Response Wrapping</a></p>
 </li>
 </ul>
+</div>
 </div>
 </div>
 </div>
