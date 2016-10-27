@@ -1,0 +1,161 @@
+---
+# The name of your project
+title: Spring Cloud Vault Config
+
+badges:
+
+  # Customize your project's badges. Delete any entries that do not apply.
+  custom:
+    - name: Source (GitHub)
+      url:  https://github.com/spring-cloud/spring-cloud-vault-config
+      icon: github
+
+    - name: StackOverflow
+      url:  http://stackoverflow.com/questions/tagged/spring-cloud
+      icon: stackoverflow
+
+---
+<!DOCTYPE HTML>
+<html lang="en-US">
+
+<!-- Specify the parent of this project (or delete if none) to influence the rendering of the breadcrumb -->
+{% capture parent_link %}
+[Spring Cloud]({{ site.projects_site_url }}/spring-cloud)
+{% endcapture %}
+
+
+{% capture billboard_description %}
+
+Spring Cloud Vault Config provides client-side support for externalized configuration in a distributed system. With Hashicorp’s <a href="https://vaultproject.io">Vault</a> you have a central place to manage external secret properties for applications across all environments. Vault can manage static and dynamic secrets such as username/password for remote applications/resources and provide credentials for external services such as MySQL, PostgreSQL, Apache Cassandra, MongoDB, Consul, AWS and more.
+
+{% endcapture %}
+
+{% capture main_content %}
+
+## Features
+
+Spring Cloud Vault Config features:
+
+* Retrieve secrets from Vault and initialize Spring Environment with remote property sources
+* Obtain secrets secured with SSL
+* Generate credentials for MySQL, PostgreSQL, Apache Cassandra, MongoDB, Consul, AWS, and RabbitMQ.
+* Token, AppId, AppRole, and AWS-EC2 authentication
+* Bootstrap application context: a parent context for the main application that can be trained to do anything
+
+
+<span id="quick-start"></span>
+
+## Quick Start
+
+<script type="text/javascript">{% include custom.js %}</script>
+{% include download_widget.md %}
+
+To get started with Spring Cloud Vault Config, simply include a build dependency.
+
+For example, typical POM dependencies would be:
+
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-vault-starter-config</artifactId>
+</dependency>
+```
+
+then configure your Vault endpoint and authentication
+
+`bootstrap.yml` for Token-based authentication
+
+```yaml
+spring.application.name=my-application
+spring.cloud.vault:
+    host: localhost
+    port: 8200
+    scheme: https
+    authentication: TOKEN
+    token: …
+```
+
+`bootstrap.yml` for AWS-EC2 authentication
+
+```yaml
+spring.application.name=my-application
+spring.cloud.vault:
+    host: localhost
+    port: 8200
+    scheme: https
+    authentication: AWS_EC2
+```
+
+finally, use properties stored inside Vault in your application
+
+```java
+@Configuration
+@RestController
+public class Application {
+
+  @Value("${config.name}")
+  String name = "World";
+
+  @RequestMapping("/")
+  public String home() {
+    return "Hello " + name;
+  }
+
+  public static void main(String[] args) {
+    SpringApplication.run(Application.class, args);
+  }
+}
+```
+
+Spring Cloud Vault Config reads config properties from Vaults using the application name and active profiles:
+
+```
+/secret/{application}/{profile}
+/secret/{application}
+/secret/{default-context}/{profile}
+/secret/{default-context}
+```
+
+## Adding Spring Cloud Vault Config modules
+
+Spring Cloud Vault Config comes with multiple modules supporting different integrations. To to get dependencies in the appropriate version you can include a BOM (Bill of Materials) in your dependency management. For example, typical POM dependency management would be:
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-vault-dependencies</artifactId>
+            <version>x.y.z</version>
+            <scope>import</scope>
+            <type>pom</type>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-vault-starter-config</artifactId>
+    </dependency>
+	<dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-vault-config-consul</artifactId>
+    </dependency>
+</dependencies>
+```
+
+{% endcapture %}
+
+{% capture related_resources %}
+
+### Related resources
+
+* [Spring Vault repository](https://github.com/spring-projects/spring-vault)
+* [Examples repository](https://github.com/mp911de/spring-cloud-vault-config-samples)
+
+{% endcapture %}
+
+
+{% include project_page.html %}
+</html>
