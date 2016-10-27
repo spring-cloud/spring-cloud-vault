@@ -22,6 +22,7 @@ Different organizations have different requirements for security
 and authentication. Vault reflects that need by shipping multiple authentication
 methods. Spring Cloud Vault supports token and AppId authentication.
 
+[[vault.config.authentication.token]]
 === Token authentication
 
 Tokens are the core method for authentication within Vault.
@@ -160,7 +161,7 @@ public class MyUserIdMechanism implements AppIdUserIdMechanism {
 
 See also: https://www.vaultproject.io/docs/auth/app-id.html[Vault Documentation: Using the App ID auth backend]
 
-== AppRole authentication
+=== AppRole authentication
 
 https://www.vaultproject.io/docs/auth/app-id.html[AppRole] is intended for machine
 authentication, like the deprecated (since Vault 0.6.1) <<vault.config.authentication.appid>>.
@@ -204,6 +205,7 @@ spring.cloud.vault:
 
 See also: https://www.vaultproject.io/docs/auth/approle.html[Vault Documentation: Using the AppRole auth backend]
 
+[[vault.config.authentication.awsec2]]
 === AWS-EC2 authentication
 
 The https://www.vaultproject.io/docs/auth/aws-ec2.html[aws-ec2]
@@ -287,6 +289,7 @@ authentication method
 
 See also: https://www.vaultproject.io/docs/auth/aws-ec2.html[Vault Documentation: Using the aws-ec2 auth backend]
 
+[[vault.config.authentication.clientcert]]
 === TLS certificate authentication
 
 The `cert` auth backend allows authentication using SSL/TLS client
@@ -314,7 +317,8 @@ spring.cloud.vault:
 
 See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the Cert auth backend]
 
-== Cubbyhole authentication
+[[vault.config.authentication.cubbyhole]]
+=== Cubbyhole authentication
 
 Cubbyhole authentication uses Vault primitives to provide a secured authentication
 workflow. Cubbyhole authentication uses tokens as primary login method.
