@@ -22,7 +22,7 @@ import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 import lombok.Data;
 
 /**
- * Configuration properties for Hashicorp Consul.
+ * Configuration properties for HashiCorp Consul.
  *
  * @author Mark Paluch
  */

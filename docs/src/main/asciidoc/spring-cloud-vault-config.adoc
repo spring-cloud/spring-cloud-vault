@@ -410,7 +410,7 @@ See also: https://www.vaultproject.io/docs/secrets/generic/index.html[Vault Docu
 [[vault.config.backends.consul]]
 === Consul
 
-Spring Cloud Vault can obtain credentials for Hashicorp Consul.
+Spring Cloud Vault can obtain credentials for HashiCorp Consul.
 The Consul integration requires the `spring-cloud-vault-config-consul`
 dependency.
 
