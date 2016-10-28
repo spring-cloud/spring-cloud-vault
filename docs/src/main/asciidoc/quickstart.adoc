@@ -93,38 +93,38 @@ the test cases). Example Maven configuration:
 
 .pom.xml
 ====
-[source,xml,indent=0]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
-    <parent>
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>1.4.1.RELEASE</version>
+    <relativePath /> <!-- lookup parent from repository -->
+</parent>
+
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-vault-starter-config</artifactId>
+        <version>{spring-cloud-version}</version>
+    </dependency>
+    <dependency>
         <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.4.1.RELEASE</version>
-        <relativePath /> <!-- lookup parent from repository -->
-    </parent>
+        <artifactId>spring-boot-starter-test</artifactId>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-vault-starter-config</artifactId>
-            <version>x.y.z</version>
-        </dependency>
-        <dependency>
+<build>
+    <plugins>
+        <plugin>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+    </plugins>
+</build>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-
-    <!-- repositories also needed for snapshots and milestones -->
+<!-- repositories also needed for snapshots and milestones -->
 ----
 ====
 
@@ -145,7 +145,6 @@ public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
-
 }
 ----
 ====
