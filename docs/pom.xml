@@ -2,24 +2,28 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.springframework.cloud</groupId>
-	<artifactId>spring-cloud-vault-config-docs</artifactId>
-	<version>1.1.0.BUILD-SNAPSHOT</version>
+	
 	<parent>
-		<artifactId>spring-cloud-dependencies-parent</artifactId>
 		<groupId>org.springframework.cloud</groupId>
-		<version>1.1.2.BUILD-SNAPSHOT</version>
+		<artifactId>spring-cloud-dependencies-parent</artifactId>
+		<version>1.2.1.RELEASE</version>
 		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
+	
+	<artifactId>spring-cloud-vault-config-docs</artifactId>
+	<version>1.0.0.BUILD-SNAPSHOT</version>
+	
 	<packaging>pom</packaging>
 	<name>Spring Cloud Vault Config Docs</name>
 	<description>Spring Cloud Docs</description>
+	
 	<properties>
 		<docs.main>spring-cloud-vault-config</docs.main>
 		<main.basedir>${basedir}/..</main.basedir>
 		<docs.whitelisted.branches>1.0.x</docs.whitelisted.branches>
 	</properties>
+	
 	<build>
 		<pluginManagement>
 			<plugins>
