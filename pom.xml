@@ -15,7 +15,7 @@
 	<packaging>pom</packaging>
 
 	<name>Spring Cloud Vault</name>
-	<description>Configuration Integration with Hashicorp Vault</description>
+	<description>Configuration Integration with HashiCorp Vault</description>
 
 	<modules>
 		<module>spring-cloud-vault-dependencies</module>

@@ -11,7 +11,7 @@
 
 	<artifactId>spring-cloud-vault-config</artifactId>
 	<name>Spring Cloud Vault Configuration Integration</name>
-	<description>Configuration Integration with Hashicorp Vault</description>
+	<description>Configuration Integration with HashiCorp Vault</description>
 
 	<dependencies>
 		<dependency>
