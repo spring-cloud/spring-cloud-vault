@@ -15,7 +15,7 @@
 	<name>Spring Cloud Vault Config Starter</name>
 	<description>Starter for exposing Spring Cloud Vault Config</description>
 
-	<url>http://projects.spring.io/spring-boot/</url>
+	<url>http://cloud.spring.io/spring-cloud-vault-config/</url>
 	<organization>
 		<name>Pivotal Software, Inc.</name>
 		<url>http://www.spring.io</url>
