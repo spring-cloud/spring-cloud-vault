@@ -22,8 +22,8 @@
 		<spring-boot.version>1.4.2.RELEASE</spring-boot.version>
 		<spring-vault.version>1.0.0.BUILD-SNAPSHOT</spring-vault.version>
 		<httpclient.version>4.5.2</httpclient.version>
-		<httpcore.version>4.4.4</httpcore.version>
-		<netty.version>4.1.0.Final</netty.version>
+		<httpcore.version>4.4.5</httpcore.version>
+		<netty.version>4.1.6.Final</netty.version>
 		<okhttp.version>2.7.5</okhttp.version>
 		<slf4j.version>1.7.21</slf4j.version>
 	</properties>
