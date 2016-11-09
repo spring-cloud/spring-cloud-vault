@@ -5,8 +5,8 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dependencies-parent</artifactId>
-		<version>1.2.1.RELEASE</version>
-		<relativePath />
+		<version>1.2.2.BUILD-SNAPSHOT</version>
+		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
 
@@ -18,9 +18,9 @@
 	<description>Spring Cloud Vault Dependencies</description>
 
 	<properties>
-		<spring-cloud-context.version>1.1.4.RELEASE</spring-cloud-context.version>
-		<spring-boot.version>1.4.1.RELEASE</spring-boot.version>
-		<spring-vault.version>1.0.0.M1</spring-vault.version>
+		<spring-cloud-context.version>1.1.2.BUILD-SNAPSHOT</spring-cloud-context.version>
+		<spring-boot.version>1.4.2.RELEASE</spring-boot.version>
+		<spring-vault.version>1.0.0.BUILD-SNAPSHOT</spring-vault.version>
 		<httpclient.version>4.5.2</httpclient.version>
 		<httpcore.version>4.4.4</httpcore.version>
 		<netty.version>4.1.0.Final</netty.version>
