@@ -300,7 +300,7 @@ To enable `cert` authentication you need to:
 1. Use SSL, see <<vault.config.ssl>>
 2. Configure a Java `Keystore` that contains the client
 certificate and the private key
-3. Set the `spring.cloud.vault.config.authentication` to `CERT`
+3. Set the `spring.cloud.vault.authentication` to `CERT`
 
 .bootstrap.yml
 ====
