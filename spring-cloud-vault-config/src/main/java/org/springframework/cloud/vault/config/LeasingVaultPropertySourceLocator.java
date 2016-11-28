@@ -50,16 +50,18 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocator
 	 * @param operations must not be {@literal null}.
 	 * @param properties must not be {@literal null}.
 	 * @param genericBackendProperties must not be {@literal null}.
+	 * @param vaultPropertySourceContextStrategy must not be {@literal null}.
 	 * @param backendAccessors must not be {@literal null}.
 	 * @param taskScheduler must not be {@literal null}.
 	 */
 	public LeasingVaultPropertySourceLocator(VaultConfigOperations operations,
 			VaultProperties properties,
 			VaultGenericBackendProperties genericBackendProperties,
+			VaultPropertySourceContextStrategy vaultPropertySourceContextStrategy,
 			Collection<SecretBackendMetadata> backendAccessors,
 			TaskScheduler taskScheduler) {
 
-		super(operations, properties, genericBackendProperties, backendAccessors);
+		super(operations, properties, genericBackendProperties, vaultPropertySourceContextStrategy, backendAccessors);
 
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
 		Assert.notNull(operations, "VaultConfigTemplate must not be null");

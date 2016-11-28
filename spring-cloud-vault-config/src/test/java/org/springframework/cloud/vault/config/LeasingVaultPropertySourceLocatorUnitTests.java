@@ -55,11 +55,15 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 	@Mock
 	private LeasingVaultPropertySource leasingVaultPropertySource;
 
+    @Mock
+    private VaultPropertySourceContextStrategy vaultPropertySourceContextStrategy;
+
 	@Before
 	public void before() {
 
 		propertySourceLocator = new LeasingVaultPropertySourceLocator(operations,
-				new VaultProperties(), new VaultGenericBackendProperties(),
+				new VaultProperties(), new VaultGenericBackendProperties(), 
+				vaultPropertySourceContextStrategy,
 				Collections.<SecretBackendMetadata> emptyList(), taskScheduler);
 	}
 
@@ -71,6 +75,7 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 
 		propertySourceLocator = new LeasingVaultPropertySourceLocator(operations,
 				vaultProperties, new VaultGenericBackendProperties(),
+				vaultPropertySourceContextStrategy,
 				Collections.<SecretBackendMetadata> emptyList(), taskScheduler);
 
 		assertThat(propertySourceLocator.getOrder()).isEqualTo(10);
@@ -80,6 +85,8 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 	public void shouldLocatePropertySources() {
 
 		when(configurableEnvironment.getActiveProfiles()).thenReturn(new String[0]);
+		when(vaultPropertySourceContextStrategy.buildContexts(configurableEnvironment))
+			.thenReturn(Collections.singletonList("/secret/appName"));
 
 		PropertySource<?> propertySource = propertySourceLocator
 				.locate(configurableEnvironment);

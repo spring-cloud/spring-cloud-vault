@@ -84,10 +84,17 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
+	public VaultPropertySourceContextStrategy vaultPropertySourceContextStrategy(VaultGenericBackendProperties vaultGenericBackendProperties) {
+		return new DefaultVaultPropertySourceContextStrategy(vaultGenericBackendProperties);
+	}
+
+	@Bean
 	public VaultPropertySourceLocator vaultPropertySourceLocator(
 			VaultOperations operations,
 			VaultProperties vaultProperties,
 			VaultGenericBackendProperties vaultGenericBackendProperties,
+			VaultPropertySourceContextStrategy vaultPropertySourceContextStrategy,
 			ObjectFactory<TaskSchedulerWrapper<? extends TaskScheduler>> taskSchedulerFactory) {
 
 		Collection<SecretBackendMetadata> backendAccessors = SecretBackendFactories
@@ -102,12 +109,12 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 			applicationContext.registerShutdownHook();
 
 			return new LeasingVaultPropertySourceLocator(vaultConfigTemplate,
-					vaultProperties, vaultGenericBackendProperties, backendAccessors,
+					vaultProperties, vaultGenericBackendProperties, vaultPropertySourceContextStrategy, backendAccessors,
 					taskSchedulerFactory.getObject().getTaskScheduler());
 		}
 
 		return new VaultPropertySourceLocator(vaultConfigTemplate, vaultProperties,
-				vaultGenericBackendProperties, backendAccessors);
+				vaultGenericBackendProperties, vaultPropertySourceContextStrategy, backendAccessors);
 	}
 
 	/**
