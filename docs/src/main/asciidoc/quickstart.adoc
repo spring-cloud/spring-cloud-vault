@@ -20,6 +20,7 @@ $ src/test/bash/create_certificates.sh
 
 NOTE: `create_certificates.sh` creates certificates in `work/ca` and a JKS truststore `work/keystore.jks`. If you want to run Spring Cloud Vault using this quickstart guide you need to configure the truststore the `spring.cloud.vault.ssl.trust-store` property to `file:work/keystore.jks`.
 
+[[quickstart.vault.start]]
 *Start Vault server*
 
 ----
@@ -88,7 +89,7 @@ without further prefixing of the property names.
 == Client Side Usage
 
 To use these features in an application, just build it as a Spring
-Boot application that depends on spring-cloud-vault-config (e.g. see
+Boot application that depends on `spring-cloud-vault-config` (e.g. see
 the test cases). Example Maven configuration:
 
 .pom.xml
@@ -188,7 +189,27 @@ chapters in the
 https://github.com/spring-cloud/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc[reference guide].
 
 If the application imports the `spring-boot-starter-actuator` project, the
-status of the vault server will be available via the `\health` endpoint.
+status of the vault server will be available via the `/health` endpoint.
 
 The vault health indicator can be enabled or disabled through the
 property `health.vault.enabled` (default `true`)
+
+
+=== Authentication
+
+Vault requires an https://www.vaultproject.io/docs/concepts/auth.html[authentication mechanism] to https://www.vaultproject.io/docs/concepts/tokens.html[authorize client requests].
+
+Spring Cloud Vault Config supports multiple http://cloud.spring.io/spring-cloud-vault-config/spring-cloud-vault-config.html#vault.config.authentication[authentication mechanisms] to authenticate applications with Vault.
+
+For a quickstart, use the root token printed by the <<quickstart.vault.start,Vault initialization>>.
+
+.bootstrap.yml
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    token: 19aefa97-cccc-bbbb-aaaa-225940e63d76
+----
+====
+
+WARNING: Consider carefully your security requirements. Static token authentication is fine if you want quickly get started with Vault, but a static token is not protected any further. Any disclosure to unintended parties allows Vault use with the associated token roles.

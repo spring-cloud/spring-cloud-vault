@@ -31,7 +31,7 @@ include::quickstart.adoc[]
 
 == Building
 
-==== Build requirements for Vault
+=== Build requirements for Vault
 
 Spring Cloud Vault Config requires SSL certificates and a running
 Vault instance listening on `localhost:8200`. Certificates and the Vault
