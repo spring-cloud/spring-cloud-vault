@@ -16,6 +16,12 @@
 package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,11 +36,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.*;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test using config infrastructure with token authentication.
@@ -55,11 +57,11 @@ public class VaultConfigTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		vaultRule
-				.prepare()
-				.getVaultOperations()
-				.write("secret/testVaultApp",
-						Collections.singletonMap("vault.value", "foo"));
+		Map<String, Object> object = new HashMap<>();
+		object.put("vault.value", "foo");
+		object.put("nested", Collections.singletonMap("key", "value"));
+
+		vaultRule.prepare().getVaultOperations().write("secret/testVaultApp", object);
 	}
 
 	@Value("${vault.value}")
@@ -81,6 +83,9 @@ public class VaultConfigTests {
 
 		assertThat(environment.containsProperty("vault.value")).isTrue();
 		assertThat(environment.getProperty("vault.value")).isEqualTo("foo");
+
+		assertThat(environment.containsProperty("nested.key")).isTrue();
+		assertThat(environment.getProperty("nested.key")).isEqualTo("value");
 	}
 
 	@Test
