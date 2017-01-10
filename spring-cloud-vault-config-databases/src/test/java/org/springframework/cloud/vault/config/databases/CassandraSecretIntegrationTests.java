@@ -46,8 +46,8 @@ public class CassandraSecretIntegrationTests extends IntegrationTestSupport {
 	private final static String CASSANDRA_HOST = "localhost";
 	private final static int CASSANDRA_PORT = 9042;
 
-	private final static String CASSANDRA_USERNAME = "cassandra";
-	private final static String CASSANDRA_PASSWORD = "cassandra";
+	private final static String CASSANDRA_USERNAME = "springvault";
+	private final static String CASSANDRA_PASSWORD = "springvault";
 
 	private final static String CREATE_USER_AND_GRANT_CQL = "CREATE USER '{{username}}' WITH PASSWORD '{{password}}' NOSUPERUSER;"
 			+ "GRANT SELECT ON ALL KEYSPACES TO {{username}};";

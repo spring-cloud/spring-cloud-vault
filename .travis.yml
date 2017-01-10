@@ -44,13 +44,13 @@ install:
   - sudo service rabbitmq-server restart
 
 before_script:
-  - mysql -e "CREATE USER 'spring' IDENTIFIED by 'vault';"
-  - mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO 'spring'@'%' WITH GRANT OPTION;";
-  - psql -U postgres -c "CREATE ROLE spring WITH LOGIN PASSWORD 'vault' CREATEROLE CREATEUSER;"
+  - mysql -e "CREATE USER 'springvault' IDENTIFIED by 'springvault';"
+  - mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO 'springvault'@'%' WITH GRANT OPTION;";
+  - psql -U postgres -c "CREATE ROLE springvault WITH LOGIN PASSWORD 'springvault' CREATEROLE CREATEUSER;"
   - |-
-    mongo admin --eval  "db.createUser({user: 'spring', pwd:'vault', roles:['root']});"
+    mongo admin --eval  "db.createUser({user: 'springvault', pwd:'springvault', roles:['root']});"
   - sleep 30 # wait until Cassandra is up
-  - apache-cassandra-2.2.8/bin/cqlsh localhost -u cassandra -p cassandra -e "CREATE USER 'spring' WITH PASSWORD 'vault' SUPERUSER"
+  - apache-cassandra-2.2.8/bin/cqlsh localhost -u cassandra -p cassandra -e "CREATE USER 'springvault' WITH PASSWORD 'springvault' SUPERUSER"
 
 script: mvn clean verify
 
