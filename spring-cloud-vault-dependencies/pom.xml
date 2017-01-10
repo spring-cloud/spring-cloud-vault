@@ -19,7 +19,7 @@
 
 	<properties>
 		<spring-cloud-context.version>1.2.0.BUILD-SNAPSHOT</spring-cloud-context.version>
-		<spring-boot.version>1.4.2.RELEASE</spring-boot.version>
+		<spring-boot.version>1.5.0.RC1</spring-boot.version>
 		<spring-vault.version>1.0.0.BUILD-SNAPSHOT</spring-vault.version>
 		<httpclient.version>4.5.2</httpclient.version>
 		<httpcore.version>4.4.5</httpcore.version>
