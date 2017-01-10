@@ -25,7 +25,7 @@
 		<httpcore.version>4.4.5</httpcore.version>
 		<netty.version>4.1.6.Final</netty.version>
 		<okhttp.version>2.7.5</okhttp.version>
-		<okhttp3.version>3.4.2</okhttp3.version>
+		<okhttp3.version>3.5.0</okhttp3.version>
 		<slf4j.version>1.7.21</slf4j.version>
 	</properties>
 
