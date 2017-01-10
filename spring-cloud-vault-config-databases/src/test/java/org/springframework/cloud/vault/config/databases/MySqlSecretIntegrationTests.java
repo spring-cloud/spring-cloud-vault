@@ -44,7 +44,7 @@ public class MySqlSecretIntegrationTests extends IntegrationTestSupport {
 	private final static int MYSQL_PORT = 3306;
 	private final static String MYSQL_HOST = "localhost";
 	private final static String ROOT_CREDENTIALS = String
-			.format("spring:vault@tcp(%s:%d)/", MYSQL_HOST, MYSQL_PORT);
+			.format("springvault:springvault@tcp(%s:%d)/", MYSQL_HOST, MYSQL_PORT);
 	private final static String CREATE_USER_AND_GRANT_SQL = "CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';"
 			+ "GRANT SELECT ON *.* TO '{{name}}'@'%';";
 

@@ -47,7 +47,7 @@ public class MongoSecretIntegrationTests extends IntegrationTestSupport {
 	private final static int MONGODB_PORT = 27017;
 	private final static String MONGODB_HOST = "localhost";
 	private final static String ROOT_CREDENTIALS = String.format(
-			"mongodb://spring:vault@%s:%d/admin?ssl=false", MONGODB_HOST, MONGODB_PORT);
+			"mongodb://springvault:springvault@%s:%d/admin?ssl=false", MONGODB_HOST, MONGODB_PORT);
 	private final static String ROLES = "[ \"readWrite\", { \"role\": \"read\", \"db\": \"admin\" } ]";
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
