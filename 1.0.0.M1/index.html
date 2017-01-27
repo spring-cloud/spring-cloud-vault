@@ -425,11 +425,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_quick_start">Quick Start</a></li>
-<li><a href="#_client_side_usage">Client Side Usage</a>
-<ul class="sectlevel2">
-<li><a href="#_authentication">Authentication</a></li>
-</ul>
-</li>
+<li><a href="#_client_side_usage">Client Side Usage</a></li>
 <li><a href="#vault.config.authentication">Authentication methods</a>
 <ul class="sectlevel2">
 <li><a href="#vault.config.authentication.token">Token authentication</a></li>
@@ -481,7 +477,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="paragraph">
-<p>Spring Cloud Vault Config provides client-side support for externalized configuration in a distributed system. With <a href="https://www.vaultproject.io">Hashicorp&#8217;s Vault</a> you have a central place to manage external secret properties for applications across all environments. Vault can manage static and dynamic secrets such as username/password for remote applications/resources and provide credentials for external services such as MySQL, PostgreSQL, Apache Cassandra, MongoDB, Consul, AWS and more.</p>
+<p>Spring Cloud Vault Config provides client-side support for externalized configuration in a distributed system. With <a href="https://www.vaultproject.io">HashiCorp's Vault</a> you have a central place to manage external secret properties for applications across all environments. Vault can manage static and dynamic secrets such as username/password for remote applications/resources and provide credentials for external services such as MySQL, PostgreSQL, Apache Cassandra, MongoDB, Consul, AWS and more.</p>
 </div>
 </div>
 </div>
@@ -533,7 +529,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </tr>
 </table>
 </div>
-<div id="quickstart.vault.start" class="paragraph">
+<div class="paragraph">
 <p><strong>Start Vault server</strong></p>
 </div>
 <div class="listingblock">
@@ -617,7 +613,7 @@ without further prefixing of the property names.</p>
 <div class="sectionbody">
 <div class="paragraph">
 <p>To use these features in an application, just build it as a Spring
-Boot application that depends on <code>spring-cloud-vault-config</code> (e.g. see
+Boot application that depends on spring-cloud-vault-config (e.g. see
 the test cases). Example Maven configuration:</p>
 </div>
 <div class="exampleblock">
@@ -628,7 +624,7 @@ the test cases). Example Maven configuration:</p>
 <pre class="highlight"><code class="language-xml" data-lang="xml">&lt;parent&gt;
     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
     &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
-    &lt;version&gt;1.5.0.RELEASE&lt;/version&gt;
+    &lt;version&gt;1.4.1.RELEASE&lt;/version&gt;
     &lt;relativePath /&gt; &lt;!-- lookup parent from repository --&gt;
 &lt;/parent&gt;
 
@@ -636,7 +632,7 @@ the test cases). Example Maven configuration:</p>
     &lt;dependency&gt;
         &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
         &lt;artifactId&gt;spring-cloud-vault-starter-config&lt;/artifactId&gt;
-        &lt;version&gt;{spring-cloud-version}&lt;/version&gt;
+        &lt;version&gt;x.y.z&lt;/version&gt;
     &lt;/dependency&gt;
     &lt;dependency&gt;
         &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
@@ -678,6 +674,7 @@ public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
+
 }</code></pre>
 </div>
 </div>
@@ -742,46 +739,11 @@ chapters in the
 </div>
 <div class="paragraph">
 <p>If the application imports the <code>spring-boot-starter-actuator</code> project, the
-status of the vault server will be available via the <code>/health</code> endpoint.</p>
+status of the vault server will be available via the <code>\health</code> endpoint.</p>
 </div>
 <div class="paragraph">
 <p>The vault health indicator can be enabled or disabled through the
 property <code>health.vault.enabled</code> (default <code>true</code>)</p>
-</div>
-<div class="sect2">
-<h3 id="_authentication">Authentication</h3>
-<div class="paragraph">
-<p>Vault requires an <a href="https://www.vaultproject.io/docs/concepts/auth.html">authentication mechanism</a> to <a href="https://www.vaultproject.io/docs/concepts/tokens.html">authorize client requests</a>.</p>
-</div>
-<div class="paragraph">
-<p>Spring Cloud Vault Config supports multiple <a href="http://cloud.spring.io/spring-cloud-vault-config/spring-cloud-vault-config.html#vault.config.authentication">authentication mechanisms</a> to authenticate applications with Vault.</p>
-</div>
-<div class="paragraph">
-<p>For a quickstart, use the root token printed by the <a href="#quickstart.vault.start">Vault initialization</a>.</p>
-</div>
-<div class="exampleblock">
-<div class="title">Example 3. bootstrap.yml</div>
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
-    token: 19aefa97-cccc-bbbb-aaaa-225940e63d76</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Warning</div>
-</td>
-<td class="content">
-Consider carefully your security requirements. Static token authentication is fine if you want quickly get started with Vault, but a static token is not protected any further. Any disclosure to unintended parties allows Vault use with the associated token roles.
-</td>
-</tr>
-</table>
-</div>
 </div>
 </div>
 </div>
@@ -815,7 +777,7 @@ can access secrets for the intended client.
 </table>
 </div>
 <div class="exampleblock">
-<div class="title">Example 4. bootstrap.yml</div>
+<div class="title">Example 3. bootstrap.yml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -857,7 +819,7 @@ The IP and Mac address are represented as Hex-encoded SHA256 hash.</p>
 <p>IP address-based UserId&#8217;s use the local host&#8217;s IP address.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 5. bootstrap.yml using SHA256 IP-Address UserId&#8217;s</div>
+<div class="title">Example 4. bootstrap.yml using SHA256 IP-Address UserId&#8217;s</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -913,7 +875,7 @@ a <code>network-interface</code> hint to pick the right device. The value of
 name or interface index (0-based).</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 6. bootstrap.yml using SHA256 Mac-Address UserId&#8217;s</div>
+<div class="title">Example 5. bootstrap.yml using SHA256 Mac-Address UserId&#8217;s</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -971,7 +933,7 @@ by calling <code>createUserId</code> each time it authenticates using AppId to
 obtain a token.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 7. bootstrap.yml</div>
+<div class="title">Example 6. bootstrap.yml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -984,7 +946,7 @@ obtain a token.</p>
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 8. MyUserIdMechanism.java</div>
+<div class="title">Example 7. MyUserIdMechanism.java</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1021,7 +983,7 @@ or together with a provided SecretId (push or pull mode).</p>
 Spring Vault will not look up these or create a custom SecretId.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 9. bootstrap.yml with AppRole authentication properties</div>
+<div class="title">Example 8. bootstrap.yml with AppRole authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1041,7 +1003,7 @@ Spring Vault will not look up these or create a custom SecretId.</p>
 </ul>
 </div>
 <div class="exampleblock">
-<div class="title">Example 10. bootstrap.yml with all AppRole authentication properties</div>
+<div class="title">Example 9. bootstrap.yml with all AppRole authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1086,7 +1048,7 @@ cryptographically signed dynamic metadata information that uniquely
 represents each EC2 instance.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 11. bootstrap.yml using AWS-EC2 Authentication</div>
+<div class="title">Example 10. bootstrap.yml using AWS-EC2 Authentication</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1113,7 +1075,7 @@ further investigation.</p>
 <p>The nonce is kept in memory and is lost during application restart.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 12. bootstrap.yml with disabled nonce</div>
+<div class="title">Example 11. bootstrap.yml with disabled nonce</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1131,7 +1093,7 @@ You can configure the authentication role by setting the
 <code>spring.cloud.vault.aws-ec2.role</code> property.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 13. bootstrap.yml with configured role</div>
+<div class="title">Example 12. bootstrap.yml with configured role</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1144,7 +1106,7 @@ You can configure the authentication role by setting the
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 14. bootstrap.yml with all AWS EC2 authentication properties</div>
+<div class="title">Example 13. bootstrap.yml with all AWS EC2 authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1202,12 +1164,12 @@ certificates that are either signed by a CA or self-signed.</p>
 certificate and the private key</p>
 </li>
 <li>
-<p>Set the <code>spring.cloud.vault.authentication</code> to <code>CERT</code></p>
+<p>Set the <code>spring.cloud.vault.config.authentication</code> to <code>CERT</code></p>
 </li>
 </ol>
 </div>
 <div class="exampleblock">
-<div class="title">Example 15. bootstrap.yml</div>
+<div class="title">Example 14. bootstrap.yml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1251,7 +1213,7 @@ Response Wrapping for token creation requires Vault 0.6.0 or higher.
 </table>
 </div>
 <div class="exampleblock">
-<div class="title">Example 16. Crating and storing tokens</div>
+<div class="title">Example 15. Crating and storing tokens</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1267,7 +1229,7 @@ wrapped_accessor:              46b6aebb-187f-932a-26d7-4f3d86a68319</code></pre>
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 17. bootstrap.yml</div>
+<div class="title">Example 16. bootstrap.yml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1368,7 +1330,7 @@ The Consul integration requires the <code>spring-cloud-vault-config-consul</code
 dependency.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 18. pom.xml</div>
+<div class="title">Example 17. pom.xml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1438,7 +1400,7 @@ the property name by setting <code>spring.cloud.vault.consul.token-property</cod
 dependency.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 19. pom.xml</div>
+<div class="title">Example 18. pom.xml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1513,7 +1475,7 @@ by setting <code>spring.cloud.vault.rabbitmq.username-property</code> and
 dependency.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 20. pom.xml</div>
+<div class="title">Example 19. pom.xml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1615,7 +1577,7 @@ backend in the configuration and the <code>spring-cloud-vault-config-databases</
 dependency.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 21. pom.xml</div>
+<div class="title">Example 20. pom.xml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
