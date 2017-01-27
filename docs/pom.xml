@@ -11,7 +11,7 @@
 	</parent>
 
 	<artifactId>spring-cloud-vault-config-docs</artifactId>
-	<version>1.0.0.BUILD-SNAPSHOT</version>
+	<version>1.0.0.M2</version>
 
 	<packaging>pom</packaging>
 	<name>Spring Cloud Vault Config Docs</name>
@@ -100,4 +100,8 @@
 			</snapshots>
 		</repository>
 	</repositories>
+
+  <scm>
+    <tag>1.0.0.M2</tag>
+  </scm>
 </project>
