@@ -53,7 +53,7 @@ before_script:
   - sleep 30 # wait until Cassandra is up
   - apache-cassandra-2.2.8/bin/cqlsh localhost -u cassandra -p cassandra -e "CREATE USER 'springvault' WITH PASSWORD 'springvault' SUPERUSER"
 
-script: mvn clean verify
+script: mvn clean verify -Pspring,java8
 
 after_script:
   - apache-cassandra-2.2.8/bin/nodetool stopdaemon
