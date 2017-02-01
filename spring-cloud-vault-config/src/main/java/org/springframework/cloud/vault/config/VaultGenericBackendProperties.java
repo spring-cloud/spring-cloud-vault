@@ -16,6 +16,7 @@
 package org.springframework.cloud.vault.config;
 
 import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import lombok.Data;
@@ -55,7 +56,7 @@ public class VaultGenericBackendProperties {
 	/**
 	 * Application name to be used for the context.
 	 */
-	@org.springframework.beans.factory.annotation.Value("${spring.cloud.vault.applicationName:${spring.application.name:application}}")
+	@Value("${spring.cloud.vault.applicationName:${spring.application.name:application}}")
 	private String applicationName;
 
 }
