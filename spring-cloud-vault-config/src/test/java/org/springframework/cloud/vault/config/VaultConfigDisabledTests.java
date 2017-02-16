@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,10 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
 
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,13 +29,9 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.core.VaultTemplate;
 
-import static org.assertj.core.api.Assertions.*;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test using config infrastructure with token authentication.
@@ -39,7 +39,7 @@ import org.junit.runner.RunWith;
  * In case this test should fail because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
- * 
+ *
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -76,7 +76,7 @@ public class VaultConfigDisabledTests {
 		// Beans are registered in parent (bootstrap) context.
 		ApplicationContext parent = applicationContext.getParent();
 
-		assertThat(parent.getBeanNamesForType(VaultClient.class)).isEmpty();
+		assertThat(parent.getBeanNamesForType(VaultTemplate.class)).isEmpty();
 		assertThat(parent.getBeanNamesForType(VaultPropertySourceLocator.class))
 				.isEmpty();
 	}

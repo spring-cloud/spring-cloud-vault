@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,11 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,19 +30,14 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.cloud.vault.util.Version;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.vault.client.VaultResponseEntity;
+import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
+import org.springframework.web.client.RestOperations;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration test using config infrastructure with Cubbyhole authentication.
@@ -45,7 +45,7 @@ import org.junit.runner.RunWith;
  * In case this test should fail because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
- * 
+ *
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -70,22 +70,21 @@ public class VaultConfigCubbyholeAuthenticationTests {
 						+ VaultConfigCubbyholeAuthenticationTests.class.getSimpleName(),
 						Collections.singletonMap("vault.value", "foo"));
 
-		VaultResponseEntity<VaultResponse> entity = vaultOperations
-				.doWithVault(new VaultOperations.SessionCallback<VaultResponseEntity<VaultResponse>>() {
+		VaultResponse vaultResponse = vaultOperations
+				.doWithSession(new RestOperationsCallback<VaultResponse>() {
 					@Override
-					public VaultResponseEntity<VaultResponse> doWithVault(
-							VaultOperations.VaultSession session) {
+					public VaultResponse doWithRestOperations(
+							RestOperations restOperations) {
 
 						HttpHeaders headers = new HttpHeaders();
 						headers.add("X-Vault-Wrap-TTL", "1h");
 
-						return session.exchange("auth/token/create", HttpMethod.POST,
-								new HttpEntity<Object>(headers), VaultResponse.class,
-								null);
+						return restOperations.postForObject("/auth/token/create",
+								new HttpEntity<Object>(headers), VaultResponse.class);
 					}
 				});
 
-		String initialToken = entity.getBody().getWrapInfo().get("token");
+		String initialToken = vaultResponse.getWrapInfo().get("token");
 		System.setProperty("spring.cloud.vault.token", initialToken);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.config;
 
 import java.net.URI;
@@ -23,7 +22,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -38,18 +36,34 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.authentication.*;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.authentication.AppIdAuthentication;
+import org.springframework.vault.authentication.AppIdAuthenticationOptions;
+import org.springframework.vault.authentication.AppIdUserIdMechanism;
+import org.springframework.vault.authentication.AppRoleAuthentication;
+import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
+import org.springframework.vault.authentication.AwsEc2Authentication;
+import org.springframework.vault.authentication.AwsEc2AuthenticationOptions;
+import org.springframework.vault.authentication.ClientAuthentication;
+import org.springframework.vault.authentication.ClientCertificateAuthentication;
+import org.springframework.vault.authentication.CubbyholeAuthentication;
+import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
+import org.springframework.vault.authentication.IpAddressUserId;
+import org.springframework.vault.authentication.LifecycleAwareSessionManager;
+import org.springframework.vault.authentication.MacAddressUserId;
+import org.springframework.vault.authentication.SessionManager;
+import org.springframework.vault.authentication.SimpleSessionManager;
+import org.springframework.vault.authentication.StaticUserId;
+import org.springframework.vault.authentication.TokenAuthentication;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
-import org.springframework.vault.core.DefaultVaultClientFactory;
-import org.springframework.vault.core.VaultClientFactory;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestOperations;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for Spring Vault support.
@@ -63,17 +77,38 @@ import org.springframework.vault.support.VaultToken;
 		VaultGenericBackendProperties.class })
 public class VaultBootstrapConfiguration implements InitializingBean {
 
-	@Autowired
-	private ConfigurableApplicationContext applicationContext;
+	private final ConfigurableApplicationContext applicationContext;
 
-	@Autowired
-	private VaultProperties vaultProperties;
+	private final VaultProperties vaultProperties;
+
+	private final VaultEndpoint vaultEndpoint;
+
+	private RestOperations restOperations;
 
 	private Collection<VaultSecretBackendDescriptor> vaultSecretBackendDescriptors;
 
 	private Collection<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> factories;
 
+	public VaultBootstrapConfiguration(ConfigurableApplicationContext applicationContext,
+			VaultProperties vaultProperties) {
+
+		this.applicationContext = applicationContext;
+		this.vaultProperties = vaultProperties;
+		this.vaultEndpoint = getVaultEndpoint(vaultProperties);
+	}
+
+	private VaultEndpoint getVaultEndpoint(VaultProperties vaultProperties) {
+
+		VaultEndpoint vaultEndpoint = new VaultEndpoint();
+		vaultEndpoint.setHost(vaultProperties.getHost());
+		vaultEndpoint.setPort(vaultProperties.getPort());
+		vaultEndpoint.setScheme(vaultProperties.getScheme());
+
+		return vaultEndpoint;
+	}
+
 	@Override
+	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() throws Exception {
 
 		this.vaultSecretBackendDescriptors = applicationContext.getBeansOfType(
@@ -81,6 +116,12 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 		this.factories = (Collection) applicationContext.getBeansOfType(
 				SecretBackendMetadataFactory.class).values();
+
+		ClientHttpRequestFactory clientHttpRequestFactory = clientHttpRequestFactoryWrapper()
+				.getClientHttpRequestFactory();
+
+		this.restOperations = VaultClients.createRestTemplate(vaultEndpoint,
+				clientHttpRequestFactory);
 	}
 
 	@Bean
@@ -143,46 +184,16 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	}
 
 	/**
-	 * @return the {@link VaultClient}
+	 * Creates a {@link VaultTemplate}.
+	 *
+	 * @return
 	 * @see #clientHttpRequestFactoryWrapper()
 	 */
 	@Bean
 	@ConditionalOnMissingBean
-	public VaultClient vaultClient() {
-
-		VaultEndpoint vaultEndpoint = new VaultEndpoint();
-		vaultEndpoint.setHost(vaultProperties.getHost());
-		vaultEndpoint.setPort(vaultProperties.getPort());
-		vaultEndpoint.setScheme(vaultProperties.getScheme());
-
-		return new VaultClient(clientHttpRequestFactoryWrapper()
-				.getClientHttpRequestFactory(), vaultEndpoint);
-	}
-
-	/**
-	 * Creates the {@link VaultClientFactory} to be used with {@link VaultTemplate}. Uses
-	 * by default {@link DefaultVaultClientFactory} with the configured
-	 * {@link #vaultClient()} instance.
-	 *
-	 * @return
-	 */
-	@Bean
-	@ConditionalOnMissingBean
-	public VaultClientFactory vaultClientFactory() {
-		return new DefaultVaultClientFactory(vaultClient());
-	}
-
-	/**
-	 * Creates a {@link VaultTemplate}.
-	 *
-	 * @return
-	 * @see #vaultClientFactory()
-	 */
-	@Bean
-	@ConditionalOnMissingBean
-	public VaultTemplate vaultTemplate(ClientAuthentication clientAuthentication,
-			SessionManager sessionManager) {
-		return new VaultTemplate(vaultClientFactory(), sessionManager);
+	public VaultTemplate vaultTemplate(SessionManager sessionManager) {
+		return new VaultTemplate(vaultEndpoint, clientHttpRequestFactoryWrapper()
+				.getClientHttpRequestFactory(), sessionManager);
 	}
 
 	/**
@@ -217,7 +228,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		if (vaultProperties.getConfig().getLifecycle().isEnabled()) {
 			return new LifecycleAwareSessionManager(clientAuthentication,
 					asyncTaskExecutorFactory.getObject().getTaskScheduler(),
-					vaultClient());
+					restOperations);
 		}
 
 		return new SimpleSessionManager(clientAuthentication);
@@ -227,8 +238,6 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@ConditionalOnMissingBean
 	public ClientAuthentication clientAuthentication() {
 
-		VaultClient vaultClient = vaultClient();
-
 		switch (vaultProperties.getAuthentication()) {
 
 		case TOKEN:
@@ -237,19 +246,19 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 			return new TokenAuthentication(vaultProperties.getToken());
 
 		case APPID:
-			return appIdAuthentication(vaultProperties, vaultClient);
+			return appIdAuthentication(vaultProperties);
 
 		case APPROLE:
-			return appRoleAuthentication(vaultProperties, vaultClient);
+			return appRoleAuthentication(vaultProperties);
 
 		case CERT:
-			return new ClientCertificateAuthentication(vaultClient);
+			return new ClientCertificateAuthentication(restOperations);
 
 		case AWS_EC2:
-			return awsEc2Authentication(vaultProperties, vaultClient);
+			return awsEc2Authentication(vaultProperties);
 
 		case CUBBYHOLE:
-			return cubbyholeAuthentication(vaultClient);
+			return cubbyholeAuthentication();
 
 		}
 
@@ -258,8 +267,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 				vaultProperties.getAuthentication()));
 	}
 
-	private ClientAuthentication appIdAuthentication(VaultProperties vaultProperties,
-			VaultClient vaultClient) {
+	private ClientAuthentication appIdAuthentication(VaultProperties vaultProperties) {
 
 		VaultProperties.AppIdProperties appId = vaultProperties.getAppId();
 		Assert.hasText(appId.getUserId(),
@@ -270,7 +278,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 				.path(appId.getAppIdPath()) //
 				.userIdMechanism(getClientAuthentication(appId)).build();
 
-		return new AppIdAuthentication(authenticationOptions, vaultClient);
+		return new AppIdAuthentication(authenticationOptions, restOperations);
 	}
 
 	private AppIdUserIdMechanism getClientAuthentication(
@@ -306,8 +314,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		}
 	}
 
-	private ClientAuthentication appRoleAuthentication(VaultProperties vaultProperties,
-			VaultClient vaultClient) {
+	private ClientAuthentication appRoleAuthentication(VaultProperties vaultProperties) {
 
 		VaultProperties.AppRoleProperties appRole = vaultProperties.getAppRole();
 		Assert.hasText(appRole.getRoleId(),
@@ -320,11 +327,10 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 			builder = builder.secretId(appRole.getSecretId());
 		}
 
-		return new AppRoleAuthentication(builder.build(), vaultClient);
+		return new AppRoleAuthentication(builder.build(), restOperations);
 	}
 
-	private ClientAuthentication awsEc2Authentication(VaultProperties vaultProperties,
-			VaultClient vaultClient) {
+	private ClientAuthentication awsEc2Authentication(VaultProperties vaultProperties) {
 
 		VaultProperties.AwsEc2Properties awsEc2 = vaultProperties.getAwsEc2();
 
@@ -334,11 +340,11 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 				.identityDocumentUri(URI.create(awsEc2.getIdentityDocument())) //
 				.build();
 
-		return new AwsEc2Authentication(authenticationOptions, vaultClient,
-				vaultClient.getRestTemplate());
+		return new AwsEc2Authentication(authenticationOptions, restOperations,
+				restOperations);
 	}
 
-	private ClientAuthentication cubbyholeAuthentication(VaultClient vaultClient) {
+	private ClientAuthentication cubbyholeAuthentication() {
 
 		Assert.hasText(vaultProperties.getToken(),
 				"Initial Token (spring.cloud.vault.token) for Cubbyhole authentication must not be empty");
@@ -348,7 +354,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 				.initialToken(VaultToken.of(vaultProperties.getToken())) //
 				.build();
 
-		return new CubbyholeAuthentication(options, vaultClient);
+		return new CubbyholeAuthentication(options, restOperations);
 	}
 
 	/**

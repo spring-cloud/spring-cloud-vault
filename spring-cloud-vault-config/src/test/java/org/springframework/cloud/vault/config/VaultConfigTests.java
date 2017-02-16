@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.core.VaultTemplate;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * In case this test should fail because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
- * 
+ *
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -94,7 +94,7 @@ public class VaultConfigTests {
 		// Beans are registered in parent (bootstrap) context.
 		ApplicationContext parent = applicationContext.getParent();
 
-		assertThat(parent.getBeanNamesForType(VaultClient.class)).isNotEmpty();
+		assertThat(parent.getBeanNamesForType(VaultTemplate.class)).isNotEmpty();
 		assertThat(parent.getBeanNamesForType(VaultPropertySourceLocator.class))
 				.isNotEmpty();
 	}

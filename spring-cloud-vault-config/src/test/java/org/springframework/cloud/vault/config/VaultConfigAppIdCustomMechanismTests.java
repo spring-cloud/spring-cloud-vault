@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.config;
-
-import static org.assertj.core.api.Assertions.*;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +22,7 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -32,6 +30,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.config.VaultConfigAppIdCustomMechanismTests.BootstrapConfiguration;
 import org.springframework.cloud.vault.util.Settings;
+import org.springframework.cloud.vault.util.TestRestTemplateFactory;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,8 +39,10 @@ import org.springframework.vault.authentication.AppIdAuthentication;
 import org.springframework.vault.authentication.AppIdAuthenticationOptions;
 import org.springframework.vault.authentication.AppIdUserIdMechanism;
 import org.springframework.vault.authentication.ClientAuthentication;
-import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.core.VaultOperations;
+import org.springframework.web.client.RestTemplate;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Paluch
@@ -49,8 +50,8 @@ import org.springframework.vault.core.VaultOperations;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = { BootstrapConfiguration.class,
 		VaultConfigAppIdCustomMechanismTests.TestApplication.class }, properties = {
-				"spring.cloud.vault.authentication=appid", "use.custom.config=true",
-				"spring.application.name=VaultConfigAppIdCustomMechanismTests" })
+		"spring.cloud.vault.authentication=appid", "use.custom.config=true",
+		"spring.application.name=VaultConfigAppIdCustomMechanismTests" })
 public class VaultConfigAppIdCustomMechanismTests {
 
 	@BeforeClass
@@ -121,13 +122,14 @@ public class VaultConfigAppIdCustomMechanismTests {
 
 		@ConditionalOnProperty("use.custom.config")
 		@Bean
-		ClientAuthentication clientAuthentication(VaultClient vaultClient) {
-			return new AppIdAuthentication(
-					AppIdAuthenticationOptions.builder()
-							.appId("VaultConfigAppIdCustomMechanismTests")
-							.userIdMechanism(new StaticUserIdMechanism()).build(),
-					vaultClient);
+		ClientAuthentication clientAuthentication() {
 
+			RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
+					.createSslConfiguration());
+
+			return new AppIdAuthentication(AppIdAuthenticationOptions.builder()
+					.appId("VaultConfigAppIdCustomMechanismTests")
+					.userIdMechanism(new StaticUserIdMechanism()).build(), restTemplate);
 		}
 	}
 

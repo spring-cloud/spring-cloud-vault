@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.config;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.util.Assert;
+import org.springframework.vault.core.util.PropertyTransformer;
+import org.springframework.vault.core.util.PropertyTransformers;
 
 /**
  * {@link SecretBackendMetadata} for the {@code generic} secret backend.
@@ -63,7 +64,7 @@ class GenericSecretBackendMetadata implements SecretBackendMetadata {
 
 	@Override
 	public PropertyTransformer getPropertyTransformer() {
-		return null;
+		return PropertyTransformers.noop();
 	}
 
 	@Override

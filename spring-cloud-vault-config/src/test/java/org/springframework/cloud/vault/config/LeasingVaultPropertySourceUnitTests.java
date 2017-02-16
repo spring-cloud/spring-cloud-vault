@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 package org.springframework.cloud.vault.config;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 import java.util.Date;
@@ -33,10 +30,18 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
-import org.springframework.vault.client.VaultResponseEntity;
+import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultOperations;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link LeasingVaultPropertySource}.
@@ -69,8 +74,8 @@ public class LeasingVaultPropertySourceUnitTests {
 		when(secretBackendMetadata.getName()).thenReturn("test");
 		when(configOperations.getVaultOperations()).thenReturn(vaultOperations);
 
-		propertySource = new LeasingVaultPropertySource(configOperations,
-				false, secretBackendMetadata, taskScheduler);
+		propertySource = new LeasingVaultPropertySource(configOperations, false,
+				secretBackendMetadata, taskScheduler);
 	}
 
 	@Test
@@ -114,8 +119,8 @@ public class LeasingVaultPropertySourceUnitTests {
 	@SuppressWarnings("unchecked")
 	public void shouldAcceptSecretsWithRenewableLease() {
 
-		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class)))
-				.thenReturn(scheduledFuture);
+		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(
+				scheduledFuture);
 		when(configOperations.read(secretBackendMetadata)).thenReturn(createSecrets());
 
 		propertySource.init();
@@ -229,21 +234,21 @@ public class LeasingVaultPropertySourceUnitTests {
 
 		propertySource.destroy();
 
-		verify(vaultOperations).doWithVault(any(VaultOperations.SessionCallback.class));
+		verify(vaultOperations).doWithSession(any(RestOperationsCallback.class));
 		verify(scheduledFuture).cancel(false);
 	}
 
 	private void prepareRenewal() {
 
-		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class)))
-				.thenReturn(scheduledFuture);
+		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(
+				scheduledFuture);
 		when(configOperations.read(secretBackendMetadata)).thenReturn(createSecrets());
 		propertySource.init();
-		when(vaultOperations.doWithVault(any(VaultOperations.SessionCallback.class)))
+		when(vaultOperations.doWithSession(any(RestOperationsCallback.class)))
 				.thenReturn(getResponseEntity("new_lease", true, 70, HttpStatus.OK));
 	}
 
-	private VaultResponseEntity<Map<String, Object>> getResponseEntity(String leaseId,
+	private ResponseEntity<Map<String, Object>> getResponseEntity(String leaseId,
 			Boolean renewable, Integer leaseDuration, HttpStatus httpStatus) {
 
 		Map<String, Object> body = new HashMap<>();
@@ -254,11 +259,10 @@ public class LeasingVaultPropertySourceUnitTests {
 		return getEntity(body, httpStatus);
 	}
 
-	private VaultResponseEntity<Map<String, Object>> getEntity(Map<String, Object> body,
+	private ResponseEntity<Map<String, Object>> getEntity(Map<String, Object> body,
 			HttpStatus status) {
 
-		return new VaultResponseEntity<Map<String, Object>>(body, status, null, null) {
-		};
+		return new ResponseEntity<>(body, status);
 	}
 
 	private Secrets createSecrets() {

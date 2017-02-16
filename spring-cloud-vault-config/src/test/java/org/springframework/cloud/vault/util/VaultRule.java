@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.util;
 
 import java.io.IOException;
@@ -22,35 +21,37 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import org.junit.rules.ExternalResource;
+
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.SessionManager;
-import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.core.DefaultVaultClientFactory;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
 
 /**
  * Vault rule to ensure a running and prepared Vault.
- * 
+ *
  * @author Mark Paluch
  */
 public class VaultRule extends ExternalResource {
 
 	private final VaultEndpoint vaultEndpoint;
+
 	private final PrepareVault prepareVault;
 
 	private VaultToken token;
 
 	/**
 	 * Create a new {@link VaultRule} with default SSL configuration and endpoint.
-	 * 
+	 *
 	 * @see Settings#createSslConfiguration()
 	 * @see VaultEndpoint
 	 */
 	public VaultRule() {
-		this(Settings.createSslConfiguration(), new VaultEndpoint());
+		this(Settings.createSslConfiguration(),
+				TestRestTemplateFactory.TEST_VAULT_ENDPOINT);
 	}
 
 	/**
@@ -65,12 +66,10 @@ public class VaultRule extends ExternalResource {
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
 		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
 
-		VaultClient vaultClient = new VaultClient(
-				TestRestTemplateFactory.create(sslConfiguration), vaultEndpoint);
-		DefaultVaultClientFactory clientFactory = new DefaultVaultClientFactory(
-				vaultClient);
+		ClientHttpRequestFactory requestFactory = TestRestTemplateFactory.create(
+				sslConfiguration).getRequestFactory();
 
-		VaultTemplate vaultTemplate = new VaultTemplate(clientFactory,
+		VaultTemplate vaultTemplate = new VaultTemplate(vaultEndpoint, requestFactory,
 				new PreparingSessionManager());
 
 		this.token = Settings.token();
@@ -92,9 +91,10 @@ public class VaultRule extends ExternalResource {
 
 		}
 		catch (Exception ex) {
-			throw new IllegalStateException(String.format(
-					"Vault is not running on localhost:%d which is required to run a test using @Rule %s",
-					vaultEndpoint.getPort(), getClass().getSimpleName()));
+			throw new IllegalStateException(
+					String.format(
+							"Vault is not running on localhost:%d which is required to run a test using @Rule %s",
+							vaultEndpoint.getPort(), getClass().getSimpleName()));
 		}
 		finally {
 			if (socket != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,28 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Map;
 
+import org.springframework.vault.core.util.PropertyTransformer;
+
 /**
- * Strategy interface to transform properties to a new key-value {@link Map}. Property
- * transformation can remap property names, adjust values or change the property map
- * entirely.
- * <p>
- * Implementors usually transform property names to target property names by retaining the
- * value.
+ * Implementation support class for classes implementing {@link PropertyTransformer}.
  *
  * @author Mark Paluch
  */
-public interface PropertyTransformer {
+abstract class PropertyTransformerSupport implements PropertyTransformer {
 
-	/**
-	 * Transform properties by creating a new map using the transformed property set.
-	 *
-	 * @param input must not be {@literal null}.
-	 * @return transformed properties.
-	 */
-	Map<String, String> transformProperties(Map<String, String> input);
+	@Override
+	public PropertyTransformer andThen(final PropertyTransformer after) {
+
+		final PropertyTransformer that = this;
+
+		return new PropertyTransformerSupport() {
+
+			@Override
+			public Map<String, String> transformProperties(Map<String, String> input) {
+
+				Map<String, String> processed = that.transformProperties(input);
+				return after.transformProperties(processed);
+			}
+		};
+	}
 }
