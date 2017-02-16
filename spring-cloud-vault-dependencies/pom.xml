@@ -36,6 +36,21 @@
 				<groupId>org.springframework.vault</groupId>
 				<artifactId>spring-vault-core</artifactId>
 				<version>${spring-vault.version}</version>
+				<!-- Provided by Spring Boot -->
+				<exclusions>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-beans</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-web</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<!-- Spring Cloud Vault -->
