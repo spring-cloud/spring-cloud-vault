@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.config;
 
 import java.util.Map;
+
+import org.springframework.vault.core.util.PropertyTransformer;
 
 /**
  * Interface specifying the API to obtain URL variables and optionally a
@@ -38,8 +39,8 @@ public interface SecretBackendMetadata {
 	 * Return a {@link PropertyTransformer} to post-process properties retrieved from
 	 * Vault.
 	 *
-	 * @return the property transformer or {@literal null} if there's no property
-	 * transformer.
+	 * @return the property transformer.
+	 * @see org.springframework.vault.core.util.PropertyTransformers
 	 */
 	PropertyTransformer getPropertyTransformer();
 

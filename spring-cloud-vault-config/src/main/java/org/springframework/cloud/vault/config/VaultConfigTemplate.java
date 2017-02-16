@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,29 @@
  */
 package org.springframework.cloud.vault.config;
 
+import java.net.URI;
 import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
-import org.springframework.vault.client.VaultResponseEntity;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.core.util.PropertyTransformer;
 import org.springframework.vault.support.JsonMapFlattener;
 import org.springframework.vault.support.VaultResponse;
+import org.springframework.web.util.DefaultUriTemplateHandler;
 
 /**
  * Central class to retrieve configuration from Vault.
- * 
+ *
  * @author Mark Paluch
  * @see VaultOperations
  */
 @Slf4j
 public class VaultConfigTemplate implements VaultConfigOperations {
 
+	private final DefaultUriTemplateHandler templateHandler = new DefaultUriTemplateHandler();
 	private final VaultOperations vaultOperations;
 	private final VaultProperties properties;
 
@@ -59,22 +61,20 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 
 		Assert.notNull(secretBackendMetadata, "SecureBackendAccessor must not be null!");
 
-		VaultResponseEntity<VaultResponse> response = vaultOperations
-				.doWithVault(new VaultOperations.SessionCallback<VaultResponseEntity<VaultResponse>>() {
-					@Override
-					public VaultResponseEntity<VaultResponse> doWithVault(
-							VaultOperations.VaultSession session) {
+		URI uri = templateHandler.expand("{backend}/{key}",
+				secretBackendMetadata.getVariables());
+		log.info(String.format("Fetching config from Vault at: %s", uri));
 
-						return session.exchange("{backend}/{key}", HttpMethod.GET, null,
-								VaultResponse.class, secretBackendMetadata.getVariables());
-					}
-				});
+		try {
+			VaultResponse vaultResponse = vaultOperations.read(uri.toString());
 
-		log.info(String.format("Fetching config from Vault at: %s", response.getUri()));
+			if (vaultResponse == null) {
 
-		if (response.getStatusCode() == HttpStatus.OK) {
+				log.info(String.format("Could not locate PropertySource: %s",
+						"key not found"));
+				return null;
+			}
 
-			VaultResponse vaultResponse = response.getBody();
 			Map<String, String> data = JsonMapFlattener.flatten(vaultResponse.getData());
 			PropertyTransformer propertyTransformer = secretBackendMetadata
 					.getPropertyTransformer();
@@ -85,20 +85,17 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 
 			return createSecrets(vaultResponse, data);
 		}
+		catch (VaultException e) {
 
-		if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
-			log.info(String
-					.format("Could not locate PropertySource: %s", "key not found"));
-		}
-		else if (properties.isFailFast()) {
-			throw new IllegalStateException(
-					String.format(
-							"Could not locate PropertySource and the fail fast property is set, failing Status %d %s",
-							response.getStatusCode().value(), response.getMessage()));
-		}
-		else {
-			log.warn(String.format("Could not locate PropertySource: Status %d %s",
-					response.getStatusCode().value(), response.getMessage()));
+			if (properties.isFailFast()) {
+				throw new IllegalStateException(
+						"Could not locate PropertySource and the fail fast property is set, failing.",
+						e);
+			}
+			else {
+				log.warn(String.format("Could not locate PropertySource: %s",
+						e.getMessage()));
+			}
 		}
 
 		return null;

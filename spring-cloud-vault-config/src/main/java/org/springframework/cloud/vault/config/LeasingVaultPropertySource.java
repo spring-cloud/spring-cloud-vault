@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,20 +25,23 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.client.VaultException;
-import org.springframework.vault.client.VaultResponseEntity;
-import org.springframework.vault.core.VaultOperations;
-
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.core.RestOperationsCallback;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestOperations;
 
 /**
  * A {@link VaultPropertySource} that renews a {@link Lease} associated with
@@ -71,8 +74,7 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 	 * @param taskScheduler must not be {@literal null}.
 	 */
 	public LeasingVaultPropertySource(VaultConfigOperations operations, boolean failFast,
-			SecretBackendMetadata secretBackendMetadata,
-			TaskScheduler taskScheduler) {
+			SecretBackendMetadata secretBackendMetadata, TaskScheduler taskScheduler) {
 
 		super(operations, failFast, secretBackendMetadata);
 
@@ -171,21 +173,20 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 	 */
 	private Lease doRenewLease(final Lease lease) {
 
-		VaultResponseEntity<Map<String, Object>> entity = getSource().getVaultOperations()
-				.doWithVault(
-						new VaultOperations.SessionCallback<VaultResponseEntity<Map<String, Object>>>() {
-							@Override
-							public VaultResponseEntity<Map<String, Object>> doWithVault(
-									VaultOperations.VaultSession session) {
+		ResponseEntity<Map<String, Object>> entity = null;
+		try {
+			entity = getSource().getVaultOperations().doWithSession(
+					new RestOperationsCallback<ResponseEntity<Map<String, Object>>>() {
 
-								return session.putForEntity(
-										String.format("sys/renew/%s", lease.getLeaseId()),
-										null, Map.class);
-							}
-
-						});
-
-		if (entity.isSuccessful() && entity.hasBody()) {
+						@Override
+						@SuppressWarnings("unchecked")
+						public ResponseEntity<Map<String, Object>> doWithRestOperations(
+								RestOperations restOperations) {
+							return (ResponseEntity) restOperations.exchange(
+									"/sys/renew/{leaseId}", HttpMethod.PUT, null,
+									Map.class, lease.getLeaseId());
+						}
+					});
 
 			Map<String, Object> body = entity.getBody();
 			String leaseId = (String) body.get("lease_id");
@@ -196,12 +197,14 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 				return null;
 			}
 
-			return Lease.of(leaseId,
-					leaseDuration != null ? leaseDuration.longValue() : 0, renewable);
+			return Lease.of(leaseId, leaseDuration != null ? leaseDuration.longValue()
+					: 0, renewable);
+		}
+		catch (HttpStatusCodeException e) {
+			throw new VaultException(String.format("Cannot renew lease: %s",
+					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
 
-		throw new VaultException(
-				String.format("Cannot renew lease: %s", buildExceptionMessage(entity)));
 	}
 
 	/**
@@ -211,36 +214,25 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 	 */
 	private void doRevokeLease(final Lease lease) {
 
-		VaultResponseEntity<Map<String, Object>> entity = getSource().getVaultOperations()
-				.doWithVault(
-						new VaultOperations.SessionCallback<VaultResponseEntity<Map<String, Object>>>() {
-							@Override
-							public VaultResponseEntity<Map<String, Object>> doWithVault(
-									VaultOperations.VaultSession session) {
+		try {
+			getSource().getVaultOperations().doWithSession(
+					new RestOperationsCallback<ResponseEntity<Map<String, Object>>>() {
 
-								return session.putForEntity(String.format("sys/revoke/%s",
-										lease.getLeaseId()), null, Map.class);
-							}
-
-						});
-
-		if (entity.isSuccessful()) {
-			return;
+						@Override
+						@SuppressWarnings("unchecked")
+						public ResponseEntity<Map<String, Object>> doWithRestOperations(
+								RestOperations restOperations) {
+							return (ResponseEntity) restOperations.exchange(
+									"/sys/revoke/{leaseId}", HttpMethod.PUT, null,
+									Map.class, lease.getLeaseId());
+						}
+					});
+		}
+		catch (HttpStatusCodeException e) {
+			throw new VaultException(String.format("Cannot revoke lease: %s",
+					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
 
-		throw new VaultException(
-				String.format("Cannot revoke lease: %s", buildExceptionMessage(entity)));
-	}
-
-	private static String buildExceptionMessage(VaultResponseEntity<?> response) {
-
-		if (StringUtils.hasText(response.getMessage())) {
-			return String.format("Status %s URI %s: %s", response.getStatusCode(),
-					response.getUri(), response.getMessage());
-		}
-
-		return String.format("Status %s URI %s", response.getStatusCode(),
-				response.getUri());
 	}
 
 	/**
@@ -291,29 +283,32 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 				cancelSchedule(currentLease);
 			}
 
-			ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(new Runnable() {
+			ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(
+					new Runnable() {
 
-				@Override
-				public void run() {
+						@Override
+						public void run() {
 
-					try {
-						schedules.remove(lease);
+							try {
+								schedules.remove(lease);
 
-						if (LeaseRenewalScheduler.this.currentLease.get() != lease) {
-							logger.debug("Current lease has changed. Skipping renewal");
-							return;
+								if (LeaseRenewalScheduler.this.currentLease.get() != lease) {
+									logger.debug("Current lease has changed. Skipping renewal");
+									return;
+								}
+
+								logger.debug("Renewing lease {}", lease.getLeaseId());
+								LeaseRenewalScheduler.this.currentLease.compareAndSet(
+										lease, renewLease.renewLease(lease));
+							}
+							catch (Exception e) {
+								logger.error("Cannot renew lease {}", lease.getLeaseId(),
+										e);
+							}
 						}
-
-						logger.debug("Renewing lease {}", lease.getLeaseId());
-						LeaseRenewalScheduler.this.currentLease.compareAndSet(lease,
-								renewLease.renewLease(lease));
-					}
-					catch (Exception e) {
-						logger.error("Cannot renew lease {}", lease.getLeaseId(), e);
-					}
-				}
-			}, new OneShotTrigger(
-					getRenewalSeconds(lease, minRenewalSeconds, expiryThresholdSeconds)));
+					},
+					new OneShotTrigger(getRenewalSeconds(lease, minRenewalSeconds,
+							expiryThresholdSeconds)));
 
 			schedules.put(lease, scheduledFuture);
 		}
@@ -344,8 +339,8 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 
 		private long getRenewalSeconds(Lease lease, int minRenewalSeconds,
 				int expiryThresholdSeconds) {
-			return Math.max(minRenewalSeconds,
-					lease.getLeaseDuration() - expiryThresholdSeconds);
+			return Math.max(minRenewalSeconds, lease.getLeaseDuration()
+					- expiryThresholdSeconds);
 		}
 
 		private boolean isLeaseRenewable(Lease lease) {
@@ -372,8 +367,8 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 		public Date nextExecutionTime(TriggerContext triggerContext) {
 
 			if (fired.compareAndSet(false, true)) {
-				return new Date(
-						System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(seconds));
+				return new Date(System.currentTimeMillis()
+						+ TimeUnit.SECONDS.toMillis(seconds));
 			}
 
 			return null;
