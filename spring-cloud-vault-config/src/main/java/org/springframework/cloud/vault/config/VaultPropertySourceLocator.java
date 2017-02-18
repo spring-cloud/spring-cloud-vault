@@ -92,7 +92,7 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 
 	private List<String> buildContexts(ConfigurableEnvironment env) {
 
-		String appName = env.getProperty("spring.application.name");
+		String appName = genericBackendProperties.getApplicationName();
 		List<String> profiles = Arrays.asList(env.getActiveProfiles());
 		List<String> contexts = new ArrayList<>();
 
