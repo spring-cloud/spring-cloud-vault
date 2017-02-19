@@ -36,83 +36,123 @@ import org.springframework.core.env.PropertySource;
  *
  * @author Ryan Hoegg
  */
-@RunWith(MockitoJUnitRunner.class) public class VaultPropertySourceLocatorUnitTests {
+@RunWith(MockitoJUnitRunner.class)
+public class VaultPropertySourceLocatorUnitTests {
 
-		private VaultPropertySourceLocator propertySourceLocator;
+	private VaultPropertySourceLocator propertySourceLocator;
 
-		@Mock private VaultConfigTemplate operations;
+	@Mock
+	private VaultConfigTemplate operations;
 
-		@Mock private ConfigurableEnvironment configurableEnvironment;
+	@Mock
+	private ConfigurableEnvironment configurableEnvironment;
 
-		@Mock private VaultPropertySource vaultPropertySource;
+	@Mock
+	private VaultPropertySource vaultPropertySource;
 
-		@Before public void before() {
-				propertySourceLocator = new VaultPropertySourceLocator(operations,
-						new VaultProperties(), new VaultGenericBackendProperties(),
-						Collections.<SecretBackendMetadata>emptyList());
-		}
+	@Before
+	public void before() {
+		propertySourceLocator = new VaultPropertySourceLocator(operations,
+			new VaultProperties(), new VaultGenericBackendProperties(),
+			Collections.<SecretBackendMetadata>emptyList());
+	}
 
-		@Test public void getOrderShouldReturnConfiguredOrder() {
+	@Test
+	public void getOrderShouldReturnConfiguredOrder() {
 
-				VaultProperties vaultProperties = new VaultProperties();
-				vaultProperties.getConfig().setOrder(42);
+		VaultProperties vaultProperties = new VaultProperties();
+		vaultProperties.getConfig().setOrder(42);
 
-				propertySourceLocator = new VaultPropertySourceLocator(operations,
-						vaultProperties, new VaultGenericBackendProperties(),
-						Collections.<SecretBackendMetadata>emptyList());
+		propertySourceLocator = new VaultPropertySourceLocator(operations,
+			vaultProperties, new VaultGenericBackendProperties(),
+			Collections.<SecretBackendMetadata>emptyList());
 
-				assertThat(propertySourceLocator.getOrder()).isEqualTo(42);
-		}
+		assertThat(propertySourceLocator.getOrder()).isEqualTo(42);
+	}
 
-		@Test public void shouldLocateOnePropertySourceWithEmptyProfiles() {
+	@Test
+	public void shouldLocateOnePropertySourceWithEmptyProfiles() {
 
-				when(configurableEnvironment.getActiveProfiles())
-						.thenReturn(new String[0]);
+		when(configurableEnvironment.getActiveProfiles()).thenReturn(new String[0]);
 
-				PropertySource<?> propertySource = propertySourceLocator
-						.locate(configurableEnvironment);
+		PropertySource<?> propertySource = propertySourceLocator
+			.locate(configurableEnvironment);
 
-				assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
+		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
-				CompositePropertySource composite = (CompositePropertySource) propertySource;
-				assertThat(composite.getPropertySources()).hasSize(1);
-		}
+		CompositePropertySource composite = (CompositePropertySource) propertySource;
+		assertThat(composite.getPropertySources()).hasSize(1);
+	}
 
-		@Test public void shouldLocatePropertySourcesForActiveProfilesInDefaultContext() {
+	@Test
+	public void shouldLocatePropertySourcesForActiveProfilesInDefaultContext() {
 
-				when(configurableEnvironment.getActiveProfiles())
-						.thenReturn(new String[] { "vermillion", "periwinkle" });
+		when(configurableEnvironment.getActiveProfiles())
+			.thenReturn(new String[] { "vermillion", "periwinkle" });
 
-				PropertySource<?> propertySource = propertySourceLocator
-						.locate(configurableEnvironment);
+		PropertySource<?> propertySource = propertySourceLocator
+			.locate(configurableEnvironment);
 
-				assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
+		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
-				CompositePropertySource composite = (CompositePropertySource) propertySource;
-				assertThat(composite.getPropertySources()).extracting("name").containsAll(
-						Arrays.asList(new String[] { "secret/application/vermillion",
-								"secret/application/periwinkle" }));
-		}
+		CompositePropertySource composite = (CompositePropertySource) propertySource;
+		assertThat(composite.getPropertySources())
+			.extracting("name")
+			.containsAll(Arrays.asList(new String[] {
+				"secret/application/vermillion",
+				"secret/application/periwinkle" }));
+	}
 
-		@Test public void shouldLocatePropertySourcesInVaultApplicationContext() {
-				final VaultGenericBackendProperties backendProperties = new VaultGenericBackendProperties();
-				backendProperties.setApplicationName("wintermute");
-				propertySourceLocator = new VaultPropertySourceLocator(operations,
-						new VaultProperties(), backendProperties,
-						Collections.<SecretBackendMetadata>emptyList());
+	@Test
+	public void shouldLocatePropertySourcesInVaultApplicationContext() {
+		final VaultGenericBackendProperties backendProperties = new VaultGenericBackendProperties();
+		backendProperties.setApplicationName("wintermute");
+		propertySourceLocator = new VaultPropertySourceLocator(operations,
+			new VaultProperties(), backendProperties, Collections.<SecretBackendMetadata>emptyList());
 
-				when(configurableEnvironment.getActiveProfiles())
-						.thenReturn(new String[] { "vermillion", "periwinkle" });
+		when(configurableEnvironment.getActiveProfiles())
+			.thenReturn(new String[] { "vermillion", "periwinkle" });
 
-				PropertySource<?> propertySource = propertySourceLocator
-						.locate(configurableEnvironment);
+		PropertySource<?> propertySource = propertySourceLocator
+			.locate(configurableEnvironment);
 
-				assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
+		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
-				CompositePropertySource composite = (CompositePropertySource) propertySource;
-				assertThat(composite.getPropertySources()).extracting("name").containsAll(
-						Arrays.asList(new String[] { "secret/wintermute",
-								"secret/wintermute/vermillion",
-								"secret/wintermute/periwinkle" }));
-		}
+		CompositePropertySource composite = (CompositePropertySource) propertySource;
+		assertThat(composite.getPropertySources()).extracting("name")
+			.containsAll(Arrays.asList(new String[] {
+				"secret/wintermute",
+				"secret/wintermute/vermillion",
+				"secret/wintermute/periwinkle" }));
+	}
+
+	@Test
+	public void shouldLocatePropertySourcesInEachPathSpecifiedWhenApplicationNameContainsSeveral() {
+		final VaultGenericBackendProperties backendProperties = new VaultGenericBackendProperties();
+		backendProperties.setApplicationName("wintermute,straylight,icebreaker/armitage");
+		propertySourceLocator = new VaultPropertySourceLocator(
+			operations,	new VaultProperties(), backendProperties, Collections.<SecretBackendMetadata>emptyList());
+
+		when(configurableEnvironment.getActiveProfiles())
+			.thenReturn(new String[] { "vermillion", "periwinkle" });
+
+		PropertySource<?> propertySource =
+			propertySourceLocator.locate(configurableEnvironment);
+
+		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
+
+		CompositePropertySource composite = (CompositePropertySource) propertySource;
+		assertThat(composite.getPropertySources())
+			.extracting("name")
+			.containsAll(Arrays.asList(
+				new String[] { "secret/wintermute",
+					"secret/straylight",
+					"secret/icebreaker/armitage",
+					"secret/wintermute/vermillion",
+					"secret/wintermute/periwinkle",
+					"secret/straylight/vermillion",
+					"secret/straylight/periwinkle",
+					"secret/icebreaker/armitage/vermillion",
+					"secret/icebreaker/armitage/periwinkle" }));
+	}
 }

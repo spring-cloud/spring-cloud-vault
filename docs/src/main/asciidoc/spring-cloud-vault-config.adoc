@@ -371,20 +371,33 @@ Spring Cloud Vault supports at the basic level the generic secret
 backend. The generic secret backend allows storage of arbitrary
 values as key-value store. A single context can store one or many
 key-value tuples. Contexts can be organized hierarchically.
-Spring Cloud Vault allows using the Application name set in
-`spring.application.name` and a default context name (`application`)
-in combination with active profiles.
-
+Spring Cloud Vault allows using the Application name
+and a default context name (`application`) in combination with active
+profiles.
 ----
 /secret/{application}/{profile}
 /secret/{application}
 /secret/{default-context}/{profile}
 /secret/{default-context}
 ----
+The application name is determined by the properties:
+
+* `spring.cloud.vault.generic.application-name`
+* `spring.cloud.vault.application-name`
+* `spring.application.name`
+
+Secrets can be obtained from other folders within the generic backend by adding their
+paths to the application name, separated by commas. For example, given the application
+name `usefulapp,mysql1,projectx/aws`, each of these folders will be used:
+
+* `/secret/usefulapp`
+* `/secret/mysql1`
+* `/secret/projectx/aws`
 
 Spring Cloud Vault adds all active profiles to the list of possible context paths.
-No active profiles will skip accessing contexts with a profile name. Properties
-are exposed like they are stored (i.e. without additional prefixes).
+No active profiles will skip accessing contexts with a profile name.
+
+Properties are exposed like they are stored (i.e. without additional prefixes).
 
 ====
 [source,yaml]
@@ -393,8 +406,9 @@ spring.cloud.vault:
     generic:
         enabled: true
         backend: secret
-        profile-separator: ','
+        profile-separator: '/'
         default-context: application
+        application-name: my-app
 ----
 ====
 
@@ -402,8 +416,9 @@ spring.cloud.vault:
 config usage
 * `backend` sets the path of the secret mount to use
 * `default-context` sets the context name used by all applications
-* `profile-separator` sets the value of the separator used to separate the
-profile name in property sources with profiles
+* `application-name` overrides the application name for use in the generic backend
+* `profile-separator` separates the profile name from the context in
+property sources with profiles
 
 See also: https://www.vaultproject.io/docs/secrets/generic/index.html[Vault Documentation: Using the generic secret backend]
 
