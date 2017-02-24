@@ -13,5 +13,5 @@ dependencyManagement {
 }
 
 dependencies {
-	compile '{@= groupId @}:spring-cloud-vault-starter-config'
+	compile '{@= groupId @}:spring-cloud-starter-vault-config'
 }
