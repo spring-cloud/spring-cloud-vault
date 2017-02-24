@@ -18,7 +18,7 @@ package org.springframework.cloud.vault.config;
 import java.net.URI;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
@@ -34,7 +34,7 @@ import org.springframework.web.util.DefaultUriTemplateHandler;
  * @author Mark Paluch
  * @see VaultOperations
  */
-@Slf4j
+@CommonsLog
 public class VaultConfigTemplate implements VaultConfigOperations {
 
 	private final DefaultUriTemplateHandler templateHandler = new DefaultUriTemplateHandler();
@@ -47,7 +47,8 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param properties must not be {@literal null}.
 	 */
-	public VaultConfigTemplate(VaultOperations vaultOperations, VaultProperties properties) {
+	public VaultConfigTemplate(VaultOperations vaultOperations,
+			VaultProperties properties) {
 
 		Assert.notNull(vaultOperations, "VaultOperations must not be null!");
 		Assert.notNull(properties, "VaultProperties must not be null!");

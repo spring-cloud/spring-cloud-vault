@@ -25,9 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.apachecommons.CommonsLog;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.http.HttpMethod;
@@ -54,7 +52,7 @@ import org.springframework.web.client.RestOperations;
  *
  * @author Mark Paluch
  */
-@Slf4j
+@CommonsLog
 class LeasingVaultPropertySource extends VaultPropertySource implements DisposableBean {
 
 	private final LeaseRenewalScheduler leaseRenewal;
@@ -197,8 +195,8 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 				return null;
 			}
 
-			return Lease.of(leaseId, leaseDuration != null ? leaseDuration.longValue()
-					: 0, renewable);
+			return Lease.of(leaseId,
+					leaseDuration != null ? leaseDuration.longValue() : 0, renewable);
 		}
 		catch (HttpStatusCodeException e) {
 			throw new VaultException(String.format("Cannot renew lease: %s",
@@ -242,9 +240,8 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 	 * a newer {@link Lease} for renewal, the previously registered renewal task will skip
 	 * renewal.
 	 */
+	@CommonsLog
 	private static class LeaseRenewalScheduler {
-
-		private final Logger logger = LoggerFactory.getLogger(getClass());
 
 		private final TaskScheduler taskScheduler;
 
@@ -273,8 +270,11 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 		void scheduleRenewal(final RenewLease renewLease, final Lease lease,
 				final int minRenewalSeconds, final int expiryThresholdSeconds) {
 
-			logger.debug("Scheduling renewal for lease {}, lease duration {}",
-					lease.getLeaseId(), lease.getLeaseDuration());
+			if (log.isDebugEnabled()) {
+				log.debug(String.format(
+						"Scheduling renewal for lease %s, lease duration %d",
+						lease.getLeaseId(), lease.getLeaseDuration()));
+			}
 
 			Lease currentLease = this.currentLease.get();
 			this.currentLease.set(lease);
@@ -283,32 +283,35 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 				cancelSchedule(currentLease);
 			}
 
-			ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(
-					new Runnable() {
+			ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(new Runnable() {
 
-						@Override
-						public void run() {
+				@Override
+				public void run() {
 
-							try {
-								schedules.remove(lease);
+					try {
 
-								if (LeaseRenewalScheduler.this.currentLease.get() != lease) {
-									logger.debug("Current lease has changed. Skipping renewal");
-									return;
-								}
+						schedules.remove(lease);
 
-								logger.debug("Renewing lease {}", lease.getLeaseId());
-								LeaseRenewalScheduler.this.currentLease.compareAndSet(
-										lease, renewLease.renewLease(lease));
-							}
-							catch (Exception e) {
-								logger.error("Cannot renew lease {}", lease.getLeaseId(),
-										e);
-							}
+						if (LeaseRenewalScheduler.this.currentLease.get() != lease) {
+							log.debug("Current lease has changed. Skipping renewal");
+							return;
 						}
-					},
-					new OneShotTrigger(getRenewalSeconds(lease, minRenewalSeconds,
-							expiryThresholdSeconds)));
+
+						if (log.isDebugEnabled()) {
+							log.debug(String.format("Renewing lease %s",
+									lease.getLeaseId()));
+						}
+
+						LeaseRenewalScheduler.this.currentLease.compareAndSet(lease,
+								renewLease.renewLease(lease));
+					}
+					catch (Exception e) {
+						log.error(String.format("Cannot renew lease %s",
+								lease.getLeaseId()), e);
+					}
+				}
+			}, new OneShotTrigger(
+					getRenewalSeconds(lease, minRenewalSeconds, expiryThresholdSeconds)));
 
 			schedules.put(lease, scheduledFuture);
 		}
@@ -317,8 +320,13 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 
 			ScheduledFuture<?> scheduledFuture = schedules.get(lease);
 			if (scheduledFuture != null) {
-				logger.debug("Canceling previously registered schedule for lease {}",
-						lease.getLeaseId());
+
+				if (log.isDebugEnabled()) {
+					log.debug(String.format(
+							"Canceling previously registered schedule for lease %s",
+							lease.getLeaseId()));
+				}
+
 				scheduledFuture.cancel(false);
 			}
 		}
@@ -339,8 +347,8 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 
 		private long getRenewalSeconds(Lease lease, int minRenewalSeconds,
 				int expiryThresholdSeconds) {
-			return Math.max(minRenewalSeconds, lease.getLeaseDuration()
-					- expiryThresholdSeconds);
+			return Math.max(minRenewalSeconds,
+					lease.getLeaseDuration() - expiryThresholdSeconds);
 		}
 
 		private boolean isLeaseRenewable(Lease lease) {
@@ -367,8 +375,8 @@ class LeasingVaultPropertySource extends VaultPropertySource implements Disposab
 		public Date nextExecutionTime(TriggerContext triggerContext) {
 
 			if (fired.compareAndSet(false, true)) {
-				return new Date(System.currentTimeMillis()
-						+ TimeUnit.SECONDS.toMillis(seconds));
+				return new Date(
+						System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(seconds));
 			}
 
 			return null;
