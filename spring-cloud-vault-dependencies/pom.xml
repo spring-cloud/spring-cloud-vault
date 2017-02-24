@@ -25,7 +25,6 @@
 		<netty.version>4.1.6.Final</netty.version>
 		<okhttp.version>2.7.5</okhttp.version>
 		<okhttp3.version>3.5.0</okhttp3.version>
-		<slf4j.version>1.7.21</slf4j.version>
 	</properties>
 
 	<dependencyManagement>
@@ -140,12 +139,6 @@
 				<optional>true</optional>
 			</dependency>
 
-			<!-- Logging -->
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
