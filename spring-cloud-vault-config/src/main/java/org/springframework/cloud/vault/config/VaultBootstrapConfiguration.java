@@ -209,6 +209,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 		ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
 		threadPoolTaskScheduler.setPoolSize(2);
+		threadPoolTaskScheduler.setDaemon(true);
 		threadPoolTaskScheduler.setThreadNamePrefix("Spring-Cloud-Vault-");
 
 		return new TaskSchedulerWrapper<>(threadPoolTaskScheduler);
