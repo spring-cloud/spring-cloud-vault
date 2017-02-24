@@ -87,7 +87,7 @@
 			<!-- Starters -->
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-vault-starter-config</artifactId>
+				<artifactId>spring-cloud-starter-vault-config</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
