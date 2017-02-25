@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.List;
 
 import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 
 /**
  * Utility class to create {@link SecretBackendMetadata} from a
@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author Mark Paluch
  */
-@Slf4j
+@CommonsLog
 @UtilityClass
 class SecretBackendFactories {
 

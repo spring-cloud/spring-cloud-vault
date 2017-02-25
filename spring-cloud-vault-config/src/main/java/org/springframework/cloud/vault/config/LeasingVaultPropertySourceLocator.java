@@ -19,12 +19,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import lombok.extern.apachecommons.CommonsLog;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.env.PropertySource;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * Extension to {@link LeasingVaultPropertySourceLocator} that creates
@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Mark Paluch
  * @see LeasingVaultPropertySource
  */
-@Slf4j
+@CommonsLog
 class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocator
 		implements DisposableBean {
 
@@ -97,8 +97,8 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocator
 					((LeasingVaultPropertySource) propertySource).destroy();
 				}
 				catch (Exception e) {
-					log.warn("Cannot destroy property source {}",
-							propertySource.getName(), e);
+					log.warn(String.format("Cannot destroy property source %s",
+							propertySource.getName()), e);
 				}
 			}
 		}

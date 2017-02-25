@@ -9,9 +9,9 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<artifactId>spring-cloud-vault-starter-config</artifactId>
+	<artifactId>spring-cloud-starter-vault-config</artifactId>
 
-	<name>Spring Cloud Vault Config Starter</name>
+	<name>Spring Cloud Starter Vault Config</name>
 	<description>Starter for exposing Spring Cloud Vault Config</description>
 
 	<url>http://cloud.spring.io/spring-cloud-vault-config/</url>

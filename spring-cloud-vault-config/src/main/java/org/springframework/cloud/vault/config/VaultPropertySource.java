@@ -19,10 +19,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import lombok.extern.apachecommons.CommonsLog;
+
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.util.Assert;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * A {@link EnumerablePropertySource} backed by {@link VaultConfigTemplate}.
@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Spencer Gibb
  * @author Mark Paluch
  */
-@Slf4j
+@CommonsLog
 class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations> {
 
 	private final boolean failFast;
