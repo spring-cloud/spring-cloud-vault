@@ -44,6 +44,7 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 	private final VaultConfigOperations operations;
 	private final VaultProperties properties;
 	private final VaultGenericBackendProperties genericBackendProperties;
+	private final VaultPropertySourceContextStrategy vaultPropertySourceContextStrategy;
 	private final Collection<SecretBackendMetadata> backendAccessors;
 
 	/**
@@ -52,11 +53,13 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 	 * @param operations must not be {@literal null}.
 	 * @param properties must not be {@literal null}.
 	 * @param genericBackendProperties must not be {@literal null}.
+	 * @param vaultPropertySourceContextStrategy must not be {@literal null}.
 	 * @param backendAccessors must not be {@literal null}.
 	 */
 	public VaultPropertySourceLocator(VaultConfigOperations operations,
 			VaultProperties properties,
 			VaultGenericBackendProperties genericBackendProperties,
+			VaultPropertySourceContextStrategy vaultPropertySourceContextStrategy,
 			Collection<SecretBackendMetadata> backendAccessors) {
 
 		Assert.notNull(operations, "VaultConfigOperations must not be null");
@@ -64,11 +67,14 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 		Assert.notNull(backendAccessors, "BackendAccessors must not be null");
 		Assert.notNull(genericBackendProperties,
 				"VaultGenericBackendProperties must not be null");
+		Assert.notNull(vaultPropertySourceContextStrategy, 
+				"VaultPropertySourceContextStrategy must not be null");
 
 		this.operations = operations;
 		this.properties = properties;
 		this.backendAccessors = backendAccessors;
 		this.genericBackendProperties = genericBackendProperties;
+		this.vaultPropertySourceContextStrategy = vaultPropertySourceContextStrategy;
 	}
 
 	@Override
@@ -90,32 +96,6 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 		return properties.getConfig().getOrder();
 	}
 
-	private List<String> buildContexts(ConfigurableEnvironment env) {
-
-		String appName = env.getProperty("spring.application.name");
-		List<String> profiles = Arrays.asList(env.getActiveProfiles());
-		List<String> contexts = new ArrayList<>();
-
-		String defaultContext = genericBackendProperties.getDefaultContext();
-		if (StringUtils.hasText(defaultContext)) {
-			contexts.add(defaultContext);
-		}
-
-		addProfiles(contexts, defaultContext, profiles);
-
-		if (StringUtils.hasText(appName)) {
-
-			if (!contexts.contains(appName)) {
-				contexts.add(appName);
-			}
-
-			addProfiles(contexts, appName, profiles);
-		}
-
-		Collections.reverse(contexts);
-		return contexts;
-	}
-
 	private CompositePropertySource createCompositePropertySource(
 			ConfigurableEnvironment environment) {
 
@@ -123,7 +103,7 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 
 		if (genericBackendProperties.isEnabled()) {
 
-			List<String> contexts = buildContexts(environment);
+			List<String> contexts = vaultPropertySourceContextStrategy.buildContexts(environment);
 			for (String propertySourceContext : contexts) {
 
 				if (StringUtils.hasText(propertySourceContext)) {
@@ -194,18 +174,5 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 			SecretBackendMetadata accessor) {
 		return new VaultPropertySource(this.operations, this.properties.isFailFast(),
 				accessor);
-	}
-
-	private void addProfiles(List<String> contexts, String baseContext,
-			List<String> profiles) {
-
-		for (String profile : profiles) {
-			String context = baseContext
-					+ this.genericBackendProperties.getProfileSeparator() + profile;
-
-			if (!contexts.contains(context)) {
-				contexts.add(context);
-			}
-		}
 	}
 }
