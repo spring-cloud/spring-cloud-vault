@@ -38,6 +38,7 @@ import org.springframework.util.StringUtils;
  * @author Spencer Gibb
  * @author Mark Paluch
  * @author Jean-Philippe Bélanger
+ * @author Ryan Hoegg
  */
 class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrdered {
 
@@ -92,28 +93,29 @@ class VaultPropertySourceLocator implements PropertySourceLocator, PriorityOrder
 
 	private List<String> buildContexts(ConfigurableEnvironment env) {
 
-		String appName = env.getProperty("spring.application.name");
+		String appName = genericBackendProperties.getApplicationName();
 		List<String> profiles = Arrays.asList(env.getActiveProfiles());
 		List<String> contexts = new ArrayList<>();
 
 		String defaultContext = genericBackendProperties.getDefaultContext();
-		if (StringUtils.hasText(defaultContext)) {
-			contexts.add(defaultContext);
-		}
+		addContext(contexts, defaultContext, profiles);
 
-		addProfiles(contexts, defaultContext, profiles);
-
-		if (StringUtils.hasText(appName)) {
-
-			if (!contexts.contains(appName)) {
-				contexts.add(appName);
-			}
-
-			addProfiles(contexts, appName, profiles);
+		for (String context : StringUtils.commaDelimitedListToSet(appName)) {
+			addContext(contexts, context, profiles);
 		}
 
 		Collections.reverse(contexts);
 		return contexts;
+	}
+
+	private void addContext(List<String> contexts, String context, List<String> profiles) {
+		if (StringUtils.hasText(context)) {
+			if (!contexts.contains(context)) {
+				contexts.add(context);
+			}
+
+			addProfiles(contexts, context, profiles);
+		}
 	}
 
 	private CompositePropertySource createCompositePropertySource(
