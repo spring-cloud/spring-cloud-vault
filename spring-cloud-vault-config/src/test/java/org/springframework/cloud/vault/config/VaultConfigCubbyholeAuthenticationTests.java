@@ -51,7 +51,7 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = VaultConfigCubbyholeAuthenticationTests.TestApplication.class, properties = {
 		"spring.cloud.vault.authentication=cubbyhole",
-		"spring.application.name=VaultConfigAppIdTests" })
+		"spring.cloud.vault.generic.applicationName=VaultConfigCubbyholeAuthenticationTests" })
 public class VaultConfigCubbyholeAuthenticationTests {
 
 	@BeforeClass
@@ -65,10 +65,10 @@ public class VaultConfigCubbyholeAuthenticationTests {
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
-		vaultOperations
-				.write("secret/"
-						+ VaultConfigCubbyholeAuthenticationTests.class.getSimpleName(),
-						Collections.singletonMap("vault.value", "foo"));
+		vaultOperations.write(
+				"secret/" + VaultConfigCubbyholeAuthenticationTests.class.getSimpleName(),
+				Collections.singletonMap("vault.value",
+						VaultConfigCubbyholeAuthenticationTests.class.getSimpleName()));
 
 		VaultResponse vaultResponse = vaultOperations
 				.doWithSession(new RestOperationsCallback<VaultResponse>() {
@@ -98,7 +98,7 @@ public class VaultConfigCubbyholeAuthenticationTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(configValue).isEqualTo("foo");
+		assertThat(configValue).isEqualTo(getClass().getSimpleName());
 	}
 
 	@SpringBootApplication

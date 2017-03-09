@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 package org.springframework.cloud.vault.config;
 
+import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.constraints.Range;
 
+import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
-
-import lombok.Data;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Spencer Gibb
@@ -30,7 +33,7 @@ import lombok.Data;
  */
 @ConfigurationProperties("spring.cloud.vault")
 @Data
-public class VaultProperties {
+public class VaultProperties implements EnvironmentAware {
 
 	/**
 	 * Enable Vault config server.
@@ -87,24 +90,35 @@ public class VaultProperties {
 	/**
 	 * Application name for AppId authentication.
 	 */
-	@org.springframework.beans.factory.annotation.Value("${spring.application.name:application}")
-	private String applicationName;
+	private String applicationName = "application";
 
 	private AuthenticationMethod authentication = AuthenticationMethod.TOKEN;
+
+	@Override
+	public void setEnvironment(Environment environment) {
+
+		RelaxedPropertyResolver springPropertyResolver = new RelaxedPropertyResolver(
+				environment, "spring.application.");
+		String springAppName = springPropertyResolver.getProperty("name");
+
+		if (StringUtils.hasText(springAppName)) {
+			this.applicationName = springAppName;
+		}
+	}
 
 	@Data
 	public static class AppIdProperties {
 
 		/**
 		 * Property value for UserId generation using a Mac-Address.
-		 * 
+		 *
 		 * @see org.springframework.vault.authentication.MacAddressUserId
 		 */
 		public final static String MAC_ADDRESS = "MAC_ADDRESS";
 
 		/**
 		 * Property value for UserId generation using an IP-Address.
-		 * 
+		 *
 		 * @see org.springframework.vault.authentication.IpAddressUserId
 		 */
 		public final static String IP_ADDRESS = "IP_ADDRESS";
