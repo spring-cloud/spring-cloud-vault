@@ -15,11 +15,7 @@
  */
 package org.springframework.cloud.vault.config;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import java.util.Collections;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,8 +26,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.vault.core.lease.SecretLeaseContainer;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link LeasingVaultPropertySourceLocator}.
@@ -44,23 +42,17 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 	private LeasingVaultPropertySourceLocator propertySourceLocator;
 
 	@Mock
-	private VaultConfigTemplate operations;
-
-	@Mock
-	private TaskScheduler taskScheduler;
-
-	@Mock
 	private ConfigurableEnvironment configurableEnvironment;
 
 	@Mock
-	private LeasingVaultPropertySource leasingVaultPropertySource;
+	private SecretLeaseContainer secretLeaseContainer;
 
 	@Before
 	public void before() {
 
-		propertySourceLocator = new LeasingVaultPropertySourceLocator(operations,
+		propertySourceLocator = new LeasingVaultPropertySourceLocator(
 				new VaultProperties(), new VaultGenericBackendProperties(),
-				Collections.<SecretBackendMetadata> emptyList(), taskScheduler);
+				Collections.<SecretBackendMetadata>emptyList(), secretLeaseContainer);
 	}
 
 	@Test
@@ -69,9 +61,9 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 		VaultProperties vaultProperties = new VaultProperties();
 		vaultProperties.getConfig().setOrder(10);
 
-		propertySourceLocator = new LeasingVaultPropertySourceLocator(operations,
-				vaultProperties, new VaultGenericBackendProperties(),
-				Collections.<SecretBackendMetadata> emptyList(), taskScheduler);
+		propertySourceLocator = new LeasingVaultPropertySourceLocator(vaultProperties,
+				new VaultGenericBackendProperties(),
+				Collections.<SecretBackendMetadata>emptyList(), secretLeaseContainer);
 
 		assertThat(propertySourceLocator.getOrder()).isEqualTo(10);
 	}
@@ -88,18 +80,5 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 
 		CompositePropertySource composite = (CompositePropertySource) propertySource;
 		assertThat(composite.getPropertySources()).hasSize(1);
-	}
-
-	@Test
-	@SuppressWarnings("unchecked")
-	public void shouldDispose() {
-
-		Set set = (Set) ReflectionTestUtils.getField(propertySourceLocator,
-				"locatedPropertySources");
-		set.add(leasingVaultPropertySource);
-
-		propertySourceLocator.destroy();
-
-		verify(leasingVaultPropertySource).destroy();
 	}
 }

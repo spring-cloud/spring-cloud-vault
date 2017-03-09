@@ -15,10 +15,16 @@
  */
 package org.springframework.cloud.vault.config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.core.util.PropertyTransformer;
 import org.springframework.vault.core.util.PropertyTransformers;
 
@@ -76,5 +82,59 @@ class GenericSecretBackendMetadata implements SecretBackendMetadata {
 		variables.put("key", key);
 
 		return variables;
+	}
+
+	/**
+	 * Build a list of context paths from application name and the active profile names.
+	 * Application name and profiles support multiple (comma-separated) values.
+	 *
+	 * @param genericBackendProperties
+	 * @param environment
+	 * @return
+	 */
+	public static List<String> buildContexts(
+			VaultGenericBackendProperties genericBackendProperties,
+			Environment environment) {
+
+		String appName = genericBackendProperties.getApplicationName();
+		List<String> profiles = Arrays.asList(environment.getActiveProfiles());
+		List<String> contexts = new ArrayList<>();
+
+		String defaultContext = genericBackendProperties.getDefaultContext();
+		addContext(contexts, defaultContext, profiles, genericBackendProperties);
+
+		for (String applicationName : StringUtils.commaDelimitedListToSet(appName)) {
+			addContext(contexts, applicationName, profiles, genericBackendProperties);
+		}
+
+		Collections.reverse(contexts);
+		return contexts;
+	}
+
+	private static void addContext(List<String> contexts, String applicationName,
+			List<String> profiles,
+			VaultGenericBackendProperties genericBackendProperties) {
+
+		if (!StringUtils.hasText(applicationName)) {
+			return;
+		}
+
+		if (!contexts.contains(applicationName)) {
+			contexts.add(applicationName);
+		}
+
+		for (String profile : profiles) {
+
+			if (!StringUtils.hasText(profile)) {
+				continue;
+			}
+
+			String contextName = applicationName
+					+ genericBackendProperties.getProfileSeparator() + profile.trim();
+
+			if (!contexts.contains(contextName)) {
+				contexts.add(contextName);
+			}
+		}
 	}
 }
