@@ -50,8 +50,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = { BootstrapConfiguration.class,
 		VaultConfigAppIdCustomMechanismTests.TestApplication.class }, properties = {
-		"spring.cloud.vault.authentication=appid", "use.custom.config=true",
-		"spring.application.name=VaultConfigAppIdCustomMechanismTests" })
+				"spring.cloud.vault.authentication=appid", "use.custom.config=true",
+				"spring.cloud.vault.applicationName=VaultConfigAppIdCustomMechanismTests" })
 public class VaultConfigAppIdCustomMechanismTests {
 
 	@BeforeClass
@@ -80,9 +80,8 @@ public class VaultConfigAppIdCustomMechanismTests {
 
 		String appId = VaultConfigAppIdCustomMechanismTests.class.getSimpleName();
 
-		vaultOperations.write(
-				"secret/" + VaultConfigAppIdCustomMechanismTests.class.getSimpleName(),
-				Collections.singletonMap("vault.value", "foo"));
+		vaultOperations.write("secret/" + appId,
+				Collections.singletonMap("vault.value", appId));
 
 		Map<String, String> appIdData = new HashMap<String, String>();
 		appIdData.put("value", "testpolicy"); // policy
@@ -106,7 +105,7 @@ public class VaultConfigAppIdCustomMechanismTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(configValue).isEqualTo("foo");
+		assertThat(configValue).isEqualTo(getClass().getSimpleName());
 	}
 
 	@SpringBootApplication
@@ -124,12 +123,15 @@ public class VaultConfigAppIdCustomMechanismTests {
 		@Bean
 		ClientAuthentication clientAuthentication() {
 
-			RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-					.createSslConfiguration());
+			RestTemplate restTemplate = TestRestTemplateFactory
+					.create(Settings.createSslConfiguration());
 
-			return new AppIdAuthentication(AppIdAuthenticationOptions.builder()
-					.appId("VaultConfigAppIdCustomMechanismTests")
-					.userIdMechanism(new StaticUserIdMechanism()).build(), restTemplate);
+			return new AppIdAuthentication(
+					AppIdAuthenticationOptions.builder()
+							.appId(VaultConfigAppIdCustomMechanismTests.class
+									.getSimpleName())
+							.userIdMechanism(new StaticUserIdMechanism()).build(),
+					restTemplate);
 		}
 	}
 

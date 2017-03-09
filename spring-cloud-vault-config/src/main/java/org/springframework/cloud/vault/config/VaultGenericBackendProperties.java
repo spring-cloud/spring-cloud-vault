@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,14 @@
  */
 package org.springframework.cloud.vault.config;
 
-import org.hibernate.validator.constraints.NotEmpty;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import lombok.Data;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import org.springframework.boot.bind.RelaxedPropertyResolver;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
+import org.springframework.util.StringUtils;
 
 /**
  * Configuration properties for Vault using the generic backend.
@@ -28,7 +31,7 @@ import lombok.Data;
  */
 @ConfigurationProperties("spring.cloud.vault.generic")
 @Data
-public class VaultGenericBackendProperties {
+public class VaultGenericBackendProperties implements EnvironmentAware {
 
 	/**
 	 * Enable the generic backend.
@@ -56,7 +59,27 @@ public class VaultGenericBackendProperties {
 	/**
 	 * Application name to be used for the context.
 	 */
-	@Value("${spring.cloud.vault.applicationName:${spring.application.name:application}}")
-	private String applicationName;
+	private String applicationName = "application";
 
+	@Override
+	public void setEnvironment(Environment environment) {
+
+		RelaxedPropertyResolver springCloudVaultPropertyResolver = new RelaxedPropertyResolver(
+				environment, "spring.cloud.vault.");
+		String springCloudVaultAppName = springCloudVaultPropertyResolver
+				.getProperty("application-name");
+
+		if (StringUtils.hasText(springCloudVaultAppName)) {
+			this.applicationName = springCloudVaultAppName;
+		}
+		else {
+			RelaxedPropertyResolver springPropertyResolver = new RelaxedPropertyResolver(
+					environment, "spring.application.");
+			String springAppName = springPropertyResolver.getProperty("name");
+
+			if (StringUtils.hasText(springAppName)) {
+				this.applicationName = springAppName;
+			}
+		}
+	}
 }
