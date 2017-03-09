@@ -26,9 +26,11 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.scheduling.TaskScheduler;
@@ -56,10 +58,11 @@ import org.springframework.vault.authentication.StaticUserId;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
+import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
@@ -111,11 +114,11 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() throws Exception {
 
-		this.vaultSecretBackendDescriptors = applicationContext.getBeansOfType(
-				VaultSecretBackendDescriptor.class).values();
+		this.vaultSecretBackendDescriptors = applicationContext
+				.getBeansOfType(VaultSecretBackendDescriptor.class).values();
 
-		this.factories = (Collection) applicationContext.getBeansOfType(
-				SecretBackendMetadataFactory.class).values();
+		this.factories = (Collection) applicationContext
+				.getBeansOfType(SecretBackendMetadataFactory.class).values();
 
 		ClientHttpRequestFactory clientHttpRequestFactory = clientHttpRequestFactoryWrapper()
 				.getClientHttpRequestFactory();
@@ -125,11 +128,10 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	}
 
 	@Bean
-	public VaultPropertySourceLocator vaultPropertySourceLocator(
-			VaultOperations operations,
+	public PropertySourceLocator vaultPropertySourceLocator(VaultOperations operations,
 			VaultProperties vaultProperties,
 			VaultGenericBackendProperties vaultGenericBackendProperties,
-			ObjectFactory<TaskSchedulerWrapper<? extends TaskScheduler>> taskSchedulerFactory) {
+			ObjectFactory<SecretLeaseContainer> secretLeaseContainerObjectFactory) {
 
 		Collection<SecretBackendMetadata> backendAccessors = SecretBackendFactories
 				.createSecretBackendMetadata(vaultSecretBackendDescriptors, factories);
@@ -142,9 +144,13 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 			// otherwise, the bootstrap context is not shut down cleanly
 			applicationContext.registerShutdownHook();
 
-			return new LeasingVaultPropertySourceLocator(vaultConfigTemplate,
-					vaultProperties, vaultGenericBackendProperties, backendAccessors,
-					taskSchedulerFactory.getObject().getTaskScheduler());
+			SecretLeaseContainer secretLeaseContainer = secretLeaseContainerObjectFactory
+					.getObject();
+			secretLeaseContainer.start();
+
+			return new LeasingVaultPropertySourceLocator(vaultProperties,
+					vaultGenericBackendProperties, backendAccessors,
+					secretLeaseContainer);
 		}
 
 		return new VaultPropertySourceLocator(vaultConfigTemplate, vaultProperties,
@@ -179,8 +185,8 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 			sslConfiguration = SslConfiguration.NONE;
 		}
 
-		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(
-				clientOptions, sslConfiguration));
+		return new ClientFactoryWrapper(
+				ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration));
 	}
 
 	/**
@@ -192,8 +198,9 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@Bean
 	@ConditionalOnMissingBean
 	public VaultTemplate vaultTemplate(SessionManager sessionManager) {
-		return new VaultTemplate(vaultEndpoint, clientHttpRequestFactoryWrapper()
-				.getClientHttpRequestFactory(), sessionManager);
+		return new VaultTemplate(vaultEndpoint,
+				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory(),
+				sessionManager);
 	}
 
 	/**
@@ -204,15 +211,20 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	 * @see ThreadPoolTaskScheduler
 	 */
 	@Bean
+	@Lazy
 	@ConditionalOnMissingBean(TaskSchedulerWrapper.class)
-	public TaskSchedulerWrapper<ThreadPoolTaskScheduler> vaultTaskScheduler() {
+	public TaskSchedulerWrapper vaultTaskScheduler() {
 
 		ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
 		threadPoolTaskScheduler.setPoolSize(2);
 		threadPoolTaskScheduler.setDaemon(true);
 		threadPoolTaskScheduler.setThreadNamePrefix("Spring-Cloud-Vault-");
 
-		return new TaskSchedulerWrapper<>(threadPoolTaskScheduler);
+		// This is to destroy bootstrap resources
+		// otherwise, the bootstrap context is not shut down cleanly
+		applicationContext.registerShutdownHook();
+
+		return new TaskSchedulerWrapper(threadPoolTaskScheduler);
 	}
 
 	/**
@@ -222,9 +234,8 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	 */
 	@Bean
 	@ConditionalOnMissingBean
-	public SessionManager sessionManager(
-			ClientAuthentication clientAuthentication,
-			ObjectFactory<TaskSchedulerWrapper<? extends AsyncTaskExecutor>> asyncTaskExecutorFactory) {
+	public SessionManager sessionManager(ClientAuthentication clientAuthentication,
+			ObjectFactory<TaskSchedulerWrapper> asyncTaskExecutorFactory) {
 
 		if (vaultProperties.getConfig().getLifecycle().isEnabled()) {
 			return new LifecycleAwareSessionManager(clientAuthentication,
@@ -233,6 +244,20 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		}
 
 		return new SimpleSessionManager(clientAuthentication);
+	}
+
+	/**
+	 * @return the {@link SessionManager} for Vault session management.
+	 * @see SessionManager
+	 * @see LifecycleAwareSessionManager
+	 */
+	@Bean
+	@Lazy
+	@ConditionalOnMissingBean
+	public SecretLeaseContainer secretLeaseContainer(VaultOperations vaultOperations,
+			TaskSchedulerWrapper taskSchedulerWrapper) {
+		return new SecretLeaseContainer(vaultOperations,
+				taskSchedulerWrapper.getTaskScheduler());
 	}
 
 	@Bean
@@ -263,9 +288,9 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 		}
 
-		throw new UnsupportedOperationException(String.format(
-				"Client authentication %s not supported",
-				vaultProperties.getAuthentication()));
+		throw new UnsupportedOperationException(
+				String.format("Client authentication %s not supported",
+						vaultProperties.getAuthentication()));
 	}
 
 	private ClientAuthentication appIdAuthentication(VaultProperties vaultProperties) {
@@ -300,8 +325,8 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 				if (StringUtils.hasText(appId.getNetworkInterface())) {
 					try {
-						return new MacAddressUserId(Integer.parseInt(appId
-								.getNetworkInterface()));
+						return new MacAddressUserId(
+								Integer.parseInt(appId.getNetworkInterface()));
 					}
 					catch (NumberFormatException e) {
 						return new MacAddressUserId(appId.getNetworkInterface());
@@ -360,33 +385,27 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 	/**
 	 * Wrapper to keep {@link TaskScheduler} local to Spring Cloud Vault.
-	 * @param <T>
 	 */
-	public static class TaskSchedulerWrapper<T extends AsyncTaskExecutor & TaskScheduler>
-			implements InitializingBean, DisposableBean {
+	public static class TaskSchedulerWrapper implements InitializingBean, DisposableBean {
 
-		private final T taskScheduler;
+		private final ThreadPoolTaskScheduler taskScheduler;
 
-		public TaskSchedulerWrapper(T taskScheduler) {
+		public TaskSchedulerWrapper(ThreadPoolTaskScheduler taskScheduler) {
 			this.taskScheduler = taskScheduler;
 		}
 
-		T getTaskScheduler() {
+		ThreadPoolTaskScheduler getTaskScheduler() {
 			return taskScheduler;
 		}
 
 		@Override
 		public void destroy() throws Exception {
-			if (taskScheduler instanceof DisposableBean) {
-				((DisposableBean) taskScheduler).destroy();
-			}
+			taskScheduler.destroy();
 		}
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
-			if (taskScheduler instanceof InitializingBean) {
-				((InitializingBean) taskScheduler).afterPropertiesSet();
-			}
+			taskScheduler.afterPropertiesSet();
 		}
 	}
 }

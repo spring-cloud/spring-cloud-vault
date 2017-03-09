@@ -15,92 +15,135 @@
  */
 package org.springframework.cloud.vault.config;
 
+import java.net.URI;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import lombok.extern.apachecommons.CommonsLog;
 
-import org.springframework.beans.factory.DisposableBean;
+import org.springframework.core.PriorityOrdered;
 import org.springframework.core.env.PropertySource;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.core.env.LeaseAwareVaultPropertySource;
+import org.springframework.vault.core.lease.SecretLeaseContainer;
+import org.springframework.vault.core.lease.domain.RequestedSecret;
+import org.springframework.vault.core.lease.event.LeaseErrorListener;
+import org.springframework.vault.core.lease.event.SecretLeaseEvent;
+import org.springframework.web.util.DefaultUriTemplateHandler;
+import org.springframework.web.util.UriTemplateHandler;
 
 /**
  * Extension to {@link LeasingVaultPropertySourceLocator} that creates
- * {@link LeasingVaultPropertySource}s.
+ * {@link LeaseAwareVaultPropertySource}s.
  *
  * @author Mark Paluch
- * @see LeasingVaultPropertySource
+ * @see LeaseAwareVaultPropertySource
  */
 @CommonsLog
-class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocator
-		implements DisposableBean {
+class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSupport
+		implements PriorityOrdered {
 
-	private final VaultConfigOperations operations;
+	private static final UriTemplateHandler TEMPLATE_HANDLER = new DefaultUriTemplateHandler();
+
+	private final SecretLeaseContainer secretLeaseContainer;
 
 	private final VaultProperties properties;
 
-	private final TaskScheduler taskScheduler;
-
-	private final Set<PropertySource<?>> locatedPropertySources = new HashSet<>();
-
 	/**
 	 * Creates a new {@link LeasingVaultPropertySourceLocator}.
-	 * @param operations must not be {@literal null}.
 	 * @param properties must not be {@literal null}.
 	 * @param genericBackendProperties must not be {@literal null}.
 	 * @param backendAccessors must not be {@literal null}.
-	 * @param taskScheduler must not be {@literal null}.
+	 * @param secretLeaseContainer must not be {@literal null}.
 	 */
-	public LeasingVaultPropertySourceLocator(VaultConfigOperations operations,
-			VaultProperties properties,
+	public LeasingVaultPropertySourceLocator(VaultProperties properties,
 			VaultGenericBackendProperties genericBackendProperties,
 			Collection<SecretBackendMetadata> backendAccessors,
-			TaskScheduler taskScheduler) {
+			SecretLeaseContainer secretLeaseContainer) {
 
-		super(operations, properties, genericBackendProperties, backendAccessors);
+		super("vault", genericBackendProperties, backendAccessors);
 
-		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
-		Assert.notNull(operations, "VaultConfigTemplate must not be null");
+		Assert.notNull(secretLeaseContainer, "SecretLeaseContainer must not be null");
 		Assert.notNull(properties, "VaultProperties must not be null");
 
-		this.operations = operations;
+		this.secretLeaseContainer = secretLeaseContainer;
 		this.properties = properties;
-		this.taskScheduler = taskScheduler;
 	}
 
 	@Override
-	protected VaultPropertySource createVaultPropertySource(
+	public int getOrder() {
+		return properties.getConfig().getOrder();
+	}
+
+	/**
+	 * Create {@link VaultPropertySource} initialized with a
+	 * {@link SecretBackendMetadata}.
+	 *
+	 * @param accessor the {@link SecretBackendMetadata}.
+	 * @return the {@link VaultPropertySource} to use.
+	 */
+	protected PropertySource<?> createVaultPropertySource(
 			SecretBackendMetadata accessor) {
 
-		LeasingVaultPropertySource propertySource = new LeasingVaultPropertySource(
-				this.operations, this.properties.isFailFast(), accessor, taskScheduler);
+		URI expand = TEMPLATE_HANDLER.expand("{backend}/{key}", accessor.getVariables());
 
-		locatedPropertySources.add(propertySource);
+		final RequestedSecret secret = RequestedSecret.renewable(expand.getPath());
 
-		return propertySource;
+		if (properties.isFailFast()) {
+			return createVaultPropertySourceFailFast(secret, accessor);
+		}
+
+		return createVaultPropertySource(secret, accessor);
 	}
 
-	@Override
-	public void destroy() {
+	/**
+	 * Decorated {@link PropertySource} creation to catch and throw the first error that
+	 * occurred durin initial secret retrieval.
+	 *
+	 * @param secret
+	 * @param accessor
+	 * @return
+	 */
+	private PropertySource<?> createVaultPropertySourceFailFast(
+			final RequestedSecret secret, SecretBackendMetadata accessor) {
 
-		Set<PropertySource<?>> propertySources = new HashSet<>(locatedPropertySources);
+		final AtomicReference<Exception> errorRef = new AtomicReference<>();
 
-		for (PropertySource<?> propertySource : propertySources) {
+		LeaseErrorListener errorListener = new LeaseErrorListener() {
+			@Override
+			public void onLeaseError(SecretLeaseEvent leaseEvent, Exception exception) {
 
-			locatedPropertySources.remove(propertySource);
-
-			if (propertySource instanceof LeasingVaultPropertySource) {
-
-				try {
-					((LeasingVaultPropertySource) propertySource).destroy();
-				}
-				catch (Exception e) {
-					log.warn(String.format("Cannot destroy property source %s",
-							propertySource.getName()), e);
+				if (leaseEvent.getSource() == secret) {
+					errorRef.compareAndSet(null, exception);
 				}
 			}
+		};
+
+		this.secretLeaseContainer.addErrorListener(errorListener);
+		try {
+			return createVaultPropertySource(secret, accessor);
 		}
+		finally {
+			this.secretLeaseContainer.removeLeaseErrorListener(errorListener);
+
+			Exception exception = errorRef.get();
+			if (exception != null) {
+				if (exception instanceof VaultException) {
+					throw (VaultException) exception;
+				}
+				throw new VaultException(
+						String.format("Cannot initialize PropertySource for secret at %s",
+								secret.getPath()),
+						exception);
+			}
+		}
+	}
+
+	private PropertySource<?> createVaultPropertySource(RequestedSecret secret,
+			SecretBackendMetadata accessor) {
+
+		return new LeaseAwareVaultPropertySource(accessor.getName(),
+				this.secretLeaseContainer, secret, accessor.getPropertyTransformer());
 	}
 }

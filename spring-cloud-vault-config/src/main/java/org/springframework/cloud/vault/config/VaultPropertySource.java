@@ -85,10 +85,6 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations
 		}
 	}
 
-	Secrets getSecrets() {
-		return secrets;
-	}
-
 	@Override
 	public Object getProperty(String name) {
 		return this.properties.get(name);

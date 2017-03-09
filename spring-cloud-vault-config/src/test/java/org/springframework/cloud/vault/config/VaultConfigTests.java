@@ -95,7 +95,7 @@ public class VaultConfigTests {
 		ApplicationContext parent = applicationContext.getParent();
 
 		assertThat(parent.getBeanNamesForType(VaultTemplate.class)).isNotEmpty();
-		assertThat(parent.getBeanNamesForType(VaultPropertySourceLocator.class))
+		assertThat(parent.getBeanNamesForType(LeasingVaultPropertySourceLocator.class))
 				.isNotEmpty();
 	}
 
