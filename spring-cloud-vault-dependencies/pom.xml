@@ -11,7 +11,7 @@
 	</parent>
 
 	<artifactId>spring-cloud-vault-dependencies</artifactId>
-	<version>1.0.0.RC1</version>
+	<version>1.0.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Spring Cloud Vault Dependencies</name>
@@ -128,8 +128,4 @@
 			</snapshots>
 		</repository>
 	</repositories>
-
-  <scm>
-    <tag>1.0.0.RC1</tag>
-  </scm>
 </project>
