@@ -88,6 +88,7 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 					Map<String, String> variables = new HashMap<>();
 					variables.put("backend", properties.getBackend());
 					variables.put("key", String.format("creds/%s", properties.getRole()));
+					variables.put("leaseMode", properties.getLeaseMode().name());
 					return variables;
 				}
 

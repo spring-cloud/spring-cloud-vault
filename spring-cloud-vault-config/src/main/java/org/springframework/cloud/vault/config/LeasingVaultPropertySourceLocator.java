@@ -28,6 +28,7 @@ import org.springframework.vault.VaultException;
 import org.springframework.vault.core.env.LeaseAwareVaultPropertySource;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
+import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
 import org.springframework.vault.core.lease.event.LeaseErrorListener;
 import org.springframework.vault.core.lease.event.SecretLeaseEvent;
 import org.springframework.web.util.DefaultUriTemplateHandler;
@@ -88,7 +89,8 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 
 		URI expand = TEMPLATE_HANDLER.expand("{backend}/{key}", accessor.getVariables());
 
-		final RequestedSecret secret = RequestedSecret.renewable(expand.getPath());
+		String leaseMode = accessor.getVariables().get("leaseMode");
+		final RequestedSecret secret = RequestedSecret.buildFromMode(leaseMode == null ? Mode.RENEW : Mode.valueOf(leaseMode), expand.getPath());
 
 		if (properties.isFailFast()) {
 			return createVaultPropertySourceFailFast(secret, accessor);

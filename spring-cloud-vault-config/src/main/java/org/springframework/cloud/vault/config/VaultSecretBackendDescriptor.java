@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.vault.config;
 
+import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
+
 /**
  * Interface to be implemented by objects that describe a Vault secret backend.
  *
@@ -40,4 +42,9 @@ public interface VaultSecretBackendDescriptor {
 	 * @return {@literal true} if the backend is enabled.
 	 */
 	boolean isEnabled();
+
+	/**
+	 * Lease mode
+	 */
+	Mode getLeaseMode();
 }

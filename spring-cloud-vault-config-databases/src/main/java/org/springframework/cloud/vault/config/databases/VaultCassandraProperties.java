@@ -17,6 +17,7 @@ package org.springframework.cloud.vault.config.databases;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
 
 import lombok.Data;
 
@@ -56,4 +57,9 @@ public class VaultCassandraProperties implements DatabaseSecretProperties {
 	 */
 	@NotEmpty
 	private String passwordProperty = "spring.data.cassandra.password";
+
+	/**
+	 * Lease mode
+	 */
+	private Mode leaseMode = Mode.RENEW;
 }
