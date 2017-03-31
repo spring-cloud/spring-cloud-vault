@@ -29,9 +29,9 @@
 	</modules>
 
 	<scm>
-		<url>https://github.com/spring-cloud/spring-cloud-vault-config</url>
-		<connection>scm:git:git://github.com/spring-cloud/spring-cloud-vault-config.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/spring-cloud/spring-cloud-vault-config.git
+		<url>https://github.com/spring-cloud/spring-cloud-vault</url>
+		<connection>scm:git:git://github.com/spring-cloud/spring-cloud-vault.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/spring-cloud/spring-cloud-vault.git
 		</developerConnection>
 		<tag>HEAD</tag>
 	</scm>

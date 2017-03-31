@@ -199,7 +199,7 @@ property `health.vault.enabled` (default `true`)
 
 Vault requires an https://www.vaultproject.io/docs/concepts/auth.html[authentication mechanism] to https://www.vaultproject.io/docs/concepts/tokens.html[authorize client requests].
 
-Spring Cloud Vault Config supports multiple http://cloud.spring.io/spring-cloud-vault-config/spring-cloud-vault-config.html#vault.config.authentication[authentication mechanisms] to authenticate applications with Vault.
+Spring Cloud Vault Config supports multiple http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication[authentication mechanisms] to authenticate applications with Vault.
 
 For a quickstart, use the root token printed by the <<quickstart.vault.start,Vault initialization>>.
 
