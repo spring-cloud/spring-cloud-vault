@@ -18,6 +18,7 @@ package org.springframework.cloud.vault.config.rabbitmq;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
+import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
 
 import lombok.Data;
 
@@ -57,4 +58,9 @@ public class VaultRabbitMqProperties implements VaultSecretBackendDescriptor {
 	 */
 	@NotEmpty
 	private String passwordProperty = "spring.rabbitmq.password";
+
+	/**
+	 * Lease mode
+	 */
+	private Mode leaseMode = Mode.RENEW;
 }
