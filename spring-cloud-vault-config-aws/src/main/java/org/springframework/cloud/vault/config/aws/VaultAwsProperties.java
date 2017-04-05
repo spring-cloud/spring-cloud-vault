@@ -15,11 +15,12 @@
  */
 package org.springframework.cloud.vault.config.aws;
 
+import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
-
-import lombok.Data;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Configuration properties for Vault using the AWS integration.
@@ -28,6 +29,7 @@ import lombok.Data;
  */
 @ConfigurationProperties("spring.cloud.vault.aws")
 @Data
+@Validated
 public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 
 	/**

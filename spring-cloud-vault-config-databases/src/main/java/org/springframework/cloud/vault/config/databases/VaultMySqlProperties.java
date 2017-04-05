@@ -1,10 +1,11 @@
 package org.springframework.cloud.vault.config.databases;
 
+import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
-
-import lombok.Data;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Configuration properties for Vault using the MySQL integration.
@@ -13,6 +14,7 @@ import lombok.Data;
  */
 @ConfigurationProperties("spring.cloud.vault.mysql")
 @Data
+@Validated
 public class VaultMySqlProperties
 		implements DatabaseSecretProperties, VaultSecretBackendDescriptor {
 

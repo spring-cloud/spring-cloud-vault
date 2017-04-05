@@ -23,6 +23,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Configuration properties for Vault using the generic backend.
@@ -31,6 +32,7 @@ import org.springframework.util.StringUtils;
  */
 @ConfigurationProperties("spring.cloud.vault.generic")
 @Data
+@Validated
 public class VaultGenericBackendProperties implements EnvironmentAware {
 
 	/**

@@ -26,6 +26,7 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * @author Spencer Gibb
@@ -33,6 +34,7 @@ import org.springframework.util.StringUtils;
  */
 @ConfigurationProperties("spring.cloud.vault")
 @Data
+@Validated
 public class VaultProperties implements EnvironmentAware {
 
 	/**

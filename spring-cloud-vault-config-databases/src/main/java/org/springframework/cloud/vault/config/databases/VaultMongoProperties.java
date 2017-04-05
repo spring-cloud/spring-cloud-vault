@@ -15,10 +15,11 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import org.hibernate.validator.constraints.NotEmpty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import lombok.Data;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Configuration properties for Vault using the MongoDB integration.
@@ -27,6 +28,7 @@ import lombok.Data;
  */
 @ConfigurationProperties("spring.cloud.vault.mongodb")
 @Data
+@Validated
 public class VaultMongoProperties implements DatabaseSecretProperties {
 
 	/**
