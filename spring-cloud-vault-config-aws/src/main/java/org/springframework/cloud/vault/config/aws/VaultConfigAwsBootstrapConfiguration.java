@@ -38,7 +38,7 @@ import org.springframework.vault.core.util.PropertyTransformer;
 public class VaultConfigAwsBootstrapConfiguration {
 
 	@Bean
-	public SecretBackendMetadataFactory<VaultAwsProperties> secretBackendMetadataFactory() {
+	public SecretBackendMetadataFactory<VaultAwsProperties> awsSecretBackendMetadataFactory() {
 		return new AwsSecretBackendMetadataFactory();
 	}
 

@@ -38,7 +38,7 @@ import org.springframework.vault.core.util.PropertyTransformer;
 public class VaultConfigRabbitMqBootstrapConfiguration {
 
 	@Bean
-	public SecretBackendMetadataFactory<VaultRabbitMqProperties> secureBackendAccessorFactory() {
+	public SecretBackendMetadataFactory<VaultRabbitMqProperties> rabbitMqSecureBackendAccessorFactory() {
 		return new RabbitMqSecretBackendMetadataFactory();
 	}
 

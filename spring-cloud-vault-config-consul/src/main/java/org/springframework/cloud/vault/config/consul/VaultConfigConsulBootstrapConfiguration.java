@@ -38,7 +38,7 @@ import org.springframework.vault.core.util.PropertyTransformer;
 public class VaultConfigConsulBootstrapConfiguration {
 
 	@Bean
-	public SecretBackendMetadataFactory<VaultConsulProperties> secretBackendAccessorFactory() {
+	public SecretBackendMetadataFactory<VaultConsulProperties> consulSecretBackendAccessorFactory() {
 		return new ConsulSecretBackendMetadataFactory();
 	}
 
