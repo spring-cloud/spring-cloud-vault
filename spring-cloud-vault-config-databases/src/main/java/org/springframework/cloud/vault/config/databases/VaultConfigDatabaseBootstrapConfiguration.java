@@ -41,7 +41,7 @@ import org.springframework.vault.core.util.PropertyTransformer;
 public class VaultConfigDatabaseBootstrapConfiguration {
 
 	@Bean
-	public SecretBackendMetadataFactory<DatabaseSecretProperties> secretBackendMetadataFactory() {
+	public SecretBackendMetadataFactory<DatabaseSecretProperties> databaseSecretBackendMetadataFactory() {
 		return new DatabaseSecretBackendMetadataFactory();
 	}
 
