@@ -15,11 +15,12 @@
  */
 package org.springframework.cloud.vault.config.rabbitmq;
 
+import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
-
-import lombok.Data;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Configuration properties for Vault using the RabbitMQ integration.
@@ -28,6 +29,7 @@ import lombok.Data;
  */
 @ConfigurationProperties("spring.cloud.vault.rabbitmq")
 @Data
+@Validated
 public class VaultRabbitMqProperties implements VaultSecretBackendDescriptor {
 
 	/**
