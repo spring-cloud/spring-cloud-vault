@@ -20,7 +20,7 @@
 	<description>Spring Cloud Vault Dependencies</description>
 
 	<properties>
-		<spring-vault.version>1.0.0.RC1</spring-vault.version>
+		<spring-vault.version>1.0.0.RELEASE</spring-vault.version>
 	</properties>
 
 	<dependencyManagement>
@@ -128,9 +128,9 @@
 
 	<repositories>
 		<repository>
-			<id>spring-milestones</id>
-			<name>Spring Milestones</name>
-			<url>https://repo.spring.io/milestone</url>
+			<id>spring-releases</id>
+			<name>Spring Releases</name>
+			<url>https://repo.spring.io/release</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
