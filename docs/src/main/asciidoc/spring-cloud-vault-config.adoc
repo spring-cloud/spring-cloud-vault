@@ -1,4 +1,6 @@
 = Spring Cloud Vault
+:revnumber: 1.0.0.RELEASE
+:revdate: 2017-04-10
 :github: https://github.com/spring-cloud/spring-cloud-vault-config
 :githubmaster: {github}/tree/master
 :docslink: {githubmaster}/docs/src/main/asciidoc
