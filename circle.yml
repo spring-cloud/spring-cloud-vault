@@ -1,0 +1,56 @@
+general:
+  branches:
+    ignore:
+      - gh-pages # list of branches to ignore
+
+machine:
+  services:
+    - rabbitmq-server
+  java:
+    version: oraclejdk8
+
+dependencies:
+  override:
+    - ./mvnw -s .settings.xml -B -U --fail-never dependency:go-offline || true
+  cache_directories:
+    - "download"
+    - "~/.m2"
+
+database:
+  override:
+    - mkdir -p download
+    - test -f download/apache-cassandra-2.2.8-bin.tar.gz || wget https://archive.apache.org/dist/cassandra/2.2.8/apache-cassandra-2.2.8-bin.tar.gz -O download/apache-cassandra-2.2.8-bin.tar.gz
+    - tar xzf download/apache-cassandra-2.2.8-bin.tar.gz
+    - cp -f spring-cloud-vault-config-databases/src/test/resources/cassandra.yaml apache-cassandra-2.2.8/conf
+    - mkdir -p apache-cassandra-2.2.8/data
+    - apache-cassandra-2.2.8/bin/cassandra -f:
+        background: true
+    - sudo rabbitmq-plugins enable rabbitmq_management
+    - sudo service rabbitmq-server restart
+    - mysql -e "CREATE USER 'springvault' IDENTIFIED by 'springvault';"
+    - mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO 'springvault'@'%' WITH GRANT OPTION;";
+    - psql -U postgres -c "CREATE ROLE springvault WITH LOGIN PASSWORD 'springvault' CREATEROLE CREATEUSER;"
+    - |-
+      mongo admin --eval  "db.createUser({user: 'springvault', pwd:'springvault', roles:['root']});"
+    - apache-cassandra-2.2.8/bin/cqlsh localhost -u cassandra -p cassandra -e "CREATE USER 'springvault' WITH PASSWORD 'springvault' SUPERUSER"
+    - src/test/bash/install_vault.sh
+    - src/test/bash/install_consul.sh
+
+test:
+  pre:
+    - src/test/bash/create_certificates.sh
+    - src/test/bash/local_run_vault.sh:
+        background: true
+    - src/test/bash/local_run_consul.sh:
+        background: true
+  override:
+    - ./mvnw -s .settings.xml clean install -U -P sonar -nsu -B -Dmaven.test.redirectTestOutputToFile=true -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+    - ./mvnw -s .settings.xml org.jacoco:jacoco-maven-plugin:report -U -P sonar -Djacoco.dataFile=$(pwd)/target/jacoco.exec
+  post:
+    - apache-cassandra-2.2.8/bin/nodetool stopdaemon || true
+    - pkill vault || true
+    - pkill consul || true
+    - find . -type f -regex ".*/spring-cloud-*.*/target/*.*" | cpio -pdm $CIRCLE_ARTIFACTS
+    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - find . -type f -regex ".*/target/.*-reports/.*" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+    - bash <(curl -s https://codecov.io/bash)
