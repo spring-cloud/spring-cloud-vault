@@ -1,8 +1,7 @@
 = Spring Cloud Vault
-:revnumber: 1.0.0.RELEASE
-:revdate: 2017-04-10
-:github: https://github.com/spring-cloud/spring-cloud-vault-config
+:github: https://github.com/spring-cloud/spring-cloud-vault
 :githubmaster: {github}/tree/master
+:revnumber: {spring-cloud-version}
 :docslink: {githubmaster}/docs/src/main/asciidoc
 :toc: left
 :nofooter:
@@ -433,13 +432,13 @@ dependency.
 
 .pom.xml
 ====
-[source,xml,indent=0]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 <dependencies>
     <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-vault-config-consul</artifactId>
-        <version>x.y.z</version>
+        <version>{spring-cloud-version}</version>
     </dependency>
 </dependencies>
 ----
@@ -483,13 +482,13 @@ dependency.
 
 .pom.xml
 ====
-[source,xml,indent=0]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 <dependencies>
     <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-vault-config-rabbitmq</artifactId>
-        <version>x.y.z</version>
+        <version>{spring-cloud-version}</version>
     </dependency>
 </dependencies>
 ----
@@ -536,13 +535,13 @@ dependency.
 
 .pom.xml
 ====
-[source,xml,indent=0]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 <dependencies>
     <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-vault-config-aws</artifactId>
-        <version>x.y.z</version>
+        <version>{spring-cloud-version}</version>
     </dependency>
 </dependencies>
 ----
@@ -601,13 +600,13 @@ dependency.
 
 .pom.xml
 ====
-[source,xml,indent=0]
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 <dependencies>
     <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-vault-config-databases</artifactId>
-        <version>x.y.z</version>
+        <version>{spring-cloud-version}</version>
     </dependency>
 </dependencies>
 ----
