@@ -4,10 +4,9 @@
 
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
-		<artifactId>spring-cloud-dependencies-parent</artifactId>
-		<version>1.3.1.RELEASE</version>
-		<relativePath />
-		<!-- lookup parent from repository -->
+		<artifactId>spring-cloud-vault-parent</artifactId>
+		<version>1.0.1.BUILD-SNAPSHOT</version>
+		<relativePath>..</relativePath>
 	</parent>
 
 	<artifactId>spring-cloud-vault-config-docs</artifactId>
@@ -18,7 +17,7 @@
 	<description>Spring Cloud Docs</description>
 
 	<properties>
-		<docs.main>spring-cloud-vault-config</docs.main>
+		<docs.main>spring-cloud-vault</docs.main>
 		<main.basedir>${basedir}/..</main.basedir>
 		<docs.whitelisted.branches>1.0.x</docs.whitelisted.branches>
 	</properties>
