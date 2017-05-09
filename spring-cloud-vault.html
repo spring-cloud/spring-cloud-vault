@@ -737,10 +737,8 @@ Supported schemes are <code>http</code> and <code>https</code>.</p>
 <p>Enabling further integrations requires additional dependencies and
 configuration. Depending on how you have set up Vault you might need
 additional configuration like
-<a href="https://github.com/spring-cloud/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc#vault-client-ssl-configuration">SSL</a> and
-<a href="https://github.com/spring-cloud/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc#token-authentication">authentication</a>. Checkout these
-chapters in the
-<a href="https://github.com/spring-cloud/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc">reference guide</a>.</p>
+<a href="http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html#vault.config.ssl">SSL</a> and
+<a href="http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html#vault.config.authentication">authentication</a>.</p>
 </div>
 <div class="paragraph">
 <p>If the application imports the <code>spring-boot-starter-actuator</code> project, the
@@ -748,7 +746,7 @@ status of the vault server will be available via the <code>/health</code> endpoi
 </div>
 <div class="paragraph">
 <p>The vault health indicator can be enabled or disabled through the
-property <code>health.vault.enabled</code> (default <code>true</code>)</p>
+property <code>health.vault.enabled</code> (default <code>true</code>).</p>
 </div>
 <div class="sect2">
 <h3 id="_authentication">Authentication</h3>
@@ -756,7 +754,7 @@ property <code>health.vault.enabled</code> (default <code>true</code>)</p>
 <p>Vault requires an <a href="https://www.vaultproject.io/docs/concepts/auth.html">authentication mechanism</a> to <a href="https://www.vaultproject.io/docs/concepts/tokens.html">authorize client requests</a>.</p>
 </div>
 <div class="paragraph">
-<p>Spring Cloud Vault Config supports multiple <a href="http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication">authentication mechanisms</a> to authenticate applications with Vault.</p>
+<p>Spring Cloud Vault supports multiple <a href="http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html#vault.config.authentication">authentication mechanisms</a> to authenticate applications with Vault.</p>
 </div>
 <div class="paragraph">
 <p>For a quickstart, use the root token printed by the <a href="#quickstart.vault.start">Vault initialization</a>.</p>
@@ -1542,7 +1540,7 @@ by setting <code>spring.cloud.vault.rabbitmq.username-property</code> and
 </ul>
 </div>
 <div class="paragraph">
-<p>See also: <a href="https://www.vaultproject.io/docs/secrets/rabbit/index.html">Vault Documentation: Setting up RabbitMQ with Vault</a></p>
+<p>See also: <a href="https://www.vaultproject.io/docs/secrets/rabbitmq/index.html">Vault Documentation: Setting up RabbitMQ with Vault</a></p>
 </div>
 </div>
 <div class="sect2">
