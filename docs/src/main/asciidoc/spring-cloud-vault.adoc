@@ -523,7 +523,7 @@ spring.cloud.vault:
 * `username-property` sets the property name in which the RabbitMQ username is stored
 * `password-property` sets the property name in which the RabbitMQ password is stored
 
-See also: https://www.vaultproject.io/docs/secrets/rabbit/index.html[Vault Documentation: Setting up RabbitMQ with Vault]
+See also: https://www.vaultproject.io/docs/secrets/rabbitmq/index.html[Vault Documentation: Setting up RabbitMQ with Vault]
 
 [[vault.config.backends.aws]]
 === AWS
