@@ -1,3 +1,4 @@
+:docs: http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html
 
 include::intro.adoc[]
 
@@ -8,20 +9,20 @@ include::intro.adoc[]
 Specifically for Spring applications:
 
 * Retrieve secrets from Vault and initialize Spring Environment with remote property sources
-* Obtain http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.generic[secrets] secured with SSL
+* Obtain {docs}#vault.config.backends.generic[secrets] secured with SSL
 * Generate credentials for
-http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.mysql[MySQL],
-http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.postgresql[PostgreSQL],
-http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.cassandra[Apache Cassandra],
-http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.mongodb[MongoDB],
-http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.consul[Consul],
-http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.aws[AWS], and http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.rabbitmq[RabbitMQ].
-* http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication.token[Token],
-http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication.appid[AppId],
-http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication.approle[AppRole],
-http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication.clientcert[Client Certificate],
-http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication.cubbyhole[Cubbyhole], and
-http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication.awsec2[AWS-EC2] authentication
+{docs}#vault.config.backends.mysql[MySQL],
+{docs}#vault.config.backends.postgresql[PostgreSQL],
+{docs}#vault.config.backends.cassandra[Apache Cassandra],
+{docs}#vault.config.backends.mongodb[MongoDB],
+{docs}#vault.config.backends.consul[Consul],
+{docs}#vault.config.backends.aws[AWS], and {docs}#vault.config.backends.rabbitmq[RabbitMQ].
+* {docs}#vault.config.authentication.token[Token],
+{docs}#vault.config.authentication.appid[AppId],
+{docs}#vault.config.authentication.approle[AppRole],
+{docs}#vault.config.authentication.clientcert[Client Certificate],
+{docs}#vault.config.authentication.cubbyhole[Cubbyhole], and
+{docs}#vault.config.authentication.awsec2[AWS-EC2] authentication
 * Bootstrap application context: a parent context for the main application that can be trained to do anything
 
 

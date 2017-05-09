@@ -1,3 +1,5 @@
+:docs: http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html
+
 *Prerequisites*
 
 To get started with Vault and this guide you need a
@@ -183,23 +185,21 @@ Supported schemes are `http` and `https`.
 Enabling further integrations requires additional dependencies and
 configuration. Depending on how you have set up Vault you might need
 additional configuration like
-https://github.com/spring-cloud/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc#vault-client-ssl-configuration[SSL] and
-https://github.com/spring-cloud/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc#token-authentication[authentication]. Checkout these
-chapters in the
-https://github.com/spring-cloud/spring-cloud-vault-config/blob/master/docs/src/main/asciidoc/spring-cloud-vault-config.adoc[reference guide].
+{docs}#vault.config.ssl[SSL] and
+{docs}#vault.config.authentication[authentication].
 
 If the application imports the `spring-boot-starter-actuator` project, the
 status of the vault server will be available via the `/health` endpoint.
 
 The vault health indicator can be enabled or disabled through the
-property `health.vault.enabled` (default `true`)
+property `health.vault.enabled` (default `true`).
 
 
 === Authentication
 
 Vault requires an https://www.vaultproject.io/docs/concepts/auth.html[authentication mechanism] to https://www.vaultproject.io/docs/concepts/tokens.html[authorize client requests].
 
-Spring Cloud Vault Config supports multiple http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication[authentication mechanisms] to authenticate applications with Vault.
+Spring Cloud Vault supports multiple {docs}#vault.config.authentication[authentication mechanisms] to authenticate applications with Vault.
 
 For a quickstart, use the root token printed by the <<quickstart.vault.start,Vault initialization>>.
 
