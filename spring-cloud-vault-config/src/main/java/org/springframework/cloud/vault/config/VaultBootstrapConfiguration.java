@@ -45,6 +45,7 @@ import org.springframework.vault.authentication.AppRoleAuthentication;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
 import org.springframework.vault.authentication.AwsEc2Authentication;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions;
+import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.Nonce;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.ClientCertificateAuthentication;
 import org.springframework.vault.authentication.CubbyholeAuthentication;
@@ -360,9 +361,13 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 		VaultProperties.AwsEc2Properties awsEc2 = vaultProperties.getAwsEc2();
 
+		Nonce nonce = StringUtils.hasText(awsEc2.getNonce())
+				? Nonce.provided(awsEc2.getNonce().toCharArray()) : Nonce.generated();
+
 		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions
 				.builder().role(awsEc2.getRole()) //
 				.path(awsEc2.getAwsEc2Path()) //
+				.nonce(nonce) //
 				.identityDocumentUri(URI.create(awsEc2.getIdentityDocument())) //
 				.build();
 
