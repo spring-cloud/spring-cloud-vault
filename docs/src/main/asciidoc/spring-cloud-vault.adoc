@@ -241,17 +241,6 @@ further investigation.
 
 The nonce is kept in memory and is lost during application restart.
 
-.bootstrap.yml with disabled nonce
-====
-[source,yaml]
-----
-spring.cloud.vault:
-    authentication: AWS_EC2
-    aws-ec2:
-        use-nonce: false
-----
-====
-
 AWS-EC2 authentication roles are optional and default to the AMI.
 You can configure the authentication role by setting the
 `spring.cloud.vault.aws-ec2.role` property.
@@ -277,7 +266,6 @@ spring.cloud.vault:
         role: application-server
         aws-ec2-path: aws-ec2
         identity-document: http://...
-        use-nonce: false
 ----
 ====
 
@@ -286,7 +274,6 @@ authentication method
 * `role` sets the role name of the AWS EC2 role definition
 * `aws-ec2-path` sets the path of the AWS EC2 mount to use
 * `identity-document` sets URL of the PKCS#7 AWS EC2 identity document
-* `use-nonce` setting this value to `false` will disable nonce usage
 
 See also: https://www.vaultproject.io/docs/auth/aws-ec2.html[Vault Documentation: Using the aws-ec2 auth backend]
 
