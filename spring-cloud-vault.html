@@ -1110,20 +1110,8 @@ party does not have the nonce and can raise an alert in Vault for
 further investigation.</p>
 </div>
 <div class="paragraph">
-<p>The nonce is kept in memory and is lost during application restart.</p>
-</div>
-<div class="exampleblock">
-<div class="title">Example 12. bootstrap.yml with disabled nonce</div>
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
-    authentication: AWS_EC2
-    aws-ec2:
-        use-nonce: false</code></pre>
-</div>
-</div>
-</div>
+<p>The nonce is kept in memory and is lost during application restart.
+You can configure a static nonce with <code>spring.cloud.vault.aws-ec2.nonce</code>.</p>
 </div>
 <div class="paragraph">
 <p>AWS-EC2 authentication roles are optional and default to the AMI.
@@ -1131,7 +1119,7 @@ You can configure the authentication role by setting the
 <code>spring.cloud.vault.aws-ec2.role</code> property.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 13. bootstrap.yml with configured role</div>
+<div class="title">Example 12. bootstrap.yml with configured role</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1144,7 +1132,7 @@ You can configure the authentication role by setting the
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 14. bootstrap.yml with all AWS EC2 authentication properties</div>
+<div class="title">Example 13. bootstrap.yml with all AWS EC2 authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1154,7 +1142,7 @@ You can configure the authentication role by setting the
         role: application-server
         aws-ec2-path: aws-ec2
         identity-document: http://...
-        use-nonce: false</code></pre>
+        nonce: my-static-nonce</code></pre>
 </div>
 </div>
 </div>
@@ -1175,7 +1163,7 @@ authentication method</p>
 <p><code>identity-document</code> sets URL of the PKCS#7 AWS EC2 identity document</p>
 </li>
 <li>
-<p><code>use-nonce</code> setting this value to <code>false</code> will disable nonce usage</p>
+<p><code>nonce</code> used for AWS-EC2 authentication. An empty nonce defaults to nonce generation</p>
 </li>
 </ul>
 </div>
@@ -1207,7 +1195,7 @@ certificate and the private key</p>
 </ol>
 </div>
 <div class="exampleblock">
-<div class="title">Example 15. bootstrap.yml</div>
+<div class="title">Example 14. bootstrap.yml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1251,7 +1239,7 @@ Response Wrapping for token creation requires Vault 0.6.0 or higher.
 </table>
 </div>
 <div class="exampleblock">
-<div class="title">Example 16. Crating and storing tokens</div>
+<div class="title">Example 15. Crating and storing tokens</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1267,7 +1255,7 @@ wrapped_accessor:              46b6aebb-187f-932a-26d7-4f3d86a68319</code></pre>
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 17. bootstrap.yml</div>
+<div class="title">Example 16. bootstrap.yml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1408,7 +1396,7 @@ The Consul integration requires the <code>spring-cloud-vault-config-consul</code
 dependency.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 18. pom.xml</div>
+<div class="title">Example 17. pom.xml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1478,7 +1466,7 @@ the property name by setting <code>spring.cloud.vault.consul.token-property</cod
 dependency.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 19. pom.xml</div>
+<div class="title">Example 18. pom.xml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1553,7 +1541,7 @@ by setting <code>spring.cloud.vault.rabbitmq.username-property</code> and
 dependency.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 20. pom.xml</div>
+<div class="title">Example 19. pom.xml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1655,7 +1643,7 @@ backend in the configuration and the <code>spring-cloud-vault-config-databases</
 dependency.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 21. pom.xml</div>
+<div class="title">Example 20. pom.xml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
