@@ -20,3 +20,7 @@ _site/
 .project
 sample-pages
 .class
+work/
+/consul/
+/vault/
+/download/
