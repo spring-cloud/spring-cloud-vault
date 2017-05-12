@@ -20,3 +20,5 @@ download/
 /rabbitmq/
 work
 build/
+pom.xml.releaseBackup
+release.properties
