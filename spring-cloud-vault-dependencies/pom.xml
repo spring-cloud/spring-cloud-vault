@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dependencies-parent</artifactId>
-		<version>1.3.1.RELEASE</version>
+		<version>1.3.2.RELEASE</version>
 		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
@@ -20,7 +20,7 @@
 	<description>Spring Cloud Vault Dependencies</description>
 
 	<properties>
-		<spring-vault.version>1.0.1.BUILD-SNAPSHOT</spring-vault.version>
+		<spring-vault.version>1.0.1.RELEASE</spring-vault.version>
 	</properties>
 
 	<dependencyManagement>
