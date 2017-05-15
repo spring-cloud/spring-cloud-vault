@@ -15,9 +15,6 @@
  */
 package org.springframework.cloud.vault.config.aws;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +22,7 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -34,11 +32,15 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.core.VaultOperations;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+
 /**
  * Integration tests using the aws secret backend. In case this test should fail because
  * of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
+ *
  * <p>
  * This test requires AWS credentials and a region, see {@link #AWS_ACCESS_KEY},
  * {@link #AWS_SECRET_KEY} and the {@link SpringBootTest} properties to be provided

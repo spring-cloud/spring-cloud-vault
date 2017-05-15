@@ -25,14 +25,15 @@ import org.springframework.vault.core.util.PropertyTransformer;
 /**
  * {@link PropertyTransformer} to transform a {@link Map} of properties by applying key
  * name translation.
+ *
  * <p>
  * Existing keys will be transformed to a target key name while retaining the original
  * value. Key name translation will leave other, not specified key names untouched.
  *
  * @author Mark Paluch
  */
-public class PropertyNameTransformer extends PropertyTransformerSupport implements
-		PropertyTransformer {
+public class PropertyNameTransformer extends PropertyTransformerSupport
+		implements PropertyTransformer {
 
 	private final Map<String, String> nameMapping = new HashMap<>();
 

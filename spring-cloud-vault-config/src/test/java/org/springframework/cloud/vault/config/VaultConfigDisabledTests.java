@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test using config infrastructure with token authentication.
+ *
  * <p>
  * In case this test should fail because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
@@ -52,11 +53,8 @@ public class VaultConfigDisabledTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		vaultRule
-				.prepare()
-				.getVaultOperations()
-				.write("secret/testVaultApp",
-						Collections.singletonMap("vault.value", "foo"));
+		vaultRule.prepare().getVaultOperations().write("secret/testVaultApp",
+				Collections.singletonMap("vault.value", "foo"));
 	}
 
 	@Autowired

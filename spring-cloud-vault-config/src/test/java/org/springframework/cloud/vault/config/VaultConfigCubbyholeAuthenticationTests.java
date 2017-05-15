@@ -41,6 +41,7 @@ import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration test using config infrastructure with Cubbyhole authentication.
+ *
  * <p>
  * In case this test should fail because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
