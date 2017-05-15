@@ -91,7 +91,7 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 
 	/**
 	 * Decorated {@link PropertySource} creation to catch and throw the first error that
-	 * occurred durin initial secret retrieval.
+	 * occurred during initial secret retrieval.
 	 *
 	 * @param secret
 	 * @param accessor

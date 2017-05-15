@@ -15,21 +15,21 @@
  */
 package org.springframework.cloud.vault.config;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultSysOperations;
 import org.springframework.vault.support.VaultHealth;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link VaultHealthIndicator}.
@@ -38,9 +38,6 @@ import org.mockito.runners.MockitoJUnitRunner;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class VaultHealthIndicatorUnitTests {
-
-	@InjectMocks
-	VaultHealthIndicator healthIndicator = new VaultHealthIndicator();
 
 	@Mock
 	VaultOperations vaultOperations;
@@ -51,8 +48,12 @@ public class VaultHealthIndicatorUnitTests {
 	@Mock
 	VaultHealth healthResponse;
 
+	VaultHealthIndicator healthIndicator;
+
 	@Before
 	public void before() throws Exception {
+
+		healthIndicator = new VaultHealthIndicator(vaultOperations);
 
 		when(vaultOperations.opsForSys()).thenReturn(vaultSysOperations);
 		when(vaultSysOperations.health()).thenReturn(healthResponse);

@@ -46,9 +46,6 @@ public class VaultPropertySourceLocatorUnitTests {
 	@Mock
 	private ConfigurableEnvironment configurableEnvironment;
 
-	@Mock
-	private VaultPropertySource vaultPropertySource;
-
 	@Before
 	public void before() {
 		propertySourceLocator = new VaultPropertySourceLocator(operations,
