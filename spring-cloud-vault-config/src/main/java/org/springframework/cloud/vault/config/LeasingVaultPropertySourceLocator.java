@@ -88,7 +88,9 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 
 		URI expand = TEMPLATE_HANDLER.expand("{backend}/{key}", accessor.getVariables());
 
-		final RequestedSecret secret = RequestedSecret.renewable(expand.getPath());
+		final RequestedSecret secret = accessor instanceof GenericSecretBackendMetadata
+				? RequestedSecret.rotating(expand.getPath())
+				: RequestedSecret.renewable(expand.getPath());
 
 		if (properties.isFailFast()) {
 			return createVaultPropertySourceFailFast(secret, accessor);
