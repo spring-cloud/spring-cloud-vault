@@ -80,7 +80,9 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 	protected PropertySource<?> createVaultPropertySource(
 			SecretBackendMetadata accessor) {
 
-		RequestedSecret secret = RequestedSecret.renewable(accessor.getPath());
+		RequestedSecret secret = accessor instanceof GenericSecretBackendMetadata
+				? RequestedSecret.rotating(accessor.getPath())
+				: RequestedSecret.renewable(accessor.getPath());
 
 		if (properties.isFailFast()) {
 			return createVaultPropertySourceFailFast(secret, accessor);
