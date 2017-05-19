@@ -194,6 +194,10 @@ status of the vault server will be available via the `/health` endpoint.
 The vault health indicator can be enabled or disabled through the
 property `health.vault.enabled` (default `true`).
 
+If Vault is configured in HA mode such that standby nodes are able to service
+requests directly, the vault health indicator can be configured to report a
+standby node as up through the property `health.vault.standby-ok` (default
+`false`).
 
 === Authentication
 
