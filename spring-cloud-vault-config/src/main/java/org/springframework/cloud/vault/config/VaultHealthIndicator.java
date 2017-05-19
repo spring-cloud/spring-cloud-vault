@@ -16,6 +16,7 @@
 package org.springframework.cloud.vault.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.vault.core.VaultOperations;
@@ -29,12 +30,15 @@ public class VaultHealthIndicator implements HealthIndicator {
 	@Autowired
 	private VaultOperations vaultOperations;
 
+	@Value("${health.vault.standby-ok:false}")
+	private boolean standbyOk;
+
 	@Override
 	public Health health() {
 
 		try {
 
-			VaultHealth vaultHealthResponse = vaultOperations.opsForSys().health();
+			VaultHealth vaultHealthResponse = vaultOperations.opsForSys().health(standbyOk);
 
 			if (!vaultHealthResponse.isInitialized()) {
 				return Health.down().withDetail("state", "Vault uninitialized").build();
@@ -45,7 +49,7 @@ public class VaultHealthIndicator implements HealthIndicator {
 			}
 
 			if (vaultHealthResponse.isStandby()) {
-				return Health.outOfService().withDetail("state", "Vault in standby")
+				return (standbyOk ? Health.up() : Health.outOfService()).withDetail("state", "Vault in standby")
 						.build();
 			}
 
