@@ -21,10 +21,13 @@ import org.springframework.vault.core.util.PropertyTransformer;
 
 /**
  * Interface specifying the API to obtain URL variables and optionally a
- * {@link PropertyTransformer}. Typically used by {@link VaultPropertySource}.
+ * {@link PropertyTransformer}. Typically used by {@link VaultPropertySource}. Supports
+ * ordering of implementations.
  *
  * @author Mark Paluch
  * @see PropertyTransformer
+ * @see org.springframework.core.Ordered
+ * @see org.springframework.core.annotation.Order
  */
 public interface SecretBackendMetadata {
 
@@ -36,6 +39,14 @@ public interface SecretBackendMetadata {
 	String getName();
 
 	/**
+	 * Return the path of this secret backend.
+	 *
+	 * @return the path of this secret backend.
+	 * @since 1.1
+	 */
+	String getPath();
+
+	/**
 	 * Return a {@link PropertyTransformer} to post-process properties retrieved from
 	 * Vault.
 	 *
@@ -45,7 +56,8 @@ public interface SecretBackendMetadata {
 	PropertyTransformer getPropertyTransformer();
 
 	/**
-	 * @return URL template variables.
+	 * @return URL template variables. URI variables should declare either {@code backend}
+	 * and {@code key} or {@code path} properties.
 	 */
 	Map<String, String> getVariables();
 }

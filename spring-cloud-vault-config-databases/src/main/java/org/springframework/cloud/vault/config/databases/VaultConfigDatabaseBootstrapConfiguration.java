@@ -83,23 +83,29 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 			return new SecretBackendMetadata() {
 
 				@Override
-				public Map<String, String> getVariables() {
-
-					Map<String, String> variables = new HashMap<>();
-					variables.put("backend", properties.getBackend());
-					variables.put("key", String.format("creds/%s", properties.getRole()));
-					return variables;
-				}
-
-				@Override
 				public String getName() {
 					return String.format("%s with Role %s", properties.getBackend(),
 							properties.getRole());
 				}
 
 				@Override
+				public String getPath() {
+					return String.format("%s/creds/%s", properties.getBackend(),
+							properties.getRole());
+				}
+
+				@Override
 				public PropertyTransformer getPropertyTransformer() {
 					return transformer;
+				}
+
+				@Override
+				public Map<String, String> getVariables() {
+
+					Map<String, String> variables = new HashMap<>();
+					variables.put("backend", properties.getBackend());
+					variables.put("key", String.format("creds/%s", properties.getRole()));
+					return variables;
 				}
 			};
 		}

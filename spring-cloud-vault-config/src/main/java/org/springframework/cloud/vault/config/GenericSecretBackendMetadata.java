@@ -58,14 +58,18 @@ class GenericSecretBackendMetadata implements SecretBackendMetadata {
 	 * leading/trailing slashes, must not be empty or {@literal null}.
 	 * @return the {@link SecretBackendMetadata}
 	 */
-	public static SecretBackendMetadata create(final String secretBackendPath,
-			final String key) {
+	public static SecretBackendMetadata create(String secretBackendPath, String key) {
 		return new GenericSecretBackendMetadata(secretBackendPath, key);
 	}
 
 	@Override
-	public String getName() {
+	public String getPath() {
 		return String.format("%s/%s", secretBackendPath, key);
+	}
+
+	@Override
+	public String getName() {
+		return getPath();
 	}
 
 	@Override

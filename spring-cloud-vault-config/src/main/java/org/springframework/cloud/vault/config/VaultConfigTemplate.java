@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.vault.config;
 
-import java.net.URI;
 import java.util.Map;
 
 import lombok.extern.apachecommons.CommonsLog;
@@ -26,7 +25,6 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.util.PropertyTransformer;
 import org.springframework.vault.support.JsonMapFlattener;
 import org.springframework.vault.support.VaultResponse;
-import org.springframework.web.util.DefaultUriTemplateHandler;
 
 /**
  * Central class to retrieve configuration from Vault.
@@ -37,7 +35,6 @@ import org.springframework.web.util.DefaultUriTemplateHandler;
 @CommonsLog
 public class VaultConfigTemplate implements VaultConfigOperations {
 
-	private final DefaultUriTemplateHandler templateHandler = new DefaultUriTemplateHandler();
 	private final VaultOperations vaultOperations;
 	private final VaultProperties properties;
 
@@ -58,16 +55,16 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 	}
 
 	@Override
-	public Secrets read(final SecretBackendMetadata secretBackendMetadata) {
+	public Secrets read(SecretBackendMetadata secretBackendMetadata) {
 
 		Assert.notNull(secretBackendMetadata, "SecureBackendAccessor must not be null!");
 
-		URI uri = templateHandler.expand("{backend}/{key}",
-				secretBackendMetadata.getVariables());
-		log.info(String.format("Fetching config from Vault at: %s", uri));
+		log.info(String.format("Fetching config from Vault at: %s",
+				secretBackendMetadata.getPath()));
 
 		try {
-			VaultResponse vaultResponse = vaultOperations.read(uri.toString());
+			VaultResponse vaultResponse = vaultOperations
+					.read(secretBackendMetadata.getPath());
 
 			if (vaultResponse == null) {
 
