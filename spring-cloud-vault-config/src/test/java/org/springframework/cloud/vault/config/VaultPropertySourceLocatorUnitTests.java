@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,6 @@
  */
 package org.springframework.cloud.vault.config;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Before;
@@ -31,10 +27,14 @@ import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
 /**
  * Unit tests for {@link VaultPropertySourceLocator}.
  *
  * @author Ryan Hoegg
+ * @author Mark Paluch
  */
 @RunWith(MockitoJUnitRunner.class)
 public class VaultPropertySourceLocatorUnitTests {
@@ -53,8 +53,8 @@ public class VaultPropertySourceLocatorUnitTests {
 	@Before
 	public void before() {
 		propertySourceLocator = new VaultPropertySourceLocator(operations,
-			new VaultProperties(), new VaultGenericBackendProperties(),
-			Collections.<SecretBackendMetadata>emptyList());
+				new VaultProperties(), new VaultGenericBackendProperties(),
+				Collections.<SecretBackendMetadata>emptyList());
 	}
 
 	@Test
@@ -64,8 +64,8 @@ public class VaultPropertySourceLocatorUnitTests {
 		vaultProperties.getConfig().setOrder(42);
 
 		propertySourceLocator = new VaultPropertySourceLocator(operations,
-			vaultProperties, new VaultGenericBackendProperties(),
-			Collections.<SecretBackendMetadata>emptyList());
+				vaultProperties, new VaultGenericBackendProperties(),
+				Collections.<SecretBackendMetadata>emptyList());
 
 		assertThat(propertySourceLocator.getOrder()).isEqualTo(42);
 	}
@@ -76,7 +76,7 @@ public class VaultPropertySourceLocatorUnitTests {
 		when(configurableEnvironment.getActiveProfiles()).thenReturn(new String[0]);
 
 		PropertySource<?> propertySource = propertySourceLocator
-			.locate(configurableEnvironment);
+				.locate(configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
@@ -88,19 +88,16 @@ public class VaultPropertySourceLocatorUnitTests {
 	public void shouldLocatePropertySourcesForActiveProfilesInDefaultContext() {
 
 		when(configurableEnvironment.getActiveProfiles())
-			.thenReturn(new String[] { "vermillion", "periwinkle" });
+				.thenReturn(new String[] { "vermillion", "periwinkle" });
 
 		PropertySource<?> propertySource = propertySourceLocator
-			.locate(configurableEnvironment);
+				.locate(configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
 		CompositePropertySource composite = (CompositePropertySource) propertySource;
-		assertThat(composite.getPropertySources())
-			.extracting("name")
-			.containsAll(Arrays.asList(new String[] {
-				"secret/application/vermillion",
-				"secret/application/periwinkle" }));
+		assertThat(composite.getPropertySources()).extracting("name").containsSequence(
+				"secret/application/periwinkle", "secret/application/vermillion");
 	}
 
 	@Test
@@ -108,51 +105,45 @@ public class VaultPropertySourceLocatorUnitTests {
 		final VaultGenericBackendProperties backendProperties = new VaultGenericBackendProperties();
 		backendProperties.setApplicationName("wintermute");
 		propertySourceLocator = new VaultPropertySourceLocator(operations,
-			new VaultProperties(), backendProperties, Collections.<SecretBackendMetadata>emptyList());
+				new VaultProperties(), backendProperties,
+				Collections.<SecretBackendMetadata>emptyList());
 
 		when(configurableEnvironment.getActiveProfiles())
-			.thenReturn(new String[] { "vermillion", "periwinkle" });
+				.thenReturn(new String[] { "vermillion", "periwinkle" });
 
 		PropertySource<?> propertySource = propertySourceLocator
-			.locate(configurableEnvironment);
+				.locate(configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
 		CompositePropertySource composite = (CompositePropertySource) propertySource;
-		assertThat(composite.getPropertySources()).extracting("name")
-			.containsAll(Arrays.asList(new String[] {
-				"secret/wintermute",
-				"secret/wintermute/vermillion",
-				"secret/wintermute/periwinkle" }));
+		assertThat(composite.getPropertySources()).extracting("name").containsSequence(
+				"secret/wintermute/periwinkle", "secret/wintermute/vermillion",
+				"secret/wintermute");
 	}
 
 	@Test
 	public void shouldLocatePropertySourcesInEachPathSpecifiedWhenApplicationNameContainsSeveral() {
 		final VaultGenericBackendProperties backendProperties = new VaultGenericBackendProperties();
 		backendProperties.setApplicationName("wintermute,straylight,icebreaker/armitage");
-		propertySourceLocator = new VaultPropertySourceLocator(
-			operations,	new VaultProperties(), backendProperties, Collections.<SecretBackendMetadata>emptyList());
+		propertySourceLocator = new VaultPropertySourceLocator(operations,
+				new VaultProperties(), backendProperties,
+				Collections.<SecretBackendMetadata>emptyList());
 
 		when(configurableEnvironment.getActiveProfiles())
-			.thenReturn(new String[] { "vermillion", "periwinkle" });
+				.thenReturn(new String[] { "vermillion", "periwinkle" });
 
-		PropertySource<?> propertySource =
-			propertySourceLocator.locate(configurableEnvironment);
+		PropertySource<?> propertySource = propertySourceLocator
+				.locate(configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
 		CompositePropertySource composite = (CompositePropertySource) propertySource;
-		assertThat(composite.getPropertySources())
-			.extracting("name")
-			.containsAll(Arrays.asList(
-				new String[] { "secret/wintermute",
-					"secret/straylight",
-					"secret/icebreaker/armitage",
-					"secret/wintermute/vermillion",
-					"secret/wintermute/periwinkle",
-					"secret/straylight/vermillion",
-					"secret/straylight/periwinkle",
-					"secret/icebreaker/armitage/vermillion",
-					"secret/icebreaker/armitage/periwinkle" }));
+		assertThat(composite.getPropertySources()).extracting("name").contains(
+				"secret/wintermute", "secret/straylight", "secret/icebreaker/armitage",
+				"secret/wintermute/vermillion", "secret/wintermute/periwinkle",
+				"secret/straylight/vermillion", "secret/straylight/periwinkle",
+				"secret/icebreaker/armitage/vermillion",
+				"secret/icebreaker/armitage/periwinkle");
 	}
 }
