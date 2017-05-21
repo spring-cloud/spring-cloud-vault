@@ -50,7 +50,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = { BootstrapConfiguration.class,
 		VaultConfigAppIdCustomMechanismTests.TestApplication.class }, properties = {
-				"spring.cloud.vault.authentication=appid", "use.custom.config=true",
+				"spring.cloud.vault.authentication=appid",
+				"VaultConfigAppIdCustomMechanismTests.custom.config=true",
 				"spring.cloud.vault.applicationName=VaultConfigAppIdCustomMechanismTests" })
 public class VaultConfigAppIdCustomMechanismTests {
 
@@ -119,7 +120,7 @@ public class VaultConfigAppIdCustomMechanismTests {
 	@Configuration
 	public static class BootstrapConfiguration {
 
-		@ConditionalOnProperty("use.custom.config")
+		@ConditionalOnProperty("VaultConfigAppIdCustomMechanismTests.custom.config")
 		@Bean
 		ClientAuthentication clientAuthentication() {
 

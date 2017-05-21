@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 package org.springframework.cloud.vault.config;
-
-import java.util.Collection;
 
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.core.PriorityOrdered;
@@ -42,15 +40,14 @@ class VaultPropertySourceLocator extends VaultPropertySourceLocatorSupport
 	 *
 	 * @param operations must not be {@literal null}.
 	 * @param properties must not be {@literal null}.
-	 * @param genericBackendProperties must not be {@literal null}.
-	 * @param backendAccessors must not be {@literal null}.
+	 * @param propertySourceLocatorConfiguration must not be {@literal null}.
+	 * @since 1.1
 	 */
 	public VaultPropertySourceLocator(VaultConfigOperations operations,
 			VaultProperties properties,
-			VaultGenericBackendProperties genericBackendProperties,
-			Collection<SecretBackendMetadata> backendAccessors) {
+			PropertySourceLocatorConfiguration propertySourceLocatorConfiguration) {
 
-		super("vault", genericBackendProperties, backendAccessors);
+		super("vault", propertySourceLocatorConfiguration);
 
 		Assert.notNull(operations, "VaultConfigOperations must not be null");
 		Assert.notNull(properties, "VaultProperties must not be null");

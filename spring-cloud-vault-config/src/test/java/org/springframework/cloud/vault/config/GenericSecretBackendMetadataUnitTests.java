@@ -15,11 +15,11 @@
  */
 package org.springframework.cloud.vault.config;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
-
-import org.springframework.mock.env.MockEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,14 +30,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class GenericSecretBackendMetadataUnitTests {
 
-	MockEnvironment environment = new MockEnvironment();
 	VaultGenericBackendProperties properties = new VaultGenericBackendProperties();
 
 	@Test
 	public void shouldCreateDefaultContexts() {
 
 		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				environment);
+				Collections.<String>emptyList());
 
 		assertThat(contexts).hasSize(1).contains("application");
 	}
@@ -48,7 +47,7 @@ public class GenericSecretBackendMetadataUnitTests {
 		properties.setApplicationName("my-app");
 
 		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				environment);
+				Collections.<String>emptyList());
 
 		assertThat(contexts).hasSize(2).containsSequence("my-app", "application");
 	}
@@ -57,11 +56,9 @@ public class GenericSecretBackendMetadataUnitTests {
 	public void shouldCreateDefaultForAppNameAndDefaultContextWithProfiles() {
 
 		properties.setApplicationName("my-app");
-		environment.addActiveProfile("cloud");
-		environment.addActiveProfile("local");
 
 		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				environment);
+				Arrays.asList("cloud", "local"));
 
 		assertThat(contexts).hasSize(6).containsSequence("my-app/local", "my-app/cloud",
 				"my-app", "application/local", "application/cloud", "application");
@@ -74,7 +71,7 @@ public class GenericSecretBackendMetadataUnitTests {
 		properties.setDefaultContext("");
 
 		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				environment);
+				Collections.<String>emptyList());
 
 		assertThat(contexts).hasSize(1).containsSequence("my-app");
 	}
@@ -85,7 +82,7 @@ public class GenericSecretBackendMetadataUnitTests {
 		properties.setApplicationName("foo,bar");
 
 		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				environment);
+				Collections.<String>emptyList());
 
 		assertThat(contexts).hasSize(3).containsSequence("bar", "foo", "application");
 	}
@@ -93,13 +90,10 @@ public class GenericSecretBackendMetadataUnitTests {
 	@Test
 	public void shouldCreateContextsWithProfile() {
 
-		environment.addActiveProfile("cloud");
-		environment.addActiveProfile("local");
-
 		properties.setApplicationName("foo,bar");
 
 		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				environment);
+				Arrays.asList("cloud", "local"));
 
 		assertThat(contexts).hasSize(9).containsSequence("bar/local", "bar/cloud", "bar",
 				"foo/local", "foo/cloud", "foo", "application/local", "application/cloud",

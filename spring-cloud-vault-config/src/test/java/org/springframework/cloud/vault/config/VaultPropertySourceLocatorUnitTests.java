@@ -15,14 +15,13 @@
  */
 package org.springframework.cloud.vault.config;
 
-import java.util.Collections;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
@@ -53,8 +52,8 @@ public class VaultPropertySourceLocatorUnitTests {
 	@Before
 	public void before() {
 		propertySourceLocator = new VaultPropertySourceLocator(operations,
-				new VaultProperties(), new VaultGenericBackendProperties(),
-				Collections.<SecretBackendMetadata>emptyList());
+				new VaultProperties(), VaultPropertySourceLocatorSupport
+						.createConfiguration(new VaultGenericBackendProperties()));
 	}
 
 	@Test
@@ -64,8 +63,8 @@ public class VaultPropertySourceLocatorUnitTests {
 		vaultProperties.getConfig().setOrder(42);
 
 		propertySourceLocator = new VaultPropertySourceLocator(operations,
-				vaultProperties, new VaultGenericBackendProperties(),
-				Collections.<SecretBackendMetadata>emptyList());
+				vaultProperties, VaultPropertySourceLocatorSupport
+						.createConfiguration(new VaultGenericBackendProperties()));
 
 		assertThat(propertySourceLocator.getOrder()).isEqualTo(42);
 	}
@@ -102,11 +101,13 @@ public class VaultPropertySourceLocatorUnitTests {
 
 	@Test
 	public void shouldLocatePropertySourcesInVaultApplicationContext() {
-		final VaultGenericBackendProperties backendProperties = new VaultGenericBackendProperties();
+
+		VaultGenericBackendProperties backendProperties = new VaultGenericBackendProperties();
 		backendProperties.setApplicationName("wintermute");
+
 		propertySourceLocator = new VaultPropertySourceLocator(operations,
-				new VaultProperties(), backendProperties,
-				Collections.<SecretBackendMetadata>emptyList());
+				new VaultProperties(),
+				VaultPropertySourceLocatorSupport.createConfiguration(backendProperties));
 
 		when(configurableEnvironment.getActiveProfiles())
 				.thenReturn(new String[] { "vermillion", "periwinkle" });
@@ -124,11 +125,13 @@ public class VaultPropertySourceLocatorUnitTests {
 
 	@Test
 	public void shouldLocatePropertySourcesInEachPathSpecifiedWhenApplicationNameContainsSeveral() {
-		final VaultGenericBackendProperties backendProperties = new VaultGenericBackendProperties();
+
+		VaultGenericBackendProperties backendProperties = new VaultGenericBackendProperties();
 		backendProperties.setApplicationName("wintermute,straylight,icebreaker/armitage");
+
 		propertySourceLocator = new VaultPropertySourceLocator(operations,
-				new VaultProperties(), backendProperties,
-				Collections.<SecretBackendMetadata>emptyList());
+				new VaultProperties(),
+				VaultPropertySourceLocatorSupport.createConfiguration(backendProperties));
 
 		when(configurableEnvironment.getActiveProfiles())
 				.thenReturn(new String[] { "vermillion", "periwinkle" });
@@ -145,5 +148,43 @@ public class VaultPropertySourceLocatorUnitTests {
 				"secret/straylight/vermillion", "secret/straylight/periwinkle",
 				"secret/icebreaker/armitage/vermillion",
 				"secret/icebreaker/armitage/periwinkle");
+	}
+
+	@Test
+	public void shouldCreatePropertySourcesInOrder() {
+
+		DefaultSecretBackendConfigurer configurer = new DefaultSecretBackendConfigurer();
+		configurer.add(new MySecondSecretBackendMetadata());
+		configurer.add(new MyFirstSecretBackendMetadata());
+
+		propertySourceLocator = new VaultPropertySourceLocator(operations,
+				new VaultProperties(), configurer);
+
+		PropertySource<?> propertySource = propertySourceLocator
+				.locate(configurableEnvironment);
+
+		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
+
+		CompositePropertySource composite = (CompositePropertySource) propertySource;
+		assertThat(composite.getPropertySources()).extracting("name")
+				.containsSequence("foo", "bar");
+	}
+
+	@Order(1)
+	static class MyFirstSecretBackendMetadata extends SecretBackendMetadataSupport {
+
+		@Override
+		public String getPath() {
+			return "foo";
+		}
+	}
+
+	@Order(2)
+	static class MySecondSecretBackendMetadata extends SecretBackendMetadataSupport {
+
+		@Override
+		public String getPath() {
+			return "bar";
+		}
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.vault.config;
 
-import java.net.URI;
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 
 import lombok.extern.apachecommons.CommonsLog;
@@ -30,8 +28,6 @@ import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.event.LeaseErrorListener;
 import org.springframework.vault.core.lease.event.SecretLeaseEvent;
-import org.springframework.web.util.DefaultUriTemplateHandler;
-import org.springframework.web.util.UriTemplateHandler;
 
 /**
  * Extension to {@link LeasingVaultPropertySourceLocator} that creates
@@ -44,25 +40,23 @@ import org.springframework.web.util.UriTemplateHandler;
 class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSupport
 		implements PriorityOrdered {
 
-	private static final UriTemplateHandler TEMPLATE_HANDLER = new DefaultUriTemplateHandler();
-
 	private final SecretLeaseContainer secretLeaseContainer;
 
 	private final VaultProperties properties;
 
 	/**
 	 * Creates a new {@link LeasingVaultPropertySourceLocator}.
+	 *
 	 * @param properties must not be {@literal null}.
-	 * @param genericBackendProperties must not be {@literal null}.
-	 * @param backendAccessors must not be {@literal null}.
+	 * @param propertySourceLocatorConfiguration must not be {@literal null}.
 	 * @param secretLeaseContainer must not be {@literal null}.
+	 * @since 1.1
 	 */
 	public LeasingVaultPropertySourceLocator(VaultProperties properties,
-			VaultGenericBackendProperties genericBackendProperties,
-			Collection<SecretBackendMetadata> backendAccessors,
+			PropertySourceLocatorConfiguration propertySourceLocatorConfiguration,
 			SecretLeaseContainer secretLeaseContainer) {
 
-		super("vault", genericBackendProperties, backendAccessors);
+		super("vault", propertySourceLocatorConfiguration);
 
 		Assert.notNull(secretLeaseContainer, "SecretLeaseContainer must not be null");
 		Assert.notNull(properties, "VaultProperties must not be null");
@@ -86,9 +80,7 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 	protected PropertySource<?> createVaultPropertySource(
 			SecretBackendMetadata accessor) {
 
-		URI expand = TEMPLATE_HANDLER.expand("{backend}/{key}", accessor.getVariables());
-
-		final RequestedSecret secret = RequestedSecret.renewable(expand.getPath());
+		RequestedSecret secret = RequestedSecret.renewable(accessor.getPath());
 
 		if (properties.isFailFast()) {
 			return createVaultPropertySourceFailFast(secret, accessor);
