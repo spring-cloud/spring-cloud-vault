@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 package org.springframework.cloud.vault.config;
-
-import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,8 +49,9 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 	public void before() {
 
 		propertySourceLocator = new LeasingVaultPropertySourceLocator(
-				new VaultProperties(), new VaultGenericBackendProperties(),
-				Collections.<SecretBackendMetadata>emptyList(), secretLeaseContainer);
+				new VaultProperties(), VaultPropertySourceLocatorSupport
+						.createConfiguration(new VaultGenericBackendProperties()),
+				secretLeaseContainer);
 	}
 
 	@Test
@@ -62,8 +61,9 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 		vaultProperties.getConfig().setOrder(10);
 
 		propertySourceLocator = new LeasingVaultPropertySourceLocator(vaultProperties,
-				new VaultGenericBackendProperties(),
-				Collections.<SecretBackendMetadata>emptyList(), secretLeaseContainer);
+				VaultPropertySourceLocatorSupport.createConfiguration(
+						new VaultGenericBackendProperties()),
+				secretLeaseContainer);
 
 		assertThat(propertySourceLocator.getOrder()).isEqualTo(10);
 	}

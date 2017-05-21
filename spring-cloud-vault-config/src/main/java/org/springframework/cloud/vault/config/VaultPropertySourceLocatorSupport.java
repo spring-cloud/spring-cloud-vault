@@ -16,15 +16,20 @@
 package org.springframework.cloud.vault.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import static org.springframework.cloud.vault.config.GenericSecretBackendMetadata.create;
 
@@ -38,9 +43,7 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 
 	private final String propertySourceName;
 
-	private final VaultGenericBackendProperties genericBackendProperties;
-
-	private final Collection<SecretBackendMetadata> backendAccessors;
+	private final PropertySourceLocatorConfiguration propertySourceLocatorConfiguration;
 
 	/**
 	 * Creates a new {@link VaultPropertySourceLocatorSupport}.
@@ -53,18 +56,62 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 			VaultGenericBackendProperties genericBackendProperties,
 			Collection<SecretBackendMetadata> backendAccessors) {
 
+		this(propertySourceName,
+				createConfiguration(genericBackendProperties, backendAccessors));
+	}
+
+	/**
+	 * Creates a new {@link VaultPropertySourceLocatorSupport} given a
+	 * {@link PropertySourceLocatorConfiguration}.
+	 *
+	 * @param propertySourceName must not be {@literal null} or empty.
+	 * @param propertySourceLocatorConfiguration must not be {@literal null}.
+	 * @since 1.1
+	 */
+	public VaultPropertySourceLocatorSupport(String propertySourceName,
+			PropertySourceLocatorConfiguration propertySourceLocatorConfiguration) {
+
 		Assert.hasText(propertySourceName, "PropertySource name must not be empty");
+		Assert.notNull(propertySourceLocatorConfiguration,
+				"PropertySourceLocatorConfiguration must not be null");
+
+		this.propertySourceName = propertySourceName;
+		this.propertySourceLocatorConfiguration = propertySourceLocatorConfiguration;
+	}
+
+	static PropertySourceLocatorConfiguration createConfiguration(
+			VaultGenericBackendProperties genericBackendProperties,
+			Collection<SecretBackendMetadata> backendAccessors) {
+
+		Assert.notNull(genericBackendProperties,
+				"VaultGenericBackendProperties must not be null");
 		Assert.notNull(backendAccessors, "BackendAccessors must not be null");
+
+		GenericPropertySourceLocatorConfiguration generic = new GenericPropertySourceLocatorConfiguration(
+				genericBackendProperties);
+
+		WrappedPropertySourceLocatorConfiguration backends = new WrappedPropertySourceLocatorConfiguration(
+				new ArrayList<>(backendAccessors));
+
+		return new CompositePropertySourceConfiguration(generic, backends);
+	}
+
+	static PropertySourceLocatorConfiguration createConfiguration(
+			VaultGenericBackendProperties genericBackendProperties) {
+
 		Assert.notNull(genericBackendProperties,
 				"VaultGenericBackendProperties must not be null");
 
-		this.propertySourceName = propertySourceName;
-		this.backendAccessors = backendAccessors;
-		this.genericBackendProperties = genericBackendProperties;
+		return new GenericPropertySourceLocatorConfiguration(genericBackendProperties);
 	}
 
 	@Override
 	public PropertySource<?> locate(Environment environment) {
+
+		if (propertySourceLocatorConfiguration instanceof EnvironmentAware) {
+			((EnvironmentAware) propertySourceLocatorConfiguration)
+					.setEnvironment(environment);
+		}
 
 		CompositePropertySource propertySource = createCompositePropertySource(
 				environment);
@@ -109,13 +156,16 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	 */
 	protected List<PropertySource<?>> doCreatePropertySources(Environment environment) {
 
+		Collection<SecretBackendMetadata> secretBackends = propertySourceLocatorConfiguration
+				.getSecretBackends();
+		List<SecretBackendMetadata> sorted = new ArrayList<>(secretBackends);
 		List<PropertySource<?>> propertySources = new ArrayList<>();
 
-		if (genericBackendProperties.isEnabled()) {
-			propertySources.addAll(doCreateGenericPropertySources(environment));
-		}
+		AnnotationAwareOrderComparator.sort(sorted);
 
-		for (SecretBackendMetadata backendAccessor : backendAccessors) {
+		propertySources.addAll(doCreateGenericPropertySources(environment));
+
+		for (SecretBackendMetadata backendAccessor : sorted) {
 
 			PropertySource<?> vaultPropertySource = createVaultPropertySource(
 					backendAccessor);
@@ -135,23 +185,7 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	 */
 	protected List<PropertySource<?>> doCreateGenericPropertySources(
 			Environment environment) {
-
-		List<PropertySource<?>> propertySources = new ArrayList<>();
-		List<String> contexts = GenericSecretBackendMetadata
-				.buildContexts(genericBackendProperties, environment);
-
-		for (String propertySourceContext : contexts) {
-
-			if (StringUtils.hasText(propertySourceContext)) {
-
-				PropertySource<?> vaultPropertySource = createVaultPropertySource(create(
-						genericBackendProperties.getBackend(), propertySourceContext));
-
-				propertySources.add(vaultPropertySource);
-			}
-		}
-
-		return propertySources;
+		return new ArrayList<>();
 	}
 
 	/**
@@ -185,4 +219,89 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	protected abstract PropertySource<?> createVaultPropertySource(
 			SecretBackendMetadata accessor);
 
+	@RequiredArgsConstructor
+	private static class GenericPropertySourceLocatorConfiguration
+			implements EnvironmentAware, PropertySourceLocatorConfiguration {
+
+		private final VaultGenericBackendProperties genericBackendProperties;
+
+		private Environment environment;
+
+		@Override
+		public void setEnvironment(Environment environment) {
+			this.environment = environment;
+		}
+
+		@Override
+		public Collection<SecretBackendMetadata> getSecretBackends() {
+
+			if (genericBackendProperties.isEnabled()) {
+
+				List<String> contexts = GenericSecretBackendMetadata.buildContexts(
+						genericBackendProperties,
+						Arrays.asList(environment.getActiveProfiles()));
+
+				List<SecretBackendMetadata> result = new ArrayList<>(contexts.size());
+
+				for (String context : contexts) {
+					result.add(create(genericBackendProperties.getBackend(), context));
+				}
+
+				return result;
+			}
+
+			return Collections.emptyList();
+		}
+	}
+
+	@RequiredArgsConstructor
+	private static class WrappedPropertySourceLocatorConfiguration
+			implements PropertySourceLocatorConfiguration {
+
+		private final List<SecretBackendMetadata> metadata;
+
+		@Override
+		public Collection<SecretBackendMetadata> getSecretBackends() {
+			return metadata;
+		}
+	}
+
+	private static class CompositePropertySourceConfiguration
+			implements PropertySourceLocatorConfiguration, EnvironmentAware {
+
+		private final List<PropertySourceLocatorConfiguration> configurations;
+
+		public CompositePropertySourceConfiguration(
+				PropertySourceLocatorConfiguration... configurations) {
+
+			List<PropertySourceLocatorConfiguration> copy = new ArrayList<>(
+					Arrays.asList(configurations));
+
+			AnnotationAwareOrderComparator.sortIfNecessary(copy);
+
+			this.configurations = copy;
+		}
+
+		@Override
+		public Collection<SecretBackendMetadata> getSecretBackends() {
+
+			List<SecretBackendMetadata> result = new ArrayList<>();
+
+			for (PropertySourceLocatorConfiguration configuration : configurations) {
+				result.addAll(configuration.getSecretBackends());
+			}
+
+			return result;
+		}
+
+		@Override
+		public void setEnvironment(Environment environment) {
+
+			for (PropertySourceLocatorConfiguration configuration : configurations) {
+				if (configuration instanceof EnvironmentAware) {
+					((EnvironmentAware) configuration).setEnvironment(environment);
+				}
+			}
+		}
+	}
 }
