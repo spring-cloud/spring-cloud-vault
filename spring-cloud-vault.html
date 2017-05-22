@@ -458,6 +458,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#vault.config.backends.postgresql">PostgreSQL</a></li>
 </ul>
 </li>
+<li><a href="#vault.config.backends.configurer">Configure <code>PropertySourceLocator</code> behavior</a></li>
 <li><a href="#vault.config.fail-fast">Vault Client Fail Fast</a></li>
 <li><a href="#vault.config.ssl">Vault Client SSL configuration</a></li>
 <li><a href="#vault-lease-renewal">Lease lifecycle management (renewal and revocation)</a></li>
@@ -1887,6 +1888,63 @@ You can configure the property names by setting
 <div class="paragraph">
 <p>See also: <a href="https://www.vaultproject.io/docs/secrets/postgresql/index.html">Vault Documentation: Setting up PostgreSQL with Vault</a></p>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="vault.config.backends.configurer">Configure <code>PropertySourceLocator</code> behavior</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Cloud Vault uses property-based configuration to create <code>PropertySource</code>s
+for generic and discovered secret backends.</p>
+</div>
+<div class="paragraph">
+<p>Discovered backends provide <code>VaultSecretBackendDescriptor</code> beans to describe the configuration
+state to use secret backend as <code>PropertySource</code>. A <code>SecretBackendMetadataFactory</code> is required
+to create a <code>SecretBackendMetadata</code> object which contains path, name and property transformation
+configuration.</p>
+</div>
+<div class="paragraph">
+<p><code>SecretBackendMetadata</code> is used to back a particular <code>PropertySource</code>.</p>
+</div>
+<div class="paragraph">
+<p>You can register an arbitrary number of beans implementing <code>VaultConfigurer</code> for customization.
+Default generic and discovered backend registration is disabled if Spring Cloud Vault discovers
+at least one <code>VaultConfigurer</code> bean. You can however enable default registration with
+<code>SecretBackendConfigurer.registerDefaultGenericSecretBackends()</code> and <code>SecretBackendConfigurer.registerDefaultDiscoveredSecretBackends()</code>.</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">public class CustomizationBean implements VaultConfigurer {
+
+    @Override
+    public void addSecretBackends(SecretBackendConfigurer configurer) {
+
+        configurer.add("secret/my-application");
+
+        configurer.registerDefaultGenericSecretBackends(false);
+        configurer.registerDefaultDiscoveredSecretBackends(true);
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+All customization is required to happen in the bootstrap context. Add your configuration
+classes to <code>META-INF/spring.factories</code> at <code>org.springframework.cloud.bootstrap.BootstrapConfiguration</code>
+in your application.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
