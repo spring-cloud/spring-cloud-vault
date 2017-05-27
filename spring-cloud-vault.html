@@ -702,6 +702,7 @@ the bootstrap phase of an application context), e.g.</p>
     host: localhost
     port: 8200
     scheme: https
+    uri: https://localhost:8200
     connection-timeout: 5000
     read-timeout: 15000
     config:
@@ -722,6 +723,9 @@ for SSL certificate validation</p>
 <li>
 <p><code>scheme</code> setting the scheme to <code>http</code> will use plain HTTP.
 Supported schemes are <code>http</code> and <code>https</code>.</p>
+</li>
+<li>
+<p><code>uri</code> configure the Vault endpoint with an URI. Takes precedence over host/port/scheme configuration</p>
 </li>
 <li>
 <p><code>connection-timeout</code> sets the connection timeout in milliseconds</p>
