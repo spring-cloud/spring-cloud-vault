@@ -21,6 +21,8 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultHealth;
 
 /**
+ * Simple health indicator reporting Vault's availability.
+ *
  * @author Stuart Ingram
  * @author Mark Paluch
  */
@@ -48,8 +50,7 @@ public class VaultHealthIndicator implements HealthIndicator {
 			}
 
 			if (vaultHealthResponse.isStandby()) {
-				return Health.outOfService().withDetail("state", "Vault in standby")
-						.build();
+				return Health.up().withDetail("state", "Vault in standby").build();
 			}
 
 			return Health.up().build();
