@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 package org.springframework.cloud.vault.config;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.cloud.vault.util.Settings.*;
-
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -28,6 +25,7 @@ import org.assertj.core.util.Files;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -37,12 +35,15 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.cloud.vault.util.Settings.findWorkDir;
+
 /**
  * Integration test using config infrastructure with TLS certificate authentication. In
  * case this test should fail because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
- * 
+ *
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -50,7 +51,8 @@ import org.springframework.vault.core.VaultOperations;
 		"spring.cloud.vault.authentication=cert",
 		"spring.cloud.vault.ssl.key-store=file:../work/client-cert.jks",
 		"spring.cloud.vault.ssl.key-store-password=changeit",
-		"spring.application.name=VaultConfigTlsCertAuthenticationTests" })
+		"spring.cloud.vault.application-name=VaultConfigTlsCertAuthenticationTests" }) // see
+// https://github.com/spring-cloud/spring-cloud-commons/issues/214
 public class VaultConfigTlsCertAuthenticationTests {
 
 	@BeforeClass

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,8 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = VaultConfigAppRoleTests.TestApplication.class, properties = {
 		"spring.cloud.vault.authentication=approle",
-		"spring.application.name=VaultConfigAppRoleTests" })
+		"spring.cloud.vault.application-name=VaultConfigAppRoleTests" }) // see
+// https://github.com/spring-cloud/spring-cloud-commons/issues/214
 public class VaultConfigAppRoleTests {
 
 	@BeforeClass
@@ -95,7 +96,8 @@ public class VaultConfigAppRoleTests {
 				.get("role_id");
 		String secretId = (String) vaultOperations
 				.write(String.format("auth/approle/role/with-secret-id/secret-id",
-						"with-secret-id"), null).getData().get("secret_id");
+						"with-secret-id"), null)
+				.getData().get("secret_id");
 
 		System.setProperty("spring.cloud.vault.app-role.role-id", roleId);
 		System.setProperty("spring.cloud.vault.app-role.secret-id", secretId);

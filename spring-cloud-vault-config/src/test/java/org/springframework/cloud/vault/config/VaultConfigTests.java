@@ -51,7 +51,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = VaultConfigTests.TestApplication.class, properties = {
 		"spring.cloud.vault.host=foo", "spring.cloud.vault.port=80",
-		"spring.cloud.vault.uri=https://localhost:8200" })
+		"spring.cloud.vault.uri=https://localhost:8200",
+		"spring.cloud.vault.application-name=testVaultApp" }) // see
+// https://github.com/spring-cloud/spring-cloud-commons/issues/214
 public class VaultConfigTests {
 
 	@BeforeClass
