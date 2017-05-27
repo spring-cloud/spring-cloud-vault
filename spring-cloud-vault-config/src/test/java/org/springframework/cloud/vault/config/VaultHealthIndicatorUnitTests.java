@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class VaultHealthIndicatorUnitTests {
 	VaultHealthIndicator healthIndicator;
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 
 		healthIndicator = new VaultHealthIndicator(vaultOperations);
 
@@ -60,7 +60,7 @@ public class VaultHealthIndicatorUnitTests {
 	}
 
 	@Test
-	public void shouldReportHealthyService() throws Exception {
+	public void shouldReportHealthyService() {
 
 		when(healthResponse.isInitialized()).thenReturn(true);
 		when(vaultOperations.opsForSys()).thenReturn(vaultSysOperations);
@@ -71,7 +71,7 @@ public class VaultHealthIndicatorUnitTests {
 	}
 
 	@Test
-	public void shouldReportSealedService() throws Exception {
+	public void shouldReportSealedService() {
 
 		when(healthResponse.isInitialized()).thenReturn(true);
 		when(healthResponse.isSealed()).thenReturn(true);
@@ -83,7 +83,7 @@ public class VaultHealthIndicatorUnitTests {
 	}
 
 	@Test
-	public void shouldReportUninitializedService() throws Exception {
+	public void shouldReportUninitializedService() {
 
 		Health health = healthIndicator.health();
 
@@ -92,19 +92,19 @@ public class VaultHealthIndicatorUnitTests {
 	}
 
 	@Test
-	public void shouldReportStandbyService() throws Exception {
+	public void shouldReportStandbyService() {
 
 		when(healthResponse.isInitialized()).thenReturn(true);
 		when(healthResponse.isStandby()).thenReturn(true);
 
 		Health health = healthIndicator.health();
 
-		assertThat(health.getStatus()).isEqualTo(Status.OUT_OF_SERVICE);
+		assertThat(health.getStatus()).isEqualTo(Status.UP);
 		assertThat(health.getDetails()).containsEntry("state", "Vault in standby");
 	}
 
 	@Test
-	public void exceptionsShouldReportDownStatus() throws Exception {
+	public void exceptionsShouldReportDownStatus() {
 
 		reset(vaultSysOperations);
 		when(vaultSysOperations.health()).thenThrow(new IllegalStateException());
