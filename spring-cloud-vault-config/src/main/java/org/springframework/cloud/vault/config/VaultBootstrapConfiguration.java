@@ -110,6 +110,10 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 	private VaultEndpoint getVaultEndpoint(VaultProperties vaultProperties) {
 
+		if (StringUtils.hasText(vaultProperties.getUri())) {
+			return VaultEndpoint.from(URI.create(vaultProperties.getUri()));
+		}
+
 		VaultEndpoint vaultEndpoint = new VaultEndpoint();
 		vaultEndpoint.setHost(vaultProperties.getHost());
 		vaultEndpoint.setPort(vaultProperties.getPort());

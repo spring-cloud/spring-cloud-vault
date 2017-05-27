@@ -61,6 +61,11 @@ public class VaultProperties implements EnvironmentAware {
 	private String scheme = "https";
 
 	/**
+	 * Vault URI. Can be set with scheme, host and port.
+	 */
+	private String uri;
+
+	/**
 	 * Connection timeout;
 	 */
 	private int connectionTimeout = 5000;
