@@ -18,7 +18,6 @@ package org.springframework.cloud.vault.config;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
@@ -66,18 +65,14 @@ public class VaultGenericBackendProperties implements EnvironmentAware {
 	@Override
 	public void setEnvironment(Environment environment) {
 
-		RelaxedPropertyResolver springCloudVaultPropertyResolver = new RelaxedPropertyResolver(
-				environment, "spring.cloud.vault.");
-		String springCloudVaultAppName = springCloudVaultPropertyResolver
-				.getProperty("application-name");
+		String springCloudVaultAppName = environment
+				.getProperty("spring.cloud.vault.application-name");
 
 		if (StringUtils.hasText(springCloudVaultAppName)) {
 			this.applicationName = springCloudVaultAppName;
 		}
 		else {
-			RelaxedPropertyResolver springPropertyResolver = new RelaxedPropertyResolver(
-					environment, "spring.application.");
-			String springAppName = springPropertyResolver.getProperty("name");
+			String springAppName = environment.getProperty("spring.application.name");
 
 			if (StringUtils.hasText(springAppName)) {
 				this.applicationName = springAppName;

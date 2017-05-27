@@ -20,7 +20,6 @@ import lombok.Getter;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.constraints.Range;
 
-import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 import org.springframework.context.EnvironmentAware;
@@ -105,9 +104,7 @@ public class VaultProperties implements EnvironmentAware {
 	@Override
 	public void setEnvironment(Environment environment) {
 
-		RelaxedPropertyResolver springPropertyResolver = new RelaxedPropertyResolver(
-				environment, "spring.application.");
-		String springAppName = springPropertyResolver.getProperty("name");
+		String springAppName = environment.getProperty("spring.application.name");
 
 		if (StringUtils.hasText(springAppName)) {
 			this.applicationName = springAppName;
