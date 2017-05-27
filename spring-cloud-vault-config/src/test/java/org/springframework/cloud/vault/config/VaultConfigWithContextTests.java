@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = VaultConfigWithContextTests.TestApplication.class)
+@SpringBootTest(classes = VaultConfigWithContextTests.TestApplication.class, properties = "spring.cloud.vault.application-name=testVaultApp") // see
+// https://github.com/spring-cloud/spring-cloud-commons/issues/214
 @ActiveProfiles("my-profile")
 public class VaultConfigWithContextTests {
 
