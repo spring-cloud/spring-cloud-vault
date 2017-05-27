@@ -16,12 +16,10 @@
 package org.springframework.cloud.vault.config;
 
 import lombok.Data;
-import lombok.Getter;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.constraints.Range;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
@@ -184,15 +182,6 @@ public class VaultProperties implements EnvironmentAware {
 		 * Name of the role, optional.
 		 */
 		private String role = "";
-
-		/**
-		 * Flag whether to generate and send a nonce.
-		 *
-		 * @deprecated not used, will be removed in a future version.
-		 */
-		@Getter(onMethod = @__(@DeprecatedConfigurationProperty(reason = "not used")))
-		@Deprecated
-		private boolean useNonce = true;
 
 		/**
 		 * Nonce used for AWS-EC2 authentication. An empty nonce defaults to nonce
