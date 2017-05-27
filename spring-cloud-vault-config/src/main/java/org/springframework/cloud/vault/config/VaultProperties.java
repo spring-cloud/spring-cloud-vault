@@ -110,6 +110,7 @@ public class VaultProperties implements EnvironmentAware {
 	}
 
 	@Data
+	@Validated
 	public static class AppIdProperties {
 
 		/**
@@ -145,6 +146,7 @@ public class VaultProperties implements EnvironmentAware {
 	}
 
 	@Data
+	@Validated
 	public static class AppRoleProperties {
 
 		/**
@@ -164,6 +166,7 @@ public class VaultProperties implements EnvironmentAware {
 	}
 
 	@Data
+	@Validated
 	public static class AwsEc2Properties {
 
 		/**
@@ -191,6 +194,7 @@ public class VaultProperties implements EnvironmentAware {
 	}
 
 	@Data
+	@Validated
 	public static class Ssl {
 
 		/**
