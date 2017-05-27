@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.config.consul;
-
-import static org.assertj.core.api.Java6Assertions.*;
-import static org.junit.Assume.*;
 
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +25,7 @@ import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -39,17 +37,19 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.web.client.RestTemplate;
+
+import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests using the consul secret backend. In case this test should fail
  * because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
- * 
+ *
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -104,8 +104,8 @@ public class VaultConfigConsulTests {
 
 		vaultOperations.write("consul/config/access", consulAccess);
 
-		vaultOperations.write("consul/roles/readonly",
-				Collections.singletonMap("policy", Base64.encode(POLICY.getBytes())));
+		vaultOperations.write("consul/roles/readonly", Collections.singletonMap("policy",
+				new String(Base64.getEncoder().encode(POLICY.getBytes()))));
 	}
 
 	@Value("${spring.cloud.consul.token}")
