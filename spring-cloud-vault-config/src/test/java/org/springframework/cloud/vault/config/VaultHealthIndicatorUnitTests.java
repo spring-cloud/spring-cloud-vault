@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,22 @@
  */
 package org.springframework.cloud.vault.config;
 
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.Status;
-import org.springframework.vault.core.VaultOperations;
-import org.springframework.vault.core.VaultSysOperations;
-import org.springframework.vault.support.VaultHealth;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.Status;
+import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.core.VaultSysOperations;
+import org.springframework.vault.support.VaultHealth;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link VaultHealthIndicator}.
@@ -52,14 +53,14 @@ public class VaultHealthIndicatorUnitTests {
 	VaultHealth healthResponse;
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 
 		when(vaultOperations.opsForSys()).thenReturn(vaultSysOperations);
 		when(vaultSysOperations.health()).thenReturn(healthResponse);
 	}
 
 	@Test
-	public void shouldReportHealthyService() throws Exception {
+	public void shouldReportHealthyService() {
 
 		when(healthResponse.isInitialized()).thenReturn(true);
 		when(vaultOperations.opsForSys()).thenReturn(vaultSysOperations);
@@ -70,7 +71,7 @@ public class VaultHealthIndicatorUnitTests {
 	}
 
 	@Test
-	public void shouldReportSealedService() throws Exception {
+	public void shouldReportSealedService() {
 
 		when(healthResponse.isInitialized()).thenReturn(true);
 		when(healthResponse.isSealed()).thenReturn(true);
@@ -82,7 +83,7 @@ public class VaultHealthIndicatorUnitTests {
 	}
 
 	@Test
-	public void shouldReportUninitializedService() throws Exception {
+	public void shouldReportUninitializedService() {
 
 		Health health = healthIndicator.health();
 
@@ -91,19 +92,19 @@ public class VaultHealthIndicatorUnitTests {
 	}
 
 	@Test
-	public void shouldReportStandbyService() throws Exception {
+	public void shouldReportStandbyService() {
 
 		when(healthResponse.isInitialized()).thenReturn(true);
 		when(healthResponse.isStandby()).thenReturn(true);
 
 		Health health = healthIndicator.health();
 
-		assertThat(health.getStatus()).isEqualTo(Status.OUT_OF_SERVICE);
+		assertThat(health.getStatus()).isEqualTo(Status.UP);
 		assertThat(health.getDetails()).containsEntry("state", "Vault in standby");
 	}
 
 	@Test
-	public void exceptionsShouldReportDownStatus() throws Exception {
+	public void exceptionsShouldReportDownStatus() {
 
 		reset(vaultSysOperations);
 		when(vaultSysOperations.health()).thenThrow(new IllegalStateException());
