@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -96,8 +96,6 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 
 		propertySourceLocator = new LeasingVaultPropertySourceLocator(
 				new VaultProperties(), configurer, secretLeaseContainer);
-
-		when(configurableEnvironment.getActiveProfiles()).thenReturn(new String[0]);
 
 		PropertySource<?> propertySource = propertySourceLocator
 				.locate(configurableEnvironment);
