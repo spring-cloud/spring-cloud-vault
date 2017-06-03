@@ -18,6 +18,7 @@ package org.springframework.cloud.vault.config.databases;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.vault.config.PropertyNameTransformer;
 import org.springframework.cloud.vault.config.SecretBackendMetadata;
@@ -41,11 +42,16 @@ import org.springframework.vault.core.util.PropertyTransformer;
 public class VaultConfigDatabaseBootstrapConfiguration {
 
 	@Bean
-	public SecretBackendMetadataFactory<DatabaseSecretProperties> databaseSecretBackendMetadataFactory() {
+	@ConditionalOnMissingBean
+	public DatabaseSecretBackendMetadataFactory databaseSecretBackendMetadataFactory() {
 		return new DatabaseSecretBackendMetadataFactory();
 	}
 
-	static class DatabaseSecretBackendMetadataFactory
+	/**
+	 * {@link SecretBackendMetadataFactory} for Database integration using
+	 * {@link DatabaseSecretProperties}.
+	 */
+	public static class DatabaseSecretBackendMetadataFactory
 			implements SecretBackendMetadataFactory<DatabaseSecretProperties> {
 
 		@Override
@@ -69,7 +75,7 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 		 * @param properties must not be {@literal null}.
 		 * @return the {@link SecretBackendMetadata}
 		 */
-		public static SecretBackendMetadata forDatabase(
+		static SecretBackendMetadata forDatabase(
 				final DatabaseSecretProperties properties) {
 
 			Assert.notNull(properties, "DatabaseSecretProperties must not be null");

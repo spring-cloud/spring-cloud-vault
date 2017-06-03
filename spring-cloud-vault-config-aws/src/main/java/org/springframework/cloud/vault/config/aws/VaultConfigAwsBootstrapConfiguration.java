@@ -18,6 +18,7 @@ package org.springframework.cloud.vault.config.aws;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.vault.config.PropertyNameTransformer;
 import org.springframework.cloud.vault.config.SecretBackendMetadata;
@@ -38,11 +39,16 @@ import org.springframework.vault.core.util.PropertyTransformer;
 public class VaultConfigAwsBootstrapConfiguration {
 
 	@Bean
-	public SecretBackendMetadataFactory<VaultAwsProperties> awsSecretBackendMetadataFactory() {
+	@ConditionalOnMissingBean
+	public AwsSecretBackendMetadataFactory awsSecretBackendMetadataFactory() {
 		return new AwsSecretBackendMetadataFactory();
 	}
 
-	static class AwsSecretBackendMetadataFactory
+	/**
+	 * {@link SecretBackendMetadataFactory} for AWS integration using
+	 * {@link VaultAwsProperties}.
+	 */
+	public static class AwsSecretBackendMetadataFactory
 			implements SecretBackendMetadataFactory<VaultAwsProperties> {
 
 		@Override
@@ -66,7 +72,7 @@ public class VaultConfigAwsBootstrapConfiguration {
 		 * @param properties must not be {@literal null}.
 		 * @return the {@link SecretBackendMetadata}
 		 */
-		public static SecretBackendMetadata forAws(final VaultAwsProperties properties) {
+		static SecretBackendMetadata forAws(final VaultAwsProperties properties) {
 
 			Assert.notNull(properties, "VaultAwsProperties must not be null");
 

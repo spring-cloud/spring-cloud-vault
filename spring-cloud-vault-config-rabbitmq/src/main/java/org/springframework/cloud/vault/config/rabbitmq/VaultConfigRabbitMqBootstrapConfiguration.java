@@ -18,6 +18,7 @@ package org.springframework.cloud.vault.config.rabbitmq;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.vault.config.PropertyNameTransformer;
 import org.springframework.cloud.vault.config.SecretBackendMetadata;
@@ -38,7 +39,8 @@ import org.springframework.vault.core.util.PropertyTransformer;
 public class VaultConfigRabbitMqBootstrapConfiguration {
 
 	@Bean
-	public SecretBackendMetadataFactory<VaultRabbitMqProperties> rabbitMqSecureBackendAccessorFactory() {
+	@ConditionalOnMissingBean
+	public RabbitMqSecretBackendMetadataFactory rabbitMqSecureBackendAccessorFactory() {
 		return new RabbitMqSecretBackendMetadataFactory();
 	}
 
@@ -47,7 +49,11 @@ public class VaultConfigRabbitMqBootstrapConfiguration {
 		return new VaultRabbitMqProperties();
 	}
 
-	static class RabbitMqSecretBackendMetadataFactory
+	/**
+	 * {@link SecretBackendMetadataFactory} for RabbitMq integration using
+	 * {@link VaultRabbitMqProperties}.
+	 */
+	public static class RabbitMqSecretBackendMetadataFactory
 			implements SecretBackendMetadataFactory<VaultRabbitMqProperties> {
 
 		@Override
@@ -71,7 +77,7 @@ public class VaultConfigRabbitMqBootstrapConfiguration {
 		 * @param properties must not be {@literal null}.
 		 * @return the {@link SecretBackendMetadata}
 		 */
-		public static SecretBackendMetadata forRabbitMq(
+		static SecretBackendMetadata forRabbitMq(
 				final VaultRabbitMqProperties properties) {
 
 			Assert.notNull(properties, "VaultRabbitMqProperties must not be null");
