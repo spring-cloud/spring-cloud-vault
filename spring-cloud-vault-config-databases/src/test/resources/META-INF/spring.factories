@@ -1,0 +1,4 @@
+# Bootstrap Configuration
+org.springframework.cloud.bootstrap.BootstrapConfiguration=\
+org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfigurationTests.CustomBootstrapConfiguration,\
+org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration

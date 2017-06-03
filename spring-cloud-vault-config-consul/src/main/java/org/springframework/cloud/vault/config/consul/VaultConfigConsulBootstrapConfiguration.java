@@ -18,6 +18,7 @@ package org.springframework.cloud.vault.config.consul;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.vault.config.PropertyNameTransformer;
 import org.springframework.cloud.vault.config.SecretBackendMetadata;
@@ -38,11 +39,16 @@ import org.springframework.vault.core.util.PropertyTransformer;
 public class VaultConfigConsulBootstrapConfiguration {
 
 	@Bean
-	public SecretBackendMetadataFactory<VaultConsulProperties> consulSecretBackendAccessorFactory() {
+	@ConditionalOnMissingBean
+	public ConsulSecretBackendMetadataFactory consulSecretBackendAccessorFactory() {
 		return new ConsulSecretBackendMetadataFactory();
 	}
 
-	static class ConsulSecretBackendMetadataFactory
+	/**
+	 * {@link SecretBackendMetadataFactory} for Consul integration using
+	 * {@link VaultConsulProperties}.
+	 */
+	public static class ConsulSecretBackendMetadataFactory
 			implements SecretBackendMetadataFactory<VaultConsulProperties> {
 
 		@Override
@@ -64,7 +70,7 @@ public class VaultConfigConsulBootstrapConfiguration {
 		 * @param properties must not be {@literal null}.
 		 * @return the {@link SecretBackendMetadata}
 		 */
-		public static SecretBackendMetadata forConsul(
+		static SecretBackendMetadata forConsul(
 				final VaultConsulProperties properties) {
 
 			Assert.notNull(properties, "VaultConsulProperties must not be null");
