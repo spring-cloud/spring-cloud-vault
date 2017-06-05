@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.vault.config;
 
+import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.util.PropertyTransformer;
 
 /**
@@ -62,6 +63,28 @@ public interface SecretBackendConfigurer {
 	 * @return {@code this} {@link SecretBackendConfigurer}.
 	 */
 	SecretBackendConfigurer add(SecretBackendMetadata metadata);
+
+	/**
+	 * Add a {@link SecretBackendMetadata} given {@link RequestedSecret}. Property sources
+	 * supporting leasing will derive lease renewal/rotation from
+	 * {@link RequestedSecret.Mode}.
+	 *
+	 * @param requestedSecret must not be {@literal null} or empty.
+	 * @return {@code this} {@link SecretBackendConfigurer}.
+	 */
+	SecretBackendConfigurer add(RequestedSecret requestedSecret);
+
+	/**
+	 * Add a {@link SecretBackendMetadata} given {@link RequestedSecret} and
+	 * {@link PropertyTransformer}. Property sources supporting leasing will derive lease
+	 * renewal/rotation from {@link RequestedSecret.Mode}.
+	 *
+	 * @param requestedSecret must not be {@literal null} or empty.
+	 * @param propertyTransformer must not be {@literal null}.
+	 * @return {@code this} {@link SecretBackendConfigurer}.
+	 */
+	SecretBackendConfigurer add(RequestedSecret requestedSecret,
+			PropertyTransformer propertyTransformer);
 
 	/**
 	 * Register default generic secret backend property sources.

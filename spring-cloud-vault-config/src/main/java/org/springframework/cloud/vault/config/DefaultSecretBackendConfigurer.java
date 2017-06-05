@@ -24,6 +24,8 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.util.Assert;
+import org.springframework.vault.core.lease.domain.RequestedSecret;
+import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
 import org.springframework.vault.core.util.PropertyTransformer;
 import org.springframework.vault.core.util.PropertyTransformers;
 
@@ -57,7 +59,12 @@ class DefaultSecretBackendConfigurer
 		Assert.hasLength(path, "Path must not be empty");
 		Assert.notNull(propertyTransformer, "PropertyTransformer must not be null");
 
-		return add(new SimpleSecretBackendMetadata(path, propertyTransformer));
+		return add(createMetadata(path, propertyTransformer));
+	}
+
+	private SimpleSecretBackendMetadata createMetadata(String path,
+			PropertyTransformer propertyTransformer) {
+		return new SimpleSecretBackendMetadata(path, propertyTransformer);
 	}
 
 	@Override
@@ -66,6 +73,29 @@ class DefaultSecretBackendConfigurer
 		Assert.notNull(metadata, "SecretBackendMetadata must not be null");
 
 		secretBackends.put(metadata.getPath(), metadata);
+
+		return this;
+	}
+
+	@Override
+	public SecretBackendConfigurer add(RequestedSecret requestedSecret) {
+
+		Assert.notNull(requestedSecret, "RequestedSecret must not be null");
+
+		return add(requestedSecret, PropertyTransformers.noop());
+	}
+
+	@Override
+	public SecretBackendConfigurer add(RequestedSecret requestedSecret,
+			PropertyTransformer propertyTransformer) {
+
+		Assert.notNull(requestedSecret, "RequestedSecret must not be null");
+		Assert.notNull(propertyTransformer, "PropertyTransformer must not be null");
+
+		secretBackends.put(requestedSecret.getPath(),
+				new SimpleLeasingSecretBackendMetadata(
+						createMetadata(requestedSecret.getPath(), propertyTransformer),
+						requestedSecret.getMode()));
 
 		return this;
 	}
@@ -126,6 +156,23 @@ class DefaultSecretBackendConfigurer
 		@Override
 		public Map<String, String> getVariables() {
 			return Collections.singletonMap("path", path);
+		}
+	}
+
+	private static class SimpleLeasingSecretBackendMetadata
+			extends SecretBackendMetadataWrapper implements LeasingSecretBackendMetadata {
+
+		private final Mode mode;
+
+		SimpleLeasingSecretBackendMetadata(SecretBackendMetadata delegate, Mode mode) {
+
+			super(delegate);
+			this.mode = mode;
+		}
+
+		@Override
+		public Mode getLeaseMode() {
+			return mode;
 		}
 	}
 }

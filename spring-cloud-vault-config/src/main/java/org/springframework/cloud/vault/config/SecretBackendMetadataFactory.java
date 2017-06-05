@@ -26,13 +26,14 @@ package org.springframework.cloud.vault.config;
  * {@link VaultSecretBackendDescriptor} instance is supported by the implementation, it
  * must be able to create {@link SecretBackendMetadata}, see
  * {@link #createMetadata(VaultSecretBackendDescriptor)}.
- * 
+ *
  * <p>
  * Typically implemented by secret backend providers that implement access to a particular
  * backend using read operations.
  *
  * @author Mark Paluch
  * @see SecretBackendMetadata
+ * @see LeasingSecretBackendMetadata
  * @see VaultSecretBackendDescriptor
  */
 public interface SecretBackendMetadataFactory<T extends VaultSecretBackendDescriptor> {
@@ -43,6 +44,7 @@ public interface SecretBackendMetadataFactory<T extends VaultSecretBackendDescri
 	 *
 	 * @param backendDescriptor must not be {@literal null}.
 	 * @return the {@link SecretBackendMetadata}.
+	 * @see LeasingSecretBackendMetadata
 	 */
 	SecretBackendMetadata createMetadata(T backendDescriptor);
 

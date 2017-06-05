@@ -25,8 +25,10 @@ import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
+import org.springframework.vault.core.lease.domain.RequestedSecret;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -80,5 +82,30 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 
 		CompositePropertySource composite = (CompositePropertySource) propertySource;
 		assertThat(composite.getPropertySources()).hasSize(1);
+		verify(secretLeaseContainer)
+				.addRequestedSecret(RequestedSecret.rotating("secret/application"));
+	}
+
+	@Test
+	public void shouldLocateLeaseAwareSources() {
+
+		RequestedSecret rotating = RequestedSecret.rotating("secret/rotating");
+		DefaultSecretBackendConfigurer configurer = new DefaultSecretBackendConfigurer();
+		configurer.add(rotating);
+		configurer.add("database/mysql/creds/readonly");
+
+		propertySourceLocator = new LeasingVaultPropertySourceLocator(
+				new VaultProperties(), configurer, secretLeaseContainer);
+
+		when(configurableEnvironment.getActiveProfiles()).thenReturn(new String[0]);
+
+		PropertySource<?> propertySource = propertySourceLocator
+				.locate(configurableEnvironment);
+
+		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
+
+		verify(secretLeaseContainer).addRequestedSecret(rotating);
+		verify(secretLeaseContainer).addRequestedSecret(
+				RequestedSecret.renewable("database/mysql/creds/readonly"));
 	}
 }
