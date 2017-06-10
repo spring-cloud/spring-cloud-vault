@@ -162,6 +162,17 @@
 	</dependencies>
 
 	<build>
+
+		<resources>
+			<resource>
+				<directory>../src/main/resources</directory>
+				<targetPath>META-INF</targetPath>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
+
 		<pluginManagement>
 			<plugins>
 				<plugin>
