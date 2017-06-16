@@ -40,15 +40,23 @@ setup are scripted, the scripts are located in `src/test/bash`.
 
 The following scripts need to be run prior to building the project for the tests to pass.
 
-    $ ./src/test/bash/install_vault.sh
-    $ ./src/test/bash/create_certificates.sh
-    $ ./src/test/bash/local_run_vault.sh
+[source,bash]
+----
+$ ./src/test/bash/install_vault.sh
+$ ./src/test/bash/create_certificates.sh
+$ ./src/test/bash/local_run_vault.sh
+----
+
+Leave Vault uninitialized, the tests will initialize and unseal Vault. They will also create a root token `00000000-0000-0000-0000-000000000000`.
 
 Changes to the documentation should be made to the adocs found under `docs/src/main/asciidoc/`
 
-README.adoc can be re-generated via the following
+`README.adoc` can be re-generated via the following
 
-    $ ./docs/src/main/ruby/generate_readme.sh > README.adoc
+[source,bash]
+----
+$ ./docs/src/main/ruby/generate_readme.sh > README.adoc
+----
 
 This script requires ruby and the asciidoctor gem installed (`gem install asciidoctor`)
 
