@@ -15,7 +15,10 @@
  */
 package org.springframework.cloud.vault.config;
 
+import static org.springframework.cloud.vault.config.GenericSecretBackendMetadata.create;
+
 import java.net.URI;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -70,10 +73,9 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
+import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
-
-import static org.springframework.cloud.vault.config.GenericSecretBackendMetadata.create;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for Spring Vault support.
@@ -83,8 +85,7 @@ import static org.springframework.cloud.vault.config.GenericSecretBackendMetadat
  */
 @Configuration
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
-@EnableConfigurationProperties({ VaultProperties.class,
-		VaultGenericBackendProperties.class })
+@EnableConfigurationProperties({ VaultProperties.class, VaultGenericBackendProperties.class })
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
 public class VaultBootstrapConfiguration implements InitializingBean {
 
@@ -126,27 +127,21 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() throws Exception {
 
-		this.vaultSecretBackendDescriptors = applicationContext
-				.getBeansOfType(VaultSecretBackendDescriptor.class).values();
+		this.vaultSecretBackendDescriptors = applicationContext.getBeansOfType(VaultSecretBackendDescriptor.class).values();
 
-		this.factories = (Collection) applicationContext
-				.getBeansOfType(SecretBackendMetadataFactory.class).values();
+		this.factories = (Collection) applicationContext.getBeansOfType(SecretBackendMetadataFactory.class).values();
 
-		ClientHttpRequestFactory clientHttpRequestFactory = clientHttpRequestFactoryWrapper()
-				.getClientHttpRequestFactory();
+		ClientHttpRequestFactory clientHttpRequestFactory = clientHttpRequestFactoryWrapper().getClientHttpRequestFactory();
 
-		this.restOperations = VaultClients.createRestTemplate(vaultEndpoint,
-				clientHttpRequestFactory);
+		this.restOperations = VaultClients.createRestTemplate(vaultEndpoint, clientHttpRequestFactory);
 	}
 
 	@Bean
-	public PropertySourceLocator vaultPropertySourceLocator(VaultOperations operations,
-			VaultProperties vaultProperties,
+	public PropertySourceLocator vaultPropertySourceLocator(VaultOperations operations, VaultProperties vaultProperties,
 			VaultGenericBackendProperties vaultGenericBackendProperties,
 			ObjectFactory<SecretLeaseContainer> secretLeaseContainerObjectFactory) {
 
-		VaultConfigTemplate vaultConfigTemplate = new VaultConfigTemplate(operations,
-				vaultProperties);
+		VaultConfigTemplate vaultConfigTemplate = new VaultConfigTemplate(operations, vaultProperties);
 
 		PropertySourceLocatorConfiguration propertySourceLocatorConfiguration = getPropertySourceConfiguration(
 				vaultGenericBackendProperties);
@@ -157,31 +152,26 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 			// otherwise, the bootstrap context is not shut down cleanly
 			applicationContext.registerShutdownHook();
 
-			SecretLeaseContainer secretLeaseContainer = secretLeaseContainerObjectFactory
-					.getObject();
+			SecretLeaseContainer secretLeaseContainer = secretLeaseContainerObjectFactory.getObject();
 			secretLeaseContainer.start();
 
-			return new LeasingVaultPropertySourceLocator(vaultProperties,
-					propertySourceLocatorConfiguration, secretLeaseContainer);
+			return new LeasingVaultPropertySourceLocator(vaultProperties, propertySourceLocatorConfiguration,
+					secretLeaseContainer);
 		}
 
-		return new VaultPropertySourceLocator(vaultConfigTemplate, vaultProperties,
-				propertySourceLocatorConfiguration);
+		return new VaultPropertySourceLocator(vaultConfigTemplate, vaultProperties, propertySourceLocatorConfiguration);
 	}
 
 	private PropertySourceLocatorConfiguration getPropertySourceConfiguration(
 			VaultGenericBackendProperties vaultGenericBackendProperties) {
 
-		Collection<VaultConfigurer> configurers = applicationContext
-				.getBeansOfType(VaultConfigurer.class).values();
+		Collection<VaultConfigurer> configurers = applicationContext.getBeansOfType(VaultConfigurer.class).values();
 
 		DefaultSecretBackendConfigurer secretBackendConfigurer = new DefaultSecretBackendConfigurer();
 
 		if (configurers.isEmpty()) {
-			secretBackendConfigurer.registerDefaultGenericSecretBackends(true)
-					.registerDefaultDiscoveredSecretBackends(true);
-		}
-		else {
+			secretBackendConfigurer.registerDefaultGenericSecretBackends(true).registerDefaultDiscoveredSecretBackends(true);
+		} else {
 
 			for (VaultConfigurer vaultConfigurer : configurers) {
 				vaultConfigurer.addSecretBackends(secretBackendConfigurer);
@@ -192,19 +182,16 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 			if (vaultGenericBackendProperties.isEnabled()) {
 
-				List<String> contexts = GenericSecretBackendMetadata
-						.buildContexts(vaultGenericBackendProperties, Arrays.asList(
-								applicationContext.getEnvironment().getActiveProfiles()));
+				List<String> contexts = GenericSecretBackendMetadata.buildContexts(vaultGenericBackendProperties,
+						Arrays.asList(applicationContext.getEnvironment().getActiveProfiles()));
 
 				for (String context : contexts) {
-					secretBackendConfigurer.add(
-							create(vaultGenericBackendProperties.getBackend(), context));
+					secretBackendConfigurer.add(create(vaultGenericBackendProperties.getBackend(), context));
 				}
 			}
 
 			Collection<SecretBackendMetadata> backendAccessors = SecretBackendFactories
-					.createSecretBackendMetadata(vaultSecretBackendDescriptors,
-							factories);
+					.createSecretBackendMetadata(vaultSecretBackendDescriptors, factories);
 			for (SecretBackendMetadata metadata : backendAccessors) {
 				secretBackendConfigurer.add(metadata);
 			}
@@ -213,8 +200,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		if (secretBackendConfigurer.isRegisterDefaultDiscoveredSecretBackends()) {
 
 			Collection<SecretBackendMetadata> backendAccessors = SecretBackendFactories
-					.createSecretBackendMetadata(vaultSecretBackendDescriptors,
-							factories);
+					.createSecretBackendMetadata(vaultSecretBackendDescriptors, factories);
 			for (SecretBackendMetadata metadata : backendAccessors) {
 				secretBackendConfigurer.add(metadata);
 			}
@@ -224,35 +210,43 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	}
 
 	/**
-	 * Creates a {@link ClientFactoryWrapper} containing a
-	 * {@link ClientHttpRequestFactory}. {@link ClientHttpRequestFactory} is not exposed
-	 * as root bean because {@link ClientHttpRequestFactory} is configured with
-	 * {@link ClientOptions} and {@link SslConfiguration} which are not necessarily
-	 * applicable for the whole application.
+	 * Creates a {@link ClientFactoryWrapper} containing a {@link ClientHttpRequestFactory}.
+	 * {@link ClientHttpRequestFactory} is not exposed as root bean because {@link ClientHttpRequestFactory} is configured
+	 * with {@link ClientOptions} and {@link SslConfiguration} which are not necessarily applicable for the whole
+	 * application.
 	 *
-	 * @return the {@link ClientFactoryWrapper} to wrap a {@link ClientHttpRequestFactory}
-	 * instance.
+	 * @return the {@link ClientFactoryWrapper} to wrap a {@link ClientHttpRequestFactory} instance.
 	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public ClientFactoryWrapper clientHttpRequestFactoryWrapper() {
 
-		ClientOptions clientOptions = new ClientOptions(
-				vaultProperties.getConnectionTimeout(), vaultProperties.getReadTimeout());
+		ClientOptions clientOptions = new ClientOptions(Duration.ofMillis(vaultProperties.getConnectionTimeout()),
+				Duration.ofMillis(vaultProperties.getReadTimeout()));
 
 		VaultProperties.Ssl ssl = vaultProperties.getSsl();
 		SslConfiguration sslConfiguration;
 		if (ssl != null) {
-			sslConfiguration = new SslConfiguration(ssl.getKeyStore(),
-					ssl.getKeyStorePassword(), ssl.getTrustStore(),
-					ssl.getTrustStorePassword());
-		}
-		else {
+
+			KeyStoreConfiguration keyStore = KeyStoreConfiguration.EMPTY;
+			KeyStoreConfiguration trustStore = KeyStoreConfiguration.EMPTY;
+
+			if (ssl.getKeyStore() != null) {
+				keyStore = new KeyStoreConfiguration(ssl.getKeyStore(),
+						ssl.getKeyStorePassword() != null ? ssl.getKeyStorePassword().toCharArray() : null, null);
+			}
+
+			if (ssl.getTrustStore() != null) {
+				trustStore = new KeyStoreConfiguration(ssl.getTrustStore(),
+						ssl.getTrustStorePassword() != null ? ssl.getTrustStorePassword().toCharArray() : null, null);
+			}
+
+			sslConfiguration = new SslConfiguration(keyStore, trustStore);
+		} else {
 			sslConfiguration = SslConfiguration.NONE;
 		}
 
-		return new ClientFactoryWrapper(
-				ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration));
+		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration));
 	}
 
 	/**
@@ -264,14 +258,13 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@Bean
 	@ConditionalOnMissingBean
 	public VaultTemplate vaultTemplate(SessionManager sessionManager) {
-		return new VaultTemplate(vaultEndpoint,
-				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory(),
+		return new VaultTemplate(vaultEndpoint, clientHttpRequestFactoryWrapper().getClientHttpRequestFactory(),
 				sessionManager);
 	}
 
 	/**
-	 * Creates a new {@link TaskSchedulerWrapper} that encapsulates a bean implementing
-	 * {@link TaskScheduler} and {@link AsyncTaskExecutor}.
+	 * Creates a new {@link TaskSchedulerWrapper} that encapsulates a bean implementing {@link TaskScheduler} and
+	 * {@link AsyncTaskExecutor}.
 	 *
 	 * @return
 	 * @see ThreadPoolTaskScheduler
@@ -305,8 +298,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 		if (vaultProperties.getConfig().getLifecycle().isEnabled()) {
 			return new LifecycleAwareSessionManager(clientAuthentication,
-					asyncTaskExecutorFactory.getObject().getTaskScheduler(),
-					restOperations);
+					asyncTaskExecutorFactory.getObject().getTaskScheduler(), restOperations);
 		}
 
 		return new SimpleSessionManager(clientAuthentication);
@@ -322,8 +314,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@ConditionalOnMissingBean
 	public SecretLeaseContainer secretLeaseContainer(VaultOperations vaultOperations,
 			TaskSchedulerWrapper taskSchedulerWrapper) {
-		return new SecretLeaseContainer(vaultOperations,
-				taskSchedulerWrapper.getTaskScheduler());
+		return new SecretLeaseContainer(vaultOperations, taskSchedulerWrapper.getTaskScheduler());
 	}
 
 	@Bean
@@ -332,76 +323,69 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 		switch (vaultProperties.getAuthentication()) {
 
-		case TOKEN:
-			Assert.hasText(vaultProperties.getToken(),
-					"Token (spring.cloud.vault.token) must not be empty");
-			return new TokenAuthentication(vaultProperties.getToken());
+			case TOKEN:
+				Assert.hasText(vaultProperties.getToken(), "Token (spring.cloud.vault.token) must not be empty");
+				return new TokenAuthentication(vaultProperties.getToken());
 
-		case APPID:
-			return appIdAuthentication(vaultProperties);
+			case APPID:
+				return appIdAuthentication(vaultProperties);
 
-		case APPROLE:
-			return appRoleAuthentication(vaultProperties);
+			case APPROLE:
+				return appRoleAuthentication(vaultProperties);
 
-		case CERT:
-			return new ClientCertificateAuthentication(restOperations);
+			case CERT:
+				return new ClientCertificateAuthentication(restOperations);
 
-		case AWS_EC2:
-			return awsEc2Authentication(vaultProperties);
+			case AWS_EC2:
+				return awsEc2Authentication(vaultProperties);
 
-		case CUBBYHOLE:
-			return cubbyholeAuthentication();
+			case CUBBYHOLE:
+				return cubbyholeAuthentication();
 
 		}
 
 		throw new UnsupportedOperationException(
-				String.format("Client authentication %s not supported",
-						vaultProperties.getAuthentication()));
+				String.format("Client authentication %s not supported", vaultProperties.getAuthentication()));
 	}
 
 	private ClientAuthentication appIdAuthentication(VaultProperties vaultProperties) {
 
 		VaultProperties.AppIdProperties appId = vaultProperties.getAppId();
-		Assert.hasText(appId.getUserId(),
-				"UserId (spring.cloud.vault.app-id.user-id) must not be empty");
+		Assert.hasText(appId.getUserId(), "UserId (spring.cloud.vault.app-id.user-id) must not be empty");
 
-		AppIdAuthenticationOptions authenticationOptions = AppIdAuthenticationOptions
-				.builder().appId(vaultProperties.getApplicationName()) //
+		AppIdAuthenticationOptions authenticationOptions = AppIdAuthenticationOptions.builder()
+				.appId(vaultProperties.getApplicationName()) //
 				.path(appId.getAppIdPath()) //
 				.userIdMechanism(getClientAuthentication(appId)).build();
 
 		return new AppIdAuthentication(authenticationOptions, restOperations);
 	}
 
-	private AppIdUserIdMechanism getClientAuthentication(
-			VaultProperties.AppIdProperties appId) {
+	private AppIdUserIdMechanism getClientAuthentication(VaultProperties.AppIdProperties appId) {
 
 		try {
 			Class<?> userIdClass = ClassUtils.forName(appId.getUserId(), null);
 			return (AppIdUserIdMechanism) BeanUtils.instantiateClass(userIdClass);
-		}
-		catch (ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 
 			switch (appId.getUserId().toUpperCase()) {
 
-			case VaultProperties.AppIdProperties.IP_ADDRESS:
-				return new IpAddressUserId();
+				case VaultProperties.AppIdProperties.IP_ADDRESS:
+					return new IpAddressUserId();
 
-			case VaultProperties.AppIdProperties.MAC_ADDRESS:
+				case VaultProperties.AppIdProperties.MAC_ADDRESS:
 
-				if (StringUtils.hasText(appId.getNetworkInterface())) {
-					try {
-						return new MacAddressUserId(
-								Integer.parseInt(appId.getNetworkInterface()));
+					if (StringUtils.hasText(appId.getNetworkInterface())) {
+						try {
+							return new MacAddressUserId(Integer.parseInt(appId.getNetworkInterface()));
+						} catch (NumberFormatException e) {
+							return new MacAddressUserId(appId.getNetworkInterface());
+						}
 					}
-					catch (NumberFormatException e) {
-						return new MacAddressUserId(appId.getNetworkInterface());
-					}
-				}
 
-				return new MacAddressUserId();
-			default:
-				return new StaticUserId(appId.getUserId());
+					return new MacAddressUserId();
+				default:
+					return new StaticUserId(appId.getUserId());
 			}
 		}
 	}
@@ -409,11 +393,10 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	private ClientAuthentication appRoleAuthentication(VaultProperties vaultProperties) {
 
 		VaultProperties.AppRoleProperties appRole = vaultProperties.getAppRole();
-		Assert.hasText(appRole.getRoleId(),
-				"RoleId (spring.cloud.vault.app-role.role-id) must not be empty");
+		Assert.hasText(appRole.getRoleId(), "RoleId (spring.cloud.vault.app-role.role-id) must not be empty");
 
-		AppRoleAuthenticationOptions.AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions
-				.builder().path(appRole.getAppRolePath()).roleId(appRole.getRoleId());
+		AppRoleAuthenticationOptions.AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions.builder()
+				.path(appRole.getAppRolePath()).roleId(appRole.getRoleId());
 
 		if (StringUtils.hasText(appRole.getSecretId())) {
 			builder = builder.secretId(appRole.getSecretId());
@@ -426,18 +409,16 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 		VaultProperties.AwsEc2Properties awsEc2 = vaultProperties.getAwsEc2();
 
-		Nonce nonce = StringUtils.hasText(awsEc2.getNonce())
-				? Nonce.provided(awsEc2.getNonce().toCharArray()) : Nonce.generated();
+		Nonce nonce = StringUtils.hasText(awsEc2.getNonce()) ? Nonce.provided(awsEc2.getNonce().toCharArray())
+				: Nonce.generated();
 
-		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions
-				.builder().role(awsEc2.getRole()) //
+		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions.builder().role(awsEc2.getRole()) //
 				.path(awsEc2.getAwsEc2Path()) //
 				.nonce(nonce) //
 				.identityDocumentUri(URI.create(awsEc2.getIdentityDocument())) //
 				.build();
 
-		return new AwsEc2Authentication(authenticationOptions, restOperations,
-				restOperations);
+		return new AwsEc2Authentication(authenticationOptions, restOperations, restOperations);
 	}
 
 	private ClientAuthentication cubbyholeAuthentication() {
