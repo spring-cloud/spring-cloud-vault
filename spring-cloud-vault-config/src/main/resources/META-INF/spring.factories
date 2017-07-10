@@ -1,4 +1,5 @@
 # Bootstrap Configuration
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
 org.springframework.cloud.vault.config.VaultBootstrapConfiguration,\
+org.springframework.cloud.vault.config.ReactiveVaultBootstrapConfiguration,\
 org.springframework.cloud.vault.config.VaultBootstrapHealthIndicatorConfiguration
