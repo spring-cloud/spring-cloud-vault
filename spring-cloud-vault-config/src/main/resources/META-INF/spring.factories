@@ -3,5 +3,6 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 org.springframework.cloud.vault.config.VaultHealthIndicatorConfiguration
 # Bootstrap Configuration
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
+org.springframework.cloud.vault.config.DiscoveryClientVaultBootstrapConfiguration,\
 org.springframework.cloud.vault.config.VaultBootstrapConfiguration,\
 org.springframework.cloud.vault.config.VaultBootstrapPropertySourceConfiguration

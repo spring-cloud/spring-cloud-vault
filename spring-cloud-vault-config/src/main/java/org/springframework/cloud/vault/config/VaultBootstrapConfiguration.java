@@ -20,6 +20,7 @@ import java.net.URI;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -39,8 +40,10 @@ import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
+import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpoint;
+import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
 import org.springframework.vault.core.VaultTemplate;
@@ -64,19 +67,27 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 	private final VaultProperties vaultProperties;
 
-	private final VaultEndpoint vaultEndpoint;
+	private final VaultEndpointProvider endpointProvider;
 
 	private RestOperations restOperations;
 
 	public VaultBootstrapConfiguration(ConfigurableApplicationContext applicationContext,
-			VaultProperties vaultProperties) {
+			VaultProperties vaultProperties,
+			ObjectProvider<VaultEndpointProvider> endpointProvider) {
 
 		this.applicationContext = applicationContext;
 		this.vaultProperties = vaultProperties;
-		this.vaultEndpoint = getVaultEndpoint(vaultProperties);
+
+		VaultEndpointProvider provider = endpointProvider.getIfAvailable();
+
+		if (provider == null) {
+			provider = SimpleVaultEndpointProvider.of(getVaultEndpoint(vaultProperties));
+		}
+
+		this.endpointProvider = provider;
 	}
 
-	private VaultEndpoint getVaultEndpoint(VaultProperties vaultProperties) {
+	private static VaultEndpoint getVaultEndpoint(VaultProperties vaultProperties) {
 
 		if (StringUtils.hasText(vaultProperties.getUri())) {
 			return VaultEndpoint.from(URI.create(vaultProperties.getUri()));
@@ -90,6 +101,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		return vaultEndpoint;
 	}
 
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() {
@@ -97,7 +109,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		ClientHttpRequestFactory clientHttpRequestFactory = clientHttpRequestFactoryWrapper()
 				.getClientHttpRequestFactory();
 
-		this.restOperations = VaultClients.createRestTemplate(vaultEndpoint,
+		this.restOperations = VaultClients.createRestTemplate(endpointProvider,
 				clientHttpRequestFactory);
 	}
 
@@ -142,7 +154,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@Bean
 	@ConditionalOnMissingBean
 	public VaultTemplate vaultTemplate(SessionManager sessionManager) {
-		return new VaultTemplate(vaultEndpoint, clientHttpRequestFactoryWrapper()
+		return new VaultTemplate(endpointProvider, clientHttpRequestFactoryWrapper()
 				.getClientHttpRequestFactory(), sessionManager);
 	}
 
