@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,35 +15,15 @@
  */
 package org.springframework.cloud.vault.config;
 
-import org.springframework.boot.actuate.autoconfigure.EndpointAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.HealthIndicatorAutoConfiguration;
-import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.vault.core.VaultOperations;
-
 /**
- * @author Stuart Ingram
+ * {@link org.springframework.boot.autoconfigure.EnableAutoConfiguration
+ * Auto-configuration} for Vault providing beans for the application context.
+ *
  * @author Mark Paluch
+ * @author Stuart Ingram
+ * @deprecated since 1.1, use {@link VaultHealthIndicatorConfiguration}.
  */
-@Configuration
-@ConditionalOnBean(VaultBootstrapConfiguration.class)
-@ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
-@ConditionalOnExpression("${health.vault.enabled:true}")
-@AutoConfigureBefore({ EndpointAutoConfiguration.class })
-@AutoConfigureAfter({ VaultBootstrapConfiguration.class,
-		HealthIndicatorAutoConfiguration.class })
-public class VaultBootstrapHealthIndicatorConfiguration {
-
-	@Bean
-	@ConditionalOnMissingBean(name = "vaultHealthIndicator")
-	public HealthIndicator vaultHealthIndicator(VaultOperations vaultOperations) {
-		return new VaultHealthIndicator(vaultOperations);
-	}
+@Deprecated
+public class VaultBootstrapHealthIndicatorConfiguration extends
+		VaultHealthIndicatorConfiguration {
 }
