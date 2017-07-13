@@ -63,6 +63,11 @@ public class VaultProperties implements EnvironmentAware {
 	private String uri;
 
 	/**
+	 * Discovery properties.
+	 */
+	private Discovery discovery = new Discovery();
+
+	/**
 	 * Connection timeout;
 	 */
 	private int connectionTimeout = 5000;
@@ -107,6 +112,23 @@ public class VaultProperties implements EnvironmentAware {
 		if (StringUtils.hasText(springAppName)) {
 			this.applicationName = springAppName;
 		}
+	}
+
+	@Data
+	public static class Discovery {
+
+		public static final String DEFAULT_VAULT = "vault";
+
+		/**
+		 * Flag to indicate that Vault server discovery is enabled (vault server URL will
+		 * be looked up via discovery).
+		 */
+		private boolean enabled;
+
+		/**
+		 * Service id to locate Vault.
+		 */
+		private String serviceId = DEFAULT_VAULT;
 	}
 
 	@Data
