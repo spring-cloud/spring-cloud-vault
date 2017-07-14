@@ -102,25 +102,34 @@ public class ReactiveVaultBootstrapConfiguration {
 		SslConfiguration sslConfiguration;
 		if (ssl != null) {
 
-			KeyStoreConfiguration keyStore = KeyStoreConfiguration.EMPTY;
-			KeyStoreConfiguration trustStore = KeyStoreConfiguration.EMPTY;
+			KeyStoreConfiguration keyStore = KeyStoreConfiguration.unconfigured();
+			KeyStoreConfiguration trustStore = KeyStoreConfiguration.unconfigured();
 
 			if (ssl.getKeyStore() != null) {
-				keyStore = new KeyStoreConfiguration(ssl.getKeyStore(),
-						ssl.getKeyStorePassword() != null ? ssl.getKeyStorePassword()
-								.toCharArray() : null, null);
+				if (StringUtils.hasText(ssl.getKeyStorePassword())) {
+					keyStore = KeyStoreConfiguration.of(ssl.getKeyStore(), ssl
+							.getKeyStorePassword().toCharArray());
+				}
+				else {
+					keyStore = KeyStoreConfiguration.of(ssl.getKeyStore());
+				}
 			}
 
 			if (ssl.getTrustStore() != null) {
-				trustStore = new KeyStoreConfiguration(ssl.getTrustStore(),
-						ssl.getTrustStorePassword() != null ? ssl.getTrustStorePassword()
-								.toCharArray() : null, null);
+
+				if (StringUtils.hasText(ssl.getTrustStorePassword())) {
+					trustStore = KeyStoreConfiguration.of(ssl.getTrustStore(), ssl
+							.getTrustStorePassword().toCharArray());
+				}
+				else {
+					trustStore = KeyStoreConfiguration.of(ssl.getTrustStore());
+				}
 			}
 
 			sslConfiguration = new SslConfiguration(keyStore, trustStore);
 		}
 		else {
-			sslConfiguration = SslConfiguration.NONE;
+			sslConfiguration = SslConfiguration.unconfigured();
 		}
 
 		return ClientHttpConnectorFactory.create(clientOptions, sslConfiguration);
