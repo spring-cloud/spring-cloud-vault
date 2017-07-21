@@ -211,7 +211,6 @@ spring.cloud.vault:
     host: localhost
     port: 8200
     scheme: https
-    uri: https://localhost:8200
     connection-timeout: 5000
     read-timeout: 15000
     config:
@@ -224,7 +223,6 @@ for SSL certificate validation
 * `port` sets the Vault port
 * `scheme` setting the scheme to `http` will use plain HTTP.
 Supported schemes are `http` and `https`.
-* `uri` configure the Vault endpoint with an URI. Takes precedence over host/port/scheme configuration
 * `connection-timeout` sets the connection timeout in milliseconds
 * `read-timeout` sets the read timeout in milliseconds
 * `config.order` sets the order for the property source
