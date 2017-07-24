@@ -459,6 +459,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </ul>
 </li>
 <li><a href="#vault.config.backends.configurer">Configure <code>PropertySourceLocator</code> behavior</a></li>
+<li><a href="#_service_registry_configuration">Service Registry Configuration</a></li>
 <li><a href="#vault.config.fail-fast">Vault Client Fail Fast</a></li>
 <li><a href="#vault.config.ssl">Vault Client SSL configuration</a></li>
 <li><a href="#vault-lease-renewal">Lease lifecycle management (renewal and revocation)</a></li>
@@ -1966,6 +1967,40 @@ in your application.
 </td>
 </tr>
 </table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_service_registry_configuration">Service Registry Configuration</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can use a <code>DiscoveryClient</code> (such as from Spring Cloud Consul) to locate
+a Vault server by setting spring.cloud.vault.discovery.enabled=true (default <code>false</code>).
+The net result of that is that your apps need a bootstrap.yml (or an environment variable)
+with the appropriate discovery configuration.
+The benefit is that the Vault can change its co-ordinates, as long as the discovery service
+is a fixed point. The default service id is <code>vault</code> but you can change that on the client with
+<code>spring.cloud.vault.discovery.serviceId</code>.</p>
+</div>
+<div class="paragraph">
+<p>The discovery client implementations all support some kind of metadata map
+(e.g. for Eureka we have eureka.instance.metadataMap). Some additional properties of the service
+may need to be configured in its service registration metadata so that clients can connect
+correctly. Service registries that do not provide details about transport layer security
+need to provide a <code>scheme</code> metadata entry to be set either to <code>https</code> or <code>http</code>.
+If no scheme is configured and the service is not exposed as secure service, then
+configuration defaults to <code>spring.cloud.vault.scheme</code> which is <code>https</code> when it&#8217;s not set.</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault.discovery:
+    enabled: true
+    service-id: my-vault-service</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
