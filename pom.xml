@@ -44,7 +44,7 @@
 		<spring-cloud-commons.version>2.0.0.M1</spring-cloud-commons.version>
 		<httpclient.version>4.5.3</httpclient.version>
 		<httpcore.version>4.4.6</httpcore.version>
-		<netty.version>4.1.12.Final</netty.version>
+		<netty.version>4.1.13.Final</netty.version>
 		<okhttp3.version>3.8.0</okhttp3.version>
 	</properties>
 
