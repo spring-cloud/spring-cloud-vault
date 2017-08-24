@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-build</artifactId>
-		<version>2.0.0.M2</version>
+		<version>2.0.0.BUILD-SNAPSHOT</version>
 		<relativePath />
 		<!-- lookup parent from repository -->
 	</parent>
 
 	<artifactId>spring-cloud-vault-parent</artifactId>
-	<version>2.0.0.M2</version>
+	<version>2.0.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Spring Cloud Vault</name>
@@ -35,12 +35,12 @@
 		<developerConnection>
 			scm:git:ssh://git@github.com/spring-cloud/spring-cloud-vault.git
 		</developerConnection>
-		<tag>v2.0.0.M2</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring-cloud-commons.version>2.0.0.M2</spring-cloud-commons.version>
+		<spring-cloud-commons.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-commons.version>
 		<httpclient.version>4.5.3</httpclient.version>
 		<httpcore.version>4.4.6</httpcore.version>
 		<netty.version>4.1.13.Final</netty.version>
@@ -207,9 +207,12 @@
 
 	<repositories>
 		<repository>
-			<id>spring-milestones</id>
-			<name>Spring Milestones</name>
-			<url>https://repo.spring.io/libs-milestone</url>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>https://repo.spring.io/libs-snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 
