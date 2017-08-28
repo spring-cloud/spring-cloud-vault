@@ -514,7 +514,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ src/test/bash/install_vault.sh</code></pre>
+<pre class="prettyprint highlight"><code class="language-bash" data-lang="bash">$ src/test/bash/install_vault.sh</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -522,7 +522,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ src/test/bash/create_certificates.sh</code></pre>
+<pre class="prettyprint highlight"><code class="language-bash" data-lang="bash">$ src/test/bash/create_certificates.sh</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -542,7 +542,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ src/test/bash/local_run_vault.sh</code></pre>
+<pre class="prettyprint highlight"><code class="language-bash" data-lang="bash">$ src/test/bash/local_run_vault.sh</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -568,7 +568,7 @@ initialize Vault and create a root token <code>00000000-0000-0000-0000-000000000
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ export VAULT_ADDR="https://localhost:8200"
+<pre class="prettyprint highlight"><code class="language-bash" data-lang="bash">$ export VAULT_ADDR="https://localhost:8200"
 $ export VAULT_SKIP_VERIFY=true # Don't do this for production
 $ vault init</code></pre>
 </div>
@@ -578,7 +578,7 @@ $ vault init</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">Key 1: 7149c6a2e16b8833f6eb1e76df03e47f6113a3288b3093faf5033d44f0e70fe701
+<pre class="prettyprint highlight"><code class="language-bash" data-lang="bash">Key 1: 7149c6a2e16b8833f6eb1e76df03e47f6113a3288b3093faf5033d44f0e70fe701
 Key 2: 901c534c7988c18c20435a85213c683bdcf0efcd82e38e2893779f152978c18c02
 Key 3: 03ff3948575b1165a20c20ee7c3e6edf04f4cdbe0e82dbff5be49c63f98bc03a03
 Key 4: 216ae5cc3ddaf93ceb8e1d15bb9fc3176653f5b738f5f3d1ee00cd7dccbe926e04
@@ -601,7 +601,7 @@ Pick 3 keys and unseal Vault. Store the Vault token in the <code>VAULT_TOKEN</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ vault unseal (Key 1)
+<pre class="prettyprint highlight"><code class="language-bash" data-lang="bash">$ vault unseal (Key 1)
 $ vault unseal (Key 2)
 $ vault unseal (Key 3)
 $ export VAULT_TOKEN=(Root token)
@@ -646,7 +646,7 @@ the test cases). Example Maven configuration:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;parent&gt;
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;parent&gt;
     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
     &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
     &lt;version&gt;1.5.4.RELEASE&lt;/version&gt;
@@ -687,7 +687,7 @@ the test cases). Example Maven configuration:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">@SpringBootApplication
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">@SpringBootApplication
 @RestController
 public class Application {
 
@@ -716,7 +716,7 @@ the bootstrap phase of an application context), e.g.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     host: localhost
     port: 8200
     scheme: https
@@ -787,7 +787,7 @@ property <code>health.vault.enabled</code> (default <code>true</code>).</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     token: 19aefa97-cccc-bbbb-aaaa-225940e63d76</code></pre>
 </div>
 </div>
@@ -842,7 +842,7 @@ can access secrets for the intended client.
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     authentication: TOKEN
     token: 00000000-0000-0000-0000-000000000000</code></pre>
 </div>
@@ -884,7 +884,7 @@ The IP and Mac address are represented as Hex-encoded SHA256 hash.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     authentication: APPID
     app-id:
         user-id: IP_ADDRESS</code></pre>
@@ -940,7 +940,7 @@ name or interface index (0-based).</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     authentication: APPID
     app-id:
         user-id: MAC_ADDRESS
@@ -998,7 +998,7 @@ obtain a token.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     authentication: APPID
     app-id:
         user-id: com.examlple.MyUserIdMechanism</code></pre>
@@ -1011,7 +1011,7 @@ obtain a token.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">public class MyUserIdMechanism implements AppIdUserIdMechanism {
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">public class MyUserIdMechanism implements AppIdUserIdMechanism {
 
   @Override
   public String createUserId() {
@@ -1048,7 +1048,7 @@ Spring Vault will not look up these or create a custom SecretId.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     authentication: APPROLE
     app-role:
         role-id: bde2076b-cccb-3cf0-d57e-bca7b1e83a52</code></pre>
@@ -1068,7 +1068,7 @@ Spring Vault will not look up these or create a custom SecretId.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     authentication: APPROLE
     app-role:
         role-id: bde2076b-cccb-3cf0-d57e-bca7b1e83a52
@@ -1113,7 +1113,7 @@ represents each EC2 instance.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     authentication: AWS_EC2</code></pre>
 </div>
 </div>
@@ -1146,7 +1146,7 @@ You can configure the authentication role by setting the
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     authentication: AWS_EC2
     aws-ec2:
         role: application-server</code></pre>
@@ -1159,7 +1159,7 @@ You can configure the authentication role by setting the
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     authentication: AWS_EC2
     aws-ec2:
         role: application-server
@@ -1222,7 +1222,7 @@ certificate and the private key</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     authentication: CERT
     ssl:
         key-store: classpath:keystore.jks
@@ -1266,7 +1266,7 @@ Response Wrapping for token creation requires Vault 0.6.0 or higher.
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-shell" data-lang="shell">$ vault token-create -wrap-ttl="10m"
+<pre class="prettyprint highlight"><code class="language-shell" data-lang="shell">$ vault token-create -wrap-ttl="10m"
 Key                            Value
 ---                            -----
 wrapping_token:                397ccb93-ff6c-b17b-9389-380b01ca2645
@@ -1282,7 +1282,7 @@ wrapped_accessor:              46b6aebb-187f-932a-26d7-4f3d86a68319</code></pre>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     authentication: CUBBYHOLE
     token: 397ccb93-ff6c-b17b-9389-380b01ca2645</code></pre>
 </div>
@@ -1375,7 +1375,7 @@ No active profiles will skip accessing contexts with a profile name.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     generic:
         enabled: true
         backend: secret
@@ -1423,7 +1423,7 @@ dependency.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependencies&gt;
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependencies&gt;
     &lt;dependency&gt;
         &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
         &lt;artifactId&gt;spring-cloud-vault-config-consul&lt;/artifactId&gt;
@@ -1449,7 +1449,7 @@ the property name by setting <code>spring.cloud.vault.consul.token-property</cod
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     consul:
         enabled: true
         role: readonly
@@ -1493,7 +1493,7 @@ dependency.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependencies&gt;
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependencies&gt;
     &lt;dependency&gt;
         &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
         &lt;artifactId&gt;spring-cloud-vault-config-rabbitmq&lt;/artifactId&gt;
@@ -1520,7 +1520,7 @@ by setting <code>spring.cloud.vault.rabbitmq.username-property</code> and
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     rabbitmq:
         enabled: true
         role: readonly
@@ -1568,7 +1568,7 @@ dependency.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependencies&gt;
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependencies&gt;
     &lt;dependency&gt;
         &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
         &lt;artifactId&gt;spring-cloud-vault-config-aws&lt;/artifactId&gt;
@@ -1595,7 +1595,7 @@ by setting <code>spring.cloud.vault.aws.access-key-property</code> and
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     aws:
         enabled: true
         role: readonly
@@ -1670,7 +1670,7 @@ dependency.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependencies&gt;
+<pre class="prettyprint highlight"><code class="language-xml" data-lang="xml">&lt;dependencies&gt;
     &lt;dependency&gt;
         &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
         &lt;artifactId&gt;spring-cloud-vault-config-databases&lt;/artifactId&gt;
@@ -1715,7 +1715,7 @@ You can configure the property names by setting
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     cassandra:
         enabled: true
         role: readonly
@@ -1769,7 +1769,7 @@ You can configure the property names by setting
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     mongodb:
         enabled: true
         role: readonly
@@ -1823,7 +1823,7 @@ You can configure the property names by setting
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     mysql:
         enabled: true
         role: readonly
@@ -1877,7 +1877,7 @@ You can configure the property names by setting
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     postgresql:
         enabled: true
         role: readonly
@@ -1939,7 +1939,7 @@ at least one <code>VaultConfigurer</code> bean. You can however enable default r
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">public class CustomizationBean implements VaultConfigurer {
+<pre class="prettyprint highlight"><code class="language-java" data-lang="java">public class CustomizationBean implements VaultConfigurer {
 
     @Override
     public void addSecretBackends(SecretBackendConfigurer configurer) {
@@ -1995,7 +1995,7 @@ configuration defaults to <code>spring.cloud.vault.scheme</code> which is <code>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault.discovery:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault.discovery:
     enabled: true
     service-id: my-vault-service</code></pre>
 </div>
@@ -2018,7 +2018,7 @@ an Exception.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     fail-fast: true</code></pre>
 </div>
 </div>
@@ -2039,7 +2039,7 @@ to set SSL settings only for Spring Cloud Vault Config.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     ssl:
         trust-store: classpath:keystore.jks
         trust-store-password: changeit</code></pre>
@@ -2118,7 +2118,7 @@ after application shutdown.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
+<pre class="prettyprint highlight"><code class="language-yaml" data-lang="yaml">spring.cloud.vault:
     config.lifecycle.enabled: true</code></pre>
 </div>
 </div>
@@ -2130,5 +2130,8 @@ after application shutdown.</p>
 </div>
 </div>
 </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+<script>prettyPrint()</script>
 </body>
 </html>
