@@ -30,7 +30,7 @@ import org.springframework.validation.annotation.Validated;
  * @author Spencer Gibb
  * @author Mark Paluch
  */
-@ConfigurationProperties("spring.cloud.vault")
+@ConfigurationProperties(value = "spring.cloud.vault", ignoreInvalidFields = true)
 @Data
 @Validated
 public class VaultProperties implements EnvironmentAware {
