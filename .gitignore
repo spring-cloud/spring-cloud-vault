@@ -24,3 +24,4 @@ work/
 /consul/
 /vault/
 /download/
+spring-cloud-vault.xml
