@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  */
 package org.springframework.cloud.vault.config;
 
-import org.springframework.boot.actuate.autoconfigure.EndpointAutoConfiguration;
-import org.springframework.boot.actuate.autoconfigure.HealthIndicatorAutoConfiguration;
+import java.util.Map;
+
+import org.springframework.boot.actuate.autoconfigure.health.CompositeHealthIndicatorConfiguration;
+import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
+import org.springframework.boot.actuate.autoconfigure.health.HealthIndicatorAutoConfiguration;
 import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -40,15 +41,21 @@ import org.springframework.vault.core.VaultOperations;
 @Configuration
 @ConditionalOnClass(HealthIndicator.class)
 @ConditionalOnBean(VaultBootstrapConfiguration.class)
+@ConditionalOnEnabledHealthIndicator("vault")
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
-@ConditionalOnExpression("${health.vault.enabled:true}")
-@AutoConfigureBefore({ EndpointAutoConfiguration.class })
-@AutoConfigureAfter(HealthIndicatorAutoConfiguration.class)
-public class VaultHealthIndicatorConfiguration {
+@AutoConfigureBefore(HealthIndicatorAutoConfiguration.class)
+public class VaultHealthIndicatorConfiguration extends
+		CompositeHealthIndicatorConfiguration<VaultHealthIndicator, VaultOperations> {
+
+	private final Map<String, VaultOperations> vaultTemplates;
+
+	public VaultHealthIndicatorConfiguration(Map<String, VaultOperations> vaultTemplates) {
+		this.vaultTemplates = vaultTemplates;
+	}
 
 	@Bean
-	@ConditionalOnMissingBean(name = "vaultHealthIndicator")
-	public HealthIndicator vaultHealthIndicator(VaultOperations vaultOperations) {
-		return new VaultHealthIndicator(vaultOperations);
+	@ConditionalOnMissingBean(name = { "vaultHealthIndicator" })
+	public HealthIndicator vaultHealthIndicator() {
+		return this.createHealthIndicator(this.vaultTemplates);
 	}
 }

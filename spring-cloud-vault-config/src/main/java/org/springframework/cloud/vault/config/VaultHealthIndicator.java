@@ -17,6 +17,8 @@ package org.springframework.cloud.vault.config;
 
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.actuate.health.Health.Builder;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultHealth;
 
@@ -41,22 +43,34 @@ public class VaultHealthIndicator implements HealthIndicator {
 
 			VaultHealth vaultHealthResponse = vaultOperations.opsForSys().health();
 
-			if (!vaultHealthResponse.isInitialized()) {
-				return Health.down().withDetail("state", "Vault uninitialized").build();
+			Builder healthBuilder = getHealthBuilder(vaultHealthResponse);
+
+			if (StringUtils.hasText(vaultHealthResponse.getVersion())) {
+				healthBuilder = healthBuilder.withDetail("version",
+						vaultHealthResponse.getVersion());
 			}
 
-			if (vaultHealthResponse.isSealed()) {
-				return Health.down().withDetail("state", "Vault sealed").build();
-			}
-
-			if (vaultHealthResponse.isStandby()) {
-				return Health.up().withDetail("state", "Vault in standby").build();
-			}
-
-			return Health.up().build();
+			return healthBuilder.build();
 		}
 		catch (Exception e) {
 			return Health.down(e).build();
 		}
+	}
+
+	private Builder getHealthBuilder(VaultHealth vaultHealthResponse) {
+
+		if (!vaultHealthResponse.isInitialized()) {
+			return Health.down().withDetail("state", "Vault uninitialized");
+		}
+
+		if (vaultHealthResponse.isSealed()) {
+			return Health.down().withDetail("state", "Vault sealed");
+		}
+
+		if (vaultHealthResponse.isStandby()) {
+			return Health.up().withDetail("state", "Vault in standby");
+		}
+
+		return Health.up();
 	}
 }
