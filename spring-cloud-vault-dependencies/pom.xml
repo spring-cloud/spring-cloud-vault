@@ -49,12 +49,6 @@
 			<!-- Spring Cloud Vault -->
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-vault-core</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-vault-config</artifactId>
 				<version>${project.version}</version>
 			</dependency>
