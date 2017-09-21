@@ -15,8 +15,9 @@
  */
 package org.springframework.cloud.vault.config;
 
+import javax.validation.constraints.NotEmpty;
+
 import lombok.Data;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.hibernate.validator.constraints.Range;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
