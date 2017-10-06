@@ -24,6 +24,7 @@ import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.agent.model.NewService;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,6 +46,7 @@ import static org.junit.Assume.assumeTrue;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(properties = { "spring.cloud.vault.discovery.enabled=true" })
+@Ignore("Consul discovery client is set up in the main context, no longer in the bootstrap context")
 public class DiscoveryBootstrapConfigurationTests extends IntegrationTestSupport {
 
 	private final static String CONSUL_HOST = "localhost";
