@@ -588,6 +588,11 @@ Using a database secret backend requires to enable the
 backend in the configuration and the `spring-cloud-vault-config-databases`
 dependency.
 
+Vault ships since 0.7.1 with a dedicated `database` secret backend that allows
+database integration via plugins. You can use that specific backend by adapting
+one of the JDBC database properties above. Make sure to specify the appropriate
+backend path, e.g. `spring.cloud.vault.mysql.role.backend=database`.
+
 .pom.xml
 ====
 [source,xml,indent=0,subs="verbatim,quotes,attributes"]
