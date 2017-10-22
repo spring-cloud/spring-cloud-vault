@@ -50,11 +50,11 @@ public class VaultDatabaseProperties implements DatabaseSecretProperties {
      * Target property for the obtained username.
      */
     @NotEmpty
-    private String usernameProperty;
+    private String usernameProperty = "spring.datasource.username";
 
     /**
      * Target property for the obtained password.
      */
     @NotEmpty
-    private String passwordProperty;
+    private String passwordProperty = "spring.datasource.password";
 }

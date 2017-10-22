@@ -15,9 +15,6 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.PlainTextAuthProvider;
-import com.datastax.driver.core.Session;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +28,10 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
+import javax.sql.DataSource;
 import java.net.InetSocketAddress;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,101 +44,95 @@ import static org.junit.Assume.assumeTrue;
  * because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
- * 
+ *
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = VaultConfigDatabaseTests.TestApplication.class, properties = {
-		"spring.cloud.vault.database.enabled=true",
-		"spring.cloud.vault.database.role=readonly",
-        "spring.cloud.vault.database.username-property=spring.data.cassandra.username",
-        "spring.cloud.vault.database.password-property=spring.data.cassandra.password",
+        "spring.cloud.vault.database.enabled=true",
+        "spring.cloud.vault.database.role=readonly",
+        "spring.datasource.url=jdbc:postgresql://localhost:5432/postgres?ssl=false",
 })
 public class VaultConfigDatabaseTests {
 
-	private final static String CASSANDRA_HOST = "localhost";
-	private final static int CASSANDRA_PORT = 9042;
+    private final static String POSTGRES_HOST = "localhost";
+    private final static int POSTGRES_PORT = 5432;
 
-	private final static String CASSANDRA_USERNAME = "springvault";
-	private final static String CASSANDRA_PASSWORD = "springvault";
+    private final static String CONNECTION_URL = String.format(
+            "postgresql://springvault:springvault@%s:%d/postgres?sslmode=disable", POSTGRES_HOST,
+            POSTGRES_PORT);
 
-	private final static String CREATE_USER_AND_GRANT_CQL = "CREATE USER '{{username}}' WITH PASSWORD '{{password}}' NOSUPERUSER;"
-			+ "GRANT SELECT ON ALL KEYSPACES TO {{username}};";
-	private static final String ROLE_NAME = "readonly";
-	private static final String BACKEND = "database";
+    private final static String CREATE_USER_AND_GRANT_SQL = "CREATE ROLE \"{{name}}\" WITH "
+            + "LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';\n"
+            + "GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";";
+    private static final String ROLE_NAME = "readonly";
+    private static final String BACKEND = "database";
 
-	/**
-	 * Initialize the database secret backend with the cassandra plugin.
-	 *
-	 * @throws Exception
-	 */
-	@BeforeClass
-	public static void beforeClass() throws Exception {
+    /**
+     * Initialize the database secret backend.
+     *
+     * @throws Exception
+     */
+    @BeforeClass
+    public static void beforeClass() throws Exception {
 
-		assumeTrue(CanConnect.to(new InetSocketAddress(CASSANDRA_HOST, CASSANDRA_PORT)));
+        assumeTrue(CanConnect.to(new InetSocketAddress(POSTGRES_HOST, POSTGRES_PORT)));
 
-		VaultRule vaultRule = new VaultRule();
-		vaultRule.before();
+        VaultRule vaultRule = new VaultRule();
+        vaultRule.before();
 
-		if (!vaultRule.prepare().hasSecretBackend(BACKEND)) {
-			vaultRule.prepare().mountSecret(BACKEND);
-		}
+        if (!vaultRule.prepare().hasSecretBackend(BACKEND)) {
+            vaultRule.prepare().mountSecret(BACKEND);
+        }
 
-		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
+        VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
-		Map<String, String> connection = new HashMap<>();
-		connection.put("plugin_name", "cassandra-database-plugin");
-		connection.put("allowed_roles", ROLE_NAME);
-		connection.put("hosts", CASSANDRA_HOST);
-		connection.put("username", CASSANDRA_USERNAME);
-		connection.put("password", CASSANDRA_PASSWORD);
+        Map<String, String> connection = new HashMap<>();
+        connection.put("plugin_name", "cassandra-database-plugin");
+        connection.put("allowed_roles", ROLE_NAME);
+        connection.put("connection_url", CONNECTION_URL);
+        vaultOperations.write(String.format("%s/config/connection", BACKEND), connection);
 
-		vaultOperations.write(String.format("%s/config/cassandra", BACKEND),
-				connection);
+        Map<String, String> role = new HashMap<>();
 
-		Map<String, String> role = new HashMap<>();
+        role.put("creation_statements", CREATE_USER_AND_GRANT_SQL);
+        role.put("db_name", "cassandra");
 
-		role.put("creation_statements", CREATE_USER_AND_GRANT_CQL);
-		role.put("db_name", "cassandra");
+        vaultOperations.write(String.format("%s/roles/%s", BACKEND, "readonly"), role);
 
-		vaultOperations.write(String.format("%s/roles/%s",BACKEND,ROLE_NAME), role);
-	}
+    }
 
-	@Value("${spring.data.cassandra.username}")
-	String username;
+    @Value("${spring.datasource.username}")
+    String username;
 
-	@Value("${spring.data.cassandra.password}")
-	String password;
+    @Value("${spring.datasource.password}")
+    String password;
 
-	@Autowired
-	Cluster cluster;
+    @Autowired
+    DataSource dataSource;
 
-	@Test
-	public void shouldConnectUsingCluster() throws SQLException {
-		cluster.connect().close();
-	}
+    @Test
+    public void shouldConnectUsingDataSource() throws SQLException {
 
-	@Test
-	public void shouldUseAuthenticationSet() throws SQLException {
-		assertThat(cluster.getConfiguration().getProtocolOptions().getAuthProvider())
-				.isInstanceOf(PlainTextAuthProvider.class);
-	}
+        Connection connection = dataSource.getConnection();
 
-	@Test
-	public void shouldConnectUsingCassandraClient() throws SQLException {
+        assertThat(connection.getSchema()).isEqualTo("public");
+        connection.close();
+    }
 
-		Cluster cluster = Cluster.builder().addContactPoint(CASSANDRA_HOST)
-				.withAuthProvider(new PlainTextAuthProvider(username, password)).build();
-		Session session = cluster.connect();
-		session.close();
-		cluster.close();
-	}
+    @Test
+    public void shouldConnectUsingJdbcUrlConnection() throws SQLException {
 
-	@SpringBootApplication
-	public static class TestApplication {
+        String url = String.format("jdbc:postgresql://%s:%d/postgres?ssl=false",
+                POSTGRES_HOST, POSTGRES_PORT);
+        DriverManager.getConnection(url, username, password).close();
+    }
 
-		public static void main(String[] args) {
-			SpringApplication.run(TestApplication.class, args);
-		}
-	}
+    @SpringBootApplication
+    public static class TestApplication {
+
+        public static void main(String[] args) {
+            SpringApplication.run(TestApplication.class, args);
+        }
+    }
 }
