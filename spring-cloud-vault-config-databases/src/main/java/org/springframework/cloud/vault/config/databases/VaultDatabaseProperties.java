@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,49 +15,46 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import javax.validation.constraints.NotEmpty;
-
 import lombok.Data;
-
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Configuration properties for Vault using the PostgreSQL integration.
+ * Configuration properties for Vault using the Database integration.
  *
  * @author Mark Paluch
  */
-@ConfigurationProperties("spring.cloud.vault.postgresql")
+@ConfigurationProperties("spring.cloud.vault.database")
 @Data
 @Validated
-@Deprecated
-public class VaultPostgreSqlProperties implements DatabaseSecretProperties {
+public class VaultDatabaseProperties implements DatabaseSecretProperties {
 
-	/**
-	 * Enable postgresql backend usage.
-	 */
-	private boolean enabled = false;
+    /**
+     * Enable cassandra backend usage.
+     */
+    private boolean enabled = false;
 
-	/**
-	 * Role name for credentials.
-	 */
-	private String role;
+    /**
+     * Role name for credentials.
+     */
+    private String role;
 
-	/**
-	 * postgresql backend path.
-	 */
-	@NotEmpty
-	private String backend = "postgresql";
+    /**
+     * Cassandra backend path.
+     */
+    @NotEmpty
+    private String backend = "database";
 
-	/**
-	 * Target property for the obtained username.
-	 */
-	@NotEmpty
-	private String usernameProperty = "spring.datasource.username";
+    /**
+     * Target property for the obtained username.
+     */
+    @NotEmpty
+    private String usernameProperty;
 
-	/**
-	 * Target property for the obtained username.
-	 */
-	@NotEmpty
-	private String passwordProperty = "spring.datasource.password";
+    /**
+     * Target property for the obtained password.
+     */
+    @NotEmpty
+    private String passwordProperty;
 }

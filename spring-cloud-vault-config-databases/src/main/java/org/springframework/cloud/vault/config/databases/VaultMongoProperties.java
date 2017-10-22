@@ -30,6 +30,7 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("spring.cloud.vault.mongodb")
 @Data
 @Validated
+@Deprecated
 public class VaultMongoProperties implements DatabaseSecretProperties {
 
 	/**

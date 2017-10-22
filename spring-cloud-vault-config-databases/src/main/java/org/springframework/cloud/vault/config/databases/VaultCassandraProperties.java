@@ -30,6 +30,7 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("spring.cloud.vault.cassandra")
 @Data
 @Validated
+@Deprecated
 public class VaultCassandraProperties implements DatabaseSecretProperties {
 
 	/**
