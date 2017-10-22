@@ -96,6 +96,7 @@ public class VaultConfigDatabaseTests {
 		Map<String, String> role = new HashMap<>();
 
 		role.put("creation_statements", CREATE_USER_AND_GRANT_CQL);
+		role.put("db_name", "cassandra");
 
 		vaultOperations.write(String.format("%s/roles/%s",BACKEND,ROLE_NAME), role);
 	}
