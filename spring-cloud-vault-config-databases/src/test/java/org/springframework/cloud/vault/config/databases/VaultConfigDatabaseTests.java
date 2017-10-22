@@ -50,7 +50,10 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = VaultConfigDatabaseTests.TestApplication.class, properties = {
 		"spring.cloud.vault.database.enabled=true",
-		"spring.cloud.vault.database.role=readonly" })
+		"spring.cloud.vault.database.role=readonly",
+        "spring.cloud.vault.database.username-property=spring.data.cassandra.username",
+        "spring.cloud.vault.database.password-property=spring.data.cassandra.password",
+})
 public class VaultConfigDatabaseTests {
 
 	private final static String CASSANDRA_HOST = "localhost";
