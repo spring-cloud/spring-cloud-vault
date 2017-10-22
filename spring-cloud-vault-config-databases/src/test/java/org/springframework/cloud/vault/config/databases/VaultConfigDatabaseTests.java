@@ -88,15 +88,15 @@ public class VaultConfigDatabaseTests {
         VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
         Map<String, String> connection = new HashMap<>();
-        connection.put("plugin_name", "cassandra-database-plugin");
+        connection.put("plugin_name", "postgresql-database-plugin");
         connection.put("allowed_roles", ROLE_NAME);
         connection.put("connection_url", CONNECTION_URL);
-        vaultOperations.write(String.format("%s/config/connection", BACKEND), connection);
+        vaultOperations.write(String.format("%s/config/postgresql", BACKEND), connection);
 
         Map<String, String> role = new HashMap<>();
 
         role.put("creation_statements", CREATE_USER_AND_GRANT_SQL);
-        role.put("db_name", "cassandra");
+        role.put("db_name", "postgresql");
 
         vaultOperations.write(String.format("%s/roles/%s", BACKEND, "readonly"), role);
 
