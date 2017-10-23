@@ -16,14 +16,15 @@
 package org.springframework.cloud.vault.config.databases;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * Configuration properties for Vault using the Database integration.
  *
- * @author Mark Paluch
+ * @author Per Abich
  */
 @ConfigurationProperties("spring.cloud.vault.database")
 @Data
@@ -31,7 +32,7 @@ import org.springframework.validation.annotation.Validated;
 public class VaultDatabaseProperties implements DatabaseSecretProperties {
 
     /**
-     * Enable cassandra backend usage.
+     * Enable database backend usage.
      */
     private boolean enabled = false;
 

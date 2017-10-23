@@ -15,12 +15,11 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import javax.validation.constraints.NotEmpty;
-
 import lombok.Data;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotEmpty;
 
 /**
  * Configuration properties for Vault using the Apache Cassandra integration.
@@ -30,7 +29,6 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("spring.cloud.vault.cassandra")
 @Data
 @Validated
-@Deprecated
 public class VaultCassandraProperties implements DatabaseSecretProperties {
 
 	/**

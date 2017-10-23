@@ -652,7 +652,8 @@ See also: https://www.vaultproject.io/docs/secrets/databases/index.html[Vault Do
 
 [[vault.config.backends.cassandra]]
 === Apache Cassandra
-This backend has been deprecated and might be removed from Vault soon.
+This backend has been deprecated in Vault and it is recommended to use the `database` backend
+and mount it as `cassandra`.
 
 Spring Cloud Vault can obtain credentials for Apache Cassandra.
 The integration can be enabled by setting
@@ -690,7 +691,8 @@ See also: https://www.vaultproject.io/docs/secrets/cassandra/index.html[Vault Do
 [[vault.config.backends.mongodb]]
 === MongoDB
 
-This backend has been deprecated and might be removed from Vault soon.
+This backend has been deprecated in Vault and it is recommended to use the `database` backend
+and mount it as `mongodb`.
 
 Spring Cloud Vault can obtain credentials for MongoDB.
 The integration can be enabled by setting
@@ -727,8 +729,8 @@ See also: https://www.vaultproject.io/docs/secrets/mongodb/index.html[Vault Docu
 
 [[vault.config.backends.mysql]]
 === MySQL
-
-This backend has been deprecated and might be removed from Vault soon.
+This backend has been deprecated in Vault and it is recommended to use the `database` backend
+and mount it as `mysql`.
 
 Spring Cloud Vault can obtain credentials for MySQL.
 The integration can be enabled by setting
@@ -765,8 +767,8 @@ See also: https://www.vaultproject.io/docs/secrets/mysql/index.html[Vault Docume
 
 [[vault.config.backends.postgresql]]
 === PostgreSQL
-
-This backend has been deprecated and might be removed from Vault soon.
+This backend has been deprecated in Vault and it is recommended to use the `database` backend
+and mount it as `postgresql`.
 
 Spring Cloud Vault can obtain credentials for PostgreSQL.
 The integration can be enabled by setting
