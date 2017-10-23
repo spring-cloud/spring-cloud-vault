@@ -11,7 +11,7 @@
 	</parent>
 
 	<artifactId>spring-cloud-vault-dependencies</artifactId>
-	<version>1.1.0.RC1</version>
+	<version>1.1.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Spring Cloud Vault Dependencies</name>
@@ -117,8 +117,4 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-
-  <scm>
-    <tag>v1.1.0.RC1</tag>
-  </scm>
 </project>
