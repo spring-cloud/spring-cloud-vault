@@ -42,7 +42,7 @@ public class VaultDatabaseProperties implements DatabaseSecretProperties {
     private String role;
 
     /**
-     * Cassandra backend path.
+     * Database backend path.
      */
     @NotEmpty
     private String backend = "database";
