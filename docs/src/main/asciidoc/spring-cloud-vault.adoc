@@ -280,6 +280,53 @@ authentication method
 
 See also: https://www.vaultproject.io/docs/auth/aws-ec2.html[Vault Documentation: Using the aws-ec2 auth backend]
 
+[[vault.config.authentication.awsiam]]
+=== AWS-IAM authentication
+
+The https://www.vaultproject.io/docs/auth/aws-ec2.html[aws] backend provides a secure
+authentication mechanism for AWS IAM roles, allowing the automatic authentication with
+vault based on the current IAM role of the running application.
+ Unlike most Vault authentication backends, this backend
+does not require first-deploying, or provisioning security-sensitive
+credentials (tokens, username/password, client certificates, etc.).
+Instead, it treats AWS as a Trusted Third Party and uses the
+4 pieces of information signed by the caller with their IAM credentials
+ to verify that the caller is indeed using that IAM role.
+
+The current IAM role the application is running in is automatically calculated.  If you are
+running your application on AWS ECS then the application will use the IAM role assigned
+to the ECS task of the running container. If you are running your application naked on top of
+an EC2 instance then the IAM role used will be the one assigned to the EC2 instance.
+
+When using the AWS-IAM authentication you must create a role in vault and assign it to your IAM
+ role.  If no vault-role value is supplied in the configuration (as below) then the friendly name
+ of the current IAM role will be used as the vault role.
+
+.bootstrap.yml with required AWS-IAM Authentication properties
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    authentication: AWS_IAM
+----
+====
+
+
+.bootstrap.yml with all AWS-IAM Authentication properties
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    authentication: AWS_IAM
+        vault-role: my-dev-role
+----
+====
+
+* `vault-role` sets the vault-role that is to be logged in to, this should be bound to your IAM role.  If one is not
+ supplied then the friendly name of the current IAM user will be used as the vault role.
+
+See also: https://www.vaultproject.io/docs/auth/aws.html[Vault documentation on configuring iam auth]
+
 [[vault.config.authentication.clientcert]]
 === TLS certificate authentication
 
@@ -351,6 +398,7 @@ See also:
 * https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
 * https://www.vaultproject.io/docs/secrets/cubbyhole/index.html[Vault Documentation: Cubbyhole Secret Backend]
 * https://www.vaultproject.io/docs/concepts/response-wrapping.html[Vault Documentation: Response Wrapping]
+
 
 [[vault.config.backends]]
 == Secret Backends
