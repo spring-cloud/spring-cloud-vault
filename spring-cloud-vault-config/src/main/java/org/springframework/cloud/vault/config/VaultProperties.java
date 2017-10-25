@@ -96,6 +96,8 @@ public class VaultProperties implements EnvironmentAware {
 
 	private AwsEc2Properties awsEc2 = new AwsEc2Properties();
 
+	private AwsIamProperties awsIam = new AwsIamProperties();
+
 	private Ssl ssl = new Ssl();
 
 	private Config config = new Config();
@@ -227,6 +229,14 @@ public class VaultProperties implements EnvironmentAware {
 	}
 
 	@Data
+	public static class AwsIamProperties {
+		/**
+		 * Name of the vault role, optional if not specified then the friendly IAM name will be used.
+		 */
+		private String vaultRole;
+	}
+
+	@Data
 	public static class Ssl {
 
 		/**
@@ -284,6 +294,6 @@ public class VaultProperties implements EnvironmentAware {
 	}
 
 	public enum AuthenticationMethod {
-		TOKEN, APPID, APPROLE, AWS_EC2, CERT, CUBBYHOLE;
+		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, CERT, CUBBYHOLE;
 	}
 }
