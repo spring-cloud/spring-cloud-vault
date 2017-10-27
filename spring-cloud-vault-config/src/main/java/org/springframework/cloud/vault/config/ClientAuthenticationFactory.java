@@ -161,17 +161,14 @@ class ClientAuthenticationFactory {
 
 	private ClientAuthentication awsIamAuthentication(VaultProperties vaultProperties) {
 
-		AWSCredentials awsCredentials = new DefaultAWSCredentialsProviderChain()
-												.getCredentials();
-
 		AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder awsIamAuthenticationOptionsBuilder = AwsIamAuthenticationOptions.builder();
 
 		if (vaultProperties.getAwsIam() != null && vaultProperties.getAwsIam().getVaultRole() != null)
 			awsIamAuthenticationOptionsBuilder.role(vaultProperties.getAwsIam().getVaultRole());
 
 		AwsIamAuthenticationOptions options = awsIamAuthenticationOptionsBuilder
-													.credentials(awsCredentials)
-													.build();
+				.credentialsProvider(new DefaultAWSCredentialsProviderChain())
+				.build();
 
 	    return new AwsIamAuthentication(options, restOperations);
 
