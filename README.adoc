@@ -11,8 +11,8 @@ Spring Cloud Vault Config provides client-side support for externalized configur
 
 Specifically for Spring applications:
 
-* Retrieve secrets from Vault and initialize Spring Environment with remote property sources
-* Obtain {docs}#vault.config.backends.generic[secrets] secured with SSL
+* Retrieve secrets from Vault and initialize Spring Environment with remote property sources.
+* Obtain {docs}#vault.config.backends.generic[secrets] secured with SSL.
 * Generate credentials for
 {docs}#vault.config.backends.mysql[MySQL],
 {docs}#vault.config.backends.postgresql[PostgreSQL],
@@ -24,9 +24,11 @@ Specifically for Spring applications:
 {docs}#vault.config.authentication.appid[AppId],
 {docs}#vault.config.authentication.approle[AppRole],
 {docs}#vault.config.authentication.clientcert[Client Certificate],
-{docs}#vault.config.authentication.cubbyhole[Cubbyhole], and
-{docs}#vault.config.authentication.awsec2[AWS-EC2] authentication
-* Bootstrap application context: a parent context for the main application that can be trained to do anything
+{docs}#vault.config.authentication.cubbyhole[Cubbyhole],
+{docs}#vault.config.authentication.awsec2[AWS-EC2] authentication, and
+{docs}#vault.config.authentication.awsiam[AWS-IAM] authentication.
+
+* Bootstrap application context: a parent context for the main application that can be trained to do anything.
 
 
 == Quick Start
