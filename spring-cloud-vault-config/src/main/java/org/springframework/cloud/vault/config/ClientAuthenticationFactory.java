@@ -15,24 +15,46 @@
  */
 package org.springframework.cloud.vault.config;
 
+import java.net.URI;
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.BeanUtils;
+import org.springframework.cloud.vault.config.VaultProperties.AwsIamProperties;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.authentication.*;
+import org.springframework.vault.authentication.AppIdAuthentication;
+import org.springframework.vault.authentication.AppIdAuthenticationOptions;
+import org.springframework.vault.authentication.AppIdUserIdMechanism;
+import org.springframework.vault.authentication.AppRoleAuthentication;
+import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
+import org.springframework.vault.authentication.AwsEc2Authentication;
+import org.springframework.vault.authentication.AwsEc2AuthenticationOptions;
+import org.springframework.vault.authentication.AwsIamAuthentication;
+import org.springframework.vault.authentication.AwsIamAuthenticationOptions;
+import org.springframework.vault.authentication.ClientAuthentication;
+import org.springframework.vault.authentication.ClientCertificateAuthentication;
+import org.springframework.vault.authentication.CubbyholeAuthentication;
+import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
+import org.springframework.vault.authentication.IpAddressUserId;
+import org.springframework.vault.authentication.MacAddressUserId;
+import org.springframework.vault.authentication.StaticUserId;
+import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.Nonce;
+import org.springframework.vault.authentication.AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
-
-import java.net.URI;
 
 /**
  * Factory for {@link ClientAuthentication}.
  *
  * @author Mark Paluch
+ * @author Kevin Holditch
  * @since 1.1
  */
 @RequiredArgsConstructor
@@ -45,7 +67,7 @@ class ClientAuthenticationFactory {
 	/**
 	 * @return a new {@link ClientAuthentication}.
 	 */
-	public ClientAuthentication createClientAuthentication() {
+	ClientAuthentication createClientAuthentication() {
 
 		switch (vaultProperties.getAuthentication()) {
 
@@ -161,18 +183,30 @@ class ClientAuthenticationFactory {
 
 	private ClientAuthentication awsIamAuthentication(VaultProperties vaultProperties) {
 
-		AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder awsIamAuthenticationOptionsBuilder = AwsIamAuthenticationOptions.builder();
+		AwsIamProperties awsIam = vaultProperties.getAwsIam();
 
-		if (vaultProperties.getAwsIam() != null && vaultProperties.getAwsIam().getVaultRole() != null)
-			awsIamAuthenticationOptionsBuilder.role(vaultProperties.getAwsIam().getVaultRole());
+		AWSCredentialsProvider credentialsProvider = AwsCredentialProvider
+				.getAwsCredentialsProvider();
 
-		AwsIamAuthenticationOptions options = awsIamAuthenticationOptionsBuilder
-				.credentialsProvider(new DefaultAWSCredentialsProviderChain())
-				.build();
+		AwsIamAuthenticationOptionsBuilder builder = AwsIamAuthenticationOptions
+				.builder();
 
-	    return new AwsIamAuthentication(options, restOperations);
+		if (StringUtils.hasText(awsIam.getRole())) {
+			builder.role(awsIam.getRole());
+		}
 
-    }
+		if (StringUtils.hasText(awsIam.getServerName())) {
+			builder.serverName(awsIam.getServerName());
+		}
+
+		builder.path(awsIam.getAwsPath()) //
+				.credentialsProvider(credentialsProvider);
+
+		AwsIamAuthenticationOptions options = builder.credentialsProvider(
+				credentialsProvider).build();
+
+		return new AwsIamAuthentication(options, restOperations);
+	}
 
 	private ClientAuthentication cubbyholeAuthentication() {
 
@@ -185,5 +219,37 @@ class ClientAuthenticationFactory {
 				.build();
 
 		return new CubbyholeAuthentication(options, restOperations);
+	}
+
+	private static class AwsCredentialProvider {
+
+		private static AWSCredentialsProvider getAwsCredentialsProvider() {
+
+			DefaultAWSCredentialsProviderChain backingCredentialsProvider = DefaultAWSCredentialsProviderChain
+					.getInstance();
+
+			// Eagerly fetch credentials preventing lag during the first, actual login.
+			AWSCredentials firstAccess = backingCredentialsProvider.getCredentials();
+
+			AtomicReference<AWSCredentials> once = new AtomicReference<>(firstAccess);
+
+			return new AWSCredentialsProvider() {
+
+				@Override
+				public AWSCredentials getCredentials() {
+
+					if (once.compareAndSet(firstAccess, null)) {
+						return firstAccess;
+					}
+
+					return backingCredentialsProvider.getCredentials();
+				}
+
+				@Override
+				public void refresh() {
+					backingCredentialsProvider.refresh();
+				}
+			};
+		}
 	}
 }
