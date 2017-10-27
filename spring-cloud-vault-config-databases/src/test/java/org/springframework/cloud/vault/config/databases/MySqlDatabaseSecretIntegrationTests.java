@@ -37,7 +37,7 @@ import static org.springframework.cloud.vault.config.databases.VaultConfigDataba
 
 /**
  * Integration tests for {@link VaultConfigTemplate} using the {@code database} secret
- * backend with {@code mysql-database-plugin }. This test requires a running MySQL
+ * backend with {@code mysql-legacy-database-plugin}. This test requires a running MySQL
  * instance, see {@link #ROOT_CREDENTIALS}.
  *
  * @author Mark Paluch
@@ -77,7 +77,7 @@ public class MySqlDatabaseSecretIntegrationTests extends IntegrationTestSupport 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
 		Map<String, String> config = new HashMap<>();
-		config.put("plugin_name", "mysql-database-plugin");
+		config.put("plugin_name", "mysql-legacy-database-plugin");
 		config.put("connection_url", ROOT_CREDENTIALS);
 		config.put("allowed_roles", "readonly");
 
