@@ -18,8 +18,10 @@ package org.springframework.cloud.vault.config.databases;
 import javax.validation.constraints.NotEmpty;
 
 import lombok.Data;
+import lombok.Getter;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 import org.springframework.validation.annotation.Validated;
 
@@ -27,21 +29,25 @@ import org.springframework.validation.annotation.Validated;
  * Configuration properties for Vault using the MySQL integration.
  *
  * @author Mark Paluch
+ * @deprecated since 2.0. Use {@link VaultDatabaseProperties}.
  */
 @ConfigurationProperties("spring.cloud.vault.mysql")
 @Data
 @Validated
+@Deprecated
 public class VaultMySqlProperties implements DatabaseSecretProperties,
 		VaultSecretBackendDescriptor {
 
 	/**
 	 * Enable mysql backend usage.
 	 */
+	@Getter(onMethod_ = { @DeprecatedConfigurationProperty(reason = "Use spring.cloud.vault.database") })
 	private boolean enabled = false;
 
 	/**
 	 * Role name for credentials.
 	 */
+	@Getter(onMethod_ = { @DeprecatedConfigurationProperty(reason = "Use spring.cloud.vault.database") })
 	private String role;
 
 	/**

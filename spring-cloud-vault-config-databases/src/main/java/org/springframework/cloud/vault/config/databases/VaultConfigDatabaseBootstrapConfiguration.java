@@ -31,9 +31,10 @@ import org.springframework.vault.core.util.PropertyTransformer;
 
 /**
  * Bootstrap configuration providing support for the Database secret backends such as
- * MySQL, PostreSQL, Apache Cassandra and MongoDB.
+ * Database, Apache Cassandra and MongoDB.
  *
  * @author Mark Paluch
+ * @author Per Abich
  */
 @Configuration
 @EnableConfigurationProperties({ VaultMySqlProperties.class,
@@ -51,8 +52,8 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 	 * {@link SecretBackendMetadataFactory} for Database integration using
 	 * {@link DatabaseSecretProperties}.
 	 */
-	public static class DatabaseSecretBackendMetadataFactory
-			implements SecretBackendMetadataFactory<DatabaseSecretProperties> {
+	public static class DatabaseSecretBackendMetadataFactory implements
+			SecretBackendMetadataFactory<DatabaseSecretProperties> {
 
 		@Override
 		public SecretBackendMetadata createMetadata(
@@ -75,16 +76,15 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 		 * @param properties must not be {@literal null}.
 		 * @return the {@link SecretBackendMetadata}
 		 */
-		static SecretBackendMetadata forDatabase(
-				final DatabaseSecretProperties properties) {
+		static SecretBackendMetadata forDatabase(final DatabaseSecretProperties properties) {
 
 			Assert.notNull(properties, "DatabaseSecretProperties must not be null");
 
 			final PropertyNameTransformer transformer = new PropertyNameTransformer();
-			transformer.addKeyTransformation("username",
-					properties.getUsernameProperty());
-			transformer.addKeyTransformation("password",
-					properties.getPasswordProperty());
+			transformer
+					.addKeyTransformation("username", properties.getUsernameProperty());
+			transformer
+					.addKeyTransformation("password", properties.getPasswordProperty());
 
 			return new SecretBackendMetadata() {
 
