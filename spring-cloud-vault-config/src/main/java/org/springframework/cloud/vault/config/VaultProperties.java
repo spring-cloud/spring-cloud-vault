@@ -30,6 +30,7 @@ import org.springframework.validation.annotation.Validated;
 /**
  * @author Spencer Gibb
  * @author Mark Paluch
+ * @author Kevin Holditch
  */
 @ConfigurationProperties("spring.cloud.vault")
 @Data
@@ -220,10 +221,23 @@ public class VaultProperties implements EnvironmentAware {
 
 	@Data
 	public static class AwsIamProperties {
+
 		/**
-		 * Name of the vault role, optional if not specified then the friendly IAM name will be used.
+		 * Mount path of the AWS authentication backend.
 		 */
-		private String vaultRole;
+		@NotEmpty
+		private String awsPath = "aws";
+
+		/**
+		 * Name of the role, optional. Defaults to the friendly IAM name if not set.
+		 */
+		private String role = "";
+
+		/**
+		 * Name of the server used to set {@code X-Vault-AWS-IAM-Server-ID} header in the
+		 * headers of login requests.
+		 */
+		private String serverName;
 	}
 
 	@Data

@@ -273,12 +273,12 @@ spring.cloud.vault:
 
 * `authentication` setting this value to `AWS_EC2` selects the AWS EC2
 authentication method
-* `role` sets the role name of the AWS EC2 role definition
+* `role` sets the name of the role against which the login is being attempted.
 * `aws-ec2-path` sets the path of the AWS EC2 mount to use
 * `identity-document` sets URL of the PKCS#7 AWS EC2 identity document
 * `nonce` used for AWS-EC2 authentication. An empty nonce defaults to nonce generation
 
-See also: https://www.vaultproject.io/docs/auth/aws-ec2.html[Vault Documentation: Using the aws-ec2 auth backend]
+See also: https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Using the aws auth backend]
 
 [[vault.config.authentication.awsiam]]
 === AWS-IAM authentication
@@ -293,14 +293,15 @@ Instead, it treats AWS as a Trusted Third Party and uses the
 4 pieces of information signed by the caller with their IAM credentials
  to verify that the caller is indeed using that IAM role.
 
-The current IAM role the application is running in is automatically calculated.  If you are
-running your application on AWS ECS then the application will use the IAM role assigned
-to the ECS task of the running container. If you are running your application naked on top of
-an EC2 instance then the IAM role used will be the one assigned to the EC2 instance.
+The current IAM role the application is running in is automatically calculated.
+If you are running your application on AWS ECS then the application
+will use the IAM role assigned to the ECS task of the running container.
+If you are running your application naked on top of an EC2 instance then
+the IAM role used will be the one assigned to the EC2 instance.
 
-When using the AWS-IAM authentication you must create a role in vault and assign it to your IAM
- role.  If no vault-role value is supplied in the configuration (as below) then the friendly name
- of the current IAM role will be used as the vault role.
+When using the AWS-IAM authentication you must create a role in Vault
+and assign it to your IAM role. An empty `role` defaults to
+the friendly name the current IAM role.
 
 .bootstrap.yml with required AWS-IAM Authentication properties
 ====
@@ -311,21 +312,27 @@ spring.cloud.vault:
 ----
 ====
 
-
 .bootstrap.yml with all AWS-IAM Authentication properties
 ====
 [source,yaml]
 ----
 spring.cloud.vault:
     authentication: AWS_IAM
-        vault-role: my-dev-role
+    aws-iam:
+        role: my-dev-role
+        aws-path: aws
+        server-id: some.server.name
 ----
 ====
 
-* `vault-role` sets the vault-role that is to be logged in to, this should be bound to your IAM role.  If one is not
- supplied then the friendly name of the current IAM user will be used as the vault role.
+* `role` sets the name of the role against which the login is being attempted. This should be bound to your IAM role. If one is not supplied then the friendly name of the current IAM user will be used as the vault role.
+* `aws-path` sets the path of the AWS mount to use
+* `server-id` sets the value to use for the `X-Vault-AWS-IAM-Server-ID` header preventing certain types of replay attacks.
 
-See also: https://www.vaultproject.io/docs/auth/aws.html[Vault documentation on configuring iam auth]
+AWS-IAM requires the AWS Java SDK dependency (`com.amazonaws:aws-java-sdk-core`)
+as the authentication implementation uses AWS SDK types for credentials and request signing.
+
+See also: https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Using the aws auth backend]
 
 [[vault.config.authentication.clientcert]]
 === TLS certificate authentication
