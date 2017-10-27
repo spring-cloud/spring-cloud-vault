@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,47 +15,49 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
+import javax.validation.constraints.NotEmpty;
+
 import lombok.Data;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
-
-import javax.validation.constraints.NotEmpty;
 
 /**
  * Configuration properties for Vault using the Database integration.
  *
  * @author Per Abich
+ * @since 2.0
  */
 @ConfigurationProperties("spring.cloud.vault.database")
 @Data
 @Validated
 public class VaultDatabaseProperties implements DatabaseSecretProperties {
 
-    /**
-     * Enable database backend usage.
-     */
-    private boolean enabled = false;
+	/**
+	 * Enable database backend usage.
+	 */
+	private boolean enabled = false;
 
-    /**
-     * Role name for credentials.
-     */
-    private String role;
+	/**
+	 * Role name for credentials.
+	 */
+	private String role;
 
-    /**
-     * Database backend path.
-     */
-    @NotEmpty
-    private String backend = "database";
+	/**
+	 * Database backend path.
+	 */
+	@NotEmpty
+	private String backend = "database";
 
-    /**
-     * Target property for the obtained username.
-     */
-    @NotEmpty
-    private String usernameProperty = "spring.datasource.username";
+	/**
+	 * Target property for the obtained username.
+	 */
+	@NotEmpty
+	private String usernameProperty = "spring.datasource.username";
 
-    /**
-     * Target property for the obtained password.
-     */
-    @NotEmpty
-    private String passwordProperty = "spring.datasource.password";
+	/**
+	 * Target property for the obtained password.
+	 */
+	@NotEmpty
+	private String passwordProperty = "spring.datasource.password";
 }

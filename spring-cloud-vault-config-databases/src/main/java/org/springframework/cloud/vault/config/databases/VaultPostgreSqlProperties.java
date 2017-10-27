@@ -15,30 +15,38 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
-
 import javax.validation.constraints.NotEmpty;
+
+import lombok.Data;
+import lombok.Getter;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Configuration properties for Vault using the PostgreSQL integration.
  *
  * @author Mark Paluch
+ * @deprecated since 2.0. Use {@link VaultDatabaseProperties}.
  */
 @ConfigurationProperties("spring.cloud.vault.postgresql")
 @Data
 @Validated
+@Deprecated
 public class VaultPostgreSqlProperties implements DatabaseSecretProperties {
 
 	/**
 	 * Enable postgresql backend usage.
 	 */
+	@Deprecated
+	@Getter(onMethod_ = { @DeprecatedConfigurationProperty(reason = "Use spring.cloud.vault.database") })
 	private boolean enabled = false;
 
 	/**
 	 * Role name for credentials.
 	 */
+	@Getter(onMethod_ = { @DeprecatedConfigurationProperty(reason = "Use spring.cloud.vault.database") })
 	private String role;
 
 	/**
