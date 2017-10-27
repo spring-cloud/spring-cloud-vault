@@ -38,7 +38,7 @@ import org.springframework.vault.core.util.PropertyTransformer;
 @Configuration
 @EnableConfigurationProperties({ VaultMySqlProperties.class,
 		VaultPostgreSqlProperties.class, VaultCassandraProperties.class,
-		VaultMongoProperties.class })
+		VaultMongoProperties.class, VaultDatabaseProperties.class })
 public class VaultConfigDatabaseBootstrapConfiguration {
 
 	@Bean

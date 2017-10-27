@@ -17,7 +17,6 @@ package org.springframework.cloud.vault.config.databases;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for {@link VaultConfigDatabaseBootstrapConfiguration}.
  *
- * @author Mark Paluch
+ * @author Per Abich
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = CustomBootstrapConfiguration.class, properties = {
