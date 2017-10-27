@@ -15,10 +15,9 @@
  */
 package org.springframework.cloud.vault.config;
 
-import java.net.URI;
-
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -27,6 +26,8 @@ import org.springframework.vault.authentication.*;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.Nonce;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
+
+import java.net.URI;
 
 /**
  * Factory for {@link ClientAuthentication}.
@@ -64,6 +65,9 @@ class ClientAuthenticationFactory {
 
 		case AWS_EC2:
 			return awsEc2Authentication(vaultProperties);
+
+		case AWS_IAM:
+			return awsIamAuthentication(vaultProperties);
 
 		case CUBBYHOLE:
 			return cubbyholeAuthentication();
@@ -154,6 +158,21 @@ class ClientAuthenticationFactory {
 		return new AwsEc2Authentication(authenticationOptions, restOperations,
 				restOperations);
 	}
+
+	private ClientAuthentication awsIamAuthentication(VaultProperties vaultProperties) {
+
+		AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder awsIamAuthenticationOptionsBuilder = AwsIamAuthenticationOptions.builder();
+
+		if (vaultProperties.getAwsIam() != null && vaultProperties.getAwsIam().getVaultRole() != null)
+			awsIamAuthenticationOptionsBuilder.role(vaultProperties.getAwsIam().getVaultRole());
+
+		AwsIamAuthenticationOptions options = awsIamAuthenticationOptionsBuilder
+				.credentialsProvider(new DefaultAWSCredentialsProviderChain())
+				.build();
+
+	    return new AwsIamAuthentication(options, restOperations);
+
+    }
 
 	private ClientAuthentication cubbyholeAuthentication() {
 
