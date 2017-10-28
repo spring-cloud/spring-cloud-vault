@@ -55,6 +55,7 @@ import org.springframework.web.client.RestOperations;
  *
  * @author Mark Paluch
  * @author Kevin Holditch
+ * @author Michal Budzyn
  * @since 1.1
  */
 @RequiredArgsConstructor
@@ -93,7 +94,10 @@ class ClientAuthenticationFactory {
 
 		case CUBBYHOLE:
 			return cubbyholeAuthentication();
-		}
+
+		case KUBERNETES:
+			return kubernetesAuthentication(vaultProperties);
+        }
 
 		throw new UnsupportedOperationException(String.format(
 				"Client authentication %s not supported",
@@ -219,6 +223,23 @@ class ClientAuthenticationFactory {
 				.build();
 
 		return new CubbyholeAuthentication(options, restOperations);
+	}
+
+	private ClientAuthentication kubernetesAuthentication(VaultProperties vaultProperties) {
+		VaultProperties.KubernetesProperties kubernetes = vaultProperties.getKubernetes();
+
+		Assert.hasText(kubernetes.getRole(),
+				"Role (spring.cloud.vault.kubernetes.role) must not be empty");
+		Assert.hasText(kubernetes.getServiceAccountTokenFile(),
+				"Role (spring.cloud.vault.kubernetes.service-account-token-file) must not be empty");
+
+		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
+				.path(kubernetes.getKubernetesPath()).role(kubernetes.getRole())
+				.jwtSupplier(new KubernetesServiceAccountTokenFile(
+						kubernetes.getServiceAccountTokenFile()))
+				.build();
+
+		return new KubernetesAuthentication(options, restOperations);
 	}
 
 	private static class AwsCredentialProvider {

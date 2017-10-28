@@ -33,6 +33,7 @@ import org.springframework.validation.annotation.Validated;
  * @author Spencer Gibb
  * @author Mark Paluch
  * @author Kevin Holditch
+ * @author Michal Budzyn
  */
 @ConfigurationProperties("spring.cloud.vault")
 @Data
@@ -98,6 +99,8 @@ public class VaultProperties implements EnvironmentAware {
 	private AwsEc2Properties awsEc2 = new AwsEc2Properties();
 
 	private AwsIamProperties awsIam = new AwsIamProperties();
+
+    private KubernetesProperties kubernetes = new KubernetesProperties();
 
 	private Ssl ssl = new Ssl();
 
@@ -250,6 +253,27 @@ public class VaultProperties implements EnvironmentAware {
 		private String serverName;
 	}
 
+    @Data
+    public static class KubernetesProperties {
+
+        /**
+         * Mount path of the Kubernetes authentication backend.
+         */
+        @NotEmpty
+        private String kubernetesPath = "kubernetes";
+
+        /**
+         * The Role.
+         */
+        private String role = null;
+
+        /**
+         * File with service account token.
+         */
+        @NotEmpty
+        private String serviceAccountTokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token";
+    }
+
 	@Data
 	public static class Ssl {
 
@@ -308,6 +332,6 @@ public class VaultProperties implements EnvironmentAware {
 	}
 
 	public enum AuthenticationMethod {
-		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, CERT, CUBBYHOLE;
+		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, CERT, CUBBYHOLE, KUBERNETES;
 	}
 }
