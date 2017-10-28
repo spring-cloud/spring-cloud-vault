@@ -22,3 +22,5 @@ work
 build/
 pom.xml.releaseBackup
 release.properties
+kubectl
+minikube
