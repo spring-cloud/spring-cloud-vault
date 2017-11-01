@@ -13,6 +13,7 @@ fi
 
 mkdir -p work/minikube
 SERVICE_ACCOUNT_TOKEN_FILE=work/minikube/hello-minikube-token
+SERVICE_ACCOUNT_CA_CRT=work/minikube/ca.crt
 
 function is_cluster_running() {
     local _running=$(${CMD_MINIKUBE} status | grep "cluster: Running" || true)
@@ -48,18 +49,17 @@ if [ $? != 0 ] ; then
 fi
 echo "HELLO_MINIKUBE_URL ${HELLO_MINIKUBE_URL}"
 
-# Copy service account token
 POD_NAME=$(${CMD_KUBECTL} get pod --selector=run=hello-minikube -o jsonpath='{.items..metadata.name}')
+# Copy service account token
 ${CMD_KUBECTL} exec ${POD_NAME} -- cat /var/run/secrets/kubernetes.io/serviceaccount/token > ${SERVICE_ACCOUNT_TOKEN_FILE}
 if [ $? != 0 ] ; then
    echo "Error while retrieving service account token file"
    exit 1
 fi
-
 # Copy ca cert
-cp $HOME/.minikube/ca.crt work/minikube
+${CMD_KUBECTL} exec ${POD_NAME} -- cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt > ${SERVICE_ACCOUNT_CA_CRT}
 if [ $? != 0 ] ; then
-   echo "Error while copying minikube ca.crt "
+   echo "Error while retrieving service account ca.crt"
    exit 1
 fi
 
