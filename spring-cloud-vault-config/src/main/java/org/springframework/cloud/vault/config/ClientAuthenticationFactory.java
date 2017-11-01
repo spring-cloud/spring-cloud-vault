@@ -96,7 +96,7 @@ class ClientAuthenticationFactory {
 			return cubbyholeAuthentication();
 
 		case KUBERNETES:
-			return kubeAuthentication(vaultProperties);
+			return kubernetesAuthentication(vaultProperties);
         }
 
 		throw new UnsupportedOperationException(String.format(
@@ -225,7 +225,7 @@ class ClientAuthenticationFactory {
 		return new CubbyholeAuthentication(options, restOperations);
 	}
 
-	private ClientAuthentication kubeAuthentication(VaultProperties vaultProperties) {
+	private ClientAuthentication kubernetesAuthentication(VaultProperties vaultProperties) {
 		VaultProperties.KubernetesProperties kubernetes = vaultProperties.getKubernetes();
 
 		Assert.hasText(kubernetes.getRole(),
@@ -233,13 +233,13 @@ class ClientAuthenticationFactory {
 		Assert.hasText(kubernetes.getServiceAccountTokenFile(),
 				"Role (spring.cloud.vault.kubernetes.service-account-token-file) must not be empty");
 
-		KubeAuthenticationOptions options = KubeAuthenticationOptions.builder()
+		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
 				.path(kubernetes.getKubernetesPath()).role(kubernetes.getRole())
-				.jwtSupplier(new KubeServiceAccountTokenFile(
+				.jwtSupplier(new KubernetesServiceAccountTokenFile(
 						kubernetes.getServiceAccountTokenFile()))
 				.build();
 
-		return new KubeAuthentication(options, restOperations);
+		return new KubernetesAuthentication(options, restOperations);
 	}
 
 	private static class AwsCredentialProvider {

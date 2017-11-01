@@ -45,8 +45,6 @@ install:
   - src/test/bash/create_certificates.sh
   - src/test/bash/install_vault.sh
   - src/test/bash/install_consul.sh
-  - src/test/bash/minikube_ci_initialize.sh
-  - src/test/bash/local_run_k8s.sh "./minikube" "./kubectl" '--vm-driver=none --extra-config=apiserver.InsecureServingOptions.BindAddress="127.0.0.1" --extra-config=apiserver.InsecureServingOptions.BindPort="8080"'
   - src/test/bash/local_run_vault.sh &
   - src/test/bash/local_run_consul.sh &
   - sudo rabbitmq-plugins enable rabbitmq_management
@@ -61,7 +59,7 @@ before_script:
   - sleep 30 # wait until Cassandra is up
   - apache-cassandra-2.2.8/bin/cqlsh localhost -u cassandra -p cassandra -e "CREATE USER 'springvault' WITH PASSWORD 'springvault' SUPERUSER"
 
-script: mvn clean verify -Pspring,java8 -DMINIKUBE_IP=$(./minikube ip)
+script: mvn clean verify -Pspring,java8
 
 after_script:
   - apache-cassandra-2.2.8/bin/nodetool stopdaemon

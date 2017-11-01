@@ -29,31 +29,31 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
 
 /**
- * Kubernetes implementation of {@link ClientAuthentication}. {@link KubeAuthentication}
+ * Kubernetes implementation of {@link ClientAuthentication}. {@link KubernetesAuthentication}
  * uses a Kubernetes Service Account JSON Web Token to login into Vault. JWT and Role are
  * sent in the login request to Vault to obtain a {@link VaultToken}.
  *
  * @author Michal Budzyn
- * @see KubeAuthenticationOptions
+ * @see KubernetesAuthenticationOptions
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/kubernetes.html">Auth Backend:
  * Kubernetes</a>
  */
-class KubeAuthentication implements ClientAuthentication {
+class KubernetesAuthentication implements ClientAuthentication {
 
-	private final KubeAuthenticationOptions options;
+	private final KubernetesAuthenticationOptions options;
 
 	private final RestOperations restOperations;
 
 	/**
-	 * Create a {@link KubeAuthentication} using {@link KubeAuthenticationOptions} and
+	 * Create a {@link KubernetesAuthentication} using {@link KubernetesAuthenticationOptions} and
 	 * {@link RestOperations}.
 	 *
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 */
-    KubeAuthentication(KubeAuthenticationOptions options,
-                       RestOperations restOperations) {
+    KubernetesAuthentication(KubernetesAuthenticationOptions options,
+                             RestOperations restOperations) {
 
 		Assert.notNull(options, "KubeAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
@@ -62,7 +62,7 @@ class KubeAuthentication implements ClientAuthentication {
 		this.restOperations = restOperations;
 	}
 
-	private static Map<String, String> getKubeLogin(String role, String jwt) {
+	private static Map<String, String> getKubernetesLogin(String role, String jwt) {
 
 		Assert.hasText(role, "role must not be empty");
 		Assert.hasText(role, "jwt must not be empty");
@@ -77,13 +77,9 @@ class KubeAuthentication implements ClientAuthentication {
 
 	@Override
 	public VaultToken login() throws VaultException {
-		return createTokenUsingKubernetes();
-	}
 
-	private VaultToken createTokenUsingKubernetes() {
-
-		Map<String, String> login = getKubeLogin(options.getRole(),
-				options.getJwtSupplier().getKubeJwt());
+		Map<String, String> login = getKubernetesLogin(options.getRole(),
+				options.getJwtSupplier().get());
 
 		try {
 			VaultResponse response = restOperations.postForObject("auth/{mount}/login",

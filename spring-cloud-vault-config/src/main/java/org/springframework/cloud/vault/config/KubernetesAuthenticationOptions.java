@@ -18,17 +18,17 @@ package org.springframework.cloud.vault.config;
 import org.springframework.util.Assert;
 
 /**
- * Authentication options for {@link KubeAuthentication}.
+ * Authentication options for {@link KubernetesAuthentication}.
  * <p>
  * Authentication options provide the path, role and jwt supplier.
- * {@link KubeAuthentication} can be constructed using {@link #builder()}. Instances of
+ * {@link KubernetesAuthentication} can be constructed using {@link #builder()}. Instances of
  * this class are immutable once constructed.
  *
  * @author Michal Budzyn
- * @see KubeAuthentication
+ * @see KubernetesAuthentication
  * @see #builder()
  */
-class KubeAuthenticationOptions {
+class KubernetesAuthenticationOptions {
 
 	static final String DEFAULT_KUBERNETES_AUTHENTICATION_PATH = "kubernetes";
 
@@ -43,44 +43,62 @@ class KubeAuthenticationOptions {
 	private final String role;
 
 	/**
-	 * {@link KubeJwtSupplier} instance to obtain a service account JSON Web Tokens.
+	 * {@link KubernetesJwtSupplier} instance to obtain a service account JSON Web Tokens.
 	 */
-	private final KubeJwtSupplier jwtSupplier;
+	private final KubernetesJwtSupplier jwtSupplier;
 
-	private KubeAuthenticationOptions(String path, String role,
-			KubeJwtSupplier jwtSupplier) {
+	private KubernetesAuthenticationOptions(String path, String role,
+											KubernetesJwtSupplier jwtSupplier) {
 
 		this.path = path;
 		this.role = role;
 		this.jwtSupplier = jwtSupplier;
 	}
 
+	/**
+	 * @return a new {@link KubernetesAuthenticationOptionsBuilder}.
+	 */
 	static KubernetesAuthenticationOptionsBuilder builder() {
 		return new KubernetesAuthenticationOptionsBuilder();
 	}
 
+	/**
+	 * @return the path of the aws authentication backend mount.
+	 */
 	String getPath() {
 		return path;
 	}
 
+	/**
+	 * @return name of the role against which the login is being attempted.
+	 */
 	String getRole() {
 		return role;
 	}
 
-	KubeJwtSupplier getJwtSupplier() {
+	/**
+	 * @return JSON Web Token supplier.
+	 */
+	KubernetesJwtSupplier getJwtSupplier() {
 		return jwtSupplier;
 	}
 
 	/**
-	 * Builder for {@link KubeAuthenticationOptions}.
+	 * Builder for {@link KubernetesAuthenticationOptions}.
 	 */
 	static class KubernetesAuthenticationOptionsBuilder {
 		private String path = DEFAULT_KUBERNETES_AUTHENTICATION_PATH;
 
 		private String role;
 
-		private KubeJwtSupplier jwtSupplier;
+		private KubernetesJwtSupplier jwtSupplier;
 
+		/**
+		 * Configure the mount path.
+		 *
+		 * @param path must not be {@literal null} or empty.
+		 * @return {@code this} {@link KubernetesAuthenticationOptionsBuilder}.
+		 */
 		KubernetesAuthenticationOptionsBuilder path(String path) {
 
 			Assert.hasText(path, "Path must not be empty");
@@ -89,6 +107,13 @@ class KubeAuthenticationOptions {
 			return this;
 		}
 
+		/**
+		 * Configure the role.
+		 *
+		 * @param role name of the role against which the login is being attempted, must
+		 * not be {@literal null} or empty.
+		 * @return {@code this} {@link KubernetesAuthenticationOptionsBuilder}.
+		 */
 		KubernetesAuthenticationOptionsBuilder role(String role) {
 
 			Assert.hasText(role, "Role must not be empty");
@@ -97,8 +122,14 @@ class KubeAuthenticationOptions {
 			return this;
 		}
 
+		/**
+		 * Configure the {@link KubernetesJwtSupplier} to obtain a Kubernetes authentication token.
+		 *
+		 * @param jwtSupplier the supplier, must not be {@literal null}.
+		 * @return {@code this} {@link KubernetesAuthenticationOptionsBuilder}.
+		 */
 		KubernetesAuthenticationOptionsBuilder jwtSupplier(
-				KubeJwtSupplier jwtSupplier) {
+				KubernetesJwtSupplier jwtSupplier) {
 
 			Assert.notNull(jwtSupplier, "JwtSupplier must not be null");
 
@@ -106,13 +137,18 @@ class KubeAuthenticationOptions {
 			return this;
 		}
 
-		KubeAuthenticationOptions build() {
+		/**
+		 * Build a new {@link KubernetesAuthenticationOptions} instance.
+		 *
+		 * @return a new {@link KubernetesAuthenticationOptions}.
+		 */
+		KubernetesAuthenticationOptions build() {
 
 			Assert.notNull(role, "Role must not be null");
-			Assert.notNull(path, "Path must not be null");
-			Assert.notNull(jwtSupplier, "JwtSupplier must not be null");
 
-			return new KubeAuthenticationOptions(path, role, jwtSupplier);
+			return new KubernetesAuthenticationOptions(path, role,
+					jwtSupplier == null ? new KubernetesServiceAccountTokenFile()
+							: jwtSupplier);
 		}
 	}
 }

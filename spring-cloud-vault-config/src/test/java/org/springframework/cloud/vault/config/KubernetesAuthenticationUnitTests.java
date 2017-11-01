@@ -35,11 +35,11 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Unit tests for {@link KubeAuthentication}.
+ * Unit tests for {@link KubernetesAuthentication}.
  *
  * @author Michal Budzyn
  */
-public class KubeAuthenticationUnitTests {
+public class KubernetesAuthenticationUnitTests {
 
 	private RestTemplate restTemplate;
 	private MockRestServiceServer mockRest;
@@ -56,11 +56,11 @@ public class KubeAuthenticationUnitTests {
 	@Test
 	public void loginShouldObtainTokenWithStaticJwtSupplier() throws Exception {
 
-		KubeAuthenticationOptions options = KubeAuthenticationOptions.builder()
+		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
 				.role("hello") //
-				.jwtSupplier((new KubeJwtSupplier() {
+				.jwtSupplier((new KubernetesJwtSupplier() {
 					@Override
-					public String getKubeJwt() {
+					public String get() {
 						return "my-jwt-token";
 					}
 				})).build();
@@ -72,7 +72,7 @@ public class KubeAuthenticationUnitTests {
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
-		KubeAuthentication authentication = new KubeAuthentication(options, restTemplate);
+		KubernetesAuthentication authentication = new KubernetesAuthentication(options, restTemplate);
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -82,10 +82,10 @@ public class KubeAuthenticationUnitTests {
 	@Test(expected = VaultException.class)
 	public void loginShouldFail() throws Exception {
 
-		KubeAuthenticationOptions options = KubeAuthenticationOptions.builder()
-				.role("hello").jwtSupplier(new KubeJwtSupplier() {
+		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
+				.role("hello").jwtSupplier(new KubernetesJwtSupplier() {
 					@Override
-					public String getKubeJwt() {
+					public String get() {
 						return "my-jwt-token";
 					}
 				}).build();
@@ -93,6 +93,6 @@ public class KubeAuthenticationUnitTests {
 		mockRest.expect(requestTo("/auth/kubernetes/login")) //
 				.andRespond(withServerError());
 
-		new KubeAuthentication(options, restTemplate).login();
+		new KubernetesAuthentication(options, restTemplate).login();
 	}
 }

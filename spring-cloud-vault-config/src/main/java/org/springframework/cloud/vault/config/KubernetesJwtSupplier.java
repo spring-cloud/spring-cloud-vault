@@ -17,17 +17,17 @@ package org.springframework.cloud.vault.config;
 
 /**
  * Interface to obtain a Kubernetes Service Account Token for Kubernetes authentication.
- * Implementations are used by {@link KubeAuthentication}.
+ * Implementations are used by {@link KubernetesAuthentication}.
  *
  * @author Michal Budzyn
- * @see KubeAuthentication
+ * @see KubernetesAuthentication
  */
-interface KubeJwtSupplier {
+interface KubernetesJwtSupplier {
 
 	/**
 	 * Get a JWT for Kubernetes authentication.
 	 *
 	 * @return the Kubernetes Service Account JWT.
 	 */
-	String getKubeJwt();
+	String get();
 }
