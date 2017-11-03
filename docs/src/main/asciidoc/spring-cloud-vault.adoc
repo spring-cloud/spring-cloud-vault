@@ -408,13 +408,11 @@ See also:
 
 [[vault.config.authentication.kubernetes]]
 === Kubernetes authentication
+
 Kubernetes authentication mechanism (since Vault 0.8.3) allows to authenticate with Vault using a Kubernetes Service Account Token.
 The authentication is role based and the role is bound to a service account name and a namespace.
 
-A file containing a JWT token for a pod’s service account is automatically mounted at `/var/run/secrets/kubernetes.io/serviceaccount/token`
-
-NOTE: The Vault backend accesses Kubernetes TokenReview API to validate provided JWT. The API is by default enabled in Kubernetes 1.7.
-
+A file containing a JWT token for a pod’s service account is automatically mounted at `/var/run/secrets/kubernetes.io/serviceaccount/token`.
 
 .bootstrap.yml with all Kubernetes authentication properties
 ====
@@ -424,47 +422,17 @@ spring.cloud.vault:
     authentication: KUBERNETES
     kubernetes:
         role: my-dev-role
+        service-account-token-file: /var/run/secrets/kubernetes.io/serviceaccount/token
 ----
 ====
 
 * `role` sets the Role.
-* `service-account-token-file` sets the location of the file containing the Kubernetes Service Account Token. If one is not supplied then the default location `/var/run/secrets/kubernetes.io/serviceaccount/token` is used.
+* `service-account-token-file` sets the location of the file containing the Kubernetes Service Account Token. Defaults to `/var/run/secrets/kubernetes.io/serviceaccount/token`.
 
-.Bind the role to a service account name and a namespace
-====
-[source,shell]
-----
-$ vault write auth/kubernetes/role/my-dev-role bound_service_account_names=my-service-account bound_service_account_namespaces=default policies=my-policy
+See also: 
 
-Success! Data written to: auth/kubernetes/role/my-dev-role
-
-----
-====
-
-.Define Kubernetes Service Account and Pod
-====
-[source,yaml]
-----
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: my-service-account
-
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: spring-cloud-vault-test
-  namespace: default
-spec:
-  serviceAccountName: my-service-account
-  containers:
-  ...
-----
-====
-
-See also: https://www.vaultproject.io/docs/auth/kubernetes.html[Vault Documentation: Kubernetes]
+* https://www.vaultproject.io/docs/auth/kubernetes.html[Vault Documentation: Kubernetes]
+* https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/[Kubernetes Documentation: Configure Service Accounts for Pods]
 
 [[vault.config.backends]]
 == Secret Backends
