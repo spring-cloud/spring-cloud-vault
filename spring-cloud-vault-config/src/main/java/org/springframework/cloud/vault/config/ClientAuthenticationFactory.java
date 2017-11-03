@@ -100,7 +100,7 @@ class ClientAuthenticationFactory {
 
 		case KUBERNETES:
 			return kubernetesAuthentication(vaultProperties);
-        }
+		}
 
 		throw new UnsupportedOperationException(String.format(
 				"Client authentication %s not supported",
@@ -229,18 +229,22 @@ class ClientAuthenticationFactory {
 	}
 
 	private ClientAuthentication kubernetesAuthentication(VaultProperties vaultProperties) {
+
 		VaultProperties.KubernetesProperties kubernetes = vaultProperties.getKubernetes();
 
 		Assert.hasText(kubernetes.getRole(),
 				"Role (spring.cloud.vault.kubernetes.role) must not be empty");
-		Assert.hasText(kubernetes.getServiceAccountTokenFile(),
-				"Role (spring.cloud.vault.kubernetes.service-account-token-file) must not be empty");
+		Assert.hasText(
+				kubernetes.getServiceAccountTokenFile(),
+				"Service account token file (spring.cloud.vault.kubernetes.service-account-token-file) must not be empty");
 
-		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
-				.path(kubernetes.getKubernetesPath()).role(kubernetes.getRole())
-				.jwtSupplier(new KubernetesServiceAccountTokenFile(
-						kubernetes.getServiceAccountTokenFile()))
-				.build();
+		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
+				.builder()
+				.path(kubernetes.getKubernetesPath())
+				.role(kubernetes.getRole())
+				.jwtSupplier(
+						new KubernetesServiceAccountTokenFile(kubernetes
+								.getServiceAccountTokenFile())).build();
 
 		return new KubernetesAuthentication(options, restOperations);
 	}
