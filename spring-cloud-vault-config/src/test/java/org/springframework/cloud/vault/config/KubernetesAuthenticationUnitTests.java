@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,9 @@
  */
 package org.springframework.cloud.vault.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -33,6 +27,13 @@ import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
  * Unit tests for {@link KubernetesAuthentication}.
@@ -45,19 +46,20 @@ public class KubernetesAuthenticationUnitTests {
 	private MockRestServiceServer mockRest;
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
+
 		this.mockRest = MockRestServiceServer.createServer(restTemplate);
 		this.restTemplate = restTemplate;
 	}
 
 	@Test
-	public void loginShouldObtainTokenWithStaticJwtSupplier() throws Exception {
+	public void loginShouldObtainTokenWithStaticJwtSupplier() {
 
-		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
-				.role("hello") //
+		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
+				.builder().role("hello") //
 				.jwtSupplier((new KubernetesJwtSupplier() {
 					@Override
 					public String get() {
@@ -69,10 +71,12 @@ public class KubernetesAuthenticationUnitTests {
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.role").value("hello"))
 				.andExpect(jsonPath("$.jwt").value("my-jwt-token"))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+				.andRespond(
+						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+								"{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
-		KubernetesAuthentication authentication = new KubernetesAuthentication(options, restTemplate);
+		KubernetesAuthentication authentication = new KubernetesAuthentication(options,
+				restTemplate);
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -80,10 +84,10 @@ public class KubernetesAuthenticationUnitTests {
 	}
 
 	@Test(expected = VaultException.class)
-	public void loginShouldFail() throws Exception {
+	public void loginShouldFail() {
 
-		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
-				.role("hello").jwtSupplier(new KubernetesJwtSupplier() {
+		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
+				.builder().role("hello").jwtSupplier(new KubernetesJwtSupplier() {
 					@Override
 					public String get() {
 						return "my-jwt-token";

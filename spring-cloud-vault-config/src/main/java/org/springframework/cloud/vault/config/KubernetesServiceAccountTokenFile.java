@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.vault.config;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -29,10 +28,12 @@ import org.springframework.vault.VaultException;
 /**
  * Mechanism to retrieve a Kubernetes service account token.
  * <p>
- * A file containing a token for a pod’s service account is automatically mounted at
- * <b>/var/run/secrets/kubernetes.io/serviceaccount/token</b>
+ * A file containing a token for a pod's service account is automatically mounted at
+ * {@code /var/run/secrets/kubernetes.io/serviceaccount/token}.
  *
  * @author Michal Budzyn
+ * @author Mark Paluch
+ * @since 1.1
  * @see KubernetesJwtSupplier
  */
 class KubernetesServiceAccountTokenFile implements KubernetesJwtSupplier {
@@ -44,78 +45,68 @@ class KubernetesServiceAccountTokenFile implements KubernetesJwtSupplier {
 
 	private byte[] token;
 
-    /**
-     * Create a new {@link KubernetesServiceAccountTokenFile} pointing to the
-     * {@link #DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE}. Construction fails with an
-     * exception if the file does not exist.
-     *
-     * @throws IllegalArgumentException if the
-     * {@link #DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE} does not exist.
-     */
-    KubernetesServiceAccountTokenFile() {
-        this(DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE);
-    }
+	/**
+	 * Create a new {@link KubernetesServiceAccountTokenFile} pointing to the
+	 * {@link #DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE}. Construction fails with an
+	 * exception if the file does not exist.
+	 *
+	 * @throws IllegalArgumentException if the
+	 * {@link #DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE} does not exist.
+	 */
+	KubernetesServiceAccountTokenFile() {
+		this(DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE);
+	}
 
-    /**
-     * Create a new {@link KubernetesServiceAccountTokenFile}
-     * {@link KubernetesServiceAccountTokenFile} from a {@code path}.
-     *
-     * @param path path to the service account token file.
-     * @throws IllegalArgumentException if the{@code path} does not exist.
-     */
-    KubernetesServiceAccountTokenFile(String path) {
-        this(new FileSystemResource(path));
-    }
+	/**
+	 * Create a new {@link KubernetesServiceAccountTokenFile}
+	 * {@link KubernetesServiceAccountTokenFile} from a {@code path}.
+	 *
+	 * @param path path to the service account token file.
+	 * @throws IllegalArgumentException if the{@code path} does not exist.
+	 */
+	KubernetesServiceAccountTokenFile(String path) {
+		this(new FileSystemResource(path));
+	}
 
-    /**
-     * Create a new {@link KubernetesServiceAccountTokenFile}
-     * {@link KubernetesServiceAccountTokenFile} from a {@link File} handle.
-     *
-     * @param file path to the service account token file.
-     * @throws IllegalArgumentException if the{@code path} does not exist.
-     */
-    KubernetesServiceAccountTokenFile(File file) {
-        this(new FileSystemResource(file));
-    }
+	/**
+	 * Create a new {@link KubernetesServiceAccountTokenFile}
+	 * {@link KubernetesServiceAccountTokenFile} from a {@link Resource} handle.
+	 *
+	 * @param resource resource pointing to the service account token file.
+	 * @throws IllegalArgumentException if the{@code path} does not exist.
+	 */
+	KubernetesServiceAccountTokenFile(Resource resource) {
 
-    /**
-     * Create a new {@link KubernetesServiceAccountTokenFile}
-     * {@link KubernetesServiceAccountTokenFile} from a {@link Resource} handle.
-     *
-     * @param resource resource pointing to the service account token file.
-     * @throws IllegalArgumentException if the{@code path} does not exist.
-     */
-    KubernetesServiceAccountTokenFile(Resource resource) {
+		Assert.isTrue(resource.exists(),
+				String.format("Resource %s does not exist", resource));
 
-        Assert.isTrue(resource.exists(), String.format("Resource %s does not exist", resource));
+		try {
+			this.token = readToken(resource);
+		}
+		catch (IOException e) {
+			throw new VaultException(String.format(
+					"Kube JWT token retrieval from %s failed", resource), e);
+		}
+	}
 
-        try {
-            this.token = readToken(resource);
-        }
-        catch (IOException e) {
-            throw new VaultException(String.format(
-                    "Kube JWT token retrieval from %s failed", resource), e);
-        }
-    }
+	@Override
+	public String get() {
+		return new String(token, StandardCharsets.US_ASCII);
+	}
 
-    @Override
-    public String get() {
-        return new String(token, StandardCharsets.US_ASCII);
-    }
+	/**
+	 * Read the token from {@link Resource}.
+	 *
+	 * @param resource the resource to read from, must not be {@literal null}.
+	 * @return the new byte array that has been copied to (possibly empty).
+	 * @throws IOException in case of I/O errors.
+	 */
+	private static byte[] readToken(Resource resource) throws IOException {
 
-    /**
-     * Read the token from {@link Resource}.
-     *
-     * @param resource the resource to read from, must not be {@literal null}.
-     * @return the new byte array that has been copied to (possibly empty).
-     * @throws IOException in case of I/O errors.
-     */
-    protected static byte[] readToken(Resource resource) throws IOException {
+		Assert.notNull(resource, "Resource must not be null");
 
-        Assert.notNull(resource, "Resource must not be null");
-
-        try (InputStream is = resource.getInputStream()) {
-            return StreamUtils.copyToByteArray(is);
-        }
-    }
+		try (InputStream is = resource.getInputStream()) {
+			return StreamUtils.copyToByteArray(is);
+		}
+	}
 }

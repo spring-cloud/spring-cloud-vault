@@ -100,7 +100,7 @@ public class VaultProperties implements EnvironmentAware {
 
 	private AwsIamProperties awsIam = new AwsIamProperties();
 
-    private KubernetesProperties kubernetes = new KubernetesProperties();
+	private KubernetesProperties kubernetes = new KubernetesProperties();
 
 	private Ssl ssl = new Ssl();
 
@@ -253,26 +253,26 @@ public class VaultProperties implements EnvironmentAware {
 		private String serverName;
 	}
 
-    @Data
-    public static class KubernetesProperties {
+	@Data
+	public static class KubernetesProperties {
 
-        /**
-         * Mount path of the Kubernetes authentication backend.
-         */
-        @NotEmpty
-        private String kubernetesPath = "kubernetes";
+		/**
+		 * Mount path of the Kubernetes authentication backend.
+		 */
+		@NotEmpty
+		private String kubernetesPath = "kubernetes";
 
-        /**
-         * The Role.
-         */
-        private String role = null;
+		/**
+		 * Name of the role against which the login is being attempted.
+		 */
+		private String role = "";
 
-        /**
-         * File with service account token.
-         */
-        @NotEmpty
-        private String serviceAccountTokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token";
-    }
+		/**
+		 * Path to the service account token file.
+		 */
+		@NotEmpty
+		private String serviceAccountTokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token";
+	}
 
 	@Data
 	public static class Ssl {
