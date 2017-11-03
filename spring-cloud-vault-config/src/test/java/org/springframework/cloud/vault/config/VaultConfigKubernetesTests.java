@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,6 @@
  */
 package org.springframework.cloud.vault.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
-import static org.springframework.cloud.vault.util.Settings.findWorkDir;
-
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -29,6 +25,7 @@ import org.assertj.core.util.Files;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -38,6 +35,13 @@ import org.springframework.cloud.vault.util.Version;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.support.Policy;
+import org.springframework.vault.support.Policy.BuiltinCapabilities;
+import org.springframework.vault.support.Policy.Rule;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+import static org.springframework.cloud.vault.util.Settings.findWorkDir;
 
 /**
  * Integration test using config infrastructure with Kubernetes authentication.
@@ -56,14 +60,15 @@ public class VaultConfigKubernetesTests {
 	String configValue;
 
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
 		String minikubeIp = System.getProperty("MINIKUBE_IP");
-		assumeTrue(StringUtils.hasText(minikubeIp) && vaultRule.prepare().getVersion()
-				.isGreaterThanOrEqualTo(Version.parse("0.8.3")));
+		assumeTrue(StringUtils.hasText(minikubeIp)
+				&& vaultRule.prepare().getVersion()
+						.isGreaterThanOrEqualTo(Version.parse("0.8.3")));
 
 		if (!vaultRule.prepare().hasAuth("kubernetes")) {
 			vaultRule.prepare().mountAuth("kubernetes");
@@ -71,14 +76,10 @@ public class VaultConfigKubernetesTests {
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
-		String rules = "{ \"name\": \"testpolicy\",\n" //
-				+ "  \"path\": {\n" //
-				+ "    \"*\": {  \"policy\": \"read\" }\n" //
-				+ "  }\n" //
-				+ "}";
+		Policy policy = Policy.of(Rule.builder().path("*")
+				.capabilities(BuiltinCapabilities.READ).build());
 
-		vaultOperations.write("sys/policy/testpolicy",
-				Collections.singletonMap("rules", rules));
+		vaultOperations.opsForSys().createOrUpdatePolicy("testpolicy", policy);
 
 		vaultOperations.write(
 				"secret/" + VaultConfigKubernetesTests.class.getSimpleName(),
@@ -100,7 +101,6 @@ public class VaultConfigKubernetesTests {
 		roleData.put("policies", "testpolicy");
 		roleData.put("ttl", "1h");
 		vaultOperations.write("auth/kubernetes/role/my-role", roleData);
-
 	}
 
 	@Test
