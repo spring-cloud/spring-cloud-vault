@@ -11,7 +11,7 @@
 	</parent>
 
 	<artifactId>spring-cloud-vault-parent</artifactId>
-	<version>1.1.0.RELEASE</version>
+	<version>1.2.0.BUILD-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Spring Cloud Vault</name>
@@ -35,7 +35,7 @@
 		<developerConnection>
 			scm:git:ssh://git@github.com/spring-cloud/spring-cloud-vault.git
 		</developerConnection>
-		<tag>v1.1.0.RELEASE</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<properties>
