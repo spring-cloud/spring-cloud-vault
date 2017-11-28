@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-vault-parent</artifactId>
-		<version>1.2.0.BUILD-SNAPSHOT</version>
+		<version>1.1.1.BUILD-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
 	<artifactId>spring-cloud-vault-config-docs</artifactId>
-	<version>1.2.0.BUILD-SNAPSHOT</version>
+	<version>1.1.1.BUILD-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 	<name>Spring Cloud Vault Config Docs</name>
@@ -19,7 +19,7 @@
 	<properties>
 		<docs.main>spring-cloud-vault</docs.main>
 		<main.basedir>${basedir}/..</main.basedir>
-		<docs.whitelisted.branches>1.0.x</docs.whitelisted.branches>
+		<docs.whitelisted.branches>1.1.x</docs.whitelisted.branches>
 	</properties>
 
 	<build>
