@@ -11,7 +11,7 @@ badges:
       icon: github
 
     - name: StackOverflow
-      url:  http://stackoverflow.com/questions/tagged/spring-cloud
+      url:  https://stackoverflow.com/questions/tagged/spring-cloud
       icon: stackoverflow
 
 ---
@@ -34,11 +34,12 @@ Spring Cloud Vault Config provides client-side support for externalized configur
 
 ## Features
 
-* Retrieve secrets from Vault and initialize Spring Environment with remote property sources
-* Obtain [secrets](http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.generic) secured with SSL
-* Generate credentials for [MySQL](http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.mysql), [PostgreSQL](http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.postgresql), [Apache Cassandra](http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.cassandra), [MongoDB](http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.mongodb), [Consul](http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.consul), [AWS](http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.aws), and [RabbitMQ](http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.backends.rabbitmq).
-* [Token](http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication.token), [AppId](http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication.appid), [AppRole](http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication.approle), [Client Certificate](http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication.clientcert), [Cubbyhole](http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication.cubbyhole), and [AWS-EC2](http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault-config.html#vault.config.authentication.awsec2) authentication
-* Bootstrap application context: a parent context for the main application that can be trained to do anything
+* Retrieve secrets from Vault and initialize Spring Environment with remote property sources.
+* Obtain [secrets](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.backends.generic) secured with SSL.
+* Generate credentials for [MySQL](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.backends.mysql), [PostgreSQL](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.backends.postgresql), [Apache Cassandra](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.backends.cassandra), [MongoDB](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.backends.mongodb), [Consul](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.backends.consul), [AWS](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.backends.aws), and [RabbitMQ](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.backends.rabbitmq).
+* [Token](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.authentication.token), [AppId](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.authentication.appid), [AppRole](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.authentication.approle), [Client Certificate](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.authentication.clientcert), [Cubbyhole](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.authentication.cubbyhole), and [AWS EC2 and IAM](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.authentication.awsec2), [Kubernetes](https://cloud.spring.io/spring-cloud-vault/single/spring-cloud-vault.html#vault.config.authentication.kubernetes) authentication.
+* Bootstrap application context: a parent context for the main application that can be trained to do anything.
+* Cloud Foundry integration using [HashiCorp's Vault service broker](https://github.com/hashicorp/vault-service-broker) through [Spring Cloud Vault Connector](https://github.com/pivotal-cf/spring-cloud-vault-connector).
 
 <span id="quick-start"></span>
 
@@ -63,7 +64,7 @@ then configure your Vault endpoint and authentication
 `bootstrap.yml` for Token-based authentication
 
 ```yaml
-spring.application.name=my-application
+spring.application.name: my-application
 spring.cloud.vault:
     host: localhost
     port: 8200
@@ -75,7 +76,7 @@ spring.cloud.vault:
 `bootstrap.yml` for AWS-EC2 authentication
 
 ```yaml
-spring.application.name=my-application
+spring.application.name: my-application
 spring.cloud.vault:
     host: localhost
     port: 8200
@@ -149,6 +150,7 @@ Spring Cloud Vault Config comes with multiple modules supporting different integ
 ### Related resources
 
 * [Spring Vault repository](https://github.com/spring-projects/spring-vault)
+* [Spring Cloud Vault Connector](https://github.com/pivotal-cf/spring-cloud-vault-connector)
 * [Examples repository](https://github.com/mp911de/spring-cloud-vault-config-samples)
 
 {% endcapture %}
