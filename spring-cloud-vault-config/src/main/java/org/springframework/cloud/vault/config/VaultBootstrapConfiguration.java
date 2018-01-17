@@ -215,7 +215,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	 */
 	@Bean
 	@ConditionalOnMissingBean
-	public SessionManager sessionManager(ClientAuthentication clientAuthentication,
+	public SessionManager vaultSessionManager(ClientAuthentication clientAuthentication,
 			ObjectFactory<TaskSchedulerWrapper> asyncTaskExecutorFactory) {
 
 		if (vaultProperties.getConfig().getLifecycle().isEnabled()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.vault.authentication.AuthenticationSteps;
 import org.springframework.vault.authentication.AuthenticationStepsFactory;
+import org.springframework.vault.authentication.LifecycleAwareSessionManager;
+import org.springframework.vault.authentication.SessionManager;
+import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.authentication.VaultTokenSupplier;
 import org.springframework.vault.core.ReactiveVaultOperations;
 import org.springframework.vault.support.VaultToken;
@@ -43,20 +46,40 @@ public class ReactiveVaultBootstrapConfigurationTests {
 	@Test
 	public void shouldConfigureTemplate() {
 
-		load(AuthenticationFactoryConfiguration.class);
+		load(AuthenticationFactoryConfiguration.class,
+				"spring.cloud.vault.config.lifecycle.enabled=false");
 
 		assertThat(context.getBean(ReactiveVaultOperations.class)).isNotNull();
 		assertThat(context.getBean(AuthenticationStepsFactory.class)).isNotNull();
+		assertThat(context.getBean(SessionManager.class)).isNotNull()
+				.isNotInstanceOf(LifecycleAwareSessionManager.class)
+				.isNotInstanceOf(SimpleSessionManager.class);
 		assertThat(context.getBeanNamesForType(WebClient.class)).isEmpty();
 	}
 
 	@Test
 	public void shouldConfigureTemplateWithTokenSupplier() {
 
-		load(TokeSupplierConfiguration.class);
+		load(TokenSupplierConfiguration.class,
+				"spring.cloud.vault.config.lifecycle.enabled=false");
 
 		assertThat(context.getBean(ReactiveVaultOperations.class)).isNotNull();
+		assertThat(context.getBean(SessionManager.class)).isNotNull()
+				.isNotInstanceOf(LifecycleAwareSessionManager.class)
+				.isNotInstanceOf(SimpleSessionManager.class);
 		assertThat(context.getBeanNamesForType(WebClient.class)).isEmpty();
+	}
+
+	@Test
+	public void shouldNotConfigureReactiveSupport() {
+
+		load(VaultBootstrapConfiguration.class,
+				"spring.cloud.vault.reactive.enabled=false",
+				"spring.cloud.vault.token=foo");
+
+		assertThat(context.getBeanNamesForType(ReactiveVaultOperations.class)).isEmpty();
+		assertThat(context.getBean(SessionManager.class)).isInstanceOf(
+				LifecycleAwareSessionManager.class);
 	}
 
 	private void load(Class<?> config, String... environment) {
@@ -82,7 +105,7 @@ public class ReactiveVaultBootstrapConfigurationTests {
 	}
 
 	@Configuration
-	static class TokeSupplierConfiguration {
+	static class TokenSupplierConfiguration {
 
 		@Bean
 		VaultTokenSupplier vaultTokenSupplier() {
