@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations
 
 	private final SecretBackendMetadata secretBackendMetadata;
 
-	private final Map<String, String> properties = new LinkedHashMap<>();
+	private final Map<String, Object> properties = new LinkedHashMap<>();
 
 	private Secrets secrets;
 

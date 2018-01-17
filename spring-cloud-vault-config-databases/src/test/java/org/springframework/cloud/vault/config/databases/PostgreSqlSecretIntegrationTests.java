@@ -15,16 +15,13 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory.*;
-
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.cloud.vault.config.VaultConfigOperations;
 import org.springframework.cloud.vault.config.VaultConfigTemplate;
 import org.springframework.cloud.vault.config.VaultProperties;
@@ -32,6 +29,10 @@ import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.vault.core.VaultOperations;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory.*;
 
 /**
  * Integration tests for
@@ -91,13 +92,12 @@ public class PostgreSqlSecretIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void shouldCreateCredentialsCorrectly() throws Exception {
+	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, String> secretProperties = configOperations
+		Map<String, Object> secretProperties = configOperations
 				.read(forDatabase(postgreSql)).getData();
 
 		assertThat(secretProperties).containsKeys("spring.datasource.username",
 				"spring.datasource.password");
 	}
-
 }

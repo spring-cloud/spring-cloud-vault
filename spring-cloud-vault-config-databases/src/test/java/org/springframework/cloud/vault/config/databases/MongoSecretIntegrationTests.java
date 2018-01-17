@@ -15,10 +15,6 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory.*;
-
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,6 +31,10 @@ import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.Version;
 import org.springframework.vault.core.VaultOperations;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory.*;
 
 /**
  * Integration tests for {@link VaultConfigTemplate} using the mongodb secret backend.
@@ -89,9 +89,10 @@ public class MongoSecretIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void shouldCreateCredentialsCorrectly() throws Exception {
+	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, String> secretProperties = configOperations.read(forDatabase(mongodb))
+		Map<String, Object> secretProperties = configOperations
+				.read(forDatabase(mongodb))
 				.getData();
 
 		assertThat(secretProperties).containsKeys("spring.data.mongodb.username",

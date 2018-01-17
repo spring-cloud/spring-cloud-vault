@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,7 @@ import org.springframework.vault.core.util.PropertyTransformer;
  *
  * @author Mark Paluch
  */
-public class PropertyNameTransformer extends PropertyTransformerSupport
-		implements PropertyTransformer {
+public class PropertyNameTransformer implements PropertyTransformer {
 
 	private final Map<String, String> nameMapping = new HashMap<>();
 
@@ -59,24 +58,23 @@ public class PropertyNameTransformer extends PropertyTransformerSupport
 	}
 
 	@Override
-	public Map<String, String> transformProperties(Map<String, String> input) {
+	public Map<String, Object> transformProperties(Map<String, ? extends Object> input) {
 
 		if (input == null) {
 			return null;
 		}
 
-		Map<String, String> transformed = new LinkedHashMap<>(input.size(), 1);
+		Map<String, Object> transformed = new LinkedHashMap<>(input.size(), 1);
 
 		for (String key : input.keySet()) {
 
-			String value = input.get(key);
 			String translatedKey = key;
 
 			if (nameMapping.containsKey(key)) {
 				translatedKey = nameMapping.get(key);
 			}
 
-			transformed.put(translatedKey, value);
+			transformed.put(translatedKey, input.get(key));
 		}
 
 		return transformed;

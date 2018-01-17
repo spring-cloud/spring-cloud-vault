@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 				return null;
 			}
 
-			Map<String, String> data = JsonMapFlattener.flatten(vaultResponse.getData());
+			Map<String, Object> data = JsonMapFlattener.flatten(vaultResponse.getData());
 			PropertyTransformer propertyTransformer = secretBackendMetadata
 					.getPropertyTransformer();
 
@@ -99,7 +99,7 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 		return null;
 	}
 
-	private Secrets createSecrets(VaultResponse vaultResponse, Map<String, String> data) {
+	private Secrets createSecrets(VaultResponse vaultResponse, Map<String, Object> data) {
 
 		Secrets secrets = new Secrets();
 

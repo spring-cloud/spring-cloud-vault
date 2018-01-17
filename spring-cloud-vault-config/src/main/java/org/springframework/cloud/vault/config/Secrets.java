@@ -25,5 +25,5 @@ import org.springframework.vault.support.VaultResponseSupport;
  *
  * @author Mark Paluch
  */
-public class Secrets extends VaultResponseSupport<Map<String, String>> {
+public class Secrets extends VaultResponseSupport<Map<String, Object>> {
 }
