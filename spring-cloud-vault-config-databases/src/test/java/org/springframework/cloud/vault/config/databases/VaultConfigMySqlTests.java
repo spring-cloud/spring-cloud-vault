@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.vault.core.VaultOperations;
  * of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
- * 
+ *
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
