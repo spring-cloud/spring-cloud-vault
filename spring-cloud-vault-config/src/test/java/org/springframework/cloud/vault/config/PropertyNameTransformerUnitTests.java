@@ -15,12 +15,12 @@
  */
 package org.springframework.cloud.vault.config;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Unit tests for {@link PropertyNameTransformer}.
@@ -35,7 +35,7 @@ public class PropertyNameTransformerUnitTests {
 		PropertyNameTransformer transformer = new PropertyNameTransformer();
 		transformer.addKeyTransformation("old-key", "new-key");
 
-		Map<String, String> map = new HashMap<>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("old-key", "value");
 		map.put("other-key", "other-value");
 
