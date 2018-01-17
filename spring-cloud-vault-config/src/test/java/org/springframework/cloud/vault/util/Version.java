@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Value object representing Version consisting of major, minor and bugfix part.
- * 
+ *
  * @author Mark Paluch
  */
 public class Version implements Comparable<Version> {
@@ -41,7 +41,7 @@ public class Version implements Comparable<Version> {
 	/**
 	 * Creates a new {@link Version} from the given integer values. At least one value has
 	 * to be given but a maximum of 4.
-	 * 
+	 *
 	 * @param parts must not be {@literal null} or empty.
 	 */
 	private Version(int... parts) {
@@ -62,7 +62,7 @@ public class Version implements Comparable<Version> {
 
 	/**
 	 * Parses the given string representation of a version into a {@link Version} object.
-	 * 
+	 *
 	 * @param version must not be {@literal null} or empty.
 	 * @return
 	 */
@@ -94,7 +94,7 @@ public class Version implements Comparable<Version> {
 
 	/**
 	 * Returns whether the current {@link Version} is greater (newer) than the given one.
-	 * 
+	 *
 	 * @param version
 	 * @return
 	 */
@@ -105,7 +105,7 @@ public class Version implements Comparable<Version> {
 	/**
 	 * Returns whether the current {@link Version} is greater (newer) or the same as the
 	 * given one.
-	 * 
+	 *
 	 * @param version
 	 * @return
 	 */
@@ -115,7 +115,7 @@ public class Version implements Comparable<Version> {
 
 	/**
 	 * Returns whether the current {@link Version} is the same as the given one.
-	 * 
+	 *
 	 * @param version
 	 * @return
 	 */
@@ -125,7 +125,7 @@ public class Version implements Comparable<Version> {
 
 	/**
 	 * Returns whether the current {@link Version} is less (older) than the given one.
-	 * 
+	 *
 	 * @param version
 	 * @return
 	 */
@@ -136,7 +136,7 @@ public class Version implements Comparable<Version> {
 	/**
 	 * Returns whether the current {@link Version} is less (older) or equal to the current
 	 * one.
-	 * 
+	 *
 	 * @param version
 	 * @return
 	 */
@@ -146,7 +146,7 @@ public class Version implements Comparable<Version> {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	public int compareTo(Version that) {
@@ -176,7 +176,7 @@ public class Version implements Comparable<Version> {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -198,7 +198,7 @@ public class Version implements Comparable<Version> {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -214,7 +214,7 @@ public class Version implements Comparable<Version> {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
