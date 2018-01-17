@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
@@ -7,7 +22,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
@@ -15,13 +29,14 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration test incorporating loading secrets using
  * {@code spring.cloud.vault.applicationName} and active profiles
  *
  * @author Ryan Hoegg
+ * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = VaultPropertySourceLocatorIntegrationTests.TestApplication.class, properties = {
@@ -31,8 +46,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles({ "integrationtest" })
 public class VaultPropertySourceLocatorIntegrationTests extends IntegrationTestSupport {
 
+	@SpringBootApplication
+	public static class TestApplication {
+	}
+
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
+
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
@@ -70,14 +90,4 @@ public class VaultPropertySourceLocatorIntegrationTests extends IntegrationTestS
 	public void getsSecretFromVaultUsingAdditionalContext() {
 		assertThat(additionalValue).isEqualTo("additional context:integrationtest value");
 	}
-
-	@SpringBootApplication
-	public static class TestApplication {
-
-		public static void main(String[] args) {
-			SpringApplication.run(VaultConfigWithContextTests.TestApplication.class,
-					args);
-		}
-	}
-
 }
