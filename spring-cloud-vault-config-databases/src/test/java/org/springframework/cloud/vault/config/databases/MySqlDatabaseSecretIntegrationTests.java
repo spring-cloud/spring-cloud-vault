@@ -31,9 +31,9 @@ import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.Version;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
-import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory.forDatabase;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory.*;
 
 /**
  * Integration tests for {@link VaultConfigTemplate} using the {@code database} secret
@@ -95,9 +95,9 @@ public class MySqlDatabaseSecretIntegrationTests extends IntegrationTestSupport 
 	}
 
 	@Test
-	public void shouldCreateCredentialsCorrectly() throws Exception {
+	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, String> secretProperties = configOperations.read(forDatabase(mySql))
+		Map<String, Object> secretProperties = configOperations.read(forDatabase(mySql))
 				.getData();
 
 		assertThat(secretProperties).containsKeys("spring.datasource.username",

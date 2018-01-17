@@ -15,9 +15,6 @@
  */
 package org.springframework.cloud.vault.config;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.cloud.vault.config.GenericSecretBackendMetadata.*;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +23,9 @@ import org.junit.Test;
 
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.cloud.vault.config.GenericSecretBackendMetadata.*;
 
 /**
  * Integration tests for {@link VaultConfigTemplate} using the generic secret backend.
@@ -38,26 +38,26 @@ public class GenericSecretIntegrationTests extends IntegrationTestSupport {
 	private VaultConfigOperations configOperations;
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 
 		vaultProperties.setFailFast(false);
-		prepare().getVaultOperations().write("secret/app-name", (Map) createData());
+		prepare().getVaultOperations().write("secret/app-name", createData());
 
 		configOperations = new VaultConfigTemplate(prepare().getVaultOperations(),
 				vaultProperties);
 	}
 
 	@Test
-	public void shouldReturnSecretsCorrectly() throws Exception {
+	public void shouldReturnSecretsCorrectly() {
 
-		Map<String, String> secretProperties = configOperations
+		Map<String, Object> secretProperties = configOperations
 				.read(create("secret", "app-name")).getData();
 
 		assertThat(secretProperties).containsAllEntriesOf(createExpectedMap());
 	}
 
 	@Test
-	public void shouldReturnNullIfNotFound() throws Exception {
+	public void shouldReturnNullIfNotFound() {
 
 		Secrets secrets = configOperations.read(create("secret", "missing"));
 
@@ -65,18 +65,24 @@ public class GenericSecretIntegrationTests extends IntegrationTestSupport {
 	}
 
 	private Map<String, Object> createData() {
+
 		Map<String, Object> data = new HashMap<>();
+
 		data.put("string", "value");
-		data.put("number", "1234");
+		data.put("number", 1234);
 		data.put("boolean", true);
+
 		return data;
 	}
 
-	private Map<String, String> createExpectedMap() {
-		Map<String, String> data = new HashMap<>();
+	private Map<String, Object> createExpectedMap() {
+
+		Map<String, Object> data = new HashMap<>();
+
 		data.put("string", "value");
-		data.put("number", "1234");
-		data.put("boolean", "true");
+		data.put("number", 1234);
+		data.put("boolean", true);
+
 		return data;
 	}
 }

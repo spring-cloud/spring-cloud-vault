@@ -15,16 +15,13 @@
  */
 package org.springframework.cloud.vault.config.aws;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrapConfiguration.AwsSecretBackendMetadataFactory.*;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.cloud.vault.config.VaultConfigOperations;
 import org.springframework.cloud.vault.config.VaultConfigTemplate;
 import org.springframework.cloud.vault.config.VaultProperties;
@@ -32,6 +29,10 @@ import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.core.VaultOperations;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+import static org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrapConfiguration.AwsSecretBackendMetadataFactory.*;
 
 /**
  * Integration tests for {@link VaultConfigTemplate} using the aws secret backend. This
@@ -88,9 +89,9 @@ public class AwsSecretIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void shouldCreateCredentialsCorrectly() throws Exception {
+	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, String> secretProperties = configOperations.read(forAws(aws))
+		Map<String, Object> secretProperties = configOperations.read(forAws(aws))
 				.getData();
 
 		assertThat(secretProperties).containsKeys("cloud.aws.credentials.accessKey",

@@ -15,10 +15,6 @@
  */
 package org.springframework.cloud.vault.config.rabbitmq;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration.RabbitMqSecretBackendMetadataFactory.*;
-
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,6 +22,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.cloud.vault.config.VaultConfigTemplate;
 import org.springframework.cloud.vault.config.VaultProperties;
 import org.springframework.cloud.vault.util.CanConnect;
@@ -33,6 +30,10 @@ import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.Version;
 import org.springframework.vault.core.VaultOperations;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
+import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration.RabbitMqSecretBackendMetadataFactory.*;
 
 /**
  * Integration tests for {@link VaultConfigTemplate} using the rabbitmq secret backend.
@@ -94,9 +95,9 @@ public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void shouldCreateCredentialsCorrectly() throws Exception {
+	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, String> secretProperties = configOperations
+		Map<String, Object> secretProperties = configOperations
 				.read(forRabbitMq(rabbitmq)).getData();
 
 		assertThat(secretProperties).containsKeys("spring.rabbitmq.username",
