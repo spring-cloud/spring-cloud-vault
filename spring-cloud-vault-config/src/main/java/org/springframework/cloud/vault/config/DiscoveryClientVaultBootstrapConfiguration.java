@@ -24,6 +24,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.commons.util.UtilAutoConfiguration;
+import org.springframework.cloud.vault.config.DiscoveryClientVaultBootstrapConfiguration.DiscoveryBootstrapConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -45,50 +46,55 @@ import org.springframework.vault.client.VaultEndpointProvider;
 @EnableConfigurationProperties(VaultProperties.class)
 @Order(Ordered.LOWEST_PRECEDENCE - 2)
 @EnableDiscoveryClient
-@Import(UtilAutoConfiguration.class)
+@Import({ UtilAutoConfiguration.class, DiscoveryBootstrapConfiguration.class })
 public class DiscoveryClientVaultBootstrapConfiguration {
 
-	private final VaultProperties vaultProperties;
+	@ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
+	@Configuration
+	static class DiscoveryBootstrapConfiguration {
 
-	public DiscoveryClientVaultBootstrapConfiguration(VaultProperties vaultProperties) {
-		this.vaultProperties = vaultProperties;
-	}
+		private final VaultProperties vaultProperties;
 
-	@Bean
-	@ConditionalOnMissingBean
-	public VaultServiceInstanceProvider vaultServerInstanceProvider(
-			DiscoveryClient discoveryClient) {
-		return new DiscoveryClientVaultServiceInstanceProvider(discoveryClient);
-	}
+		public DiscoveryBootstrapConfiguration(VaultProperties vaultProperties) {
+			this.vaultProperties = vaultProperties;
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public VaultServiceInstanceProvider vaultServerInstanceProvider(
+				DiscoveryClient discoveryClient) {
+			return new DiscoveryClientVaultServiceInstanceProvider(discoveryClient);
+		}
 
 	@Bean
 	@ConditionalOnMissingBean
 	public VaultEndpointProvider vaultEndpointProvider(
 			VaultServiceInstanceProvider instanceProvider) {
 
-		final String serviceId = this.vaultProperties.getDiscovery().getServiceId();
+			final String serviceId = this.vaultProperties.getDiscovery().getServiceId();
 
-		final String fallbackScheme;
+			final String fallbackScheme;
 
-		if (StringUtils.hasText(this.vaultProperties.getUri())) {
-			fallbackScheme = URI.create(this.vaultProperties.getUri()).getScheme();
+			if (StringUtils.hasText(this.vaultProperties.getUri())) {
+				fallbackScheme = URI.create(this.vaultProperties.getUri()).getScheme();
+			}
+			else {
+				fallbackScheme = this.vaultProperties.getScheme();
+			}
+
+			ServiceInstance server = instanceProvider.getVaultServerInstance(serviceId);
+
+			final VaultEndpoint vaultEndpoint = VaultEndpoint.create(server.getHost(),
+					server.getPort());
+
+			if (server.getMetadata().containsKey("scheme")) {
+				vaultEndpoint.setScheme(server.getMetadata().get("scheme"));
+			}
+			else {
+				vaultEndpoint.setScheme(server.isSecure() ? "https" : fallbackScheme);
+			}
+
+			return () -> vaultEndpoint;
 		}
-		else {
-			fallbackScheme = this.vaultProperties.getScheme();
-		}
-
-		ServiceInstance server = instanceProvider.getVaultServerInstance(serviceId);
-
-		final VaultEndpoint vaultEndpoint = VaultEndpoint.create(server.getHost(),
-				server.getPort());
-
-		if (server.getMetadata().containsKey("scheme")) {
-			vaultEndpoint.setScheme(server.getMetadata().get("scheme"));
-		}
-		else {
-			vaultEndpoint.setScheme(server.isSecure() ? "https" : fallbackScheme);
-		}
-
-		return () -> vaultEndpoint;
 	}
 }
