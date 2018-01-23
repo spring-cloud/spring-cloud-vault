@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,13 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
  */
 @CommonsLog
 @RequiredArgsConstructor
-class VaultServerInstanceProvider {
+public class DiscoveryClientVaultServiceInstanceProvider implements
+		VaultServiceInstanceProvider {
 
 	private final DiscoveryClient client;
 
-	ServiceInstance getVaultServerInstance(String serviceId) {
+	@Override
+	public ServiceInstance getVaultServerInstance(String serviceId) {
 
 		log.debug("Locating Vault server (" + serviceId + ") via discovery");
 
