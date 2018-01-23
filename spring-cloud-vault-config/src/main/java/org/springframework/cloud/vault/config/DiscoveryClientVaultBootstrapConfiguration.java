@@ -50,18 +50,21 @@ public class DiscoveryClientVaultBootstrapConfiguration {
 
 	private final VaultProperties vaultProperties;
 
-	private final VaultServerInstanceProvider instanceProvider;
-
-	public DiscoveryClientVaultBootstrapConfiguration(VaultProperties vaultProperties,
-			DiscoveryClient discoveryClient) {
-
+	public DiscoveryClientVaultBootstrapConfiguration(VaultProperties vaultProperties) {
 		this.vaultProperties = vaultProperties;
-		this.instanceProvider = new VaultServerInstanceProvider(discoveryClient);
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
-	public VaultEndpointProvider vaultEndpointProvider() {
+	public VaultServiceInstanceProvider vaultServerInstanceProvider(
+			DiscoveryClient discoveryClient) {
+		return new DiscoveryClientVaultServiceInstanceProvider(discoveryClient);
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public VaultEndpointProvider vaultEndpointProvider(
+			VaultServiceInstanceProvider instanceProvider) {
 
 		final String serviceId = this.vaultProperties.getDiscovery().getServiceId();
 
@@ -86,12 +89,6 @@ public class DiscoveryClientVaultBootstrapConfiguration {
 			vaultEndpoint.setScheme(server.isSecure() ? "https" : fallbackScheme);
 		}
 
-		return new VaultEndpointProvider() {
-
-			@Override
-			public VaultEndpoint getVaultEndpoint() {
-				return vaultEndpoint;
-			}
-		};
+		return () -> vaultEndpoint;
 	}
 }
