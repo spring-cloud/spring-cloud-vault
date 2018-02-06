@@ -6,7 +6,7 @@
 :toc: left
 :nofooter:
 
-(C) 2016-2017 The original authors.
+(C) 2016-2018 The original authors.
 
 NOTE: _Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically._
 
@@ -168,8 +168,7 @@ https://www.vaultproject.io/docs/auth/app-id.html[AppRole] is intended for machi
 authentication, like the deprecated (since Vault 0.6.1) <<vault.config.authentication.appid>>.
 AppRole authentication consists of two hard to guess (secret) tokens: RoleId and SecretId.
 
-Spring Vault supports AppRole authentication by providing either RoleId only
-or together with a provided SecretId (push or pull mode).
+Spring Vault supports various AppRole scenarios (push/pull mode and wrapped).
 
 RoleId and optionally SecretId must be provided by configuration,
 Spring Vault will not look up these or create a custom SecretId.
@@ -185,7 +184,39 @@ spring.cloud.vault:
 ----
 ====
 
-* `role-id` sets the RoleId.
+The following scenarios are supported along the required configuration details:
+
+.Configuration
+|===
+| *Method*                          | *RoleId* | *SecretId*| *RoleName* | *Token*
+| Provided RoleId/SecretId          | Provided | Provided  |            |         
+| Provided RoleId without SecretId  | Provided |           |            |         
+| Provided RoleId, Pull SecretId    | Provided | Provided  | Provided   | Provided
+| Pull RoleId, provided SecretId    |          | Provided  | Provided   | Provided
+| Full Pull Mode                    |          |           | Provided   | Provided
+| Wrapped                           |          |           |            | Provided
+| Wrapped RoleId, provided SecretId | Provided |           |            | Provided
+| Provided RoleId, wrapped SecretId |          | Provided  |            | Provided
+|===
+
+.Pull/Push/Wrapped Matrix
+|===
+| *RoleId* | *SecretId* | *Supported*
+| Provided | Provided   | ✅
+| Provided | Pull       | ✅ 
+| Provided | Wrapped    | ✅ 
+| Provided | Absent     | ✅ 
+| Pull     | Provided   | ✅ 
+| Pull     | Pull       | ✅ 
+| Pull     | Wrapped    | ❌                   
+| Pull     | Absent     | ❌                   
+| Wrapped  | Provided   | ✅ 
+| Wrapped  | Pull       | ❌                   
+| Wrapped  | Wrapped    | ✅ 
+| Wrapped  | Absent     | ❌                  
+|===
+
+NOTE: You can use still all combinations of push/pull/wrapped modes by providing a configured `AppRoleAuthentication` bean within the boostrap context. Spring Cloud Vault cannot derive all possible AppRole combinations from the configuration properties. 
 
 .bootstrap.yml with all AppRole authentication properties
 ====
@@ -196,13 +227,15 @@ spring.cloud.vault:
     app-role:
         role-id: bde2076b-cccb-3cf0-d57e-bca7b1e83a52
         secret-id: 1696536f-1976-73b1-b241-0b4213908d39
-        app-auth-path: approle
+        role: my-role
+        app-role-path: approle
 ----
 ====
 
 * `role-id` sets the RoleId.
-* `secret-id` sets the SecretId. SecretId can be omitted if AppRole is configured without requiring SecretId (See `bind_secret_id`)
-* `approle-path` sets the path of the approle authentication mount to use
+* `secret-id` sets the SecretId. SecretId can be omitted if AppRole is configured without requiring SecretId (See `bind_secret_id`).
+* `role`: sets the AppRole name for pull mode.
+* `app-role-path` sets the path of the approle authentication mount to use.
 
 See also: https://www.vaultproject.io/docs/auth/approle.html[Vault Documentation: Using the AppRole auth backend]
 

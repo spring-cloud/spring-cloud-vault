@@ -179,9 +179,14 @@ public class VaultProperties implements EnvironmentAware {
 	public static class AppRoleProperties {
 
 		/**
-		 * Mount path of the AppId authentication backend.
+		 * Mount path of the AppRole authentication backend.
 		 */
 		private String appRolePath = "approle";
+
+		/**
+		 * Name of the role, optional, used for pull-mode.
+		 */
+		private String role = "";
 
 		/**
 		 * The RoleId.
