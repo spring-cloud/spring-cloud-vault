@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Tests for {@link VaultConfigDatabaseBootstrapConfiguration}.
@@ -47,6 +47,7 @@ public class VaultConfigDatabaseBootstrapConfigurationTests
 	@Autowired
 	DatabaseSecretBackendMetadataFactory factory;
 
+	@SuppressWarnings("deprecation")
 	@Autowired
 	VaultMySqlProperties properties;
 

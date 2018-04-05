@@ -57,6 +57,7 @@ public class PostgreSqlSecretIntegrationTests extends IntegrationTestSupport {
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
 	private VaultConfigOperations configOperations;
+	@SuppressWarnings("deprecation")
 	private VaultPostgreSqlProperties postgreSql = new VaultPostgreSqlProperties();
 
 	/**
