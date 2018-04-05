@@ -65,7 +65,7 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 
 		this.vaultSecretBackendDescriptors = applicationContext.getBeansOfType(
 				VaultSecretBackendDescriptor.class).values();

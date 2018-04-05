@@ -58,11 +58,9 @@ public class CassandraSecretIntegrationTests extends IntegrationTestSupport {
 
 	/**
 	 * Initialize cassandra secret backend.
-	 *
-	 * @throws Exception
 	 */
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(CASSANDRA_HOST, CASSANDRA_PORT)));
 

@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.*;
 public class PropertyNameTransformerUnitTests {
 
 	@Test
-	public void shouldTranslateProperties() throws Exception {
+	public void shouldTranslateProperties() {
 
 		PropertyNameTransformer transformer = new PropertyNameTransformer();
 		transformer.addKeyTransformation("old-key", "new-key");
@@ -44,7 +44,7 @@ public class PropertyNameTransformerUnitTests {
 	}
 
 	@Test
-	public void shouldAllowNullInput() throws Exception {
+	public void shouldAllowNullInput() {
 
 		PropertyNameTransformer transformer = new PropertyNameTransformer();
 		transformer.addKeyTransformation("old-key", "new-key");

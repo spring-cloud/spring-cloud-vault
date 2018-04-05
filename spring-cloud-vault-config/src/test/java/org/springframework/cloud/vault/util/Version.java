@@ -46,8 +46,9 @@ public class Version implements Comparable<Version> {
 	 */
 	private Version(int... parts) {
 
-		Assert.notNull(parts);
-		Assert.isTrue(parts.length > 0 && parts.length < 5);
+		Assert.notNull(parts, "Parts must not be null!");
+		Assert.isTrue(parts.length > 0 && parts.length < 5,
+				"Parts must contain 1 to 5 segments!");
 
 		this.major = parts[0];
 		this.minor = parts.length > 1 ? parts[1] : 0;
@@ -220,7 +221,7 @@ public class Version implements Comparable<Version> {
 	@Override
 	public String toString() {
 
-		List<Integer> digits = new ArrayList<Integer>();
+		List<Integer> digits = new ArrayList<>();
 		digits.add(major);
 		digits.add(minor);
 

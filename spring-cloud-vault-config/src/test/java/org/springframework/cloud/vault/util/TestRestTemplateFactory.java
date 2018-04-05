@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.util;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,7 +40,7 @@ public class TestRestTemplateFactory {
 
 	public static final VaultEndpoint TEST_VAULT_ENDPOINT = new VaultEndpoint();
 
-	private static final AtomicReference<ClientHttpRequestFactory> factoryCache = new AtomicReference<ClientHttpRequestFactory>();
+	private static final AtomicReference<ClientHttpRequestFactory> factoryCache = new AtomicReference<>();
 
 	/**
 	 * Create a new {@link RestTemplate} using the {@link SslConfiguration}. The

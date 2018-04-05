@@ -328,6 +328,6 @@ public class VaultProperties implements EnvironmentAware {
 	}
 
 	public enum AuthenticationMethod {
-		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, CERT, CUBBYHOLE, KUBERNETES;
+		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, CERT, CUBBYHOLE, KUBERNETES
 	}
 }

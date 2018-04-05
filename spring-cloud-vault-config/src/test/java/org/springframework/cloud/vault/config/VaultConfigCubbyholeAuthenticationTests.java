@@ -31,13 +31,11 @@ import org.springframework.cloud.vault.util.Version;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
-import org.springframework.web.client.RestOperations;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
 
 /**
  * Integration test using config infrastructure with Cubbyhole authentication.
@@ -56,7 +54,7 @@ import static org.junit.Assume.assumeTrue;
 public class VaultConfigCubbyholeAuthenticationTests {
 
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
@@ -72,17 +70,13 @@ public class VaultConfigCubbyholeAuthenticationTests {
 						VaultConfigCubbyholeAuthenticationTests.class.getSimpleName()));
 
 		VaultResponse vaultResponse = vaultOperations
-				.doWithSession(new RestOperationsCallback<VaultResponse>() {
-					@Override
-					public VaultResponse doWithRestOperations(
-							RestOperations restOperations) {
+.doWithSession(restOperations -> {
 
-						HttpHeaders headers = new HttpHeaders();
-						headers.add("X-Vault-Wrap-TTL", "1h");
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("X-Vault-Wrap-TTL", "1h");
 
-						return restOperations.postForObject("/auth/token/create",
-								new HttpEntity<Object>(headers), VaultResponse.class);
-					}
+			return restOperations.postForObject("/auth/token/create", new HttpEntity<>(
+					headers), VaultResponse.class);
 				});
 
 		String initialToken = vaultResponse.getWrapInfo().get("token");

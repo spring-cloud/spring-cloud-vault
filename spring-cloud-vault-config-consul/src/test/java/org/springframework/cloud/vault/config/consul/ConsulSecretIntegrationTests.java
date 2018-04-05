@@ -68,12 +68,10 @@ public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 	private RestTemplate restTemplate = new RestTemplate();
 
 	/**
-	 * Initialize the postgresql secret backend.
-	 *
-	 * @throws Exception
+	 * Initialize the consul secret backend.
 	 */
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(CONSUL_HOST, CONSUL_PORT)));
 

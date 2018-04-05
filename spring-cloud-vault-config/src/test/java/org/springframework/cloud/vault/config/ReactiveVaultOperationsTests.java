@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.*;
 public class ReactiveVaultOperationsTests {
 
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();

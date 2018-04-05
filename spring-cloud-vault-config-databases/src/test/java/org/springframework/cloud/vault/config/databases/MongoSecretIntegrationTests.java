@@ -56,11 +56,9 @@ public class MongoSecretIntegrationTests extends IntegrationTestSupport {
 
 	/**
 	 * Initialize the mongodb secret backend.
-	 *
-	 * @throws Exception
 	 */
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(MONGODB_HOST, MONGODB_PORT)));
 		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.2")));

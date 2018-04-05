@@ -60,11 +60,9 @@ public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 
 	/**
 	 * Initialize the rabbitmq secret backend.
-	 *
-	 * @throws Exception
 	 */
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 
 		assumeTrue(CanConnect
 				.to(new InetSocketAddress(RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT)));

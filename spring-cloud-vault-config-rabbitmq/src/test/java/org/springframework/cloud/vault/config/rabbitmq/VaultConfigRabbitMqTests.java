@@ -16,16 +16,17 @@
 
 package org.springframework.cloud.vault.config.rabbitmq;
 
-import static org.junit.Assume.*;
-
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -37,9 +38,7 @@ import org.springframework.cloud.vault.util.Version;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import static org.junit.Assume.*;
 
 /**
  * Integration tests using the rabbitmq secret backend. In case this test should fail
@@ -70,11 +69,9 @@ public class VaultConfigRabbitMqTests {
 
 	/**
 	 * Initialize the rabbitmq secret backend.
-	 *
-	 * @throws Exception
 	 */
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		assumeTrue(CanConnect
 				.to(new InetSocketAddress(RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT)));
@@ -124,11 +121,10 @@ public class VaultConfigRabbitMqTests {
 		factory.setPort(RABBITMQ_PORT);
 		factory.setUsername(username);
 		factory.setPassword(password);
-		Connection connection = factory.newConnection();
-		Channel channel = connection.createChannel();
 
-		channel.close();
-		connection.close();
+		try (Connection connection = factory.newConnection()) {
+			connection.createChannel().close();
+		}
 	}
 
 	@SpringBootApplication

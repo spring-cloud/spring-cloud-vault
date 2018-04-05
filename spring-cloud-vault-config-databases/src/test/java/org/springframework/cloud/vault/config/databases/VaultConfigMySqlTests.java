@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import static org.junit.Assume.*;
-
 import java.net.InetSocketAddress;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -27,6 +25,7 @@ import javax.sql.DataSource;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -36,6 +35,8 @@ import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
+
+import static org.junit.Assume.*;
 
 /**
  * Integration tests using the mysql secret backend. In case this test should fail because
@@ -60,11 +61,9 @@ public class VaultConfigMySqlTests {
 
 	/**
 	 * Initialize the mysql secret backend.
-	 *
-	 * @throws Exception
 	 */
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(MYSQL_HOST, MYSQL_PORT)));
 

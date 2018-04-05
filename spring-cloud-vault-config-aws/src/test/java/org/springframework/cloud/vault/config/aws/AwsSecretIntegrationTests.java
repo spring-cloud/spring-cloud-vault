@@ -55,11 +55,9 @@ public class AwsSecretIntegrationTests extends IntegrationTestSupport {
 
 	/**
 	 * Initialize the aws secret backend.
-	 *
-	 * @throws Exception
 	 */
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 
 		assumeTrue(StringUtils.hasText(AWS_ACCESS_KEY)
 				&& StringUtils.hasText(AWS_SECRET_KEY));

@@ -27,7 +27,6 @@ import org.springframework.vault.core.env.LeaseAwareVaultPropertySource;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.event.LeaseErrorListener;
-import org.springframework.vault.core.lease.event.SecretLeaseEvent;
 
 /**
  * Extension to {@link LeasingVaultPropertySourceLocator} that creates
@@ -118,13 +117,10 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 
 		final AtomicReference<Exception> errorRef = new AtomicReference<>();
 
-		LeaseErrorListener errorListener = new LeaseErrorListener() {
-			@Override
-			public void onLeaseError(SecretLeaseEvent leaseEvent, Exception exception) {
+		LeaseErrorListener errorListener = (leaseEvent, exception) -> {
 
-				if (leaseEvent.getSource() == secret) {
-					errorRef.compareAndSet(null, exception);
-				}
+			if (leaseEvent.getSource() == secret) {
+				errorRef.compareAndSet(null, exception);
 			}
 		};
 

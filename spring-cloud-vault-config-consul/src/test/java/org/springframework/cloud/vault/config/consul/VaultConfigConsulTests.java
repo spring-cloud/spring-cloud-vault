@@ -16,7 +16,6 @@
 package org.springframework.cloud.vault.config.consul;
 
 import java.net.InetSocketAddress;
-import java.sql.SQLException;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,8 +40,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.assertj.core.api.Java6Assertions.*;
+import static org.junit.Assume.*;
 
 /**
  * Integration tests using the consul secret backend. In case this test should fail
@@ -72,11 +71,9 @@ public class VaultConfigConsulTests {
 
 	/**
 	 * Initialize the consul secret backend.
-	 *
-	 * @throws Exception
 	 */
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(CONSUL_HOST, CONSUL_PORT)));
 
@@ -112,7 +109,7 @@ public class VaultConfigConsulTests {
 	String token;
 
 	@Test
-	public void shouldHaveToken() throws SQLException {
+	public void shouldHaveToken() {
 		assertThat(token).isNotEmpty();
 	}
 

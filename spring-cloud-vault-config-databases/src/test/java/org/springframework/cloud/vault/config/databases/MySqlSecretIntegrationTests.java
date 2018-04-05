@@ -56,11 +56,9 @@ public class MySqlSecretIntegrationTests extends IntegrationTestSupport {
 
 	/**
 	 * Initialize the mysql secret backend.
-	 *
-	 * @throws Exception
 	 */
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(MYSQL_HOST, MYSQL_PORT)));
 
