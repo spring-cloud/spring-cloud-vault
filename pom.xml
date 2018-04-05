@@ -42,7 +42,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring-cloud-commons.version>2.0.0.BUILD-SNAPSHOT</spring-cloud-commons.version>
-		<httpclient.version>4.5.3</httpclient.version>
+		<httpclient.version>4.5.5</httpclient.version>
 		<httpcore.version>4.4.7</httpcore.version>
 		<netty.version>4.1.17.Final</netty.version>
 		<okhttp3.version>3.9.0</okhttp3.version>
