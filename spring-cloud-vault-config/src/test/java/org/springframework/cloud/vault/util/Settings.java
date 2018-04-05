@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.util;
 
 import java.io.File;
@@ -54,7 +53,8 @@ public class Settings {
 		File workDir = findWorkDir();
 
 		return SslConfiguration.forTrustStore(
-				new FileSystemResource(new File(workDir, "keystore.jks")), "changeit");
+new FileSystemResource(new File(workDir,
+				"keystore.jks")), "changeit".toCharArray());
 	}
 
 	/**

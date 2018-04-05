@@ -53,6 +53,7 @@ public class MySqlDatabaseSecretIntegrationTests extends IntegrationTestSupport 
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
 	private VaultConfigOperations configOperations;
+	@SuppressWarnings("deprecation")
 	private VaultMySqlProperties mySql = new VaultMySqlProperties();
 
 	/**
