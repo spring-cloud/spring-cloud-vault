@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.vault.util;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -80,30 +79,16 @@ public class VaultRule extends ExternalResource {
 	@Override
 	public void before() {
 
-		Socket socket = null;
-		try {
-
-			socket = new Socket();
+		try (Socket socket = new Socket()) {
 
 			socket.connect(new InetSocketAddress(InetAddress.getByName("localhost"),
 					vaultEndpoint.getPort()));
-			socket.close();
-
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(
 					String.format(
 							"Vault is not running on localhost:%d which is required to run a test using @Rule %s",
 							vaultEndpoint.getPort(), getClass().getSimpleName()));
-		}
-		finally {
-			if (socket != null) {
-				try {
-					socket.close();
-				}
-				catch (IOException e) {
-				}
-			}
 		}
 
 		if (!this.prepareVault.isAvailable()) {

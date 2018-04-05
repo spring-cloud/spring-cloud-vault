@@ -33,7 +33,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.authentication.IpAddressUserId;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration test using config infrastructure with AppId authentication.
@@ -53,7 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class VaultConfigAppIdTests {
 
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
@@ -82,14 +82,14 @@ public class VaultConfigAppIdTests {
 		vaultOperations.write("secret/" + VaultConfigAppIdTests.class.getSimpleName(),
 				Collections.singletonMap("vault.value", "foo"));
 
-		Map<String, String> appIdData = new HashMap<String, String>();
+		Map<String, String> appIdData = new HashMap<>();
 		appIdData.put("value", "testpolicy"); // policy
 		appIdData.put("display_name", "this is my test application");
 
 		vaultOperations.write(String.format("auth/app-id/map/app-id/%s", appId),
 				appIdData);
 
-		Map<String, String> userIdData = new HashMap<String, String>();
+		Map<String, String> userIdData = new HashMap<>();
 		userIdData.put("value", appId); // name of the app-id
 		userIdData.put("cidr_block", "0.0.0.0/0");
 

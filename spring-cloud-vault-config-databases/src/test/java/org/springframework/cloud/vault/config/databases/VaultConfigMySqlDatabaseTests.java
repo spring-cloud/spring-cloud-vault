@@ -38,7 +38,7 @@ import org.springframework.cloud.vault.util.Version;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.junit.Assume.assumeTrue;
+import static org.junit.Assume.*;
 
 /**
  * Integration tests using the database secret backend. In case this test should fail
@@ -64,11 +64,9 @@ public class VaultConfigMySqlDatabaseTests {
 
 	/**
 	 * Initialize the mysql secret backend.
-	 *
-	 * @throws Exception
 	 */
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();

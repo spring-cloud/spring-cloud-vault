@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.vault.config;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.util.Collections;
 
 import org.junit.Before;
@@ -24,6 +22,8 @@ import org.junit.Test;
 
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
+
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration tests for {@link VaultPropertySource}.
@@ -33,13 +33,13 @@ import org.springframework.cloud.vault.util.Settings;
 public class VaultPropertySourceIntegrationTests extends IntegrationTestSupport {
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 		prepare().getVaultOperations().write("secret/myapp",
 				Collections.singletonMap("key", "value"));
 	}
 
 	@Test
-	public void shouldReadValue() throws Exception {
+	public void shouldReadValue() {
 
 		VaultProperties vaultProperties = Settings.createVaultProperties();
 

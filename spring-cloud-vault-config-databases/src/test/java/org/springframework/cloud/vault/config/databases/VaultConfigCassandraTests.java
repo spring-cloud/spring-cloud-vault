@@ -15,14 +15,13 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-
 import java.net.InetSocketAddress;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.PlainTextAuthProvider;
+import com.datastax.driver.core.Session;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,9 +36,8 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.PlainTextAuthProvider;
-import com.datastax.driver.core.Session;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
 
 /**
  * Integration tests using the cassandra secret backend. In case this test should fail
@@ -66,11 +64,9 @@ public class VaultConfigCassandraTests {
 
 	/**
 	 * Initialize the cassandra secret backend.
-	 *
-	 * @throws Exception
 	 */
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(CASSANDRA_HOST, CASSANDRA_PORT)));
 
@@ -109,24 +105,24 @@ public class VaultConfigCassandraTests {
 	Cluster cluster;
 
 	@Test
-	public void shouldConnectUsingCluster() throws SQLException {
+	public void shouldConnectUsingCluster() {
 		cluster.connect().close();
 	}
 
 	@Test
-	public void shouldUseAuthenticationSet() throws SQLException {
+	public void shouldUseAuthenticationSet() {
 		assertThat(cluster.getConfiguration().getProtocolOptions().getAuthProvider())
 				.isInstanceOf(PlainTextAuthProvider.class);
 	}
 
 	@Test
-	public void shouldConnectUsingCassandraClient() throws SQLException {
+	public void shouldConnectUsingCassandraClient() {
 
-		Cluster cluster = Cluster.builder().addContactPoint(CASSANDRA_HOST)
-				.withAuthProvider(new PlainTextAuthProvider(username, password)).build();
-		Session session = cluster.connect();
-		session.close();
-		cluster.close();
+		try (Cluster cluster = Cluster.builder().addContactPoint(CASSANDRA_HOST)
+				.withAuthProvider(new PlainTextAuthProvider(username, password)).build()) {
+			Session session = cluster.connect();
+			session.close();
+		}
 	}
 
 	@SpringBootApplication

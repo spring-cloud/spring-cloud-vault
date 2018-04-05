@@ -35,8 +35,8 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.cloud.vault.util.Settings.findWorkDir;
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.cloud.vault.util.Settings.*;
 
 /**
  * Integration test using config infrastructure with TLS certificate authentication. In
@@ -56,7 +56,7 @@ import static org.springframework.cloud.vault.util.Settings.findWorkDir;
 public class VaultConfigTlsCertAuthenticationTests {
 
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();

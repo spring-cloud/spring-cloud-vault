@@ -32,8 +32,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
 
 /**
  * Integration tests using the aws secret backend. In case this test should fail because
@@ -62,11 +62,9 @@ public class VaultConfigAwsTests {
 
 	/**
 	 * Initialize the aws secret backend.
-	 *
-	 * @throws Exception
 	 */
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		assumeTrue(StringUtils.hasText(AWS_ACCESS_KEY)
 				&& StringUtils.hasText(AWS_SECRET_KEY));
@@ -97,7 +95,7 @@ public class VaultConfigAwsTests {
 	String secretKey;
 
 	@Test
-	public void shouldInitializeAwsProperties() throws Exception {
+	public void shouldInitializeAwsProperties() {
 
 		assertThat(accessKey).isNotEmpty();
 		assertThat(secretKey).isNotEmpty();

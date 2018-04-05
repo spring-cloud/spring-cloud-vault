@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.vault.config.databases;
 
-import static org.junit.Assume.*;
-
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -40,8 +40,7 @@ import org.springframework.cloud.vault.util.Version;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoDatabase;
+import static org.junit.Assume.*;
 
 /**
  * Integration tests using the mongodb secret backend. In case this test should fail
@@ -67,11 +66,9 @@ public class VaultConfigMongoTests {
 
 	/**
 	 * Initialize the mongo secret backend.
-	 *
-	 * @throws Exception
 	 */
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(MONGODB_HOST, MONGODB_PORT)));
 
@@ -112,7 +109,8 @@ public class VaultConfigMongoTests {
 		MongoDatabase mongoDatabase = mongoClient.getDatabase("admin");
 
 		List<Document> collections = mongoDatabase.listCollections()
-				.into(new ArrayList<Document>());
+.into(
+				new ArrayList<>());
 
 		for (Document collection : collections) {
 			if (collection.getString("name").equals("hello")) {

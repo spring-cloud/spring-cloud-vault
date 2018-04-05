@@ -33,8 +33,8 @@ import org.springframework.cloud.vault.util.Version;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.*;
 
 /**
  * Integration test using config infrastructure with AppRole authentication.
@@ -54,7 +54,7 @@ import static org.junit.Assume.assumeTrue;
 public class VaultConfigAppRoleTests {
 
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
@@ -84,7 +84,7 @@ public class VaultConfigAppRoleTests {
 		vaultOperations.write("secret/" + VaultConfigAppRoleTests.class.getSimpleName(),
 				Collections.singletonMap("vault.value", "foo"));
 
-		Map<String, String> withSecretId = new HashMap<String, String>();
+		Map<String, String> withSecretId = new HashMap<>();
 		withSecretId.put("policies", "testpolicy"); // policy
 		withSecretId.put("bound_cidr_list", "0.0.0.0/0");
 		withSecretId.put("bind_secret_id", "true");

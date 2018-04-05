@@ -31,7 +31,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration test using config infrastructure with token authentication.
@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class VaultConfigDisabledTests {
 
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();

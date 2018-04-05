@@ -58,11 +58,9 @@ public class MySqlDatabaseSecretIntegrationTests extends IntegrationTestSupport 
 
 	/**
 	 * Initialize the mysql secret backend.
-	 *
-	 * @throws Exception
 	 */
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(MYSQL_HOST, MYSQL_PORT)));
 		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.7.1")));

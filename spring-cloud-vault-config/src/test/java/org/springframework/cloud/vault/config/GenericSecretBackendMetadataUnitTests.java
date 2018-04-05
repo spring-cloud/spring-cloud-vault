@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Unit tests for {@link GenericSecretBackendMetadata}.
@@ -36,7 +36,7 @@ public class GenericSecretBackendMetadataUnitTests {
 	public void shouldCreateDefaultContexts() {
 
 		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				Collections.<String>emptyList());
+				Collections.emptyList());
 
 		assertThat(contexts).hasSize(1).contains("application");
 	}
@@ -47,7 +47,7 @@ public class GenericSecretBackendMetadataUnitTests {
 		properties.setApplicationName("my-app");
 
 		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				Collections.<String>emptyList());
+				Collections.emptyList());
 
 		assertThat(contexts).hasSize(2).containsSequence("my-app", "application");
 	}
@@ -71,7 +71,7 @@ public class GenericSecretBackendMetadataUnitTests {
 		properties.setDefaultContext("");
 
 		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				Collections.<String>emptyList());
+				Collections.emptyList());
 
 		assertThat(contexts).hasSize(1).containsSequence("my-app");
 	}
@@ -82,7 +82,7 @@ public class GenericSecretBackendMetadataUnitTests {
 		properties.setApplicationName("foo,bar");
 
 		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				Collections.<String>emptyList());
+				Collections.emptyList());
 
 		assertThat(contexts).hasSize(3).containsSequence("bar", "foo", "application");
 	}

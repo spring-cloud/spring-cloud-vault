@@ -42,7 +42,7 @@ import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * @author Mark Paluch
@@ -56,7 +56,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class VaultConfigAppIdCustomMechanismTests {
 
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
@@ -84,14 +84,14 @@ public class VaultConfigAppIdCustomMechanismTests {
 		vaultOperations.write("secret/" + appId,
 				Collections.singletonMap("vault.value", appId));
 
-		Map<String, String> appIdData = new HashMap<String, String>();
+		Map<String, String> appIdData = new HashMap<>();
 		appIdData.put("value", "testpolicy"); // policy
 		appIdData.put("display_name", "this is my test application");
 
 		vaultOperations.write(String.format("auth/app-id/map/app-id/%s", appId),
 				appIdData);
 
-		Map<String, String> userIdData = new HashMap<String, String>();
+		Map<String, String> userIdData = new HashMap<>();
 		userIdData.put("value", appId); // name of the app-id
 		userIdData.put("cidr_block", "0.0.0.0/0");
 

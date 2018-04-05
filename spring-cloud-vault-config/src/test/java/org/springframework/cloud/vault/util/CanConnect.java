@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.vault.util;
 
 import java.io.IOException;
@@ -37,21 +36,13 @@ public class CanConnect {
 	 */
 	public static boolean to(SocketAddress socketAddress) {
 
-		Socket socket = new Socket();
-		try {
+		try (Socket socket = new Socket()) {
 
 			socket.connect(socketAddress, (int) TimeUnit.SECONDS.toMillis(1));
 			return true;
 		}
 		catch (IOException e) {
 			return false;
-		}
-		finally {
-			try {
-				socket.close();
-			}
-			catch (IOException o_O) {
-			}
 		}
 	}
 }

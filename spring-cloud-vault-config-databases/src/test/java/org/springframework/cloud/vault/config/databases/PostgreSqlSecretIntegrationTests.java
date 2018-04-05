@@ -62,11 +62,9 @@ public class PostgreSqlSecretIntegrationTests extends IntegrationTestSupport {
 
 	/**
 	 * Initialize the postgresql secret backend.
-	 *
-	 * @throws Exception
 	 */
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(POSTGRES_HOST, POSTGRES_PORT)));
 

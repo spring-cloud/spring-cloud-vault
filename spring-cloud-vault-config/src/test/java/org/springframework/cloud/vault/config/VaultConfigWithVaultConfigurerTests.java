@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration test using config infrastructure with token authentication.
@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class VaultConfigWithVaultConfigurerTests {
 
 	@BeforeClass
-	public static void beforeClass() throws Exception {
+	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
@@ -83,13 +83,8 @@ public class VaultConfigWithVaultConfigurerTests {
 		@ConditionalOnProperty("VaultConfigWithVaultConfigurerTests.custom.config")
 		@Bean
 		VaultConfigurer vaultConfigurer() {
-
-			return new VaultConfigurer() {
-				@Override
-				public void addSecretBackends(SecretBackendConfigurer configurer) {
-					configurer.add("secret/VaultConfigWithVaultConfigurerTests");
-				}
-			};
+			return configurer -> configurer
+					.add("secret/VaultConfigWithVaultConfigurerTests");
 		}
 	}
 }
