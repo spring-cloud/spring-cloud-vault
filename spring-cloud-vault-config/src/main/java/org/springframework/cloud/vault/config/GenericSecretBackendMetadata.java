@@ -15,30 +15,20 @@
  */
 package org.springframework.cloud.vault.config;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link SecretBackendMetadata} for the {@code generic} secret backend.
  *
  * @author Mark Paluch
  */
-public class GenericSecretBackendMetadata extends SecretBackendMetadataSupport
-		implements SecretBackendMetadata {
-
-	private final String path;
+public class GenericSecretBackendMetadata extends KeyValueSecretBackendMetadata implements
+		SecretBackendMetadata {
 
 	private GenericSecretBackendMetadata(String path) {
-
-		Assert.hasText(path, "Secret backend path must not be empty");
-
-		this.path = path;
+		super(path);
 	}
 
 	/**
@@ -53,8 +43,7 @@ public class GenericSecretBackendMetadata extends SecretBackendMetadataSupport
 	 */
 	public static SecretBackendMetadata create(String secretBackendPath, String key) {
 
-		Assert.hasText(secretBackendPath,
-				"Secret backend path must not be null or empty");
+		Assert.hasText(secretBackendPath, "Secret backend path must not be null or empty");
 		Assert.hasText(key, "Key must not be null or empty");
 
 		return create(String.format("%s/%s", secretBackendPath, key));
@@ -73,40 +62,17 @@ public class GenericSecretBackendMetadata extends SecretBackendMetadataSupport
 		return new GenericSecretBackendMetadata(path);
 	}
 
-	@Override
-	public String getPath() {
-		return path;
-	}
-
 	/**
 	 * Build a list of context paths from application name and the active profile names.
 	 * Application name and profiles support multiple (comma-separated) values.
 	 *
-	 * @param genericBackendProperties
+	 * @param properties
 	 * @param profiles active application profiles.
 	 * @return list of context paths.
 	 */
-	public static List<String> buildContexts(
-			VaultGenericBackendProperties genericBackendProperties,
+	public static List<String> buildContexts(VaultGenericBackendProperties properties,
 			List<String> profiles) {
-
-		String appName = genericBackendProperties.getApplicationName();
-		Set<String> contexts = new LinkedHashSet<>();
-
-		String defaultContext = genericBackendProperties.getDefaultContext();
-		contexts.addAll(buildContexts(defaultContext, profiles,
-				genericBackendProperties.getProfileSeparator()));
-
-		for (String applicationName : StringUtils.commaDelimitedListToSet(appName)) {
-			contexts.addAll(buildContexts(applicationName, profiles,
-					genericBackendProperties.getProfileSeparator()));
-		}
-
-		List<String> result = new ArrayList<>(contexts);
-
-		Collections.reverse(result);
-
-		return result;
+		return KeyValueSecretBackendMetadata.buildContexts(properties, profiles);
 	}
 
 	/**
@@ -123,30 +89,7 @@ public class GenericSecretBackendMetadata extends SecretBackendMetadataSupport
 	 */
 	public static List<String> buildContexts(String applicationName,
 			List<String> profiles, String profileSeparator) {
-
-		List<String> contexts = new ArrayList<>();
-
-		if (!StringUtils.hasText(applicationName)) {
-			return contexts;
-		}
-
-		if (!contexts.contains(applicationName)) {
-			contexts.add(applicationName);
-		}
-
-		for (String profile : profiles) {
-
-			if (!StringUtils.hasText(profile)) {
-				continue;
-			}
-
-			String contextName = applicationName + profileSeparator + profile.trim();
-
-			if (!contexts.contains(contextName)) {
-				contexts.add(contextName);
-			}
-		}
-
-		return contexts;
+		return KeyValueSecretBackendMetadata.buildContexts(applicationName, profiles,
+				profileSeparator);
 	}
 }

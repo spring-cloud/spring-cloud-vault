@@ -189,8 +189,8 @@ The following scenarios are supported along the required configuration details:
 .Configuration
 |===
 | *Method*                          | *RoleId* | *SecretId*| *RoleName* | *Token*
-| Provided RoleId/SecretId          | Provided | Provided  |            |         
-| Provided RoleId without SecretId  | Provided |           |            |         
+| Provided RoleId/SecretId          | Provided | Provided  |            |
+| Provided RoleId without SecretId  | Provided |           |            |
 | Provided RoleId, Pull SecretId    | Provided | Provided  | Provided   | Provided
 | Pull RoleId, provided SecretId    |          | Provided  | Provided   | Provided
 | Full Pull Mode                    |          |           | Provided   | Provided
@@ -203,20 +203,20 @@ The following scenarios are supported along the required configuration details:
 |===
 | *RoleId* | *SecretId* | *Supported*
 | Provided | Provided   | ✅
-| Provided | Pull       | ✅ 
-| Provided | Wrapped    | ✅ 
-| Provided | Absent     | ✅ 
-| Pull     | Provided   | ✅ 
-| Pull     | Pull       | ✅ 
-| Pull     | Wrapped    | ❌                   
-| Pull     | Absent     | ❌                   
-| Wrapped  | Provided   | ✅ 
-| Wrapped  | Pull       | ❌                   
-| Wrapped  | Wrapped    | ✅ 
-| Wrapped  | Absent     | ❌                  
+| Provided | Pull       | ✅
+| Provided | Wrapped    | ✅
+| Provided | Absent     | ✅
+| Pull     | Provided   | ✅
+| Pull     | Pull       | ✅
+| Pull     | Wrapped    | ❌
+| Pull     | Absent     | ❌
+| Wrapped  | Provided   | ✅
+| Wrapped  | Pull       | ❌
+| Wrapped  | Wrapped    | ✅
+| Wrapped  | Absent     | ❌
 |===
 
-NOTE: You can use still all combinations of push/pull/wrapped modes by providing a configured `AppRoleAuthentication` bean within the boostrap context. Spring Cloud Vault cannot derive all possible AppRole combinations from the configuration properties. 
+NOTE: You can use still all combinations of push/pull/wrapped modes by providing a configured `AppRoleAuthentication` bean within the boostrap context. Spring Cloud Vault cannot derive all possible AppRole combinations from the configuration properties.
 
 .bootstrap.yml with all AppRole authentication properties
 ====
@@ -462,7 +462,7 @@ spring.cloud.vault:
 * `role` sets the Role.
 * `service-account-token-file` sets the location of the file containing the Kubernetes Service Account Token. Defaults to `/var/run/secrets/kubernetes.io/serviceaccount/token`.
 
-See also: 
+See also:
 
 * https://www.vaultproject.io/docs/auth/kubernetes.html[Vault Documentation: Kubernetes]
 * https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/[Kubernetes Documentation: Configure Service Accounts for Pods]
@@ -470,6 +470,7 @@ See also:
 [[vault.config.backends]]
 == Secret Backends
 
+[[vault.config.backends.kv]]
 [[vault.config.backends.generic]]
 === Generic Backend
 
@@ -492,7 +493,7 @@ The application name is determined by the properties:
 * `spring.cloud.vault.application-name`
 * `spring.application.name`
 
-Secrets can be obtained from other folders within the generic backend by adding their
+Secrets can be obtained from other contexts within the generic backend by adding their
 paths to the application name, separated by commas. For example, given the application
 name `usefulapp,mysql1,projectx/aws`, each of these folders will be used:
 
@@ -526,7 +527,71 @@ config usage
 * `profile-separator` separates the profile name from the context in
 property sources with profiles
 
-See also: https://www.vaultproject.io/docs/secrets/generic/index.html[Vault Documentation: Using the generic secret backend]
+NOTE: The key-value secret backend can be operated in versioned (v2) and non-versioned (v1) modes. Depending on the mode of operation, a different API is required to access secrets. Make sure to enable `generic` secret backend usage for non-versioned key-value backends and `kv` secret backend usage for versioned key-value backends.
+
+See also: https://www.vaultproject.io/docs/secrets/kv/kv-v1.html[Vault Documentation: Using the KV Secrets Engine - Version 1 (generic secret backend)]
+
+[[vault.config.backends.kv.versioned]]
+=== Versioned Key-Value Backend
+
+Spring Cloud Vault supports the versioned Key-Value secret
+backend. The key-value backend allows storage of arbitrary
+values as key-value store. A single context can store one or many
+key-value tuples. Contexts can be organized hierarchically.
+Spring Cloud Vault allows using the Application name
+and a default context name (`application`) in combination with active
+profiles.
+----
+/secret/{application}/{profile}
+/secret/{application}
+/secret/{default-context}/{profile}
+/secret/{default-context}
+----
+The application name is determined by the properties:
+
+* `spring.cloud.vault.kv.application-name`
+* `spring.cloud.vault.application-name`
+* `spring.application.name`
+
+Secrets can be obtained from other contexts within the key-value backend by adding their
+paths to the application name, separated by commas. For example, given the application
+name `usefulapp,mysql1,projectx/aws`, each of these folders will be used:
+
+* `/secret/usefulapp`
+* `/secret/mysql1`
+* `/secret/projectx/aws`
+
+Spring Cloud Vault adds all active profiles to the list of possible context paths.
+No active profiles will skip accessing contexts with a profile name.
+
+Properties are exposed like they are stored (i.e. without additional prefixes).
+
+NOTE: Spring Cloud Vault adds the `data/` context between the mount path and the actual context path.
+
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    kv:
+        enabled: true
+        backend: secret
+        profile-separator: '/'
+        default-context: application
+        application-name: my-app
+----
+====
+
+* `enabled` setting this value to `false` disables the secret backend
+config usage
+* `backend` sets the path of the secret mount to use
+* `default-context` sets the context name used by all applications
+* `application-name` overrides the application name for use in the generic backend
+* `profile-separator` separates the profile name from the context in
+property sources with profiles
+
+NOTE: The key-value secret backend can be operated in versioned (v2) and non-versioned (v1) modes. Depending on the mode of operation, a different API is required to access secrets. Make sure to enable `generic` secret backend usage for non-versioned key-value backends and `kv` secret backend usage for versioned key-value backends.
+
+See also: https://www.vaultproject.io/docs/secrets/kv/kv-v2.html[Vault Documentation: Using the KV Secrets Engine - Version 2 (versioned key-value backend)]
 
 [[vault.config.backends.consul]]
 === Consul

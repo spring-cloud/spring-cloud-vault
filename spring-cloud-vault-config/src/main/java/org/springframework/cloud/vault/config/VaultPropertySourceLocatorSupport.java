@@ -31,7 +31,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.Assert;
 
-import static org.springframework.cloud.vault.config.GenericSecretBackendMetadata.create;
+import static org.springframework.cloud.vault.config.GenericSecretBackendMetadata.*;
 
 /**
  * Abstract {@link PropertySourceLocator} to create {@link PropertySource}s based on
@@ -223,7 +223,7 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	private static class GenericPropertySourceLocatorConfiguration
 			implements EnvironmentAware, PropertySourceLocatorConfiguration {
 
-		private final VaultGenericBackendProperties genericBackendProperties;
+		private final VaultKeyValueBackendPropertiesSupport genericBackendProperties;
 
 		private Environment environment;
 
