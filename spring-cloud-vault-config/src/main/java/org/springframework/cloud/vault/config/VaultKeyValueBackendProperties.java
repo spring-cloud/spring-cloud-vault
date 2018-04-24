@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,17 +29,18 @@ import org.springframework.validation.annotation.Validated;
  * Configuration properties for Vault using the generic backend.
  *
  * @author Mark Paluch
+ * @since 2.0
  */
-@ConfigurationProperties("spring.cloud.vault.generic")
+@ConfigurationProperties("spring.cloud.vault.kv")
 @Data
 @Validated
-public class VaultGenericBackendProperties implements EnvironmentAware,
+public class VaultKeyValueBackendProperties implements EnvironmentAware,
 		VaultKeyValueBackendPropertiesSupport {
 
 	/**
-	 * Enable the generic backend.
+	 * Enable the kev-value backend.
 	 */
-	private boolean enabled = true;
+	private boolean enabled = false;
 
 	/**
 	 * Name of the default backend.
@@ -50,7 +51,6 @@ public class VaultGenericBackendProperties implements EnvironmentAware,
 	/**
 	 * Name of the default context.
 	 */
-	@NotEmpty
 	private String defaultContext = "application";
 
 	/**
