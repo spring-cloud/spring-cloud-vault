@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.vault.util;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.util.Assert;
@@ -27,9 +28,9 @@ import org.springframework.vault.support.VaultInitializationResponse;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
-import org.springframework.vault.support.VaultTokenRequest.VaultTokenRequestBuilder;
 import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
+import org.springframework.vault.support.VaultTokenRequest.VaultTokenRequestBuilder;
 
 /**
  * @author Mark Paluch
@@ -129,13 +130,28 @@ public class PrepareVault {
 	/**
 	 * Mount an secret backend.
 	 *
-	 * @param secretBackend
+	 * @param secretBackend must not be {@literal null} or empty.
 	 */
 	public void mountSecret(String secretBackend) {
+		mountSecret(secretBackend, secretBackend, Collections.emptyMap());
+	}
+
+	/**
+	 * Mount an secret backend {@code secretBackend} at {@code path}.
+	 *
+	 * @param secretBackend must not be {@literal null} or empty.
+	 * @param path must not be {@literal null} or empty.
+	 * @param config must not be {@literal null}.
+	 */
+	public void mountSecret(String secretBackend, String path, Map<String, Object> config) {
 
 		Assert.hasText(secretBackend, "SecretBackend must not be empty");
+		Assert.hasText(path, "Mount path must not be empty");
+		Assert.notNull(config, "Configuration must not be null");
 
-		adminOperations.mount(secretBackend, VaultMount.create(secretBackend));
+		VaultMount mount = VaultMount.builder().type(secretBackend).config(config)
+				.build();
+		adminOperations.mount(path, mount);
 	}
 
 	/**
@@ -177,5 +193,26 @@ public class PrepareVault {
 		}
 
 		return Version.parse("0.0.0");
+	}
+
+	/**
+	 * Disable Vault versioning Key-Value backend (kv version 2).
+	 */
+	public void disableGenericVersioning() {
+
+		vaultOperations.opsForSys().unmount("secret");
+
+		VaultMount kv = VaultMount.builder().type("kv")
+				.config(Collections.singletonMap("versioned", false)).build();
+		vaultOperations.opsForSys().mount("secret", kv);
+	}
+
+	public void mountVersionedKvBackend() {
+
+		mountSecret("kv", "versioned", Collections.emptyMap());
+		vaultOperations.write(
+				"sys/mounts/versioned/tune",
+				Collections.singletonMap("options",
+						Collections.singletonMap("version", "2")));
 	}
 }

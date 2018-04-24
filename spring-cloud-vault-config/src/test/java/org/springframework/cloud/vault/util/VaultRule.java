@@ -36,6 +36,8 @@ import org.springframework.vault.support.VaultToken;
  */
 public class VaultRule extends ExternalResource {
 
+	public static final Version VERSIONING_INTRODUCED_WITH = Version.parse("0.10.0");
+
 	private final VaultEndpoint vaultEndpoint;
 
 	private final PrepareVault prepareVault;
@@ -92,8 +94,16 @@ public class VaultRule extends ExternalResource {
 		}
 
 		if (!this.prepareVault.isAvailable()) {
+
 			this.token = prepareVault.initializeVault();
 			this.prepareVault.createToken(Settings.token().getToken(), "root");
+
+			if (this.prepareVault.getVersion().isGreaterThanOrEqualTo(
+					VERSIONING_INTRODUCED_WITH)) {
+				this.prepareVault.disableGenericVersioning();
+				this.prepareVault.mountVersionedKvBackend();
+			}
+
 			this.token = Settings.token();
 		}
 	}
