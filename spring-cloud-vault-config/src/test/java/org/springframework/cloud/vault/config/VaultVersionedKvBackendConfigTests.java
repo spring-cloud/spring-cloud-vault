@@ -29,6 +29,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
+import org.springframework.cloud.vault.util.Version;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -37,6 +38,7 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration test using config infrastructure with token authentication.
@@ -62,6 +64,8 @@ public class VaultVersionedKvBackendConfigTests {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
+
+		assumeTrue(vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.10.0")));
 
 		Map<String, Object> object = new HashMap<>();
 		object.put("vault.value", "foo");
