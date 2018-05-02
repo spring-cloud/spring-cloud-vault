@@ -28,8 +28,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.squareup.okhttp</groupId>
-			<artifactId>okhttp</artifactId>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
