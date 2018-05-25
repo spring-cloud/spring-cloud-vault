@@ -34,8 +34,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
