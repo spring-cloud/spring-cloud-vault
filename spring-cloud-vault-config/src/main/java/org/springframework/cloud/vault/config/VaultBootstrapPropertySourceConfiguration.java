@@ -142,7 +142,9 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 						keyValueBackend, Arrays.asList(applicationContext
 								.getEnvironment().getActiveProfiles()));
 
-				if (keyValueBackend instanceof VaultKeyValueBackendProperties) {
+				if (keyValueBackend instanceof VaultKeyValueBackendProperties
+						&& ((VaultKeyValueBackendProperties) keyValueBackend)
+								.getBackendVersion() == 2) {
 
 					for (String context : contexts) {
 						secretBackendConfigurer.add(KeyValueSecretBackendMetadata.create(

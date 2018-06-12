@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Configuration properties for Vault using the generic backend.
+ * Configuration properties for Vault using the key-value backend.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -63,6 +63,15 @@ public class VaultKeyValueBackendProperties implements EnvironmentAware,
 	 * Application name to be used for the context.
 	 */
 	private String applicationName = "application";
+
+	/**
+	 * Key-Value backend version. Currently supported versions are:
+	 * <ul>
+	 * <li>Version 1 (unversioned key-value backend).</li>
+	 * <li>Version 2 (versioned key-value backend).</li>
+	 * </ul>
+	 */
+	private int backendVersion = 2;
 
 	@Override
 	public void setEnvironment(Environment environment) {
