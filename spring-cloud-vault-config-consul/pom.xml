@@ -18,34 +18,30 @@
 	</properties>
 
 	<dependencies>
+		<!-- Compile -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-vault-config</artifactId>
 		</dependency>
 
+		<!-- Annotation processing -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-autoconfigure-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
 
+		<!-- Test -->
 		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-vault-config</artifactId>
-			<type>test-jar</type>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-consul-discovery</artifactId>
-			<version>${spring-cloud-consul.version}</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.cloud</groupId>
-					<artifactId>spring-cloud-starter-ribbon</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>spring-cloud-vault-config</artifactId>
+			<type>test-jar</type>
 		</dependency>
 
 		<dependency>
@@ -62,9 +58,16 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-consul-discovery</artifactId>
+			<version>${spring-cloud-consul.version}</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-starter-ribbon</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 

@@ -16,27 +16,30 @@
 	<description>Spring Cloud Vault Config AWS support</description>
 
 	<dependencies>
+		<!-- Compile -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-vault-config</artifactId>
 		</dependency>
 
+		<!-- Annotation processing -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-autoconfigure-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-vault-config</artifactId>
-			<type>test-jar</type>
-		</dependency>
-
+		<!-- Test -->
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-vault-config</artifactId>
+			<type>test-jar</type>
 		</dependency>
 	</dependencies>
 
