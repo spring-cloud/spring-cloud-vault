@@ -16,21 +16,24 @@
 	<description>Spring Cloud Vault Config RabbitMQ support</description>
 
 	<dependencies>
+		<!-- Compile -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-vault-config</artifactId>
 		</dependency>
 
+		<!-- Annotation processing -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-autoconfigure-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
 
+		<!-- Test -->
 		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-vault-config</artifactId>
-			<type>test-jar</type>
+			<groupId>com.squareup.okhttp</groupId>
+			<artifactId>okhttp</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -40,9 +43,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.squareup.okhttp</groupId>
-			<artifactId>okhttp</artifactId>
-			<scope>test</scope>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-vault-config</artifactId>
+			<type>test-jar</type>
 		</dependency>
 	</dependencies>
 
