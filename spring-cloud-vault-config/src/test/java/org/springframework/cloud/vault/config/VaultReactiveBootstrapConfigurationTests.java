@@ -35,11 +35,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Tests for {@link ReactiveVaultBootstrapConfiguration}.
+ * Tests for {@link VaultReactiveBootstrapConfiguration}.
  *
  * @author Mark Paluch
  */
-public class ReactiveVaultBootstrapConfigurationTests {
+public class VaultReactiveBootstrapConfigurationTests {
 
 	private AnnotationConfigApplicationContext context;
 
@@ -89,7 +89,7 @@ public class ReactiveVaultBootstrapConfigurationTests {
 		TestPropertyValues.of(environment).applyTo(ctx);
 
 		ctx.register(config);
-		ctx.register(ReactiveVaultBootstrapConfiguration.class);
+		ctx.register(VaultReactiveBootstrapConfiguration.class);
 		ctx.refresh();
 
 		this.context = ctx;

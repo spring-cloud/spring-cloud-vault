@@ -47,6 +47,7 @@ import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
+import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
@@ -178,7 +179,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	 * @see #clientHttpRequestFactoryWrapper()
 	 */
 	@Bean
-	@ConditionalOnMissingBean
+	@ConditionalOnMissingBean(VaultOperations.class)
 	public VaultTemplate vaultTemplate(SessionManager sessionManager) {
 		return new VaultTemplate(endpointProvider, clientHttpRequestFactoryWrapper()
 				.getClientHttpRequestFactory(), sessionManager);

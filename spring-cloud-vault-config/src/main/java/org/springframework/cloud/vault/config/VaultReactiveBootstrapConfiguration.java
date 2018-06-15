@@ -74,7 +74,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @ConditionalOnClass({ Flux.class, WebClient.class, ReactiveVaultOperations.class })
 @EnableConfigurationProperties({ VaultProperties.class })
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
-public class ReactiveVaultBootstrapConfiguration {
+public class VaultReactiveBootstrapConfiguration {
 
 	private final VaultProperties vaultProperties;
 
@@ -82,7 +82,7 @@ public class ReactiveVaultBootstrapConfiguration {
 
 	private final ClientHttpConnector clientHttpConnector;
 
-	public ReactiveVaultBootstrapConfiguration(VaultProperties vaultProperties) {
+	public VaultReactiveBootstrapConfiguration(VaultProperties vaultProperties) {
 
 		this.vaultProperties = vaultProperties;
 		this.vaultEndpoint = getVaultEndpoint(vaultProperties);
@@ -160,7 +160,7 @@ public class ReactiveVaultBootstrapConfiguration {
 	 * @see #reactiveVaultSessionManager(BeanFactory, ObjectFactory)
 	 */
 	@Bean
-	@ConditionalOnMissingBean
+	@ConditionalOnMissingBean(ReactiveVaultOperations.class)
 	public ReactiveVaultTemplate reactiveVaultTemplate(
 			ReactiveSessionManager tokenSupplier) {
 		return new ReactiveVaultTemplate(vaultEndpoint, clientHttpConnector,
