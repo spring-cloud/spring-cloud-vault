@@ -15,8 +15,7 @@
  */
 package org.springframework.cloud.vault.config;
 
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health.Builder;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.core.VaultOperations;
@@ -28,7 +27,7 @@ import org.springframework.vault.support.VaultHealth;
  * @author Stuart Ingram
  * @author Mark Paluch
  */
-public class VaultHealthIndicator implements HealthIndicator {
+public class VaultHealthIndicator extends AbstractHealthIndicator {
 
 	private final VaultOperations vaultOperations;
 
@@ -36,41 +35,38 @@ public class VaultHealthIndicator implements HealthIndicator {
 		this.vaultOperations = vaultOperations;
 	}
 
+
 	@Override
-	public Health health() {
+	protected void doHealthCheck(Builder builder) {
 
 		try {
 
 			VaultHealth vaultHealthResponse = vaultOperations.opsForSys().health();
 
-			Builder healthBuilder = getHealthBuilder(vaultHealthResponse);
+			if (!vaultHealthResponse.isInitialized()) {
+				builder.down().withDetail("state", "Vault uninitialized");
+			}
+			else
 
-			if (StringUtils.hasText(vaultHealthResponse.getVersion())) {
-				healthBuilder = healthBuilder.withDetail("version",
-						vaultHealthResponse.getVersion());
+			if (vaultHealthResponse.isSealed()) {
+				builder.down().withDetail("state", "Vault sealed");
+			}
+			else
+
+			if (vaultHealthResponse.isStandby()) {
+				builder.up().withDetail("state", "Vault in standby");
+			}
+			else {
+				builder.up();
 			}
 
-			return healthBuilder.build();
+			if (StringUtils.hasText(vaultHealthResponse.getVersion())) {
+				builder.withDetail("version",
+						vaultHealthResponse.getVersion());
+			}
 		}
 		catch (Exception e) {
-			return Health.down(e).build();
+			builder.down(e);
 		}
-	}
-
-	private Builder getHealthBuilder(VaultHealth vaultHealthResponse) {
-
-		if (!vaultHealthResponse.isInitialized()) {
-			return Health.down().withDetail("state", "Vault uninitialized");
-		}
-
-		if (vaultHealthResponse.isSealed()) {
-			return Health.down().withDetail("state", "Vault sealed");
-		}
-
-		if (vaultHealthResponse.isStandby()) {
-			return Health.up().withDetail("state", "Vault in standby");
-		}
-
-		return Health.up();
 	}
 }
