@@ -1,6 +1,6 @@
 # Auto-Configuration
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.springframework.cloud.vault.config.VaultHealthIndicatorConfiguration
+org.springframework.cloud.vault.config.VaultHealthIndicatorAutoConfiguration
 # Bootstrap Configuration
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
 org.springframework.cloud.vault.config.DiscoveryClientVaultBootstrapConfiguration,\
