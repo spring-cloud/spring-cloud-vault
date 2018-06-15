@@ -38,7 +38,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
- * Tests for {@link ReactiveVaultBootstrapConfiguration}.
+ * Tests for {@link DiscoveryClientVaultBootstrapConfiguration}.
  *
  * @author Mark Paluch
  */

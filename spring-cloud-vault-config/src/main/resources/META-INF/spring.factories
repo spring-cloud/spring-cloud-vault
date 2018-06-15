@@ -5,5 +5,5 @@ org.springframework.cloud.vault.config.VaultHealthIndicatorAutoConfiguration
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
 org.springframework.cloud.vault.config.DiscoveryClientVaultBootstrapConfiguration,\
 org.springframework.cloud.vault.config.VaultBootstrapConfiguration,\
-org.springframework.cloud.vault.config.ReactiveVaultBootstrapConfiguration,\
+org.springframework.cloud.vault.config.VaultReactiveBootstrapConfiguration,\
 org.springframework.cloud.vault.config.VaultBootstrapPropertySourceConfiguration
