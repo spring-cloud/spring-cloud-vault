@@ -1,0 +1,3 @@
+releaser:
+  maven:
+    buildCommand: ./config/build.sh
