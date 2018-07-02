@@ -216,7 +216,9 @@ The following scenarios are supported along the required configuration details:
 | Wrapped  | Absent     | ❌
 |===
 
-NOTE: You can use still all combinations of push/pull/wrapped modes by providing a configured `AppRoleAuthentication` bean within the boostrap context. Spring Cloud Vault cannot derive all possible AppRole combinations from the configuration properties.
+NOTE: You can use still all combinations of push/pull/wrapped modes by providing a configured `AppRoleAuthentication` bean within the bootstrap context. Spring Cloud Vault cannot derive all possible AppRole combinations from the configuration properties.
+
+IMPORTANT: AppRole authentication is limited to simple pull mode using reactive infrastructure. Full pull mode is not yet supported. Using Spring Cloud Vault with the Spring WebFlux stack enables Vault's reactive auto-configuration which can be disabled by setting `spring.cloud.vault.reactive.enabled=false`.
 
 .bootstrap.yml with all AppRole authentication properties
 ====
