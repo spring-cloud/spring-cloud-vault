@@ -52,7 +52,7 @@ import static org.junit.Assume.*;
 @SpringBootTest(classes = VaultConfigMySqlDatabaseTests.TestApplication.class, properties = {
 		"spring.cloud.vault.database.enabled=true",
 		"spring.cloud.vault.database.role=readonly",
-		"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false" })
+		"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=UTC" })
 public class VaultConfigMySqlDatabaseTests {
 
 	private final static int MYSQL_PORT = 3306;
@@ -113,7 +113,7 @@ public class VaultConfigMySqlDatabaseTests {
 	@Test
 	public void shouldConnectUsingJdbcUrlConnection() throws SQLException {
 
-		String url = String.format("jdbc:mysql://%s?useSSL=false", MYSQL_HOST);
+		String url = String.format("jdbc:mysql://%s?useSSL=false&serverTimezone=UTC", MYSQL_HOST);
 		DriverManager.getConnection(url, username, password).close();
 	}
 

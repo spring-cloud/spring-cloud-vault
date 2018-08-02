@@ -53,7 +53,8 @@ import static org.junit.Assume.*;
 @SpringBootTest(classes = VaultConfigPostgreSqlTests.TestApplication.class, properties = {
 		"spring.cloud.vault.postgresql.enabled=true",
 		"spring.cloud.vault.postgresql.role=readonly",
-		"spring.datasource.url=jdbc:postgresql://localhost:5432/postgres?ssl=false" })
+		"spring.datasource.url=jdbc:postgresql://localhost:5432/postgres?ssl=false",
+		"spring.main.allow-bean-definition-overriding=true" })
 public class VaultConfigPostgreSqlTests {
 
 	private final static String POSTGRES_HOST = "localhost";
