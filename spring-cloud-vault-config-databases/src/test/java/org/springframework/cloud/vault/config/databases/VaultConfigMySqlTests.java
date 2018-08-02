@@ -49,7 +49,8 @@ import static org.junit.Assume.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = VaultConfigMySqlTests.TestApplication.class, properties = {
 		"spring.cloud.vault.mysql.enabled=true", "spring.cloud.vault.mysql.role=readonly",
-		"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=UTC" })
+		"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=UTC",
+		"spring.main.allow-bean-definition-overriding=true" })
 public class VaultConfigMySqlTests {
 
 	private final static int MYSQL_PORT = 3306;
