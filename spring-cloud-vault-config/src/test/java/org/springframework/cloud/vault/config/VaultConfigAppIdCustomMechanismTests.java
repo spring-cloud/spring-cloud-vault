@@ -28,7 +28,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.vault.config.VaultConfigAppIdCustomMechanismTests.BootstrapConfiguration;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.TestRestTemplateFactory;
 import org.springframework.cloud.vault.util.VaultRule;
@@ -48,11 +47,12 @@ import static org.assertj.core.api.Assertions.*;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = { BootstrapConfiguration.class,
+@SpringBootTest(classes = {
 		VaultConfigAppIdCustomMechanismTests.TestApplication.class }, properties = {
 				"spring.cloud.vault.authentication=appid",
 				"VaultConfigAppIdCustomMechanismTests.custom.config=true",
-				"spring.cloud.vault.applicationName=VaultConfigAppIdCustomMechanismTests" })
+		"spring.cloud.vault.applicationName=VaultConfigAppIdCustomMechanismTests",
+		"spring.main.allow-bean-definition-overriding=true" })
 public class VaultConfigAppIdCustomMechanismTests {
 
 	@BeforeClass

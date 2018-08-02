@@ -51,8 +51,8 @@ import static org.springframework.cloud.vault.util.Settings.*;
 		"spring.cloud.vault.authentication=cert",
 		"spring.cloud.vault.ssl.key-store=file:../work/client-cert.jks",
 		"spring.cloud.vault.ssl.key-store-password=changeit",
-		"spring.cloud.vault.application-name=VaultConfigTlsCertAuthenticationTests" }) // see
-// https://github.com/spring-cloud/spring-cloud-commons/issues/214
+		"spring.cloud.vault.application-name=VaultConfigTlsCertAuthenticationTests",
+		"spring.cloud.vault.reactive.enabled=false" })
 public class VaultConfigTlsCertAuthenticationTests {
 
 	@BeforeClass

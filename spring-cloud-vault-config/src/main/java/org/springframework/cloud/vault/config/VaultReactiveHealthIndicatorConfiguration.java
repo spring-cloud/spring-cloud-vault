@@ -50,7 +50,7 @@ class VaultReactiveHealthIndicatorConfiguration
 
 	@Bean
 	@ConditionalOnMissingBean(name = { "vaultReactiveHealthIndicator" })
-	public ReactiveHealthIndicator vaultHealthIndicator() {
+	public ReactiveHealthIndicator vaultReactiveHealthIndicator() {
 		return this.createHealthIndicator(this.reactiveVaultTemplates);
 	}
 }
