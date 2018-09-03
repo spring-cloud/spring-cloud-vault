@@ -205,9 +205,7 @@ additional configuration like
 If the application imports the `spring-boot-starter-actuator` project, the
 status of the vault server will be available via the `/health` endpoint.
 
-The vault health indicator can be enabled or disabled through the
-property `health.vault.enabled` (default `true`).
-
+The vault health indicator can be enabled or disabled through the property `management.health.vault.enabled` (default to `true`).
 
 === Authentication
 
