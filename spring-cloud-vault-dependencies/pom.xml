@@ -18,7 +18,7 @@
 	<description>Spring Cloud Vault Dependencies</description>
 
 	<properties>
-		<spring-vault.version>2.1.0.BUILD-SNAPSHOT</spring-vault.version>
+		<spring-vault.version>2.1.0.RC1</spring-vault.version>
 	</properties>
 
 	<dependencyManagement>
