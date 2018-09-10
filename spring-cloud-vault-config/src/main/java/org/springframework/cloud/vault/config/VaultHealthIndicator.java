@@ -35,38 +35,30 @@ public class VaultHealthIndicator extends AbstractHealthIndicator {
 		this.vaultOperations = vaultOperations;
 	}
 
-
 	@Override
 	protected void doHealthCheck(Builder builder) {
 
-		try {
+		VaultHealth vaultHealthResponse = vaultOperations.opsForSys().health();
 
-			VaultHealth vaultHealthResponse = vaultOperations.opsForSys().health();
-
-			if (!vaultHealthResponse.isInitialized()) {
-				builder.down().withDetail("state", "Vault uninitialized");
-			}
-			else
-
-			if (vaultHealthResponse.isSealed()) {
-				builder.down().withDetail("state", "Vault sealed");
-			}
-			else
-
-			if (vaultHealthResponse.isStandby()) {
-				builder.up().withDetail("state", "Vault in standby");
-			}
-			else {
-				builder.up();
-			}
-
-			if (StringUtils.hasText(vaultHealthResponse.getVersion())) {
-				builder.withDetail("version",
-						vaultHealthResponse.getVersion());
-			}
+		if (!vaultHealthResponse.isInitialized()) {
+			builder.down().withDetail("state", "Vault uninitialized");
 		}
-		catch (Exception e) {
-			builder.down(e);
+		else
+
+		if (vaultHealthResponse.isSealed()) {
+			builder.down().withDetail("state", "Vault sealed");
+		}
+		else
+
+		if (vaultHealthResponse.isStandby()) {
+			builder.up().withDetail("state", "Vault in standby");
+		}
+		else {
+			builder.up();
+		}
+
+		if (StringUtils.hasText(vaultHealthResponse.getVersion())) {
+			builder.withDetail("version", vaultHealthResponse.getVersion());
 		}
 	}
 }
