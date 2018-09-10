@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.vault.config;
 
-import java.net.URI;
 import java.time.Duration;
 
 import reactor.core.publisher.Flux;
@@ -38,7 +37,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.AuthenticationStepsFactory;
 import org.springframework.vault.authentication.AuthenticationStepsOperator;
 import org.springframework.vault.authentication.CachingVaultTokenSupplier;
@@ -55,7 +53,6 @@ import org.springframework.vault.core.ReactiveVaultOperations;
 import org.springframework.vault.core.ReactiveVaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
-import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -85,22 +82,8 @@ public class VaultReactiveBootstrapConfiguration {
 	public VaultReactiveBootstrapConfiguration(VaultProperties vaultProperties) {
 
 		this.vaultProperties = vaultProperties;
-		this.vaultEndpoint = getVaultEndpoint(vaultProperties);
+		this.vaultEndpoint = VaultConfigurationUtil.createVaultEndpoint(vaultProperties);
 		this.clientHttpConnector = createConnector(this.vaultProperties);
-	}
-
-	private static VaultEndpoint getVaultEndpoint(VaultProperties vaultProperties) {
-
-		if (StringUtils.hasText(vaultProperties.getUri())) {
-			return VaultEndpoint.from(URI.create(vaultProperties.getUri()));
-		}
-
-		VaultEndpoint vaultEndpoint = new VaultEndpoint();
-		vaultEndpoint.setHost(vaultProperties.getHost());
-		vaultEndpoint.setPort(vaultProperties.getPort());
-		vaultEndpoint.setScheme(vaultProperties.getScheme());
-
-		return vaultEndpoint;
 	}
 
 	/**
@@ -116,39 +99,8 @@ public class VaultReactiveBootstrapConfiguration {
 				.getConnectionTimeout()), Duration.ofMillis(vaultProperties
 				.getReadTimeout()));
 
-		VaultProperties.Ssl ssl = vaultProperties.getSsl();
-		SslConfiguration sslConfiguration;
-		if (ssl != null) {
-
-			KeyStoreConfiguration keyStore = KeyStoreConfiguration.unconfigured();
-			KeyStoreConfiguration trustStore = KeyStoreConfiguration.unconfigured();
-
-			if (ssl.getKeyStore() != null) {
-				if (StringUtils.hasText(ssl.getKeyStorePassword())) {
-					keyStore = KeyStoreConfiguration.of(ssl.getKeyStore(), ssl
-							.getKeyStorePassword().toCharArray());
-				}
-				else {
-					keyStore = KeyStoreConfiguration.of(ssl.getKeyStore());
-				}
-			}
-
-			if (ssl.getTrustStore() != null) {
-
-				if (StringUtils.hasText(ssl.getTrustStorePassword())) {
-					trustStore = KeyStoreConfiguration.of(ssl.getTrustStore(), ssl
-							.getTrustStorePassword().toCharArray());
-				}
-				else {
-					trustStore = KeyStoreConfiguration.of(ssl.getTrustStore());
-				}
-			}
-
-			sslConfiguration = new SslConfiguration(keyStore, trustStore);
-		}
-		else {
-			sslConfiguration = SslConfiguration.unconfigured();
-		}
+		SslConfiguration sslConfiguration = VaultConfigurationUtil
+				.createSslConfiguration(vaultProperties.getSsl());
 
 		return ClientHttpConnectorFactory.create(clientOptions, sslConfiguration);
 	}
