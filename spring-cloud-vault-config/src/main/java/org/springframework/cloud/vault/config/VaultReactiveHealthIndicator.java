@@ -49,21 +49,14 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 	@Override
 	protected Mono<Health> doHealthCheck(Builder builder) {
 
-		try {
-
-			return vaultOperations
-					.doWithSession(it -> it.get().uri("sys/health").exchange())
-					.flatMap(it -> it.bodyToMono(VaultHealthImpl.class))
-					.onErrorResume(WebClientResponseException.class,
-							VaultReactiveHealthIndicator::deserializeError)
-					.map(vaultHealthResponse -> {
-						return getHealth(builder, vaultHealthResponse);
-					});
-
-		}
-		catch (Exception e) {
-			return Mono.just(builder.down(e).build());
-		}
+		return vaultOperations
+				.doWithSession(it -> it.get().uri("sys/health").exchange())
+				.flatMap(it -> it.bodyToMono(VaultHealthImpl.class))
+				.onErrorResume(WebClientResponseException.class,
+						VaultReactiveHealthIndicator::deserializeError)
+				.map(vaultHealthResponse -> {
+					return getHealth(builder, vaultHealthResponse);
+				});
 	}
 
 	private static Mono<? extends VaultHealthImpl> deserializeError(
