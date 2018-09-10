@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.vault.config;
 
-import java.net.URI;
 import java.time.Duration;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -36,14 +35,12 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultClients;
-import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
@@ -51,7 +48,6 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
-import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -84,26 +80,12 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		VaultEndpointProvider provider = endpointProvider.getIfAvailable();
 
 		if (provider == null) {
-			provider = SimpleVaultEndpointProvider.of(getVaultEndpoint(vaultProperties));
+			provider = SimpleVaultEndpointProvider.of(VaultConfigurationUtil
+					.createVaultEndpoint(vaultProperties));
 		}
 
 		this.endpointProvider = provider;
 	}
-
-	private static VaultEndpoint getVaultEndpoint(VaultProperties vaultProperties) {
-
-		if (StringUtils.hasText(vaultProperties.getUri())) {
-			return VaultEndpoint.from(URI.create(vaultProperties.getUri()));
-		}
-
-		VaultEndpoint vaultEndpoint = new VaultEndpoint();
-		vaultEndpoint.setHost(vaultProperties.getHost());
-		vaultEndpoint.setPort(vaultProperties.getPort());
-		vaultEndpoint.setScheme(vaultProperties.getScheme());
-
-		return vaultEndpoint;
-	}
-
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -134,39 +116,8 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 				.getConnectionTimeout()), Duration.ofMillis(vaultProperties
 				.getReadTimeout()));
 
-		VaultProperties.Ssl ssl = vaultProperties.getSsl();
-		SslConfiguration sslConfiguration;
-		if (ssl != null) {
-
-			KeyStoreConfiguration keyStore = KeyStoreConfiguration.unconfigured();
-			KeyStoreConfiguration trustStore = KeyStoreConfiguration.unconfigured();
-
-			if (ssl.getKeyStore() != null) {
-				if (StringUtils.hasText(ssl.getKeyStorePassword())) {
-					keyStore = KeyStoreConfiguration.of(ssl.getKeyStore(), ssl
-							.getKeyStorePassword().toCharArray());
-				}
-				else {
-					keyStore = KeyStoreConfiguration.of(ssl.getKeyStore());
-				}
-			}
-
-			if (ssl.getTrustStore() != null) {
-
-				if (StringUtils.hasText(ssl.getTrustStorePassword())) {
-					trustStore = KeyStoreConfiguration.of(ssl.getTrustStore(), ssl
-							.getTrustStorePassword().toCharArray());
-				}
-				else {
-					trustStore = KeyStoreConfiguration.of(ssl.getTrustStore());
-				}
-			}
-
-			sslConfiguration = new SslConfiguration(keyStore, trustStore);
-		}
-		else {
-			sslConfiguration = SslConfiguration.unconfigured();
-		}
+		SslConfiguration sslConfiguration = VaultConfigurationUtil
+				.createSslConfiguration(vaultProperties.getSsl());
 
 		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(
 				clientOptions, sslConfiguration));
