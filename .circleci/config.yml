@@ -1,0 +1,57 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:8u151-jdk
+    environment:
+      JAVA_TOOL_OPTIONS: "-Xms512m -Xmx768m"
+      TERM: dumb
+    branches:
+      ignore:
+        - gh-pages # list of branches to ignore
+    resource_class: large
+    steps:
+      - setup_remote_docker
+      - checkout
+      - restore_cache:
+          key: sc-vault-{{ .Branch }}
+      - run:
+          name: "Download dependencies"
+          command: ./mvnw -s .settings.xml -B -U --fail-never dependency:go-offline || true
+      - run:
+          name: "Download Vault"
+          command: src/test/bash/install_vault.sh
+      - save_cache:
+          key: sc-vault-{{ .Branch }}
+          paths:
+            - ~/.m2
+            - "download"
+      - run:
+          name: "Create Certificates"
+          command: src/test/bash/create_certificates.sh
+      - run:
+          name: "Starting Vault"
+          command: src/test/bash/local_run_vault.sh
+          background: true
+      - run:
+          name: "Running build"
+          command: ./mvnw -s .settings.xml clean org.jacoco:jacoco-maven-plugin:prepare-agent install install -U -P sonar -nsu -B -Dmaven.test.redirectTestOutputToFile=true -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+      - run:
+          name: "Starting Vault"
+          command: pkill vault
+          when: always
+      - run:
+          name: "Aggregate test results"
+          when: always
+          command: |
+            mkdir -p junit/
+            find . -type f -regex ".*/target/.*-reports/.*" -exec cp {} junit/ \;
+            find . -type f -regex ".*/build/test-results/.*" -exec cp {} junit/ \;
+            bash <(curl -s https://codecov.io/bash)
+      - store_artifacts:
+          path: junit/
+          destination: artifacts
+      - store_test_results:
+          path: junit/
+          destination: testartifacts
