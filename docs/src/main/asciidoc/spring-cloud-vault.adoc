@@ -457,11 +457,13 @@ spring.cloud.vault:
     authentication: KUBERNETES
     kubernetes:
         role: my-dev-role
+        kubernetes-path: kubernetes
         service-account-token-file: /var/run/secrets/kubernetes.io/serviceaccount/token
 ----
 ====
 
 * `role` sets the Role.
+* `kubernetes-path` sets the path of the Kubernetes mount to use.
 * `service-account-token-file` sets the location of the file containing the Kubernetes Service Account Token. Defaults to `/var/run/secrets/kubernetes.io/serviceaccount/token`.
 
 See also:
