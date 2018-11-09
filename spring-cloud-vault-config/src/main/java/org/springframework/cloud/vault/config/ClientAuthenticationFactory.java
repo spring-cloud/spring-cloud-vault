@@ -15,18 +15,26 @@
  */
 package org.springframework.cloud.vault.config;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URI;
+import java.security.GeneralSecurityException;
+import java.util.Base64;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.apachecommons.CommonsLog;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.cloud.vault.config.VaultProperties.AppRoleProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AwsIamProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AzureMsiProperties;
+import org.springframework.cloud.vault.config.VaultProperties.GcpCredentials;
+import org.springframework.cloud.vault.config.VaultProperties.GcpIamProperties;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -36,6 +44,8 @@ import org.springframework.vault.authentication.AppRoleAuthenticationOptions.Rol
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.Nonce;
 import org.springframework.vault.authentication.AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder;
+import org.springframework.vault.authentication.GcpComputeAuthenticationOptions.GcpComputeAuthenticationOptionsBuilder;
+import org.springframework.vault.authentication.GcpIamAuthenticationOptions.GcpIamAuthenticationOptionsBuilder;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
 
@@ -48,11 +58,14 @@ import org.springframework.web.client.RestOperations;
  * @since 1.1
  */
 @RequiredArgsConstructor
+@CommonsLog
 class ClientAuthenticationFactory {
 
 	private final VaultProperties vaultProperties;
 
 	private final RestOperations restOperations;
+
+	private final RestOperations externalRestOperations;
 
 	/**
 	 * @return a new {@link ClientAuthentication}.
@@ -81,6 +94,12 @@ class ClientAuthenticationFactory {
 
 		case CUBBYHOLE:
 			return cubbyholeAuthentication();
+
+		case GCP_GCE:
+			return gcpGceAuthentication(vaultProperties);
+
+		case GCP_IAM:
+			return gcpIamAuthentication(vaultProperties);
 
 		case KUBERNETES:
 			return kubernetesAuthentication(vaultProperties);
@@ -224,7 +243,7 @@ class ClientAuthenticationFactory {
 				.build();
 
 		return new AwsEc2Authentication(authenticationOptions, restOperations,
-				restOperations);
+				externalRestOperations);
 	}
 
 	private ClientAuthentication awsIamAuthentication(VaultProperties vaultProperties) {
@@ -264,7 +283,7 @@ class ClientAuthenticationFactory {
 		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder()
 				.role(azureMsi.getRole()).build();
 
-		return new AzureMsiAuthentication(options, restOperations);
+		return new AzureMsiAuthentication(options, restOperations, externalRestOperations);
 	}
 
 	private ClientAuthentication cubbyholeAuthentication() {
@@ -278,6 +297,72 @@ class ClientAuthenticationFactory {
 				.build();
 
 		return new CubbyholeAuthentication(options, restOperations);
+	}
+
+	private ClientAuthentication gcpGceAuthentication(VaultProperties vaultProperties) {
+
+		VaultProperties.GcpGceProperties gcp = vaultProperties.getGcpGce();
+
+		Assert.hasText(gcp.getRole(),
+				"Role (spring.cloud.vault.gcp-gce.role) must not be empty");
+
+		GcpComputeAuthenticationOptionsBuilder builder = GcpComputeAuthenticationOptions
+				.builder().path(gcp.getGcpPath()).role(gcp.getRole());
+
+		if (StringUtils.hasText(gcp.getServiceAccount())) {
+			builder.serviceAccount(gcp.getServiceAccount());
+		}
+
+		return new GcpComputeAuthentication(builder.build(), restOperations,
+				externalRestOperations);
+	}
+
+	private ClientAuthentication gcpIamAuthentication(VaultProperties vaultProperties) {
+
+		VaultProperties.GcpIamProperties gcp = vaultProperties.getGcpIam();
+
+		Assert.hasText(gcp.getRole(),
+				"Role (spring.cloud.vault.gcp-iam.role) must not be empty");
+
+		GcpIamAuthenticationOptionsBuilder builder = GcpIamAuthenticationOptions
+				.builder().path(gcp.getGcpPath()).role(gcp.getRole())
+				.jwtValidity(gcp.getJwtValidity());
+
+		if (StringUtils.hasText(gcp.getProjectId())) {
+			builder.projectId(gcp.getProjectId());
+		}
+
+		if (StringUtils.hasText(gcp.getServiceAccountId())) {
+			builder.serviceAccountId(gcp.getServiceAccountId());
+		}
+
+		GcpCredentialSupplier supplier = () -> getGoogleCredential(gcp);
+		builder.credential(supplier.get());
+
+		GcpIamAuthenticationOptions options = builder.build();
+
+		try {
+			return new GcpIamAuthentication(options, restOperations);
+		}
+		catch (IOException | GeneralSecurityException e) {
+			throw new IllegalStateException("Cannot create GcpIamAuthentication", e);
+		}
+	}
+
+	private GoogleCredential getGoogleCredential(GcpIamProperties gcp) throws IOException {
+
+		GcpCredentials credentialProperties = gcp.getCredentials();
+		if (credentialProperties.getLocation() != null) {
+			return GoogleCredential.fromStream(credentialProperties.getLocation()
+					.getInputStream());
+		}
+
+		if (StringUtils.hasText(credentialProperties.getEncodedKey())) {
+			return GoogleCredential.fromStream(new ByteArrayInputStream(Base64
+					.getDecoder().decode(credentialProperties.getEncodedKey())));
+		}
+
+		return GoogleCredential.getApplicationDefault();
 	}
 
 	private ClientAuthentication kubernetesAuthentication(VaultProperties vaultProperties) {

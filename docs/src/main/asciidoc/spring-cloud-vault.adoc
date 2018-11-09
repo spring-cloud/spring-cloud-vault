@@ -485,6 +485,125 @@ See also:
 * https://www.vaultproject.io/docs/secrets/cubbyhole/index.html[Vault Documentation: Cubbyhole Secret Backend]
 * https://www.vaultproject.io/docs/concepts/response-wrapping.html[Vault Documentation: Response Wrapping]
 
+[[vault.config.authentication.gcpgce]]
+== GCP-GCE authentication
+
+The https://www.vaultproject.io/docs/auth/gcp.html[gcp]
+auth backend allows Vault login by using existing GCP (Google Cloud Platform) IAM and GCE credentials.
+
+GCP GCE (Google Compute Engine) authentication creates a signature in the form of a
+JSON Web Token (JWT) for a service account. A JWT for a Compute Engine instance
+is obtained from the GCE  metadata service using https://cloud.google.com/compute/docs/instances/verifying-instance-identity[Instance identification].
+This API creates a JSON Web Token that can be used to confirm the instance identity.
+
+Unlike most Vault authentication backends, this backend
+does not require first-deploying, or provisioning security-sensitive
+credentials (tokens, username/password, client certificates, etc.).
+Instead, it treats GCP as a Trusted Third Party and uses the
+cryptographically signed dynamic metadata information that uniquely
+represents each GCP service account.
+
+.bootstrap.yml with required GCP-GCE Authentication properties
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    authentication: GCP_GCE
+    gcp-gce:
+        role: my-dev-role
+----
+====
+
+.bootstrap.yml with all GCP-GCE Authentication properties
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    authentication: GCP_GCE
+    gcp-gce:
+        gcp-path: gcp
+        role: my-dev-role
+        service-account: my-service@projectid.iam.gserviceaccount.com
+----
+====
+
+* `role` sets the name of the role against which the login is being attempted.
+* `gcp-path` sets the path of the GCP mount to use
+* `service-account` allows overriding the service account Id to a specific value. Defaults to the `default` service account.
+
+See also:
+
+* https://www.vaultproject.io/docs/auth/gcp.html[Vault Documentation: Using the GCP auth backend]
+* https://cloud.google.com/compute/docs/instances/verifying-instance-identity[GCP Documentation: Verifying the Identity of Instances]
+
+[[vault.config.authentication.gcpiam]]
+== GCP-IAM authentication
+
+The https://www.vaultproject.io/docs/auth/gcp.html[gcp]
+auth backend allows Vault login by using existing GCP (Google Cloud Platform) IAM and GCE credentials.
+
+GCP IAM authentication creates a signature in the form of a JSON Web Token (JWT)
+for a service account. A JWT for a service account is obtained by
+calling GCP IAM's https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt[`projects.serviceAccounts.signJwt`] API. The caller authenticates against GCP IAM
+and proves thereby its identity. This Vault backend treats GCP as a Trusted Third Party.
+
+IAM credentials can be obtained from either the runtime environment
+, specifically the https://cloud.google.com/docs/authentication/production[`GOOGLE_APPLICATION_CREDENTIALS`]
+environment variable, the Google Compute metadata service, 
+or supplied externally as e.g. JSON or base64 encoded. 
+JSON is the preferred form as it carries the project id and 
+service account identifier required for calling ``projects.serviceAccounts.signJwt``.
+
+.bootstrap.yml with required GCP-IAM Authentication properties
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    authentication: GCP_IAM
+    gcp-iam:
+        role: my-dev-role
+----
+====
+
+.bootstrap.yml with all GCP-IAM Authentication properties
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    authentication: GCP_IAM
+    gcp-iam:
+        credentials:
+            location: classpath:credentials.json
+            encoded-key: e+KApn0=
+        gcp-path: gcp
+        jwt-validity: 15m
+        project-id: my-project-id
+        role: my-dev-role
+        service-account: my-service@projectid.iam.gserviceaccount.com
+----
+====
+
+* `role` sets the name of the role against which the login is being attempted.
+* `credentials.location` path to the credentials resource that contains Google credentials in JSON format.
+* `credentials.encoded-key` the base64 encoded contents of an OAuth2 account private key in the JSON format.
+* `gcp-path` sets the path of the GCP mount to use
+* `jwt-validity` configures the JWT token validity. Defaults to 15 minutes.
+* `project-id` allows overriding the project Id to a specific value. Defaults to the project Id from the obtained credential.
+* `service-account` allows overriding the service account Id to a specific value. Defaults to the service account from the obtained credential.
+
+GCP IAM authentication requires the Google Cloud Java SDK dependency
+(`com.google.apis:google-api-services-iam` and `com.google.auth:google-auth-library-oauth2-http`)
+as the authentication implementation uses Google APIs for credentials and JWT signing.
+
+NOTE: Google credentials require an OAuth 2 token maintaining the token lifecycle. All API
+is synchronous therefore, `GcpIamAuthentication` does not support `AuthenticationSteps` which is
+required for reactive usage.
+
+See also:
+
+* https://www.vaultproject.io/docs/auth/gcp.html[Vault Documentation: Using the GCP auth backend]
+* https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt[GCP Documentation: projects.serviceAccounts.signJwt][[vault.authentication.gcpiam]]
+
 [[vault.config.authentication.kubernetes]]
 === Kubernetes authentication
 
