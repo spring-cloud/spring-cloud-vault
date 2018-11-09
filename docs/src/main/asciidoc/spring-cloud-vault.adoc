@@ -369,6 +369,50 @@ as the authentication implementation uses AWS SDK types for credentials and requ
 
 See also: https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Using the aws auth backend]
 
+[[vault.config.authentication.azuremsi]]
+=== Azure MSI authentication
+
+The https://www.vaultproject.io/docs/auth/azure.html[azure]
+auth backend provides a secure introduction mechanism
+for Azure VM instances, allowing automated retrieval of a Vault
+token. Unlike most Vault authentication backends, this backend
+does not require first-deploying, or provisioning security-sensitive
+credentials (tokens, username/password, client certificates, etc.).
+Instead, it treats Azure as a Trusted Third Party and uses the
+managed service identity and instance metadata information that can be
+bound to a VM instance.
+
+.bootstrap.yml with required Azure Authentication properties
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    authentication: AZURE_MSI
+    azure-msi:
+        role: my-dev-role
+----
+====
+
+.bootstrap.yml with all Azure Authentication properties
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    authentication: AZURE_MSI
+    azure-msi:
+        role: my-dev-role
+        azure-path: aws
+----
+====
+
+* `role` sets the name of the role against which the login is being attempted.
+* `azure-path` sets the path of the Azure mount to use
+
+Azure MSI authentication fetches environmental details about the virtual machine 
+(subscription Id, resource group, VM name) from the instance metadata service.
+
+See also: https://www.vaultproject.io/docs/auth/azure.html[Vault Documentation: Using the azure auth backend]
+
 [[vault.config.authentication.clientcert]]
 === TLS certificate authentication
 
