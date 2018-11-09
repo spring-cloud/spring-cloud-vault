@@ -60,11 +60,6 @@ class ClientAuthenticationFactory {
 
 		switch (vaultProperties.getAuthentication()) {
 
-		case TOKEN:
-			Assert.hasText(vaultProperties.getToken(),
-					"Token (spring.cloud.vault.token) must not be empty");
-			return new TokenAuthentication(vaultProperties.getToken());
-
 		case APPID:
 			return appIdAuthentication(vaultProperties);
 
@@ -85,6 +80,11 @@ class ClientAuthenticationFactory {
 
 		case KUBERNETES:
 			return kubernetesAuthentication(vaultProperties);
+
+		case TOKEN:
+			Assert.hasText(vaultProperties.getToken(),
+					"Token (spring.cloud.vault.token) must not be empty");
+			return new TokenAuthentication(vaultProperties.getToken());
 		}
 
 		throw new UnsupportedOperationException(String.format(
