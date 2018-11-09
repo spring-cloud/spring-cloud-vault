@@ -61,19 +61,11 @@ class ClientAuthenticationFactory {
 
 		switch (vaultProperties.getAuthentication()) {
 
-		case TOKEN:
-			Assert.hasText(vaultProperties.getToken(),
-					"Token (spring.cloud.vault.token) must not be empty");
-			return new TokenAuthentication(vaultProperties.getToken());
-
 		case APPID:
 			return appIdAuthentication(vaultProperties);
 
 		case APPROLE:
 			return appRoleAuthentication(vaultProperties);
-
-		case CERT:
-			return new ClientCertificateAuthentication(restOperations);
 
 		case AWS_EC2:
 			return awsEc2Authentication(vaultProperties);
@@ -84,11 +76,19 @@ class ClientAuthenticationFactory {
 		case AZURE_MSI:
 			return azureMsiAuthentication(vaultProperties);
 
+		case CERT:
+			return new ClientCertificateAuthentication(restOperations);
+
 		case CUBBYHOLE:
 			return cubbyholeAuthentication();
 
 		case KUBERNETES:
 			return kubernetesAuthentication(vaultProperties);
+
+		case TOKEN:
+			Assert.hasText(vaultProperties.getToken(),
+					"Token (spring.cloud.vault.token) must not be empty");
+			return new TokenAuthentication(vaultProperties.getToken());
 		}
 
 		throw new UnsupportedOperationException(String.format(
