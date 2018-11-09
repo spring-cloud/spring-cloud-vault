@@ -49,6 +49,7 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for Spring Vault support.
@@ -68,7 +69,15 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 	private final VaultEndpointProvider endpointProvider;
 
+	/**
+	 * Used for Vault communication.
+	 */
 	private RestOperations restOperations;
+
+	/**
+	 * Used for external (AWS, GCP) communication.
+	 */
+	private RestOperations externalRestOperations;
 
 	public VaultBootstrapConfiguration(ConfigurableApplicationContext applicationContext,
 			VaultProperties vaultProperties,
@@ -96,6 +105,8 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 		this.restOperations = VaultClients.createRestTemplate(endpointProvider,
 				clientHttpRequestFactory);
+
+		this.externalRestOperations = new RestTemplate(clientHttpRequestFactory);
 	}
 
 	/**
@@ -190,7 +201,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	public ClientAuthentication clientAuthentication() {
 
 		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(
-				vaultProperties, restOperations);
+				vaultProperties, restOperations, externalRestOperations);
 
 		return factory.createClientAuthentication();
 	}

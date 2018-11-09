@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.vault.config;
 
+import java.time.Duration;
+
 import javax.validation.constraints.NotEmpty;
 
 import lombok.Data;
@@ -99,6 +101,10 @@ public class VaultProperties implements EnvironmentAware {
 	private AwsIamProperties awsIam = new AwsIamProperties();
 
 	private AzureMsiProperties azureMsi = new AzureMsiProperties();
+
+	private GcpGceProperties gcpGce = new GcpGceProperties();
+
+	private GcpIamProperties gcpIam = new GcpIamProperties();
 
 	private KubernetesProperties kubernetes = new KubernetesProperties();
 
@@ -266,6 +272,79 @@ public class VaultProperties implements EnvironmentAware {
 	}
 
 	@Data
+	public static class GcpGceProperties {
+
+		/**
+		 * Mount path of the Kubernetes authentication backend.
+		 */
+		@NotEmpty
+		private String gcpPath = "gcp";
+
+		/**
+		 * Name of the role against which the login is being attempted.
+		 */
+		private String role = "";
+
+		/**
+		 * Optional service account id. Using the default id if left unconfigured.
+		 */
+		private String serviceAccount = "";
+	}
+
+	@Data
+	public static class GcpIamProperties {
+
+		/**
+		 * Mount path of the Kubernetes authentication backend.
+		 */
+		@NotEmpty
+		private String gcpPath = "gcp";
+
+		/**
+		 * Name of the role against which the login is being attempted.
+		 */
+		private String role = "";
+
+		/**
+		 * Overrides the GCP project Id.
+		 */
+		private String projectId = "";
+
+		/**
+		 * Overrides the GCP service account Id.
+		 */
+		private String serviceAccountId = "";
+
+		/**
+		 * Validity of the JWT token.
+		 */
+		private Duration jwtValidity = Duration.ofMinutes(15);
+
+		/**
+		 * Credentials configuration.
+		 */
+		private final GcpCredentials credentials = new GcpCredentials();
+	}
+
+	@Data
+	public static class GcpCredentials {
+
+		/**
+		 * Location of the OAuth2 credentials private key.
+		 *
+		 * <p>
+		 * Since this is a Resource, the private key can be in a multitude of locations,
+		 * such as a local file system, classpath, URL, etc.
+		 */
+		private Resource location;
+
+		/**
+		 * The base64 encoded contents of an OAuth2 account private key in JSON format.
+		 */
+		private String encodedKey;
+	}
+
+	@Data
 	public static class KubernetesProperties {
 
 		/**
@@ -345,6 +424,6 @@ public class VaultProperties implements EnvironmentAware {
 	}
 
 	public enum AuthenticationMethod {
-		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, KUBERNETES
+		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, KUBERNETES
 	}
 }
