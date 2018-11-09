@@ -98,6 +98,8 @@ public class VaultProperties implements EnvironmentAware {
 
 	private AwsIamProperties awsIam = new AwsIamProperties();
 
+	private AzureMsiProperties azureMsi = new AzureMsiProperties();
+
 	private KubernetesProperties kubernetes = new KubernetesProperties();
 
 	private Ssl ssl = new Ssl();
@@ -249,6 +251,21 @@ public class VaultProperties implements EnvironmentAware {
 	}
 
 	@Data
+	public static class AzureMsiProperties {
+
+		/**
+		 * Mount path of the Azure MSI authentication backend.
+		 */
+		@NotEmpty
+		private String azurePath = "azure";
+
+		/**
+		 * Name of the role.
+		 */
+		private String role = "";
+	}
+
+	@Data
 	public static class KubernetesProperties {
 
 		/**
@@ -328,6 +345,6 @@ public class VaultProperties implements EnvironmentAware {
 	}
 
 	public enum AuthenticationMethod {
-		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, CERT, CUBBYHOLE, KUBERNETES
+		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, KUBERNETES
 	}
 }

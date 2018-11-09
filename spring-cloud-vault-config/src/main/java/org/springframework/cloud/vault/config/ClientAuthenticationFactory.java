@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.cloud.vault.config.VaultProperties.AppRoleProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AwsIamProperties;
+import org.springframework.cloud.vault.config.VaultProperties.AzureMsiProperties;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -79,6 +80,9 @@ class ClientAuthenticationFactory {
 
 		case AWS_IAM:
 			return awsIamAuthentication(vaultProperties);
+
+		case AZURE_MSI:
+			return azureMsiAuthentication(vaultProperties);
 
 		case CUBBYHOLE:
 			return cubbyholeAuthentication();
@@ -248,6 +252,19 @@ class ClientAuthenticationFactory {
 				credentialsProvider).build();
 
 		return new AwsIamAuthentication(options, restOperations);
+	}
+
+	private ClientAuthentication azureMsiAuthentication(VaultProperties vaultProperties) {
+
+		AzureMsiProperties azureMsi = vaultProperties.getAzureMsi();
+
+		Assert.hasText(azureMsi.getRole(),
+				"Azure role (spring.cloud.vault.azure-msi.role) must not be empty");
+
+		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder()
+				.role(azureMsi.getRole()).build();
+
+		return new AzureMsiAuthentication(options, restOperations);
 	}
 
 	private ClientAuthentication cubbyholeAuthentication() {
