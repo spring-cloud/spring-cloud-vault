@@ -18,8 +18,9 @@ package org.springframework.cloud.vault.config;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.FilteredClassLoader;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.vault.authentication.AuthenticationSteps;
@@ -41,58 +42,74 @@ import static org.assertj.core.api.Assertions.*;
  */
 public class VaultReactiveBootstrapConfigurationTests {
 
-	private AnnotationConfigApplicationContext context;
+	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+			.withConfiguration(AutoConfigurations
+					.of(VaultReactiveBootstrapConfiguration.class));
 
 	@Test
 	public void shouldConfigureTemplate() {
 
-		load(AuthenticationFactoryConfiguration.class,
-				"spring.cloud.vault.config.lifecycle.enabled=false");
+		contextRunner
+				.withUserConfiguration(AuthenticationFactoryConfiguration.class)
+				.withPropertyValues("spring.cloud.vault.config.lifecycle.enabled=false")
+				.run(context -> {
 
-		assertThat(context.getBean(ReactiveVaultOperations.class)).isNotNull();
-		assertThat(context.getBean(AuthenticationStepsFactory.class)).isNotNull();
-		assertThat(context.getBean(SessionManager.class)).isNotNull()
-				.isNotInstanceOf(LifecycleAwareSessionManager.class)
-				.isNotInstanceOf(SimpleSessionManager.class);
-		assertThat(context.getBeanNamesForType(WebClient.class)).isEmpty();
+					assertThat(context.getBean(ReactiveVaultOperations.class))
+							.isNotNull();
+					assertThat(context.getBean(AuthenticationStepsFactory.class))
+							.isNotNull();
+					assertThat(context.getBean(SessionManager.class)).isNotNull()
+							.isNotInstanceOf(LifecycleAwareSessionManager.class)
+							.isNotInstanceOf(SimpleSessionManager.class);
+					assertThat(context.getBeanNamesForType(WebClient.class)).isEmpty();
+				});
+	}
+
+	@Test
+	public void shouldNotConfigureIfHttpClientIsMissing() {
+
+		contextRunner
+				.withUserConfiguration(AuthenticationFactoryConfiguration.class)
+				.withClassLoader(
+						new FilteredClassLoader("reactor.netty.http.client.HttpClient"))
+				.run(context -> {
+
+					assertThat(context.getBeanNamesForType(ReactiveVaultOperations.class))
+							.isEmpty();
+				});
 	}
 
 	@Test
 	public void shouldConfigureTemplateWithTokenSupplier() {
 
-		load(TokenSupplierConfiguration.class,
-				"spring.cloud.vault.config.lifecycle.enabled=false");
+		contextRunner
+				.withUserConfiguration(TokenSupplierConfiguration.class)
+				.withPropertyValues("spring.cloud.vault.config.lifecycle.enabled=false")
+				.run(context -> {
 
-		assertThat(context.getBean(ReactiveVaultOperations.class)).isNotNull();
-		assertThat(context.getBean(SessionManager.class)).isNotNull()
-				.isNotInstanceOf(LifecycleAwareSessionManager.class)
-				.isNotInstanceOf(SimpleSessionManager.class);
-		assertThat(context.getBeanNamesForType(WebClient.class)).isEmpty();
+					assertThat(context.getBean(ReactiveVaultOperations.class))
+							.isNotNull();
+					assertThat(context.getBean(SessionManager.class)).isNotNull()
+							.isNotInstanceOf(LifecycleAwareSessionManager.class)
+							.isNotInstanceOf(SimpleSessionManager.class);
+					assertThat(context.getBeanNamesForType(WebClient.class)).isEmpty();
+				});
 	}
 
 	@Test
 	public void shouldNotConfigureReactiveSupport() {
 
-		load(VaultBootstrapConfiguration.class,
-				"spring.cloud.vault.reactive.enabled=false",
-				"spring.cloud.vault.token=foo");
+		contextRunner
+				.withUserConfiguration(VaultBootstrapConfiguration.class)
+				.withPropertyValues("spring.cloud.vault.reactive.enabled=false",
+						"spring.cloud.vault.token=foo")
+				.run(context -> {
 
-		assertThat(context.getBeanNamesForType(ReactiveVaultOperations.class)).isEmpty();
-		assertThat(context.getBean(SessionManager.class)).isInstanceOf(
-				LifecycleAwareSessionManager.class);
-	}
-
-	private void load(Class<?> config, String... environment) {
-
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-
-		TestPropertyValues.of(environment).applyTo(ctx);
-
-		ctx.register(config);
-		ctx.register(VaultReactiveBootstrapConfiguration.class);
-		ctx.refresh();
-
-		this.context = ctx;
+					assertThat(context.getBeanNamesForType(ReactiveVaultOperations.class))
+							.isEmpty();
+					assertThat(context.getBean(SessionManager.class)).isInstanceOf(
+							LifecycleAwareSessionManager.class);
+				});
 	}
 
 	@Configuration
