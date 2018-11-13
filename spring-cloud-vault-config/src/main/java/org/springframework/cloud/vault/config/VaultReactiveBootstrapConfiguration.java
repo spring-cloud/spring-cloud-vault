@@ -20,6 +20,7 @@ import java.time.Duration;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.ipc.netty.http.client.HttpClient;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -71,7 +72,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @ConditionalOnExpression("${spring.cloud.vault.reactive.enabled:true}")
-@ConditionalOnClass({ Flux.class, WebClient.class, ReactiveVaultOperations.class })
+@ConditionalOnClass({ Flux.class, WebClient.class, ReactiveVaultOperations.class,
+		HttpClient.class })
 @EnableConfigurationProperties({ VaultProperties.class })
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
 public class VaultReactiveBootstrapConfiguration {
