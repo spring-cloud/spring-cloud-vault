@@ -24,10 +24,10 @@ import lombok.Data;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.vault.client.VaultEndpoint;
@@ -44,55 +44,60 @@ import static org.mockito.Mockito.*;
  */
 public class DiscoveryClientVaultBootstrapConfigurationTests {
 
-	private AnnotationConfigApplicationContext context;
+	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+			.withConfiguration(AutoConfigurations.of(
+					DiscoveryClientVaultBootstrapConfiguration.class,
+					VaultBootstrapConfiguration.class));
 
 	@Test
 	public void shouldRegisterDefaultBeans() {
 
-		load(DiscoveryConfiguration.class, "spring.cloud.vault.token=foo",
-				"spring.cloud.vault.discovery.enabled=true");
+		contextRunner
+				.withUserConfiguration(DiscoveryConfiguration.class)
+				.withPropertyValues("spring.cloud.vault.token=foo",
+						"spring.cloud.vault.discovery.enabled=true")
+				.run(context -> {
 
-		assertThat(context.getBean(VaultServiceInstanceProvider.class)).isInstanceOf(
-				DiscoveryClientVaultServiceInstanceProvider.class);
+					assertThat(context.getBean(VaultServiceInstanceProvider.class))
+							.isInstanceOf(
+									DiscoveryClientVaultServiceInstanceProvider.class);
 
-		VaultEndpointProvider endpointProvider = context
-				.getBean(VaultEndpointProvider.class);
-		VaultEndpoint vaultEndpoint = endpointProvider.getVaultEndpoint();
-		assertThat(vaultEndpoint.getPort()).isEqualTo(1234);
+					VaultEndpointProvider endpointProvider = context
+							.getBean(VaultEndpointProvider.class);
+					VaultEndpoint vaultEndpoint = endpointProvider.getVaultEndpoint();
+					assertThat(vaultEndpoint.getPort()).isEqualTo(1234);
+				});
 	}
 
 	@Test
 	public void shouldNotRegisterBeansIfDiscoveryDisabled() {
 
-		load(DiscoveryConfiguration.class, "spring.cloud.vault.token=foo",
-				"spring.cloud.vault.discovery.enabled=false");
+		contextRunner
+				.withUserConfiguration(DiscoveryConfiguration.class)
+				.withPropertyValues("spring.cloud.vault.token=foo",
+						"spring.cloud.vault.discovery.enabled=false")
+				.run(context -> {
 
-		assertThat(context.getBeanNamesForType(VaultServiceInstanceProvider.class))
-				.isEmpty();
+					assertThat(
+							context.getBeanNamesForType(VaultServiceInstanceProvider.class))
+							.isEmpty();
+				});
 	}
 
 	@Test
 	public void shouldNotRegisterBeansIfVaultDisabled() {
 
-		load(DiscoveryConfiguration.class, "spring.cloud.vault.token=foo",
-				"spring.cloud.vault.enabled=false");
+		contextRunner
+				.withUserConfiguration(DiscoveryConfiguration.class)
+				.withPropertyValues("spring.cloud.vault.token=foo",
+						"spring.cloud.vault.enabled=false")
+				.run(context -> {
 
-		assertThat(context.getBeanNamesForType(VaultServiceInstanceProvider.class))
-				.isEmpty();
-	}
+					assertThat(
+							context.getBeanNamesForType(VaultServiceInstanceProvider.class))
+							.isEmpty();
+				});
 
-	private void load(Class<?> config, String... environment) {
-
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-
-		TestPropertyValues.of(environment).applyTo(ctx);
-
-		ctx.register(config);
-		ctx.register(DiscoveryClientVaultBootstrapConfiguration.class);
-		ctx.register(VaultBootstrapConfiguration.class);
-		ctx.refresh();
-
-		this.context = ctx;
 	}
 
 	@Configuration
