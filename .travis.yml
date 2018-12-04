@@ -19,13 +19,12 @@ jdk:
 
 env:
   matrix:
-    - VAULT_VER=0.5.2
     - VAULT_VER=0.6.5
     - VAULT_VER=0.7.3
     - VAULT_VER=0.8.3
     - VAULT_VER=0.9.6
     - VAULT_VER=0.10.3
-    - VAULT_VER=0.11.4
+    - VAULT_VER=0.11.5
     - VAULT_VER=1.0.0
 
 before_install:
