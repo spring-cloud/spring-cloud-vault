@@ -320,7 +320,8 @@ class ClientAuthenticationFactory {
 		Assert.hasText(this.vaultProperties.getToken(),
 				"Initial Token (spring.cloud.vault.token) for Cubbyhole authentication must not be empty");
 
-		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder() //
+		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions
+				.builder() //
 				.wrapped() //
 				.initialToken(VaultToken.of(this.vaultProperties.getToken())) //
 				.build();

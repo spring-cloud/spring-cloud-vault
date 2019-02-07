@@ -44,14 +44,10 @@ public class VaultHealthIndicator extends AbstractHealthIndicator {
 		if (!vaultHealthResponse.isInitialized()) {
 			builder.down().withDetail("state", "Vault uninitialized");
 		}
-		else
-
-		if (vaultHealthResponse.isSealed()) {
+		else if (vaultHealthResponse.isSealed()) {
 			builder.down().withDetail("state", "Vault sealed");
 		}
-		else
-
-		if (vaultHealthResponse.isStandby()) {
+		else if (vaultHealthResponse.isStandby()) {
 			builder.up().withDetail("state", "Vault in standby");
 		}
 		else {
