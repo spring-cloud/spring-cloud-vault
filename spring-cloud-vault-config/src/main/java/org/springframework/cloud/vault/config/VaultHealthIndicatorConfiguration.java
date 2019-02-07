@@ -45,7 +45,7 @@ class VaultHealthIndicatorConfiguration extends
 	}
 
 	@Bean
-	@ConditionalOnMissingBean(name = { "vaultHealthIndicator" })
+	@ConditionalOnMissingBean(name = {"vaultHealthIndicator"})
 	public HealthIndicator vaultHealthIndicator() {
 		return this.createHealthIndicator(this.vaultTemplates);
 	}
