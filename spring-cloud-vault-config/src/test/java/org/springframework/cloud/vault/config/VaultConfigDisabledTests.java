@@ -48,6 +48,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = VaultConfigDisabledTests.TestApplication.class, properties = "spring.cloud.vault.enabled=false")
 public class VaultConfigDisabledTests {
 
+	@Autowired
+	Environment environment;
+
+	@Autowired
+	ApplicationContext applicationContext;
+
 	@BeforeClass
 	public static void beforeClass() {
 
@@ -57,12 +63,6 @@ public class VaultConfigDisabledTests {
 		vaultRule.prepare().getVaultOperations().write("secret/testVaultApp",
 				Collections.singletonMap("vault.value", "foo"));
 	}
-
-	@Autowired
-	Environment environment;
-
-	@Autowired
-	ApplicationContext applicationContext;
 
 	@Test
 	public void shouldNotContainVaultProperties() {

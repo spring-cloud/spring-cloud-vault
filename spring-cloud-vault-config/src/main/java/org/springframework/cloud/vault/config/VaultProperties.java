@@ -131,6 +131,15 @@ public class VaultProperties implements EnvironmentAware {
 	}
 
 	/**
+	 * Enumeration of authentication methods.
+	 */
+	public enum AuthenticationMethod {
+
+		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, KUBERNETES
+
+	}
+
+	/**
 	 * Discovery properties.
 	 */
 	@Data
@@ -330,6 +339,11 @@ public class VaultProperties implements EnvironmentAware {
 	public static class GcpIamProperties {
 
 		/**
+		 * Credentials configuration.
+		 */
+		private final GcpCredentials credentials = new GcpCredentials();
+
+		/**
 		 * Mount path of the Kubernetes authentication backend.
 		 */
 		@NotEmpty
@@ -354,11 +368,6 @@ public class VaultProperties implements EnvironmentAware {
 		 * Validity of the JWT token.
 		 */
 		private Duration jwtValidity = Duration.ofMinutes(15);
-
-		/**
-		 * Credentials configuration.
-		 */
-		private final GcpCredentials credentials = new GcpCredentials();
 
 	}
 
@@ -473,15 +482,6 @@ public class VaultProperties implements EnvironmentAware {
 		 * Enable lifecycle management.
 		 */
 		private boolean enabled = true;
-
-	}
-
-	/**
-	 * Enumeration of authentication methods.
-	 */
-	public enum AuthenticationMethod {
-
-		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, KUBERNETES
 
 	}
 

@@ -94,6 +94,65 @@ class ClientAuthenticationFactory {
 
 	private final RestOperations externalRestOperations;
 
+	static AppRoleAuthenticationOptions getAppRoleAuthenticationOptions(
+			VaultProperties vaultProperties) {
+
+		AppRoleProperties appRole = vaultProperties.getAppRole();
+
+		AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions
+				.builder().path(appRole.getAppRolePath());
+
+		if (StringUtils.hasText(appRole.getRole())) {
+			builder.appRole(appRole.getRole());
+		}
+
+		RoleId roleId = getRoleId(vaultProperties, appRole);
+		SecretId secretId = getSecretId(vaultProperties, appRole);
+
+		builder.roleId(roleId).secretId(secretId);
+
+		return builder.build();
+	}
+
+	private static RoleId getRoleId(VaultProperties vaultProperties,
+			AppRoleProperties appRole) {
+
+		if (StringUtils.hasText(appRole.getRoleId())) {
+			return RoleId.provided(appRole.getRoleId());
+		}
+
+		if (StringUtils.hasText(vaultProperties.getToken())
+				&& StringUtils.hasText(appRole.getRole())) {
+			return RoleId.pull(VaultToken.of(vaultProperties.getToken()));
+		}
+
+		if (StringUtils.hasText(vaultProperties.getToken())) {
+			return RoleId.wrapped(VaultToken.of(vaultProperties.getToken()));
+		}
+
+		throw new IllegalArgumentException(
+				"Cannot configure RoleId. Any of role-id, initial token, or initial toke and role name must be configured.");
+	}
+
+	private static SecretId getSecretId(VaultProperties vaultProperties,
+			AppRoleProperties appRole) {
+
+		if (StringUtils.hasText(appRole.getSecretId())) {
+			return SecretId.provided(appRole.getSecretId());
+		}
+
+		if (StringUtils.hasText(vaultProperties.getToken())
+				&& StringUtils.hasText(appRole.getRole())) {
+			return SecretId.pull(VaultToken.of(vaultProperties.getToken()));
+		}
+
+		if (StringUtils.hasText(vaultProperties.getToken())) {
+			return SecretId.wrapped(VaultToken.of(vaultProperties.getToken()));
+		}
+
+		return SecretId.absent();
+	}
+
 	/**
 	 * @return a new {@link ClientAuthentication}.
 	 */
@@ -195,65 +254,6 @@ class ClientAuthenticationFactory {
 				vaultProperties);
 
 		return new AppRoleAuthentication(options, this.restOperations);
-	}
-
-	static AppRoleAuthenticationOptions getAppRoleAuthenticationOptions(
-			VaultProperties vaultProperties) {
-
-		AppRoleProperties appRole = vaultProperties.getAppRole();
-
-		AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions
-				.builder().path(appRole.getAppRolePath());
-
-		if (StringUtils.hasText(appRole.getRole())) {
-			builder.appRole(appRole.getRole());
-		}
-
-		RoleId roleId = getRoleId(vaultProperties, appRole);
-		SecretId secretId = getSecretId(vaultProperties, appRole);
-
-		builder.roleId(roleId).secretId(secretId);
-
-		return builder.build();
-	}
-
-	private static RoleId getRoleId(VaultProperties vaultProperties,
-			AppRoleProperties appRole) {
-
-		if (StringUtils.hasText(appRole.getRoleId())) {
-			return RoleId.provided(appRole.getRoleId());
-		}
-
-		if (StringUtils.hasText(vaultProperties.getToken())
-				&& StringUtils.hasText(appRole.getRole())) {
-			return RoleId.pull(VaultToken.of(vaultProperties.getToken()));
-		}
-
-		if (StringUtils.hasText(vaultProperties.getToken())) {
-			return RoleId.wrapped(VaultToken.of(vaultProperties.getToken()));
-		}
-
-		throw new IllegalArgumentException(
-				"Cannot configure RoleId. Any of role-id, initial token, or initial toke and role name must be configured.");
-	}
-
-	private static SecretId getSecretId(VaultProperties vaultProperties,
-			AppRoleProperties appRole) {
-
-		if (StringUtils.hasText(appRole.getSecretId())) {
-			return SecretId.provided(appRole.getSecretId());
-		}
-
-		if (StringUtils.hasText(vaultProperties.getToken())
-				&& StringUtils.hasText(appRole.getRole())) {
-			return SecretId.pull(VaultToken.of(vaultProperties.getToken()));
-		}
-
-		if (StringUtils.hasText(vaultProperties.getToken())) {
-			return SecretId.wrapped(VaultToken.of(vaultProperties.getToken()));
-		}
-
-		return SecretId.absent();
 	}
 
 	private ClientAuthentication awsEc2Authentication(VaultProperties vaultProperties) {

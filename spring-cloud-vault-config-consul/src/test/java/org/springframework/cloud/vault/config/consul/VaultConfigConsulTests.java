@@ -74,6 +74,9 @@ public class VaultConfigConsulTests {
 	private static final ParameterizedTypeReference<Map<String, String>> STRING_MAP = new ParameterizedTypeReference<Map<String, String>>() {
 	};
 
+	@Value("${spring.cloud.consul.token}")
+	String token;
+
 	/**
 	 * Initialize the consul secret backend.
 	 */
@@ -119,9 +122,6 @@ public class VaultConfigConsulTests {
 			throw e;
 		}
 	}
-
-	@Value("${spring.cloud.consul.token}")
-	String token;
 
 	@Test
 	public void shouldHaveToken() {

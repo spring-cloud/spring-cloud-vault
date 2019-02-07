@@ -56,6 +56,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 				"spring.main.allow-bean-definition-overriding=true" })
 public class VaultConfigAppIdCustomMechanismTests {
 
+	@Value("${vault.value}")
+	String configValue;
+
 	@BeforeClass
 	public static void beforeClass() {
 
@@ -101,9 +104,6 @@ public class VaultConfigAppIdCustomMechanismTests {
 		vaultOperations.write(String.format("auth/app-id/map/user-id/%s", userId),
 				userIdData);
 	}
-
-	@Value("${vault.value}")
-	String configValue;
 
 	@Test
 	public void contextLoads() {

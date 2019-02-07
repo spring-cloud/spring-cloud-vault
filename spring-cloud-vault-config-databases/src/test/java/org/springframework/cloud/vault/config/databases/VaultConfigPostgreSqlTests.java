@@ -69,6 +69,15 @@ public class VaultConfigPostgreSqlTests {
 			+ "LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';\n"
 			+ "GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";";
 
+	@Value("${spring.datasource.username}")
+	String username;
+
+	@Value("${spring.datasource.password}")
+	String password;
+
+	@Autowired
+	DataSource dataSource;
+
 	/**
 	 * Initialize the postgresql secret backend.
 	 */
@@ -92,15 +101,6 @@ public class VaultConfigPostgreSqlTests {
 		vaultOperations.write("postgresql/roles/readonly",
 				Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
 	}
-
-	@Value("${spring.datasource.username}")
-	String username;
-
-	@Value("${spring.datasource.password}")
-	String password;
-
-	@Autowired
-	DataSource dataSource;
 
 	@Test
 	public void shouldConnectUsingDataSource() throws SQLException {

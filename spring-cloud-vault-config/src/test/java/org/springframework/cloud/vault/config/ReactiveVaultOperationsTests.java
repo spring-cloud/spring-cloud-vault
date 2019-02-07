@@ -50,6 +50,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 		"spring.cloud.vault.host=foo", "spring.cloud.vault.uri=https://localhost:8200", })
 public class ReactiveVaultOperationsTests {
 
+	@Autowired
+	ReactiveVaultOperations reactiveOperations;
+
 	@BeforeClass
 	public static void beforeClass() {
 
@@ -62,9 +65,6 @@ public class ReactiveVaultOperationsTests {
 
 		vaultRule.prepare().getVaultOperations().write("secret/testVaultApp", object);
 	}
-
-	@Autowired
-	ReactiveVaultOperations reactiveOperations;
 
 	@Test
 	public void shouldAccessVault() {

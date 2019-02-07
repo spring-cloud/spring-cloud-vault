@@ -54,6 +54,9 @@ import static org.junit.Assume.assumeTrue;
 		"spring.cloud.vault.generic.applicationName=VaultConfigCubbyholeAuthenticationTests" })
 public class VaultConfigCubbyholeAuthenticationTests {
 
+	@Value("${vault.value}")
+	String configValue;
+
 	@BeforeClass
 	public static void beforeClass() {
 
@@ -87,9 +90,6 @@ public class VaultConfigCubbyholeAuthenticationTests {
 	public static void afterClass() {
 		System.clearProperty("spring.cloud.vault.token");
 	}
-
-	@Value("${vault.value}")
-	String configValue;
 
 	@Test
 	public void contextLoads() {

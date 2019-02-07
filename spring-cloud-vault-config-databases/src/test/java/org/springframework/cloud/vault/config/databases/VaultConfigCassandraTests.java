@@ -66,6 +66,15 @@ public class VaultConfigCassandraTests {
 	private static final String CREATE_USER_AND_GRANT_CQL = "CREATE USER '{{username}}' WITH PASSWORD '{{password}}' NOSUPERUSER;"
 			+ "GRANT SELECT ON ALL KEYSPACES TO {{username}};";
 
+	@Value("${spring.data.cassandra.username}")
+	String username;
+
+	@Value("${spring.data.cassandra.password}")
+	String password;
+
+	@Autowired
+	Cluster cluster;
+
 	/**
 	 * Initialize the cassandra secret backend.
 	 */
@@ -98,15 +107,6 @@ public class VaultConfigCassandraTests {
 
 		vaultOperations.write("cassandra/roles/readonly", role);
 	}
-
-	@Value("${spring.data.cassandra.username}")
-	String username;
-
-	@Value("${spring.data.cassandra.password}")
-	String password;
-
-	@Autowired
-	Cluster cluster;
 
 	@Test
 	public void shouldConnectUsingCluster() {

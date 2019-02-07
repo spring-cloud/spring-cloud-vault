@@ -67,6 +67,15 @@ public class VaultConfigMySqlDatabaseTests {
 	private static final String CREATE_USER_AND_GRANT_SQL = "CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';"
 			+ "GRANT SELECT ON *.* TO '{{name}}'@'%';";
 
+	@Value("${spring.datasource.username}")
+	String username;
+
+	@Value("${spring.datasource.password}")
+	String password;
+
+	@Autowired
+	DataSource dataSource;
+
 	/**
 	 * Initialize the mysql secret backend.
 	 */
@@ -99,15 +108,6 @@ public class VaultConfigMySqlDatabaseTests {
 
 		vaultOperations.write("database/roles/readonly", body);
 	}
-
-	@Value("${spring.datasource.username}")
-	String username;
-
-	@Value("${spring.datasource.password}")
-	String password;
-
-	@Autowired
-	DataSource dataSource;
 
 	@Test
 	public void shouldConnectUsingDataSource() throws SQLException {

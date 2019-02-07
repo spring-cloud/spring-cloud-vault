@@ -69,6 +69,15 @@ public class VaultConfigMongoTests {
 
 	private static final String ROLES = "[ \"readWrite\", { \"role\": \"read\", \"db\": \"admin\" } ]";
 
+	@Value("${spring.data.mongodb.username}")
+	String username;
+
+	@Value("${spring.data.mongodb.password}")
+	String password;
+
+	@Autowired
+	MongoClient mongoClient;
+
 	/**
 	 * Initialize the mongo secret backend.
 	 */
@@ -98,15 +107,6 @@ public class VaultConfigMongoTests {
 
 		vaultOperations.write("mongodb/roles/readonly", role);
 	}
-
-	@Value("${spring.data.mongodb.username}")
-	String username;
-
-	@Value("${spring.data.mongodb.password}")
-	String password;
-
-	@Autowired
-	MongoClient mongoClient;
 
 	@Test
 	public void shouldConnectUsingDataSource() {

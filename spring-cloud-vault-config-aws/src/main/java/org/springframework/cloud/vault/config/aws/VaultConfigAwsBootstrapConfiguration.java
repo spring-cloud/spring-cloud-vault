@@ -52,17 +52,6 @@ public class VaultConfigAwsBootstrapConfiguration {
 	public static class AwsSecretBackendMetadataFactory
 			implements SecretBackendMetadataFactory<VaultAwsProperties> {
 
-		@Override
-		public SecretBackendMetadata createMetadata(
-				VaultAwsProperties backendDescriptor) {
-			return forAws(backendDescriptor);
-		}
-
-		@Override
-		public boolean supports(VaultSecretBackendDescriptor backendDescriptor) {
-			return backendDescriptor instanceof VaultAwsProperties;
-		}
-
 		/**
 		 * Creates {@link SecretBackendMetadata} for a secret backend using
 		 * {@link VaultAwsProperties}. This accessor transforms Vault's username/password
@@ -112,6 +101,17 @@ public class VaultConfigAwsBootstrapConfiguration {
 					return variables;
 				}
 			};
+		}
+
+		@Override
+		public SecretBackendMetadata createMetadata(
+				VaultAwsProperties backendDescriptor) {
+			return forAws(backendDescriptor);
+		}
+
+		@Override
+		public boolean supports(VaultSecretBackendDescriptor backendDescriptor) {
+			return backendDescriptor instanceof VaultAwsProperties;
 		}
 
 	}

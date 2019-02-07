@@ -52,17 +52,6 @@ public class VaultConfigConsulBootstrapConfiguration {
 	public static class ConsulSecretBackendMetadataFactory
 			implements SecretBackendMetadataFactory<VaultConsulProperties> {
 
-		@Override
-		public SecretBackendMetadata createMetadata(
-				VaultConsulProperties backendDescriptor) {
-			return forConsul(backendDescriptor);
-		}
-
-		@Override
-		public boolean supports(VaultSecretBackendDescriptor backendDescriptor) {
-			return backendDescriptor instanceof VaultConsulProperties;
-		}
-
 		/**
 		 * Creates a {@link SecretBackendMetadata} for a secret backend using
 		 * {@link VaultConsulProperties}. This accessor transforms Vault's token property
@@ -107,6 +96,17 @@ public class VaultConfigConsulBootstrapConfiguration {
 					return transformer;
 				}
 			};
+		}
+
+		@Override
+		public SecretBackendMetadata createMetadata(
+				VaultConsulProperties backendDescriptor) {
+			return forConsul(backendDescriptor);
+		}
+
+		@Override
+		public boolean supports(VaultSecretBackendDescriptor backendDescriptor) {
+			return backendDescriptor instanceof VaultConsulProperties;
 		}
 
 	}

@@ -56,17 +56,6 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 	public static class DatabaseSecretBackendMetadataFactory
 			implements SecretBackendMetadataFactory<DatabaseSecretProperties> {
 
-		@Override
-		public SecretBackendMetadata createMetadata(
-				DatabaseSecretProperties backendDescriptor) {
-			return forDatabase(backendDescriptor);
-		}
-
-		@Override
-		public boolean supports(VaultSecretBackendDescriptor backendDescriptor) {
-			return backendDescriptor instanceof DatabaseSecretProperties;
-		}
-
 		/**
 		 * Creates a {@link SecretBackendMetadata} for a secret backend using
 		 * {@link DatabaseSecretProperties}. This accessor transforms Vault's
@@ -115,6 +104,17 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 					return variables;
 				}
 			};
+		}
+
+		@Override
+		public SecretBackendMetadata createMetadata(
+				DatabaseSecretProperties backendDescriptor) {
+			return forDatabase(backendDescriptor);
+		}
+
+		@Override
+		public boolean supports(VaultSecretBackendDescriptor backendDescriptor) {
+			return backendDescriptor instanceof DatabaseSecretProperties;
 		}
 
 	}

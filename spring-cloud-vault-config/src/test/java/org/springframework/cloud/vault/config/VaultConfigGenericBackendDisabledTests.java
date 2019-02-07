@@ -46,6 +46,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = VaultConfigGenericBackendDisabledTests.TestApplication.class, properties = "spring.cloud.vault.generic.enabled=false")
 public class VaultConfigGenericBackendDisabledTests {
 
+	@Autowired
+	Environment environment;
+
 	@BeforeClass
 	public static void beforeClass() {
 
@@ -55,9 +58,6 @@ public class VaultConfigGenericBackendDisabledTests {
 		vaultRule.prepare().getVaultOperations().write("secret/testVaultApp",
 				Collections.singletonMap("vault.value", "foo"));
 	}
-
-	@Autowired
-	Environment environment;
 
 	@Test
 	public void shouldNotContainVaultProperties() {

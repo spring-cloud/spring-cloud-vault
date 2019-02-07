@@ -56,6 +56,9 @@ import static org.springframework.cloud.vault.util.Settings.findWorkDir;
 		"spring.cloud.vault.reactive.enabled=false" })
 public class VaultConfigTlsCertAuthenticationTests {
 
+	@Value("${vault.value}")
+	String configValue;
+
 	@BeforeClass
 	public static void beforeClass() {
 
@@ -94,9 +97,6 @@ public class VaultConfigTlsCertAuthenticationTests {
 
 		vaultOperations.write("auth/cert/certs/my-role", role);
 	}
-
-	@Value("${vault.value}")
-	String configValue;
 
 	@Test
 	public void contextLoads() {
