@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.HashMap;
@@ -45,7 +46,6 @@ public class PropertyNameTransformer implements PropertyTransformer {
 	/**
 	 * Adds a key name transformation by providing a {@code sourceKeyName} and a
 	 * {@code targetKeyName}.
-	 *
 	 * @param sourceKeyName must not be empty or {@literal null}.
 	 * @param targetKeyName must not be empty or {@literal null}.
 	 */
@@ -54,7 +54,7 @@ public class PropertyNameTransformer implements PropertyTransformer {
 		Assert.hasText(sourceKeyName, "Source key name must not be empty");
 		Assert.hasText(targetKeyName, "Target key name must not be empty");
 
-		nameMapping.put(sourceKeyName, targetKeyName);
+		this.nameMapping.put(sourceKeyName, targetKeyName);
 	}
 
 	@Override
@@ -70,8 +70,8 @@ public class PropertyNameTransformer implements PropertyTransformer {
 
 			String translatedKey = key;
 
-			if (nameMapping.containsKey(key)) {
-				translatedKey = nameMapping.get(key);
+			if (this.nameMapping.containsKey(key)) {
+				translatedKey = this.nameMapping.get(key);
 			}
 
 			transformed.put(translatedKey, input.get(key));
@@ -79,4 +79,5 @@ public class PropertyNameTransformer implements PropertyTransformer {
 
 		return transformed;
 	}
+
 }

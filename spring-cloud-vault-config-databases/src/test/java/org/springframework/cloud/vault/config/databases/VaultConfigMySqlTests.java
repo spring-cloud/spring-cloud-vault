@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.databases;
 
 import java.net.InetSocketAddress;
@@ -36,7 +37,7 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.junit.Assume.*;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests using the mysql secret backend. In case this test should fail because
@@ -53,11 +54,14 @@ import static org.junit.Assume.*;
 		"spring.main.allow-bean-definition-overriding=true" })
 public class VaultConfigMySqlTests {
 
-	private final static int MYSQL_PORT = 3306;
-	private final static String MYSQL_HOST = "localhost";
-	private final static String ROOT_CREDENTIALS = String
+	private static final int MYSQL_PORT = 3306;
+
+	private static final String MYSQL_HOST = "localhost";
+
+	private static final String ROOT_CREDENTIALS = String
 			.format("springvault:springvault@tcp(%s:%d)/", MYSQL_HOST, MYSQL_PORT);
-	private final static String CREATE_USER_AND_GRANT_SQL = "CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';"
+
+	private static final String CREATE_USER_AND_GRANT_SQL = "CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';"
 			+ "GRANT SELECT ON *.* TO '{{name}}'@'%';";
 
 	/**
@@ -96,14 +100,15 @@ public class VaultConfigMySqlTests {
 	@Test
 	public void shouldConnectUsingDataSource() throws SQLException {
 
-		dataSource.getConnection().close();
+		this.dataSource.getConnection().close();
 	}
 
 	@Test
 	public void shouldConnectUsingJdbcUrlConnection() throws SQLException {
 
-		String url = String.format("jdbc:mysql://%s?useSSL=false&serverTimezone=UTC", MYSQL_HOST);
-		DriverManager.getConnection(url, username, password).close();
+		String url = String.format("jdbc:mysql://%s?useSSL=false&serverTimezone=UTC",
+				MYSQL_HOST);
+		DriverManager.getConnection(url, this.username, this.password).close();
 	}
 
 	@SpringBootApplication
@@ -112,5 +117,7 @@ public class VaultConfigMySqlTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

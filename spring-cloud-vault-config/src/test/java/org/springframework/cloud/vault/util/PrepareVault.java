@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.util;
 
 import java.util.Collections;
@@ -28,9 +29,9 @@ import org.springframework.vault.support.VaultInitializationResponse;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
+import org.springframework.vault.support.VaultTokenRequest.VaultTokenRequestBuilder;
 import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
-import org.springframework.vault.support.VaultTokenRequest.VaultTokenRequestBuilder;
 
 /**
  * @author Mark Paluch
@@ -38,6 +39,7 @@ import org.springframework.vault.support.VaultTokenRequest.VaultTokenRequestBuil
 public class PrepareVault {
 
 	private final VaultOperations vaultOperations;
+
 	private final VaultSysOperations adminOperations;
 
 	public PrepareVault(VaultOperations vaultOperations) {
@@ -48,7 +50,6 @@ public class PrepareVault {
 
 	/**
 	 * Initialize Vault and unseal the vault.
-	 *
 	 * @return the root token.
 	 */
 	public VaultToken initializeVault() {
@@ -56,12 +57,12 @@ public class PrepareVault {
 		int createKeys = 2;
 		int requiredKeys = 2;
 
-		VaultInitializationResponse initialized = vaultOperations.opsForSys()
+		VaultInitializationResponse initialized = this.vaultOperations.opsForSys()
 				.initialize(VaultInitializationRequest.create(createKeys, requiredKeys));
 
 		for (int i = 0; i < requiredKeys; i++) {
 
-			VaultUnsealStatus unsealStatus = vaultOperations.opsForSys()
+			VaultUnsealStatus unsealStatus = this.vaultOperations.opsForSys()
 					.unseal(initialized.getKeys().get(i));
 
 			if (!unsealStatus.isSealed()) {
@@ -74,13 +75,11 @@ public class PrepareVault {
 
 	/**
 	 * Create a token for the given {@code tokenId} and {@code policy}.
-	 *
 	 * @param tokenId
 	 * @param policy
 	 * @return
 	 */
 	public VaultToken createToken(String tokenId, String policy) {
-
 
 		VaultTokenRequestBuilder builder = VaultTokenRequest.builder().id(tokenId);
 
@@ -88,35 +87,33 @@ public class PrepareVault {
 			builder.withPolicy(policy);
 		}
 
-		VaultTokenResponse vaultTokenResponse = vaultOperations.opsForToken()
+		VaultTokenResponse vaultTokenResponse = this.vaultOperations.opsForToken()
 				.create(builder.build());
 		return vaultTokenResponse.getToken();
 	}
 
 	/**
 	 * Check whether Vault is available (vault created and unsealed).
-	 *
 	 * @return
 	 */
 	public boolean isAvailable() {
-		return adminOperations.isInitialized() && !adminOperations.health().isSealed();
+		return this.adminOperations.isInitialized()
+				&& !this.adminOperations.health().isSealed();
 	}
 
 	/**
 	 * Mount an auth backend.
-	 *
 	 * @param authBackend
 	 */
 	public void mountAuth(String authBackend) {
 
 		Assert.hasText(authBackend, "AuthBackend must not be empty");
 
-		adminOperations.authMount(authBackend, VaultMount.create(authBackend));
+		this.adminOperations.authMount(authBackend, VaultMount.create(authBackend));
 	}
 
 	/**
 	 * Check whether a auth-backend is enabled.
-	 *
 	 * @param authBackend
 	 * @return
 	 */
@@ -124,12 +121,11 @@ public class PrepareVault {
 
 		Assert.hasText(authBackend, "AuthBackend must not be empty");
 
-		return adminOperations.getAuthMounts().containsKey(authBackend + "/");
+		return this.adminOperations.getAuthMounts().containsKey(authBackend + "/");
 	}
 
 	/**
 	 * Mount an secret backend.
-	 *
 	 * @param secretBackend must not be {@literal null} or empty.
 	 */
 	public void mountSecret(String secretBackend) {
@@ -138,12 +134,12 @@ public class PrepareVault {
 
 	/**
 	 * Mount an secret backend {@code secretBackend} at {@code path}.
-	 *
 	 * @param secretBackend must not be {@literal null} or empty.
 	 * @param path must not be {@literal null} or empty.
 	 * @param config must not be {@literal null}.
 	 */
-	public void mountSecret(String secretBackend, String path, Map<String, Object> config) {
+	public void mountSecret(String secretBackend, String path,
+			Map<String, Object> config) {
 
 		Assert.hasText(secretBackend, "SecretBackend must not be empty");
 		Assert.hasText(path, "Mount path must not be empty");
@@ -151,25 +147,24 @@ public class PrepareVault {
 
 		VaultMount mount = VaultMount.builder().type(secretBackend).config(config)
 				.build();
-		adminOperations.mount(path, mount);
+		this.adminOperations.mount(path, mount);
 	}
 
 	/**
 	 * Check whether a auth-backend is enabled.
-	 *
 	 * @param secretBackend
 	 * @return
 	 */
 	public boolean hasSecretBackend(String secretBackend) {
 
 		Assert.hasText(secretBackend, "SecretBackend must not be empty");
-		Map<String, VaultMount> mounts = adminOperations.getMounts();
+		Map<String, VaultMount> mounts = this.adminOperations.getMounts();
 		return mounts.containsKey(secretBackend)
 				|| mounts.containsKey(secretBackend + "/");
 	}
 
 	public VaultOperations getVaultOperations() {
-		return vaultOperations;
+		return this.vaultOperations;
 	}
 
 	/**
@@ -200,19 +195,18 @@ public class PrepareVault {
 	 */
 	public void disableGenericVersioning() {
 
-		vaultOperations.opsForSys().unmount("secret");
+		this.vaultOperations.opsForSys().unmount("secret");
 
 		VaultMount kv = VaultMount.builder().type("kv")
 				.config(Collections.singletonMap("versioned", false)).build();
-		vaultOperations.opsForSys().mount("secret", kv);
+		this.vaultOperations.opsForSys().mount("secret", kv);
 	}
 
 	public void mountVersionedKvBackend() {
 
 		mountSecret("kv", "versioned", Collections.emptyMap());
-		vaultOperations.write(
-				"sys/mounts/versioned/tune",
-				Collections.singletonMap("options",
-						Collections.singletonMap("version", "2")));
+		this.vaultOperations.write("sys/mounts/versioned/tune", Collections
+				.singletonMap("options", Collections.singletonMap("version", "2")));
 	}
+
 }

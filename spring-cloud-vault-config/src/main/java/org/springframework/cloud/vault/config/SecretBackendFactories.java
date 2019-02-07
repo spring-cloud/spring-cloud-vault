@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import lombok.experimental.UtilityClass;
 import lombok.extern.apachecommons.CommonsLog;
 
 /**
@@ -29,10 +29,9 @@ import lombok.extern.apachecommons.CommonsLog;
  * @author Mark Paluch
  */
 @CommonsLog
-@UtilityClass
-class SecretBackendFactories {
+final class SecretBackendFactories {
 
-	public static Collection<SecretBackendMetadata> createSecretBackendMetadata(
+	static Collection<SecretBackendMetadata> createSecretBackendMetadata(
 			Collection<VaultSecretBackendDescriptor> vaultSecretBackendDescriptors,
 			Collection<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> factories) {
 
@@ -73,4 +72,9 @@ class SecretBackendFactories {
 		}
 		return accessor;
 	}
+
+	private SecretBackendFactories() {
+
+	}
+
 }

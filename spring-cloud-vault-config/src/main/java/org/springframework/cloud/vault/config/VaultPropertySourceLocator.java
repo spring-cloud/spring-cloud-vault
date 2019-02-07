@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
@@ -33,17 +34,17 @@ class VaultPropertySourceLocator extends VaultPropertySourceLocatorSupport
 		implements PriorityOrdered {
 
 	private final VaultConfigOperations operations;
+
 	private final VaultProperties properties;
 
 	/**
 	 * Creates a new {@link VaultPropertySourceLocator}.
-	 *
 	 * @param operations must not be {@literal null}.
 	 * @param properties must not be {@literal null}.
 	 * @param propertySourceLocatorConfiguration must not be {@literal null}.
 	 * @since 1.1
 	 */
-	public VaultPropertySourceLocator(VaultConfigOperations operations,
+	VaultPropertySourceLocator(VaultConfigOperations operations,
 			VaultProperties properties,
 			PropertySourceLocatorConfiguration propertySourceLocatorConfiguration) {
 
@@ -58,7 +59,7 @@ class VaultPropertySourceLocator extends VaultPropertySourceLocatorSupport
 
 	@Override
 	public int getOrder() {
-		return properties.getConfig().getOrder();
+		return this.properties.getConfig().getOrder();
 	}
 
 	/**
@@ -74,9 +75,8 @@ class VaultPropertySourceLocator extends VaultPropertySourceLocatorSupport
 	}
 
 	/**
-	 * Create {@link VaultPropertySource} initialized with a
-	 * {@link SecretBackendMetadata}.
-	 *
+	 * Create {@link VaultPropertySource} initialized with a {@link SecretBackendMetadata}
+	 * .
 	 * @param accessor the {@link SecretBackendMetadata}.
 	 * @return the {@link VaultPropertySource} to use.
 	 */
@@ -85,4 +85,5 @@ class VaultPropertySourceLocator extends VaultPropertySourceLocatorSupport
 		return new VaultPropertySource(this.operations, this.properties.isFailFast(),
 				accessor);
 	}
+
 }

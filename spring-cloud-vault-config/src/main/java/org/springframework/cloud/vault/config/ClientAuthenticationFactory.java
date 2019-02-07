@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.io.ByteArrayInputStream;
@@ -38,14 +39,40 @@ import org.springframework.cloud.vault.config.VaultProperties.GcpIamProperties;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.authentication.*;
+import org.springframework.vault.authentication.AppIdAuthentication;
+import org.springframework.vault.authentication.AppIdAuthenticationOptions;
+import org.springframework.vault.authentication.AppIdUserIdMechanism;
+import org.springframework.vault.authentication.AppRoleAuthentication;
+import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.AppRoleAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
+import org.springframework.vault.authentication.AwsEc2Authentication;
+import org.springframework.vault.authentication.AwsEc2AuthenticationOptions;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.Nonce;
+import org.springframework.vault.authentication.AwsIamAuthentication;
+import org.springframework.vault.authentication.AwsIamAuthenticationOptions;
 import org.springframework.vault.authentication.AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder;
+import org.springframework.vault.authentication.AzureMsiAuthentication;
+import org.springframework.vault.authentication.AzureMsiAuthenticationOptions;
+import org.springframework.vault.authentication.ClientAuthentication;
+import org.springframework.vault.authentication.ClientCertificateAuthentication;
+import org.springframework.vault.authentication.CubbyholeAuthentication;
+import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
+import org.springframework.vault.authentication.GcpComputeAuthentication;
+import org.springframework.vault.authentication.GcpComputeAuthenticationOptions;
 import org.springframework.vault.authentication.GcpComputeAuthenticationOptions.GcpComputeAuthenticationOptionsBuilder;
+import org.springframework.vault.authentication.GcpCredentialSupplier;
+import org.springframework.vault.authentication.GcpIamAuthentication;
+import org.springframework.vault.authentication.GcpIamAuthenticationOptions;
 import org.springframework.vault.authentication.GcpIamAuthenticationOptions.GcpIamAuthenticationOptionsBuilder;
+import org.springframework.vault.authentication.IpAddressUserId;
+import org.springframework.vault.authentication.KubernetesAuthentication;
+import org.springframework.vault.authentication.KubernetesAuthenticationOptions;
+import org.springframework.vault.authentication.KubernetesServiceAccountTokenFile;
+import org.springframework.vault.authentication.MacAddressUserId;
+import org.springframework.vault.authentication.StaticUserId;
+import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
 
@@ -72,47 +99,47 @@ class ClientAuthenticationFactory {
 	 */
 	ClientAuthentication createClientAuthentication() {
 
-		switch (vaultProperties.getAuthentication()) {
+		switch (this.vaultProperties.getAuthentication()) {
 
 		case APPID:
-			return appIdAuthentication(vaultProperties);
+			return appIdAuthentication(this.vaultProperties);
 
 		case APPROLE:
-			return appRoleAuthentication(vaultProperties);
+			return appRoleAuthentication(this.vaultProperties);
 
 		case AWS_EC2:
-			return awsEc2Authentication(vaultProperties);
+			return awsEc2Authentication(this.vaultProperties);
 
 		case AWS_IAM:
-			return awsIamAuthentication(vaultProperties);
+			return awsIamAuthentication(this.vaultProperties);
 
 		case AZURE_MSI:
-			return azureMsiAuthentication(vaultProperties);
+			return azureMsiAuthentication(this.vaultProperties);
 
 		case CERT:
-			return new ClientCertificateAuthentication(restOperations);
+			return new ClientCertificateAuthentication(this.restOperations);
 
 		case CUBBYHOLE:
 			return cubbyholeAuthentication();
 
 		case GCP_GCE:
-			return gcpGceAuthentication(vaultProperties);
+			return gcpGceAuthentication(this.vaultProperties);
 
 		case GCP_IAM:
-			return gcpIamAuthentication(vaultProperties);
+			return gcpIamAuthentication(this.vaultProperties);
 
 		case KUBERNETES:
-			return kubernetesAuthentication(vaultProperties);
+			return kubernetesAuthentication(this.vaultProperties);
 
 		case TOKEN:
-			Assert.hasText(vaultProperties.getToken(),
+			Assert.hasText(this.vaultProperties.getToken(),
 					"Token (spring.cloud.vault.token) must not be empty");
-			return new TokenAuthentication(vaultProperties.getToken());
+			return new TokenAuthentication(this.vaultProperties.getToken());
 		}
 
-		throw new UnsupportedOperationException(String.format(
-				"Client authentication %s not supported",
-				vaultProperties.getAuthentication()));
+		throw new UnsupportedOperationException(
+				String.format("Client authentication %s not supported",
+						this.vaultProperties.getAuthentication()));
 	}
 
 	private ClientAuthentication appIdAuthentication(VaultProperties vaultProperties) {
@@ -126,7 +153,7 @@ class ClientAuthenticationFactory {
 				.path(appId.getAppIdPath()) //
 				.userIdMechanism(getClientAuthentication(appId)).build();
 
-		return new AppIdAuthentication(authenticationOptions, restOperations);
+		return new AppIdAuthentication(authenticationOptions, this.restOperations);
 	}
 
 	private AppIdUserIdMechanism getClientAuthentication(
@@ -147,8 +174,8 @@ class ClientAuthenticationFactory {
 
 				if (StringUtils.hasText(appId.getNetworkInterface())) {
 					try {
-						return new MacAddressUserId(Integer.parseInt(appId
-								.getNetworkInterface()));
+						return new MacAddressUserId(
+								Integer.parseInt(appId.getNetworkInterface()));
 					}
 					catch (NumberFormatException e) {
 						return new MacAddressUserId(appId.getNetworkInterface());
@@ -164,9 +191,10 @@ class ClientAuthenticationFactory {
 
 	private ClientAuthentication appRoleAuthentication(VaultProperties vaultProperties) {
 
-		AppRoleAuthenticationOptions options = getAppRoleAuthenticationOptions(vaultProperties);
+		AppRoleAuthenticationOptions options = getAppRoleAuthenticationOptions(
+				vaultProperties);
 
-		return new AppRoleAuthentication(options, restOperations);
+		return new AppRoleAuthentication(options, this.restOperations);
 	}
 
 	static AppRoleAuthenticationOptions getAppRoleAuthenticationOptions(
@@ -232,8 +260,8 @@ class ClientAuthenticationFactory {
 
 		VaultProperties.AwsEc2Properties awsEc2 = vaultProperties.getAwsEc2();
 
-		Nonce nonce = StringUtils.hasText(awsEc2.getNonce()) ? Nonce.provided(awsEc2
-				.getNonce().toCharArray()) : Nonce.generated();
+		Nonce nonce = StringUtils.hasText(awsEc2.getNonce())
+				? Nonce.provided(awsEc2.getNonce().toCharArray()) : Nonce.generated();
 
 		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions
 				.builder().role(awsEc2.getRole()) //
@@ -242,8 +270,8 @@ class ClientAuthenticationFactory {
 				.identityDocumentUri(URI.create(awsEc2.getIdentityDocument())) //
 				.build();
 
-		return new AwsEc2Authentication(authenticationOptions, restOperations,
-				externalRestOperations);
+		return new AwsEc2Authentication(authenticationOptions, this.restOperations,
+				this.externalRestOperations);
 	}
 
 	private ClientAuthentication awsIamAuthentication(VaultProperties vaultProperties) {
@@ -267,10 +295,10 @@ class ClientAuthenticationFactory {
 		builder.path(awsIam.getAwsPath()) //
 				.credentialsProvider(credentialsProvider);
 
-		AwsIamAuthenticationOptions options = builder.credentialsProvider(
-				credentialsProvider).build();
+		AwsIamAuthenticationOptions options = builder
+				.credentialsProvider(credentialsProvider).build();
 
-		return new AwsIamAuthentication(options, restOperations);
+		return new AwsIamAuthentication(options, this.restOperations);
 	}
 
 	private ClientAuthentication azureMsiAuthentication(VaultProperties vaultProperties) {
@@ -283,20 +311,21 @@ class ClientAuthenticationFactory {
 		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder()
 				.role(azureMsi.getRole()).build();
 
-		return new AzureMsiAuthentication(options, restOperations, externalRestOperations);
+		return new AzureMsiAuthentication(options, this.restOperations,
+				this.externalRestOperations);
 	}
 
 	private ClientAuthentication cubbyholeAuthentication() {
 
-		Assert.hasText(vaultProperties.getToken(),
+		Assert.hasText(this.vaultProperties.getToken(),
 				"Initial Token (spring.cloud.vault.token) for Cubbyhole authentication must not be empty");
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder() //
 				.wrapped() //
-				.initialToken(VaultToken.of(vaultProperties.getToken())) //
+				.initialToken(VaultToken.of(this.vaultProperties.getToken())) //
 				.build();
 
-		return new CubbyholeAuthentication(options, restOperations);
+		return new CubbyholeAuthentication(options, this.restOperations);
 	}
 
 	private ClientAuthentication gcpGceAuthentication(VaultProperties vaultProperties) {
@@ -313,8 +342,8 @@ class ClientAuthenticationFactory {
 			builder.serviceAccount(gcp.getServiceAccount());
 		}
 
-		return new GcpComputeAuthentication(builder.build(), restOperations,
-				externalRestOperations);
+		return new GcpComputeAuthentication(builder.build(), this.restOperations,
+				this.externalRestOperations);
 	}
 
 	private ClientAuthentication gcpIamAuthentication(VaultProperties vaultProperties) {
@@ -324,8 +353,8 @@ class ClientAuthenticationFactory {
 		Assert.hasText(gcp.getRole(),
 				"Role (spring.cloud.vault.gcp-iam.role) must not be empty");
 
-		GcpIamAuthenticationOptionsBuilder builder = GcpIamAuthenticationOptions
-				.builder().path(gcp.getGcpPath()).role(gcp.getRole())
+		GcpIamAuthenticationOptionsBuilder builder = GcpIamAuthenticationOptions.builder()
+				.path(gcp.getGcpPath()).role(gcp.getRole())
 				.jwtValidity(gcp.getJwtValidity());
 
 		if (StringUtils.hasText(gcp.getProjectId())) {
@@ -342,48 +371,47 @@ class ClientAuthenticationFactory {
 		GcpIamAuthenticationOptions options = builder.build();
 
 		try {
-			return new GcpIamAuthentication(options, restOperations);
+			return new GcpIamAuthentication(options, this.restOperations);
 		}
 		catch (IOException | GeneralSecurityException e) {
 			throw new IllegalStateException("Cannot create GcpIamAuthentication", e);
 		}
 	}
 
-	private GoogleCredential getGoogleCredential(GcpIamProperties gcp) throws IOException {
+	private GoogleCredential getGoogleCredential(GcpIamProperties gcp)
+			throws IOException {
 
 		GcpCredentials credentialProperties = gcp.getCredentials();
 		if (credentialProperties.getLocation() != null) {
-			return GoogleCredential.fromStream(credentialProperties.getLocation()
-					.getInputStream());
+			return GoogleCredential
+					.fromStream(credentialProperties.getLocation().getInputStream());
 		}
 
 		if (StringUtils.hasText(credentialProperties.getEncodedKey())) {
-			return GoogleCredential.fromStream(new ByteArrayInputStream(Base64
-					.getDecoder().decode(credentialProperties.getEncodedKey())));
+			return GoogleCredential.fromStream(new ByteArrayInputStream(
+					Base64.getDecoder().decode(credentialProperties.getEncodedKey())));
 		}
 
 		return GoogleCredential.getApplicationDefault();
 	}
 
-	private ClientAuthentication kubernetesAuthentication(VaultProperties vaultProperties) {
+	private ClientAuthentication kubernetesAuthentication(
+			VaultProperties vaultProperties) {
 
 		VaultProperties.KubernetesProperties kubernetes = vaultProperties.getKubernetes();
 
 		Assert.hasText(kubernetes.getRole(),
 				"Role (spring.cloud.vault.kubernetes.role) must not be empty");
-		Assert.hasText(
-				kubernetes.getServiceAccountTokenFile(),
+		Assert.hasText(kubernetes.getServiceAccountTokenFile(),
 				"Service account token file (spring.cloud.vault.kubernetes.service-account-token-file) must not be empty");
 
 		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
-				.builder()
-				.path(kubernetes.getKubernetesPath())
-				.role(kubernetes.getRole())
-				.jwtSupplier(
-						new KubernetesServiceAccountTokenFile(kubernetes
-								.getServiceAccountTokenFile())).build();
+				.builder().path(kubernetes.getKubernetesPath()).role(kubernetes.getRole())
+				.jwtSupplier(new KubernetesServiceAccountTokenFile(
+						kubernetes.getServiceAccountTokenFile()))
+				.build();
 
-		return new KubernetesAuthentication(options, restOperations);
+		return new KubernetesAuthentication(options, this.restOperations);
 	}
 
 	private static class AwsCredentialProvider {
@@ -416,5 +444,7 @@ class ClientAuthenticationFactory {
 				}
 			};
 		}
+
 	}
+
 }

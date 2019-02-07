@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ class DefaultSecretBackendConfigurer
 
 		Assert.notNull(metadata, "SecretBackendMetadata must not be null");
 
-		secretBackends.put(metadata.getPath(), metadata);
+		this.secretBackends.put(metadata.getPath(), metadata);
 
 		return this;
 	}
@@ -92,7 +93,7 @@ class DefaultSecretBackendConfigurer
 		Assert.notNull(requestedSecret, "RequestedSecret must not be null");
 		Assert.notNull(propertyTransformer, "PropertyTransformer must not be null");
 
-		secretBackends.put(requestedSecret.getPath(),
+		this.secretBackends.put(requestedSecret.getPath(),
 				new SimpleLeasingSecretBackendMetadata(
 						createMetadata(requestedSecret.getPath(), propertyTransformer),
 						requestedSecret.getMode()));
@@ -119,16 +120,16 @@ class DefaultSecretBackendConfigurer
 	}
 
 	public boolean isRegisterDefaultGenericSecretBackends() {
-		return registerDefaultGenericSecretBackends;
+		return this.registerDefaultGenericSecretBackends;
 	}
 
 	public boolean isRegisterDefaultDiscoveredSecretBackends() {
-		return registerDefaultDiscoveredSecretBackends;
+		return this.registerDefaultDiscoveredSecretBackends;
 	}
 
 	@Override
 	public List<SecretBackendMetadata> getSecretBackends() {
-		return new ArrayList<>(secretBackends.values());
+		return new ArrayList<>(this.secretBackends.values());
 	}
 
 	@RequiredArgsConstructor
@@ -140,23 +141,24 @@ class DefaultSecretBackendConfigurer
 
 		@Override
 		public String getName() {
-			return String.format("Context backend: %s", path);
+			return String.format("Context backend: %s", this.path);
 		}
 
 		@Override
 		public String getPath() {
-			return path;
+			return this.path;
 		}
 
 		@Override
 		public PropertyTransformer getPropertyTransformer() {
-			return propertyTransformer;
+			return this.propertyTransformer;
 		}
 
 		@Override
 		public Map<String, String> getVariables() {
-			return Collections.singletonMap("path", path);
+			return Collections.singletonMap("path", this.path);
 		}
+
 	}
 
 	private static class SimpleLeasingSecretBackendMetadata
@@ -172,7 +174,9 @@ class DefaultSecretBackendConfigurer
 
 		@Override
 		public Mode getLeaseMode() {
-			return mode;
+			return this.mode;
 		}
+
 	}
+
 }

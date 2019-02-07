@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.databases;
 
 import java.net.InetSocketAddress;
@@ -40,7 +41,7 @@ import org.springframework.cloud.vault.util.Version;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.junit.Assume.*;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests using the mongodb secret backend. In case this test should fail
@@ -58,11 +59,15 @@ import static org.junit.Assume.*;
 		"spring.data.mongodb.database=admin" })
 public class VaultConfigMongoTests {
 
-	private final static int MONGODB_PORT = 27017;
-	private final static String MONGODB_HOST = "localhost";
-	private final static String ROOT_CREDENTIALS = String.format(
-			"mongodb://springvault:springvault@%s:%d/admin?ssl=false", MONGODB_HOST, MONGODB_PORT);
-	private final static String ROLES = "[ \"readWrite\", { \"role\": \"read\", \"db\": \"admin\" } ]";
+	private static final int MONGODB_PORT = 27017;
+
+	private static final String MONGODB_HOST = "localhost";
+
+	private static final String ROOT_CREDENTIALS = String.format(
+			"mongodb://springvault:springvault@%s:%d/admin?ssl=false", MONGODB_HOST,
+			MONGODB_PORT);
+
+	private static final String ROLES = "[ \"readWrite\", { \"role\": \"read\", \"db\": \"admin\" } ]";
 
 	/**
 	 * Initialize the mongo secret backend.
@@ -106,11 +111,10 @@ public class VaultConfigMongoTests {
 	@Test
 	public void shouldConnectUsingDataSource() {
 
-		MongoDatabase mongoDatabase = mongoClient.getDatabase("admin");
+		MongoDatabase mongoDatabase = this.mongoClient.getDatabase("admin");
 
 		List<Document> collections = mongoDatabase.listCollections()
-.into(
-				new ArrayList<>());
+				.into(new ArrayList<>());
 
 		for (Document collection : collections) {
 			if (collection.getString("name").equals("hello")) {
@@ -127,5 +131,7 @@ public class VaultConfigMongoTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args).registerShutdownHook();
 		}
+
 	}
+
 }

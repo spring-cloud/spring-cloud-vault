@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.aws;
 
 import java.util.Collections;
@@ -30,9 +31,9 @@ import org.springframework.cloud.vault.util.Settings;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrapConfiguration.AwsSecretBackendMetadataFactory.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+import static org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrapConfiguration.AwsSecretBackendMetadataFactory.forAws;
 
 /**
  * Integration tests for {@link VaultConfigTemplate} using the aws secret backend. This
@@ -43,14 +44,18 @@ import static org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrap
  */
 public class AwsSecretIntegrationTests extends IntegrationTestSupport {
 
-	private final static String AWS_REGION = "eu-west-1";
-	private final static String AWS_ACCESS_KEY = System.getProperty("aws.access.key");
-	private final static String AWS_SECRET_KEY = System.getProperty("aws.secret.key");
+	private static final String AWS_REGION = "eu-west-1";
 
-	private final static String ARN = "arn:aws:iam::aws:policy/ReadOnlyAccess";
+	private static final String AWS_ACCESS_KEY = System.getProperty("aws.access.key");
+
+	private static final String AWS_SECRET_KEY = System.getProperty("aws.secret.key");
+
+	private static final String ARN = "arn:aws:iam::aws:policy/ReadOnlyAccess";
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
+
 	private VaultConfigOperations configOperations;
+
 	private VaultAwsProperties aws = new VaultAwsProperties();
 
 	/**
@@ -62,11 +67,11 @@ public class AwsSecretIntegrationTests extends IntegrationTestSupport {
 		assumeTrue(StringUtils.hasText(AWS_ACCESS_KEY)
 				&& StringUtils.hasText(AWS_SECRET_KEY));
 
-		aws.setEnabled(true);
-		aws.setRole("readonly");
+		this.aws.setEnabled(true);
+		this.aws.setRole("readonly");
 
-		if (!prepare().hasSecretBackend(aws.getBackend())) {
-			prepare().mountSecret(aws.getBackend());
+		if (!prepare().hasSecretBackend(this.aws.getBackend())) {
+			prepare().mountSecret(this.aws.getBackend());
 		}
 
 		VaultOperations vaultOperations = prepare().getVaultOperations();
@@ -76,23 +81,25 @@ public class AwsSecretIntegrationTests extends IntegrationTestSupport {
 		connection.put("access_key", AWS_ACCESS_KEY);
 		connection.put("secret_key", AWS_SECRET_KEY);
 
-		vaultOperations.write(String.format("%s/config/root", aws.getBackend()),
+		vaultOperations.write(String.format("%s/config/root", this.aws.getBackend()),
 				connection);
 
 		vaultOperations.write(
-				String.format("%s/roles/%s", aws.getBackend(), aws.getRole()),
+				String.format("%s/roles/%s", this.aws.getBackend(), this.aws.getRole()),
 				Collections.singletonMap("arn", ARN));
 
-		configOperations = new VaultConfigTemplate(vaultOperations, vaultProperties);
+		this.configOperations = new VaultConfigTemplate(vaultOperations,
+				this.vaultProperties);
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, Object> secretProperties = configOperations.read(forAws(aws))
-				.getData();
+		Map<String, Object> secretProperties = this.configOperations
+				.read(forAws(this.aws)).getData();
 
 		assertThat(secretProperties).containsKeys("cloud.aws.credentials.accessKey",
 				"cloud.aws.credentials.secretKey");
 	}
+
 }

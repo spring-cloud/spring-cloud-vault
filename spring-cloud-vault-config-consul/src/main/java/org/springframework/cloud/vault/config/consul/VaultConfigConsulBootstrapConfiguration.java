@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.consul;
 
 import java.util.HashMap;
@@ -66,12 +67,10 @@ public class VaultConfigConsulBootstrapConfiguration {
 		 * Creates a {@link SecretBackendMetadata} for a secret backend using
 		 * {@link VaultConsulProperties}. This accessor transforms Vault's token property
 		 * names to names provided with {@link VaultConsulProperties#getTokenProperty()}.
-		 *
 		 * @param properties must not be {@literal null}.
 		 * @return the {@link SecretBackendMetadata}
 		 */
-		static SecretBackendMetadata forConsul(
-				final VaultConsulProperties properties) {
+		static SecretBackendMetadata forConsul(final VaultConsulProperties properties) {
 
 			Assert.notNull(properties, "VaultConsulProperties must not be null");
 
@@ -109,5 +108,7 @@ public class VaultConfigConsulBootstrapConfiguration {
 				}
 			};
 		}
+
 	}
+
 }

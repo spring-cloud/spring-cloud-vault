@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
@@ -33,8 +34,8 @@ import org.springframework.cloud.vault.util.Version;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration test using config infrastructure with AppRole authentication.
@@ -49,7 +50,8 @@ import static org.junit.Assume.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = VaultConfigAppRoleTests.TestApplication.class, properties = {
 		"spring.cloud.vault.authentication=approle",
-		"spring.cloud.vault.application-name=VaultConfigAppRoleTests" }) // see
+		"spring.cloud.vault.application-name=VaultConfigAppRoleTests" })
+// see
 // https://github.com/spring-cloud/spring-cloud-commons/issues/214
 public class VaultConfigAppRoleTests {
 
@@ -109,7 +111,7 @@ public class VaultConfigAppRoleTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(configValue).isEqualTo("foo");
+		assertThat(this.configValue).isEqualTo("foo");
 	}
 
 	@SpringBootApplication
@@ -118,5 +120,7 @@ public class VaultConfigAppRoleTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.databases;
 
 import java.util.HashMap;
@@ -52,8 +53,8 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 	 * {@link SecretBackendMetadataFactory} for Database integration using
 	 * {@link DatabaseSecretProperties}.
 	 */
-	public static class DatabaseSecretBackendMetadataFactory implements
-			SecretBackendMetadataFactory<DatabaseSecretProperties> {
+	public static class DatabaseSecretBackendMetadataFactory
+			implements SecretBackendMetadataFactory<DatabaseSecretProperties> {
 
 		@Override
 		public SecretBackendMetadata createMetadata(
@@ -72,19 +73,19 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 		 * username/password property names to names provided with
 		 * {@link DatabaseSecretProperties#getUsernameProperty()} and
 		 * {@link DatabaseSecretProperties#getPasswordProperty()}.
-		 *
 		 * @param properties must not be {@literal null}.
 		 * @return the {@link SecretBackendMetadata}
 		 */
-		static SecretBackendMetadata forDatabase(final DatabaseSecretProperties properties) {
+		static SecretBackendMetadata forDatabase(
+				final DatabaseSecretProperties properties) {
 
 			Assert.notNull(properties, "DatabaseSecretProperties must not be null");
 
 			final PropertyNameTransformer transformer = new PropertyNameTransformer();
-			transformer
-					.addKeyTransformation("username", properties.getUsernameProperty());
-			transformer
-					.addKeyTransformation("password", properties.getPasswordProperty());
+			transformer.addKeyTransformation("username",
+					properties.getUsernameProperty());
+			transformer.addKeyTransformation("password",
+					properties.getPasswordProperty());
 
 			return new SecretBackendMetadata() {
 
@@ -115,5 +116,7 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 				}
 			};
 		}
+
 	}
+
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.databases;
 
 import javax.validation.constraints.NotEmpty;
@@ -40,13 +41,15 @@ public class VaultPostgreSqlProperties implements DatabaseSecretProperties {
 	 * Enable postgresql backend usage.
 	 */
 	@Deprecated
-	@Getter(onMethod_ = { @DeprecatedConfigurationProperty(reason = "Use spring.cloud.vault.database") })
+	@Getter(onMethod_ = {
+			@DeprecatedConfigurationProperty(reason = "Use spring.cloud.vault.database") })
 	private boolean enabled = false;
 
 	/**
 	 * Role name for credentials.
 	 */
-	@Getter(onMethod_ = { @DeprecatedConfigurationProperty(reason = "Use spring.cloud.vault.database") })
+	@Getter(onMethod_ = {
+			@DeprecatedConfigurationProperty(reason = "Use spring.cloud.vault.database") })
 	private String role;
 
 	/**
@@ -66,4 +69,5 @@ public class VaultPostgreSqlProperties implements DatabaseSecretProperties {
 	 */
 	@NotEmpty
 	private String passwordProperty = "spring.datasource.password";
+
 }

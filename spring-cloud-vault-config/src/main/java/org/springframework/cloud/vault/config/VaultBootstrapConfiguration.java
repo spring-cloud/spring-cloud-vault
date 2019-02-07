@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.time.Duration;
@@ -42,8 +43,8 @@ import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpointProvider;
-import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
+import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.ClientOptions;
@@ -89,21 +90,20 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		VaultEndpointProvider provider = endpointProvider.getIfAvailable();
 
 		if (provider == null) {
-			provider = SimpleVaultEndpointProvider.of(VaultConfigurationUtil
-					.createVaultEndpoint(vaultProperties));
+			provider = SimpleVaultEndpointProvider
+					.of(VaultConfigurationUtil.createVaultEndpoint(vaultProperties));
 		}
 
 		this.endpointProvider = provider;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() {
 
 		ClientHttpRequestFactory clientHttpRequestFactory = clientHttpRequestFactoryWrapper()
 				.getClientHttpRequestFactory();
 
-		this.restOperations = VaultClients.createRestTemplate(endpointProvider,
+		this.restOperations = VaultClients.createRestTemplate(this.endpointProvider,
 				clientHttpRequestFactory);
 
 		this.externalRestOperations = new RestTemplate(clientHttpRequestFactory);
@@ -115,7 +115,6 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	 * as root bean because {@link ClientHttpRequestFactory} is configured with
 	 * {@link ClientOptions} and {@link SslConfiguration} which are not necessarily
 	 * applicable for the whole application.
-	 *
 	 * @return the {@link ClientFactoryWrapper} to wrap a {@link ClientHttpRequestFactory}
 	 * instance.
 	 */
@@ -123,35 +122,35 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@ConditionalOnMissingBean
 	public ClientFactoryWrapper clientHttpRequestFactoryWrapper() {
 
-		ClientOptions clientOptions = new ClientOptions(Duration.ofMillis(vaultProperties
-				.getConnectionTimeout()), Duration.ofMillis(vaultProperties
-				.getReadTimeout()));
+		ClientOptions clientOptions = new ClientOptions(
+				Duration.ofMillis(this.vaultProperties.getConnectionTimeout()),
+				Duration.ofMillis(this.vaultProperties.getReadTimeout()));
 
 		SslConfiguration sslConfiguration = VaultConfigurationUtil
-				.createSslConfiguration(vaultProperties.getSsl());
+				.createSslConfiguration(this.vaultProperties.getSsl());
 
-		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(
-				clientOptions, sslConfiguration));
+		return new ClientFactoryWrapper(
+				ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration));
 	}
 
 	/**
 	 * Creates a {@link VaultTemplate}.
-	 *
-	 * @return
-	 * @see #clientHttpRequestFactoryWrapper()
+	 * @param sessionManager the {@link SessionManager}.
+	 * @return the {@link VaultTemplate} bean.
+	 * @see VaultBootstrapConfiguration#clientHttpRequestFactoryWrapper()
 	 */
 	@Bean
 	@ConditionalOnMissingBean(VaultOperations.class)
 	public VaultTemplate vaultTemplate(SessionManager sessionManager) {
-		return new VaultTemplate(endpointProvider, clientHttpRequestFactoryWrapper()
-				.getClientHttpRequestFactory(), sessionManager);
+		return new VaultTemplate(this.endpointProvider,
+				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory(),
+				sessionManager);
 	}
 
 	/**
 	 * Creates a new {@link TaskSchedulerWrapper} that encapsulates a bean implementing
 	 * {@link TaskScheduler} and {@link AsyncTaskExecutor}.
-	 *
-	 * @return
+	 * @return the {@link TaskSchedulerWrapper} bean.
 	 * @see ThreadPoolTaskScheduler
 	 */
 	@Bean
@@ -166,13 +165,16 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 		// This is to destroy bootstrap resources
 		// otherwise, the bootstrap context is not shut down cleanly
-		applicationContext.registerShutdownHook();
+		this.applicationContext.registerShutdownHook();
 
 		return new TaskSchedulerWrapper(threadPoolTaskScheduler);
 	}
 
 	/**
 	 * @return the {@link SessionManager} for Vault session management.
+	 * @param clientAuthentication the {@link ClientAuthentication}.
+	 * @param asyncTaskExecutorFactory the {@link ObjectFactory} for
+	 * {@link TaskSchedulerWrapper}.
 	 * @see SessionManager
 	 * @see LifecycleAwareSessionManager
 	 */
@@ -181,10 +183,10 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	public SessionManager vaultSessionManager(ClientAuthentication clientAuthentication,
 			ObjectFactory<TaskSchedulerWrapper> asyncTaskExecutorFactory) {
 
-		if (vaultProperties.getConfig().getLifecycle().isEnabled()) {
+		if (this.vaultProperties.getConfig().getLifecycle().isEnabled()) {
 			return new LifecycleAwareSessionManager(clientAuthentication,
 					asyncTaskExecutorFactory.getObject().getTaskScheduler(),
-					restOperations);
+					this.restOperations);
 		}
 
 		return new SimpleSessionManager(clientAuthentication);
@@ -201,7 +203,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	public ClientAuthentication clientAuthentication() {
 
 		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(
-				vaultProperties, restOperations, externalRestOperations);
+				this.vaultProperties, this.restOperations, this.externalRestOperations);
 
 		return factory.createClientAuthentication();
 	}
@@ -218,17 +220,19 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		}
 
 		ThreadPoolTaskScheduler getTaskScheduler() {
-			return taskScheduler;
+			return this.taskScheduler;
 		}
 
 		@Override
 		public void destroy() throws Exception {
-			taskScheduler.destroy();
+			this.taskScheduler.destroy();
 		}
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
-			taskScheduler.afterPropertiesSet();
+			this.taskScheduler.afterPropertiesSet();
 		}
+
 	}
+
 }

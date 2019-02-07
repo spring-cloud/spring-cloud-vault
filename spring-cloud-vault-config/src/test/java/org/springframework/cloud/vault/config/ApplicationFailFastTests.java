@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import org.junit.Test;
@@ -65,4 +66,5 @@ public class ApplicationFailFastTests {
 				"--server.port=0", "--spring.cloud.vault.failFast=false",
 				"--spring.cloud.vault.port=9999");
 	}
+
 }

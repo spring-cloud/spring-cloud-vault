@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.databases;
 
 import java.net.InetSocketAddress;
@@ -31,9 +32,9 @@ import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.Version;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory.forDatabase;
 
 /**
  * Integration tests for {@link VaultConfigTemplate} using the {@code database} secret
@@ -44,15 +45,20 @@ import static org.springframework.cloud.vault.config.databases.VaultConfigDataba
  */
 public class MySqlDatabaseSecretIntegrationTests extends IntegrationTestSupport {
 
-	private final static int MYSQL_PORT = 3306;
-	private final static String MYSQL_HOST = "localhost";
-	private final static String ROOT_CREDENTIALS = String.format(
-			"springvault:springvault@tcp(%s:%d)/", MYSQL_HOST, MYSQL_PORT);
-	private final static String CREATE_USER_AND_GRANT_SQL = "CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';"
+	private static final int MYSQL_PORT = 3306;
+
+	private static final String MYSQL_HOST = "localhost";
+
+	private static final String ROOT_CREDENTIALS = String
+			.format("springvault:springvault@tcp(%s:%d)/", MYSQL_HOST, MYSQL_PORT);
+
+	private static final String CREATE_USER_AND_GRANT_SQL = "CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';"
 			+ "GRANT SELECT ON *.* TO '{{name}}'@'%';";
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
+
 	private VaultConfigOperations configOperations;
+
 	@SuppressWarnings("deprecation")
 	private VaultMySqlProperties mySql = new VaultMySqlProperties();
 
@@ -65,41 +71,43 @@ public class MySqlDatabaseSecretIntegrationTests extends IntegrationTestSupport 
 		assumeTrue(CanConnect.to(new InetSocketAddress(MYSQL_HOST, MYSQL_PORT)));
 		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.7.1")));
 
-		mySql.setEnabled(true);
-		mySql.setRole("readonly");
-		mySql.setBackend("database");
+		this.mySql.setEnabled(true);
+		this.mySql.setRole("readonly");
+		this.mySql.setBackend("database");
 
-		if (!prepare().hasSecretBackend(mySql.getBackend())) {
-			prepare().mountSecret(mySql.getBackend());
+		if (!prepare().hasSecretBackend(this.mySql.getBackend())) {
+			prepare().mountSecret(this.mySql.getBackend());
 		}
 
-		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
+		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();
 
 		Map<String, String> config = new HashMap<>();
 		config.put("plugin_name", "mysql-legacy-database-plugin");
 		config.put("connection_url", ROOT_CREDENTIALS);
 		config.put("allowed_roles", "readonly");
 
-		vaultOperations.write(String.format("%s/config/mysql", mySql.getBackend()),
+		vaultOperations.write(String.format("%s/config/mysql", this.mySql.getBackend()),
 				config);
 
 		Map<String, String> body = new HashMap<>();
 		body.put("db_name", "mysql");
 		body.put("creation_statements", CREATE_USER_AND_GRANT_SQL);
 
-		vaultOperations.write(
-				String.format("%s/roles/%s", mySql.getBackend(), mySql.getRole()), body);
+		vaultOperations.write(String.format("%s/roles/%s", this.mySql.getBackend(),
+				this.mySql.getRole()), body);
 
-		configOperations = new VaultConfigTemplate(vaultOperations, vaultProperties);
+		this.configOperations = new VaultConfigTemplate(vaultOperations,
+				this.vaultProperties);
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, Object> secretProperties = configOperations.read(forDatabase(mySql))
-				.getData();
+		Map<String, Object> secretProperties = this.configOperations
+				.read(forDatabase(this.mySql)).getData();
 
 		assertThat(secretProperties).containsKeys("spring.datasource.username",
 				"spring.datasource.password");
 	}
+
 }

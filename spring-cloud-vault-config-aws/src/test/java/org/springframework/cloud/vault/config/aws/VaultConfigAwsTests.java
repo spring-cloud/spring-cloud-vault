@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.aws;
 
 import java.util.Collections;
@@ -32,8 +33,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests using the aws secret backend. In case this test should fail because
@@ -54,11 +55,13 @@ import static org.junit.Assume.*;
 		"cloud.aws.region.auto=false", "cloud.aws.region.static=eu-west-1" })
 public class VaultConfigAwsTests {
 
-	private final static String AWS_REGION = "eu-west-1";
-	private final static String AWS_ACCESS_KEY = System.getProperty("aws.access.key");
-	private final static String AWS_SECRET_KEY = System.getProperty("aws.secret.key");
+	private static final String AWS_REGION = "eu-west-1";
 
-	private final static String ARN = "arn:aws:iam::aws:policy/ReadOnlyAccess";
+	private static final String AWS_ACCESS_KEY = System.getProperty("aws.access.key");
+
+	private static final String AWS_SECRET_KEY = System.getProperty("aws.secret.key");
+
+	private static final String ARN = "arn:aws:iam::aws:policy/ReadOnlyAccess";
 
 	/**
 	 * Initialize the aws secret backend.
@@ -97,8 +100,8 @@ public class VaultConfigAwsTests {
 	@Test
 	public void shouldInitializeAwsProperties() {
 
-		assertThat(accessKey).isNotEmpty();
-		assertThat(secretKey).isNotEmpty();
+		assertThat(this.accessKey).isNotEmpty();
+		assertThat(this.secretKey).isNotEmpty();
 	}
 
 	@SpringBootApplication
@@ -107,5 +110,7 @@ public class VaultConfigAwsTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

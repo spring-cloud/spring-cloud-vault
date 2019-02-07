@@ -38,8 +38,8 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests using the postgresql secret backend. In case this test should fail
@@ -57,14 +57,15 @@ import static org.junit.Assume.*;
 		"spring.main.allow-bean-definition-overriding=true" })
 public class VaultConfigPostgreSqlTests {
 
-	private final static String POSTGRES_HOST = "localhost";
-	private final static int POSTGRES_PORT = 5432;
+	private static final String POSTGRES_HOST = "localhost";
 
-	private final static String CONNECTION_URL = String.format(
-			"postgresql://springvault:springvault@%s:%d/postgres?sslmode=disable", POSTGRES_HOST,
-			POSTGRES_PORT);
+	private static final int POSTGRES_PORT = 5432;
 
-	private final static String CREATE_USER_AND_GRANT_SQL = "CREATE ROLE \"{{name}}\" WITH "
+	private static final String CONNECTION_URL = String.format(
+			"postgresql://springvault:springvault@%s:%d/postgres?sslmode=disable",
+			POSTGRES_HOST, POSTGRES_PORT);
+
+	private static final String CREATE_USER_AND_GRANT_SQL = "CREATE ROLE \"{{name}}\" WITH "
 			+ "LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';\n"
 			+ "GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";";
 
@@ -104,7 +105,7 @@ public class VaultConfigPostgreSqlTests {
 	@Test
 	public void shouldConnectUsingDataSource() throws SQLException {
 
-		Connection connection = dataSource.getConnection();
+		Connection connection = this.dataSource.getConnection();
 
 		assertThat(connection.getSchema()).isEqualTo("public");
 		connection.close();
@@ -115,7 +116,7 @@ public class VaultConfigPostgreSqlTests {
 
 		String url = String.format("jdbc:postgresql://%s:%d/postgres?ssl=false",
 				POSTGRES_HOST, POSTGRES_PORT);
-		DriverManager.getConnection(url, username, password).close();
+		DriverManager.getConnection(url, this.username, this.password).close();
 	}
 
 	@SpringBootApplication
@@ -124,5 +125,7 @@ public class VaultConfigPostgreSqlTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
@@ -37,7 +38,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -65,17 +66,15 @@ public class VaultVersionedKvBackendConfigTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		assumeTrue(vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.10.0")));
+		assumeTrue(vaultRule.prepare().getVersion()
+				.isGreaterThanOrEqualTo(Version.parse("0.10.0")));
 
 		Map<String, Object> object = new HashMap<>();
 		object.put("vault.value", "foo");
 		object.put("nested", Collections.singletonMap("key", "value"));
 
-		vaultRule
-				.prepare()
-				.getVaultOperations()
-				.write("versioned/data/testVaultApp",
-						Collections.singletonMap("data", object));
+		vaultRule.prepare().getVaultOperations().write("versioned/data/testVaultApp",
+				Collections.singletonMap("data", object));
 	}
 
 	@Value("${vault.value}")
@@ -89,24 +88,24 @@ public class VaultVersionedKvBackendConfigTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(configValue).isEqualTo("foo");
+		assertThat(this.configValue).isEqualTo("foo");
 	}
 
 	@Test
 	public void shouldContainProperty() {
 
-		assertThat(environment.containsProperty("vault.value")).isTrue();
-		assertThat(environment.getProperty("vault.value")).isEqualTo("foo");
+		assertThat(this.environment.containsProperty("vault.value")).isTrue();
+		assertThat(this.environment.getProperty("vault.value")).isEqualTo("foo");
 
-		assertThat(environment.containsProperty("nested.key")).isTrue();
-		assertThat(environment.getProperty("nested.key")).isEqualTo("value");
+		assertThat(this.environment.containsProperty("nested.key")).isTrue();
+		assertThat(this.environment.getProperty("nested.key")).isEqualTo("value");
 	}
 
 	@Test
 	public void shouldContainVaultBeans() {
 
 		// Beans are registered in parent (bootstrap) context.
-		ApplicationContext parent = applicationContext.getParent();
+		ApplicationContext parent = this.applicationContext.getParent();
 
 		assertThat(parent.getBeanNamesForType(VaultTemplate.class)).isNotEmpty();
 		assertThat(parent.getBeanNamesForType(LeasingVaultPropertySourceLocator.class))
@@ -117,7 +116,7 @@ public class VaultVersionedKvBackendConfigTests {
 	public void shouldNotContainRestTemplateArtifacts() {
 
 		// Beans are registered in parent (bootstrap) context.
-		ApplicationContext parent = applicationContext.getParent();
+		ApplicationContext parent = this.applicationContext.getParent();
 
 		assertThat(parent.getBeanNamesForType(RestTemplate.class)).isEmpty();
 		assertThat(parent.getBeanNamesForType(ClientHttpRequestFactory.class)).isEmpty();
@@ -129,5 +128,7 @@ public class VaultVersionedKvBackendConfigTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

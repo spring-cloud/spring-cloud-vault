@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.time.Duration;
@@ -92,14 +93,14 @@ public class VaultReactiveBootstrapConfiguration {
 	 * Creates a {@link ClientHttpConnector} configured with {@link ClientOptions} and
 	 * {@link SslConfiguration} which are not necessarily applicable for the whole
 	 * application.
-	 *
+	 * @param vaultProperties the Vault properties.
 	 * @return the {@link ClientHttpConnector}.
 	 */
 	private static ClientHttpConnector createConnector(VaultProperties vaultProperties) {
 
-		ClientOptions clientOptions = new ClientOptions(Duration.ofMillis(vaultProperties
-				.getConnectionTimeout()), Duration.ofMillis(vaultProperties
-				.getReadTimeout()));
+		ClientOptions clientOptions = new ClientOptions(
+				Duration.ofMillis(vaultProperties.getConnectionTimeout()),
+				Duration.ofMillis(vaultProperties.getReadTimeout()));
 
 		SslConfiguration sslConfiguration = VaultConfigurationUtil
 				.createSslConfiguration(vaultProperties.getSsl());
@@ -109,19 +110,22 @@ public class VaultReactiveBootstrapConfiguration {
 
 	/**
 	 * Creates a {@link ReactiveVaultTemplate}.
-	 *
-	 * @return
+	 * @param tokenSupplier the {@link VaultTokenSupplier}.
+	 * @return the {@link ReactiveVaultTemplate} bean.
 	 * @see #reactiveVaultSessionManager(BeanFactory, ObjectFactory)
 	 */
 	@Bean
 	@ConditionalOnMissingBean(ReactiveVaultOperations.class)
 	public ReactiveVaultTemplate reactiveVaultTemplate(
 			ReactiveSessionManager tokenSupplier) {
-		return new ReactiveVaultTemplate(vaultEndpoint, clientHttpConnector,
+		return new ReactiveVaultTemplate(this.vaultEndpoint, this.clientHttpConnector,
 				tokenSupplier);
 	}
 
 	/**
+	 * @param beanFactory the {@link BeanFactory}.
+	 * @param asyncTaskExecutorFactory the {@link ObjectFactory} for
+	 * {@link TaskSchedulerWrapper}.
 	 * @return {@link ReactiveSessionManager} for reactive session use.
 	 * @see ReactiveSessionManager
 	 * @see ReactiveLifecycleAwareSessionManager
@@ -134,10 +138,10 @@ public class VaultReactiveBootstrapConfiguration {
 		VaultTokenSupplier vaultTokenSupplier = beanFactory.getBean("vaultTokenSupplier",
 				VaultTokenSupplier.class);
 
-		if (vaultProperties.getConfig().getLifecycle().isEnabled()) {
+		if (this.vaultProperties.getConfig().getLifecycle().isEnabled()) {
 
-			WebClient webClient = ReactiveVaultClients.createWebClient(vaultEndpoint,
-					clientHttpConnector);
+			WebClient webClient = ReactiveVaultClients.createWebClient(this.vaultEndpoint,
+					this.clientHttpConnector);
 			return new ReactiveLifecycleAwareSessionManager(vaultTokenSupplier,
 					asyncTaskExecutorFactory.getObject().getTaskScheduler(), webClient);
 		}
@@ -146,6 +150,7 @@ public class VaultReactiveBootstrapConfiguration {
 	}
 
 	/**
+	 * @param sessionManager the {@link ReactiveSessionManager}.
 	 * @return {@link SessionManager} adapter wrapping {@link ReactiveSessionManager}.
 	 */
 	@Bean
@@ -155,6 +160,7 @@ public class VaultReactiveBootstrapConfiguration {
 	}
 
 	/**
+	 * @param beanFactory the {@link BeanFactory}.
 	 * @return the {@link VaultTokenSupplier} for reactive Vault session management
 	 * adapting {@link ClientAuthentication} that also implement
 	 * {@link AuthenticationStepsFactory}.
@@ -191,14 +197,14 @@ public class VaultReactiveBootstrapConfiguration {
 			}
 
 			if (clientAuthentication instanceof AuthenticationStepsFactory) {
-				return createAuthenticationStepsOperator((AuthenticationStepsFactory) clientAuthentication);
+				return createAuthenticationStepsOperator(
+						(AuthenticationStepsFactory) clientAuthentication);
 			}
 
-			throw new IllegalStateException(
-					String.format(
-							"Cannot construct VaultTokenSupplier from %s. "
-									+ "ClientAuthentication must implement AuthenticationStepsFactory or be TokenAuthentication",
-							clientAuthentication));
+			throw new IllegalStateException(String.format(
+					"Cannot construct VaultTokenSupplier from %s. "
+							+ "ClientAuthentication must implement AuthenticationStepsFactory or be TokenAuthentication",
+					clientAuthentication));
 		}
 
 		throw new IllegalStateException(
@@ -212,4 +218,5 @@ public class VaultReactiveBootstrapConfiguration {
 		return new AuthenticationStepsOperator(factory.getAuthenticationSteps(),
 				webClient);
 	}
+
 }

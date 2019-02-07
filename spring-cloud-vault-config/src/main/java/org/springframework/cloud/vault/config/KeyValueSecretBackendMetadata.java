@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.ArrayList;
@@ -21,8 +22,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -35,10 +36,11 @@ import org.springframework.vault.core.util.PropertyTransformers;
  * @author Mark Paluch
  * @since 2.0
  */
-public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport implements
-		SecretBackendMetadata {
+public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
+		implements SecretBackendMetadata {
 
 	private final String path;
+
 	private final PropertyTransformer propertyTransformer;
 
 	KeyValueSecretBackendMetadata(String path) {
@@ -59,7 +61,6 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport 
 	 * Create a {@link SecretBackendMetadata} for the {@code kv} secret backend given a
 	 * {@code secretBackendPath} and {@code key}. Use plain mount and key paths. The
 	 * required {@code data} segment is added by this method.
-	 *
 	 * @param secretBackendPath the secret backend mount path without leading/trailing
 	 * slashes and without the {@code data} path segment, must not be empty or
 	 * {@literal null}.
@@ -69,7 +70,8 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport 
 	 */
 	public static SecretBackendMetadata create(String secretBackendPath, String key) {
 
-		Assert.hasText(secretBackendPath, "Secret backend path must not be null or empty");
+		Assert.hasText(secretBackendPath,
+				"Secret backend path must not be null or empty");
 		Assert.hasText(key, "Key must not be null or empty");
 
 		return create(String.format("%s/data/%s", secretBackendPath, key),
@@ -79,7 +81,6 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport 
 	/**
 	 * Create a {@link SecretBackendMetadata} for the {@code generic} secret backend given
 	 * a {@code path}.
-	 *
 	 * @param path the relative path of the secret. slashes, must not be empty or
 	 * {@literal null}.
 	 * @return the {@link SecretBackendMetadata}
@@ -91,7 +92,6 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport 
 	/**
 	 * Create a {@link SecretBackendMetadata} for the {@code generic} secret backend given
 	 * a {@code path}.
-	 *
 	 * @param path the relative path of the secret. slashes, must not be empty or
 	 * {@literal null}.
 	 * @param propertyTransformer property transformer.
@@ -104,19 +104,18 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport 
 
 	@Override
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	@Override
 	public PropertyTransformer getPropertyTransformer() {
-		return propertyTransformer;
+		return this.propertyTransformer;
 	}
 
 	/**
 	 * Build a list of context paths from application name and the active profile names.
 	 * Application name and profiles support multiple (comma-separated) values.
-	 *
-	 * @param properties
+	 * @param properties the key-value backend properties.
 	 * @param profiles active application profiles.
 	 * @return list of context paths.
 	 */
@@ -146,7 +145,6 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport 
 	 * Create a list of context names from a combination of application name and
 	 * application name with profile name. Using an empty application name will return an
 	 * empty list.
-	 *
 	 * @param applicationName the application name. May be empty.
 	 * @param profiles active application profiles.
 	 * @param profileSeparator profile separator character between application name and
@@ -185,7 +183,7 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport 
 	/**
 	 * {@link PropertyTransformer} that strips a prefix from property names.
 	 */
-	static class UnwrappingPropertyTransformer implements PropertyTransformer {
+	static final class UnwrappingPropertyTransformer implements PropertyTransformer {
 
 		private final String prefixToStrip;
 
@@ -209,19 +207,22 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport 
 		}
 
 		@Override
-		public Map<String, Object> transformProperties(Map<String, ? extends Object> input) {
+		public Map<String, Object> transformProperties(
+				Map<String, ? extends Object> input) {
 
 			Map<String, Object> target = new LinkedHashMap<>(input.size(), 1);
 
 			for (Entry<String, ? extends Object> entry : input.entrySet()) {
 
-				if (entry.getKey().startsWith(prefixToStrip + ".")) {
-					target.put(entry.getKey().substring(prefixToStrip.length() + 1),
+				if (entry.getKey().startsWith(this.prefixToStrip + ".")) {
+					target.put(entry.getKey().substring(this.prefixToStrip.length() + 1),
 							entry.getValue());
 				}
 			}
 
 			return target;
 		}
+
 	}
+
 }

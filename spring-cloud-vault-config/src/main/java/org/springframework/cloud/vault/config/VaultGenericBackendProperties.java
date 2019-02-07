@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import javax.validation.constraints.NotEmpty;
@@ -33,8 +34,8 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("spring.cloud.vault.generic")
 @Data
 @Validated
-public class VaultGenericBackendProperties implements EnvironmentAware,
-		VaultKeyValueBackendPropertiesSupport {
+public class VaultGenericBackendProperties
+		implements EnvironmentAware, VaultKeyValueBackendPropertiesSupport {
 
 	/**
 	 * Enable the generic backend.
@@ -81,4 +82,5 @@ public class VaultGenericBackendProperties implements EnvironmentAware,
 			}
 		}
 	}
+
 }

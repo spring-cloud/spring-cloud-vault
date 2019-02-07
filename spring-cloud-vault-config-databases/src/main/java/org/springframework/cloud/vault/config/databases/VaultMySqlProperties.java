@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.databases;
 
 import javax.validation.constraints.NotEmpty;
@@ -35,19 +36,21 @@ import org.springframework.validation.annotation.Validated;
 @Data
 @Validated
 @Deprecated
-public class VaultMySqlProperties implements DatabaseSecretProperties,
-		VaultSecretBackendDescriptor {
+public class VaultMySqlProperties
+		implements DatabaseSecretProperties, VaultSecretBackendDescriptor {
 
 	/**
 	 * Enable mysql backend usage.
 	 */
-	@Getter(onMethod_ = { @DeprecatedConfigurationProperty(reason = "Use spring.cloud.vault.database") })
+	@Getter(onMethod_ = {
+			@DeprecatedConfigurationProperty(reason = "Use spring.cloud.vault.database") })
 	private boolean enabled = false;
 
 	/**
 	 * Role name for credentials.
 	 */
-	@Getter(onMethod_ = { @DeprecatedConfigurationProperty(reason = "Use spring.cloud.vault.database") })
+	@Getter(onMethod_ = {
+			@DeprecatedConfigurationProperty(reason = "Use spring.cloud.vault.database") })
 	private String role;
 
 	/**
@@ -67,4 +70,5 @@ public class VaultMySqlProperties implements DatabaseSecretProperties,
 	 */
 	@NotEmpty
 	private String passwordProperty = "spring.datasource.password";
+
 }

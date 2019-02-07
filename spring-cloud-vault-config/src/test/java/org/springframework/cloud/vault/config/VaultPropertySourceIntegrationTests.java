@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
@@ -23,7 +24,7 @@ import org.junit.Test;
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link VaultPropertySource}.
@@ -52,4 +53,5 @@ public class VaultPropertySourceIntegrationTests extends IntegrationTestSupport 
 		assertThat(propertySource.getPropertyNames()).contains("key");
 		assertThat(propertySource.getProperty("key")).isEqualTo("value");
 	}
+
 }

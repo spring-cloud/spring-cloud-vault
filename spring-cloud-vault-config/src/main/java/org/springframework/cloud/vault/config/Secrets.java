@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Map;
@@ -26,4 +27,5 @@ import org.springframework.vault.support.VaultResponseSupport;
  * @author Mark Paluch
  */
 public class Secrets extends VaultResponseSupport<Map<String, Object>> {
+
 }

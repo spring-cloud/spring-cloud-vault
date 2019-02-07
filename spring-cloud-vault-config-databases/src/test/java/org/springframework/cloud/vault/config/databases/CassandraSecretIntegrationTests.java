@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.databases;
 
 import java.net.InetSocketAddress;
@@ -30,9 +31,9 @@ import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory.forDatabase;
 
 /**
  * Integration tests for {@link VaultConfigTemplate} using the cassandra secret backend.
@@ -43,17 +44,21 @@ import static org.springframework.cloud.vault.config.databases.VaultConfigDataba
  */
 public class CassandraSecretIntegrationTests extends IntegrationTestSupport {
 
-	private final static String CASSANDRA_HOST = "localhost";
-	private final static int CASSANDRA_PORT = 9042;
+	private static final String CASSANDRA_HOST = "localhost";
 
-	private final static String CASSANDRA_USERNAME = "springvault";
-	private final static String CASSANDRA_PASSWORD = "springvault";
+	private static final int CASSANDRA_PORT = 9042;
 
-	private final static String CREATE_USER_AND_GRANT_CQL = "CREATE USER '{{username}}' WITH PASSWORD '{{password}}' NOSUPERUSER;"
+	private static final String CASSANDRA_USERNAME = "springvault";
+
+	private static final String CASSANDRA_PASSWORD = "springvault";
+
+	private static final String CREATE_USER_AND_GRANT_CQL = "CREATE USER '{{username}}' WITH PASSWORD '{{password}}' NOSUPERUSER;"
 			+ "GRANT SELECT ON ALL KEYSPACES TO {{username}};";
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
+
 	private VaultConfigOperations configOperations;
+
 	private VaultCassandraProperties cassandra = new VaultCassandraProperties();
 
 	/**
@@ -64,14 +69,14 @@ public class CassandraSecretIntegrationTests extends IntegrationTestSupport {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(CASSANDRA_HOST, CASSANDRA_PORT)));
 
-		cassandra.setEnabled(true);
-		cassandra.setRole("readonly");
+		this.cassandra.setEnabled(true);
+		this.cassandra.setRole("readonly");
 
-		if (!prepare().hasSecretBackend(cassandra.getBackend())) {
-			prepare().mountSecret(cassandra.getBackend());
+		if (!prepare().hasSecretBackend(this.cassandra.getBackend())) {
+			prepare().mountSecret(this.cassandra.getBackend());
 		}
 
-		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
+		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();
 
 		Map<String, String> connection = new HashMap<>();
 		connection.put("hosts", CASSANDRA_HOST);
@@ -79,7 +84,7 @@ public class CassandraSecretIntegrationTests extends IntegrationTestSupport {
 		connection.put("password", CASSANDRA_PASSWORD);
 
 		vaultOperations.write(
-				String.format("%s/config/connection", cassandra.getBackend()),
+				String.format("%s/config/connection", this.cassandra.getBackend()),
 				connection);
 
 		Map<String, String> role = new HashMap<>();
@@ -87,20 +92,21 @@ public class CassandraSecretIntegrationTests extends IntegrationTestSupport {
 		role.put("creation_cql", CREATE_USER_AND_GRANT_CQL);
 		role.put("consistency", "All");
 
-		vaultOperations.write(
-				String.format("%s/roles/%s", cassandra.getBackend(), cassandra.getRole()),
-				role);
+		vaultOperations.write(String.format("%s/roles/%s", this.cassandra.getBackend(),
+				this.cassandra.getRole()), role);
 
-		configOperations = new VaultConfigTemplate(vaultOperations, vaultProperties);
+		this.configOperations = new VaultConfigTemplate(vaultOperations,
+				this.vaultProperties);
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, Object> secretProperties = configOperations
-				.read(forDatabase(cassandra)).getData();
+		Map<String, Object> secretProperties = this.configOperations
+				.read(forDatabase(this.cassandra)).getData();
 
 		assertThat(secretProperties).containsKeys("spring.data.cassandra.username",
 				"spring.data.cassandra.password");
 	}
+
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import org.junit.Before;
@@ -26,8 +27,8 @@ import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link VaultPropertySourceLocator}.
@@ -48,7 +49,7 @@ public class VaultPropertySourceLocatorUnitTests {
 
 	@Before
 	public void before() {
-		propertySourceLocator = new VaultPropertySourceLocator(operations,
+		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
 				new VaultProperties(), VaultPropertySourceLocatorSupport
 						.createConfiguration(new VaultGenericBackendProperties()));
 	}
@@ -59,20 +60,20 @@ public class VaultPropertySourceLocatorUnitTests {
 		VaultProperties vaultProperties = new VaultProperties();
 		vaultProperties.getConfig().setOrder(42);
 
-		propertySourceLocator = new VaultPropertySourceLocator(operations,
+		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
 				vaultProperties, VaultPropertySourceLocatorSupport
 						.createConfiguration(new VaultGenericBackendProperties()));
 
-		assertThat(propertySourceLocator.getOrder()).isEqualTo(42);
+		assertThat(this.propertySourceLocator.getOrder()).isEqualTo(42);
 	}
 
 	@Test
 	public void shouldLocateOnePropertySourceWithEmptyProfiles() {
 
-		when(configurableEnvironment.getActiveProfiles()).thenReturn(new String[0]);
+		when(this.configurableEnvironment.getActiveProfiles()).thenReturn(new String[0]);
 
-		PropertySource<?> propertySource = propertySourceLocator
-				.locate(configurableEnvironment);
+		PropertySource<?> propertySource = this.propertySourceLocator
+				.locate(this.configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
@@ -83,11 +84,11 @@ public class VaultPropertySourceLocatorUnitTests {
 	@Test
 	public void shouldLocatePropertySourcesForActiveProfilesInDefaultContext() {
 
-		when(configurableEnvironment.getActiveProfiles())
+		when(this.configurableEnvironment.getActiveProfiles())
 				.thenReturn(new String[] { "vermillion", "periwinkle" });
 
-		PropertySource<?> propertySource = propertySourceLocator
-				.locate(configurableEnvironment);
+		PropertySource<?> propertySource = this.propertySourceLocator
+				.locate(this.configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
@@ -102,15 +103,15 @@ public class VaultPropertySourceLocatorUnitTests {
 		VaultGenericBackendProperties backendProperties = new VaultGenericBackendProperties();
 		backendProperties.setApplicationName("wintermute");
 
-		propertySourceLocator = new VaultPropertySourceLocator(operations,
+		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
 				new VaultProperties(),
 				VaultPropertySourceLocatorSupport.createConfiguration(backendProperties));
 
-		when(configurableEnvironment.getActiveProfiles())
+		when(this.configurableEnvironment.getActiveProfiles())
 				.thenReturn(new String[] { "vermillion", "periwinkle" });
 
-		PropertySource<?> propertySource = propertySourceLocator
-				.locate(configurableEnvironment);
+		PropertySource<?> propertySource = this.propertySourceLocator
+				.locate(this.configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
@@ -126,15 +127,15 @@ public class VaultPropertySourceLocatorUnitTests {
 		VaultGenericBackendProperties backendProperties = new VaultGenericBackendProperties();
 		backendProperties.setApplicationName("wintermute,straylight,icebreaker/armitage");
 
-		propertySourceLocator = new VaultPropertySourceLocator(operations,
+		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
 				new VaultProperties(),
 				VaultPropertySourceLocatorSupport.createConfiguration(backendProperties));
 
-		when(configurableEnvironment.getActiveProfiles())
+		when(this.configurableEnvironment.getActiveProfiles())
 				.thenReturn(new String[] { "vermillion", "periwinkle" });
 
-		PropertySource<?> propertySource = propertySourceLocator
-				.locate(configurableEnvironment);
+		PropertySource<?> propertySource = this.propertySourceLocator
+				.locate(this.configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
@@ -154,11 +155,11 @@ public class VaultPropertySourceLocatorUnitTests {
 		configurer.add(new MySecondSecretBackendMetadata());
 		configurer.add(new MyFirstSecretBackendMetadata());
 
-		propertySourceLocator = new VaultPropertySourceLocator(operations,
+		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
 				new VaultProperties(), configurer);
 
-		PropertySource<?> propertySource = propertySourceLocator
-				.locate(configurableEnvironment);
+		PropertySource<?> propertySource = this.propertySourceLocator
+				.locate(this.configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
@@ -174,6 +175,7 @@ public class VaultPropertySourceLocatorUnitTests {
 		public String getPath() {
 			return "foo";
 		}
+
 	}
 
 	@Order(2)
@@ -183,5 +185,7 @@ public class VaultPropertySourceLocatorUnitTests {
 		public String getPath() {
 			return "bar";
 		}
+
 	}
+
 }

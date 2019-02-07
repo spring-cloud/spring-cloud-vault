@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.HashMap;
@@ -24,8 +25,8 @@ import org.junit.Test;
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.cloud.vault.config.GenericSecretBackendMetadata.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.cloud.vault.config.GenericSecretBackendMetadata.create;
 
 /**
  * Integration tests for {@link VaultConfigTemplate} using the generic secret backend.
@@ -35,22 +36,23 @@ import static org.springframework.cloud.vault.config.GenericSecretBackendMetadat
 public class GenericSecretIntegrationTests extends IntegrationTestSupport {
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
+
 	private VaultConfigOperations configOperations;
 
 	@Before
 	public void setUp() {
 
-		vaultProperties.setFailFast(false);
+		this.vaultProperties.setFailFast(false);
 		prepare().getVaultOperations().write("secret/app-name", createData());
 
-		configOperations = new VaultConfigTemplate(prepare().getVaultOperations(),
-				vaultProperties);
+		this.configOperations = new VaultConfigTemplate(prepare().getVaultOperations(),
+				this.vaultProperties);
 	}
 
 	@Test
 	public void shouldReturnSecretsCorrectly() {
 
-		Map<String, Object> secretProperties = configOperations
+		Map<String, Object> secretProperties = this.configOperations
 				.read(create("secret", "app-name")).getData();
 
 		assertThat(secretProperties).containsAllEntriesOf(createExpectedMap());
@@ -59,7 +61,7 @@ public class GenericSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void shouldReturnNullIfNotFound() {
 
-		Secrets secrets = configOperations.read(create("secret", "missing"));
+		Secrets secrets = this.configOperations.read(create("secret", "missing"));
 
 		assertThat(secrets).isNull();
 	}
@@ -85,4 +87,5 @@ public class GenericSecretIntegrationTests extends IntegrationTestSupport {
 
 		return data;
 	}
+
 }

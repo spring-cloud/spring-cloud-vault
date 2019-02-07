@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.io.File;
@@ -35,8 +36,8 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.cloud.vault.util.Settings.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.cloud.vault.util.Settings.findWorkDir;
 
 /**
  * Integration test using config infrastructure with TLS certificate authentication. In
@@ -99,7 +100,7 @@ public class VaultConfigTlsCertAuthenticationTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(configValue).isEqualTo("foo");
+		assertThat(this.configValue).isEqualTo("foo");
 	}
 
 	@SpringBootApplication
@@ -108,5 +109,7 @@ public class VaultConfigTlsCertAuthenticationTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

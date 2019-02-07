@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.util;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -47,7 +48,6 @@ public class TestRestTemplateFactory {
 	 * underlying {@link ClientHttpRequestFactory} is cached. See
 	 * {@link #create(ClientHttpRequestFactory)} to create {@link RestTemplate} for a
 	 * given {@link ClientHttpRequestFactory}.
-	 *
 	 * @param sslConfiguration must not be {@literal null}.
 	 * @return
 	 */
@@ -69,7 +69,6 @@ public class TestRestTemplateFactory {
 	 * {@link RestTemplate} will throw
 	 * {@link org.springframework.web.client.HttpStatusCodeException exceptions} in error
 	 * cases and behave in that aspect like the regular {@link RestTemplate}.
-	 *
 	 * @param requestFactory must not be {@literal null}.
 	 * @return
 	 */
@@ -114,4 +113,5 @@ public class TestRestTemplateFactory {
 			}
 		}
 	}
+
 }

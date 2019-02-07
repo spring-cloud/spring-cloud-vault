@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
@@ -36,7 +37,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test using config infrastructure with token authentication.
@@ -52,7 +53,8 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest(classes = VaultConfigTests.TestApplication.class, properties = {
 		"spring.cloud.vault.host=foo", "spring.cloud.vault.port=80",
 		"spring.cloud.vault.uri=https://localhost:8200",
-		"spring.cloud.vault.application-name=testVaultApp" }) // see
+		"spring.cloud.vault.application-name=testVaultApp" })
+// see
 // https://github.com/spring-cloud/spring-cloud-commons/issues/214
 public class VaultConfigTests {
 
@@ -80,24 +82,24 @@ public class VaultConfigTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(configValue).isEqualTo("foo");
+		assertThat(this.configValue).isEqualTo("foo");
 	}
 
 	@Test
 	public void shouldContainProperty() {
 
-		assertThat(environment.containsProperty("vault.value")).isTrue();
-		assertThat(environment.getProperty("vault.value")).isEqualTo("foo");
+		assertThat(this.environment.containsProperty("vault.value")).isTrue();
+		assertThat(this.environment.getProperty("vault.value")).isEqualTo("foo");
 
-		assertThat(environment.containsProperty("nested.key")).isTrue();
-		assertThat(environment.getProperty("nested.key")).isEqualTo("value");
+		assertThat(this.environment.containsProperty("nested.key")).isTrue();
+		assertThat(this.environment.getProperty("nested.key")).isEqualTo("value");
 	}
 
 	@Test
 	public void shouldContainVaultBeans() {
 
 		// Beans are registered in parent (bootstrap) context.
-		ApplicationContext parent = applicationContext.getParent();
+		ApplicationContext parent = this.applicationContext.getParent();
 
 		assertThat(parent.getBeanNamesForType(VaultTemplate.class)).isNotEmpty();
 		assertThat(parent.getBeanNamesForType(LeasingVaultPropertySourceLocator.class))
@@ -108,7 +110,7 @@ public class VaultConfigTests {
 	public void shouldNotContainRestTemplateArtifacts() {
 
 		// Beans are registered in parent (bootstrap) context.
-		ApplicationContext parent = applicationContext.getParent();
+		ApplicationContext parent = this.applicationContext.getParent();
 
 		assertThat(parent.getBeanNamesForType(RestTemplate.class)).isEmpty();
 		assertThat(parent.getBeanNamesForType(ClientHttpRequestFactory.class)).isEmpty();
@@ -120,5 +122,7 @@ public class VaultConfigTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

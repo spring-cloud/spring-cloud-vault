@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.util;
 
 import java.io.IOException;
@@ -30,7 +31,6 @@ public class CanConnect {
 	/**
 	 * Performs a check whether a connection can be established to the
 	 * {@code socketAddress}.
-	 *
 	 * @param socketAddress the address to test, must not be {@literal null}.
 	 * @return {@literal true}, if a connection can be established
 	 */
@@ -45,4 +45,5 @@ public class CanConnect {
 			return false;
 		}
 	}
+
 }

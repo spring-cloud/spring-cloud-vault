@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.util;
 
 import org.junit.Rule;
@@ -28,6 +29,7 @@ public abstract class IntegrationTestSupport {
 	public final VaultRule vaultRule = new VaultRule();
 
 	public final PrepareVault prepare() {
-		return vaultRule.prepare();
+		return this.vaultRule.prepare();
 	}
+
 }

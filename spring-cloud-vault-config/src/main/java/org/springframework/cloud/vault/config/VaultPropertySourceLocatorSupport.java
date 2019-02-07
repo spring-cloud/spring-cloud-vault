@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.ArrayList;
@@ -31,8 +32,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.Assert;
 
-import static org.springframework.cloud.vault.config.GenericSecretBackendMetadata.*;
-
 /**
  * Abstract {@link PropertySourceLocator} to create {@link PropertySource}s based on
  * {@link VaultGenericBackendProperties} and {@link SecretBackendMetadata}.
@@ -47,7 +46,6 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 
 	/**
 	 * Creates a new {@link VaultPropertySourceLocatorSupport}.
-	 *
 	 * @param propertySourceName must not be {@literal null} or empty.
 	 * @param genericBackendProperties must not be {@literal null}.
 	 * @param backendAccessors must not be {@literal null}.
@@ -63,7 +61,6 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	/**
 	 * Creates a new {@link VaultPropertySourceLocatorSupport} given a
 	 * {@link PropertySourceLocatorConfiguration}.
-	 *
 	 * @param propertySourceName must not be {@literal null} or empty.
 	 * @param propertySourceLocatorConfiguration must not be {@literal null}.
 	 * @since 1.1
@@ -108,8 +105,8 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	@Override
 	public PropertySource<?> locate(Environment environment) {
 
-		if (propertySourceLocatorConfiguration instanceof EnvironmentAware) {
-			((EnvironmentAware) propertySourceLocatorConfiguration)
+		if (this.propertySourceLocatorConfiguration instanceof EnvironmentAware) {
+			((EnvironmentAware) this.propertySourceLocatorConfiguration)
 					.setEnvironment(environment);
 		}
 
@@ -127,7 +124,6 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	/**
 	 * Allows initialization the {@link PropertySource} before use. Implementations may
 	 * override this method to preload properties in the {@link PropertySource}.
-	 *
 	 * @param propertySource must not be {@literal null}.
 	 */
 	protected void initialize(CompositePropertySource propertySource) {
@@ -135,28 +131,26 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 
 	/**
 	 * Creates a {@link CompositePropertySource}.
-	 *
 	 * @param environment must not be {@literal null}.
-	 * @return
+	 * @return the composite {@link PropertySource}.
 	 */
 	protected CompositePropertySource createCompositePropertySource(
 			Environment environment) {
 
 		List<PropertySource<?>> propertySources = doCreatePropertySources(environment);
 
-		return doCreateCompositePropertySource(propertySourceName, propertySources);
+		return doCreateCompositePropertySource(this.propertySourceName, propertySources);
 	}
 
 	/**
 	 * Create {@link PropertySource}s given {@link Environment} from the property
 	 * configuration.
-	 *
 	 * @param environment must not be {@literal null}.
 	 * @return a {@link List} of ordered {@link PropertySource}s.
 	 */
 	protected List<PropertySource<?>> doCreatePropertySources(Environment environment) {
 
-		Collection<SecretBackendMetadata> secretBackends = propertySourceLocatorConfiguration
+		Collection<SecretBackendMetadata> secretBackends = this.propertySourceLocatorConfiguration
 				.getSecretBackends();
 		List<SecretBackendMetadata> sorted = new ArrayList<>(secretBackends);
 		List<PropertySource<?>> propertySources = new ArrayList<>();
@@ -179,9 +173,8 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	 * Create {@link PropertySource}s using the generic {@literal secret} backend.
 	 * Property sources for the generic secret backend derive from the application name
 	 * and active profiles to generate context paths.
-	 *
 	 * @param environment must not be {@literal null}.
-	 * @return
+	 * @return {@link List} of {@link PropertySource}s.
 	 */
 	protected List<PropertySource<?>> doCreateGenericPropertySources(
 			Environment environment) {
@@ -191,7 +184,6 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	/**
 	 * Create a {@link CompositePropertySource} given a {@link List} of
 	 * {@link PropertySource}s.
-	 *
 	 * @param propertySourceName the property source name.
 	 * @param propertySources the property sources.
 	 * @return the {@link CompositePropertySource} to use.
@@ -210,9 +202,8 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	}
 
 	/**
-	 * Create {@link VaultPropertySource} initialized with a
-	 * {@link SecretBackendMetadata}.
-	 *
+	 * Create {@link VaultPropertySource} initialized with a {@link SecretBackendMetadata}
+	 * .
 	 * @param accessor the {@link SecretBackendMetadata}.
 	 * @return the {@link VaultPropertySource} to use.
 	 */
@@ -235,16 +226,17 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 		@Override
 		public Collection<SecretBackendMetadata> getSecretBackends() {
 
-			if (genericBackendProperties.isEnabled()) {
+			if (this.genericBackendProperties.isEnabled()) {
 
 				List<String> contexts = GenericSecretBackendMetadata.buildContexts(
-						genericBackendProperties,
-						Arrays.asList(environment.getActiveProfiles()));
+						this.genericBackendProperties,
+						Arrays.asList(this.environment.getActiveProfiles()));
 
 				List<SecretBackendMetadata> result = new ArrayList<>(contexts.size());
 
 				for (String context : contexts) {
-					result.add(create(genericBackendProperties.getBackend(), context));
+					result.add(GenericSecretBackendMetadata
+							.create(this.genericBackendProperties.getBackend(), context));
 				}
 
 				return result;
@@ -252,6 +244,7 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 
 			return Collections.emptyList();
 		}
+
 	}
 
 	@RequiredArgsConstructor
@@ -262,8 +255,9 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 
 		@Override
 		public Collection<SecretBackendMetadata> getSecretBackends() {
-			return metadata;
+			return this.metadata;
 		}
+
 	}
 
 	private static class CompositePropertySourceConfiguration
@@ -271,7 +265,7 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 
 		private final List<PropertySourceLocatorConfiguration> configurations;
 
-		public CompositePropertySourceConfiguration(
+		CompositePropertySourceConfiguration(
 				PropertySourceLocatorConfiguration... configurations) {
 
 			List<PropertySourceLocatorConfiguration> copy = new ArrayList<>(
@@ -287,7 +281,7 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 
 			List<SecretBackendMetadata> result = new ArrayList<>();
 
-			for (PropertySourceLocatorConfiguration configuration : configurations) {
+			for (PropertySourceLocatorConfiguration configuration : this.configurations) {
 				result.addAll(configuration.getSecretBackends());
 			}
 
@@ -297,11 +291,13 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 		@Override
 		public void setEnvironment(Environment environment) {
 
-			for (PropertySourceLocatorConfiguration configuration : configurations) {
+			for (PropertySourceLocatorConfiguration configuration : this.configurations) {
 				if (configuration instanceof EnvironmentAware) {
 					((EnvironmentAware) configuration).setEnvironment(environment);
 				}
 			}
 		}
+
 	}
+
 }

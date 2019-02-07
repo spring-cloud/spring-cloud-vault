@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
@@ -29,7 +30,7 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test incorporating loading secrets using
@@ -48,6 +49,7 @@ public class VaultPropertySourceLocatorIntegrationTests extends IntegrationTestS
 
 	@SpringBootApplication
 	public static class TestApplication {
+
 	}
 
 	@BeforeClass
@@ -63,9 +65,9 @@ public class VaultPropertySourceLocatorIntegrationTests extends IntegrationTestS
 						"vault.value", "spring.application.name:integrationtest value"));
 		vaultRule.prepare().getVaultOperations().write("secret/neuromancer", Collections
 				.singletonMap("vault.value", "spring.cloud.vault.applicationName value"));
-		vaultRule.prepare().getVaultOperations().write(
-				"secret/neuromancer/integrationtest",
-				Collections.singletonMap("vault.value",
+		vaultRule.prepare().getVaultOperations()
+				.write("secret/neuromancer/integrationtest", Collections.singletonMap(
+						"vault.value",
 						"spring.cloud.vault.applicationName:integrationtest value"));
 		vaultRule.prepare().getVaultOperations().write("secret/icebreaker",
 				Collections.singletonMap("icebreaker.value", "additional context value"));
@@ -82,12 +84,14 @@ public class VaultPropertySourceLocatorIntegrationTests extends IntegrationTestS
 
 	@Test
 	public void getsSecretFromVaultUsingVaultApplicationName() {
-		assertThat(configValue)
+		assertThat(this.configValue)
 				.isEqualTo("spring.cloud.vault.applicationName:integrationtest value");
 	}
 
 	@Test
 	public void getsSecretFromVaultUsingAdditionalContext() {
-		assertThat(additionalValue).isEqualTo("additional context:integrationtest value");
+		assertThat(this.additionalValue)
+				.isEqualTo("additional context:integrationtest value");
 	}
+
 }

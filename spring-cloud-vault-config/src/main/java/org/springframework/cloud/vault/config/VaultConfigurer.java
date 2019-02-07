@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 /**
@@ -41,9 +42,9 @@ public interface VaultConfigurer {
 	/**
 	 * Configure the secret backends that are instantiated as
 	 * {@link org.springframework.core.env.PropertySource property sources}.
-	 *
 	 * @param configurer the {@link SecretBackendConfigurer} to configure secret backends,
 	 * must not be {@literal null}.
 	 */
 	void addSecretBackends(SecretBackendConfigurer configurer);
+
 }

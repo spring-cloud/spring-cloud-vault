@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -45,13 +46,12 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 
 	/**
 	 * Creates a new {@link LeasingVaultPropertySourceLocator}.
-	 *
 	 * @param properties must not be {@literal null}.
 	 * @param propertySourceLocatorConfiguration must not be {@literal null}.
 	 * @param secretLeaseContainer must not be {@literal null}.
 	 * @since 1.1
 	 */
-	public LeasingVaultPropertySourceLocator(VaultProperties properties,
+	LeasingVaultPropertySourceLocator(VaultProperties properties,
 			PropertySourceLocatorConfiguration propertySourceLocatorConfiguration,
 			SecretLeaseContainer secretLeaseContainer) {
 
@@ -66,13 +66,12 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 
 	@Override
 	public int getOrder() {
-		return properties.getConfig().getOrder();
+		return this.properties.getConfig().getOrder();
 	}
 
 	/**
-	 * Create {@link VaultPropertySource} initialized with a
-	 * {@link SecretBackendMetadata}.
-	 *
+	 * Create {@link VaultPropertySource} initialized with a {@link SecretBackendMetadata}
+	 * .
 	 * @param accessor the {@link SecretBackendMetadata}.
 	 * @return the {@link VaultPropertySource} to use.
 	 */
@@ -81,7 +80,7 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 
 		RequestedSecret secret = getRequestedSecret(accessor);
 
-		if (properties.isFailFast()) {
+		if (this.properties.isFailFast()) {
 			return createVaultPropertySourceFailFast(secret, accessor);
 		}
 
@@ -107,13 +106,12 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 	/**
 	 * Decorated {@link PropertySource} creation to catch and throw the first error that
 	 * occurred during initial secret retrieval.
-	 *
-	 * @param secret
-	 * @param accessor
-	 * @return
+	 * @param secret the requested secret.
+	 * @param accessor the metadata accessor.
+	 * @return the property source for the {@link RequestedSecret}.
 	 */
-	private PropertySource<?> createVaultPropertySourceFailFast(
-			final RequestedSecret secret, SecretBackendMetadata accessor) {
+	private PropertySource<?> createVaultPropertySourceFailFast(RequestedSecret secret,
+			SecretBackendMetadata accessor) {
 
 		final AtomicReference<Exception> errorRef = new AtomicReference<>();
 
@@ -150,4 +148,5 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 		return new LeaseAwareVaultPropertySource(accessor.getName(),
 				this.secretLeaseContainer, secret, accessor.getPropertyTransformer());
 	}
+
 }

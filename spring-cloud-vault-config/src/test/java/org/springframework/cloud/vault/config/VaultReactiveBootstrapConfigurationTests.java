@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import org.junit.Test;
@@ -33,7 +34,7 @@ import org.springframework.vault.core.ReactiveVaultOperations;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link VaultReactiveBootstrapConfiguration}.
@@ -43,14 +44,13 @@ import static org.assertj.core.api.Assertions.*;
 public class VaultReactiveBootstrapConfigurationTests {
 
 	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations
-					.of(VaultReactiveBootstrapConfiguration.class));
+			.withConfiguration(
+					AutoConfigurations.of(VaultReactiveBootstrapConfiguration.class));
 
 	@Test
 	public void shouldConfigureTemplate() {
 
-		contextRunner
-				.withUserConfiguration(AuthenticationFactoryConfiguration.class)
+		this.contextRunner.withUserConfiguration(AuthenticationFactoryConfiguration.class)
 				.withPropertyValues("spring.cloud.vault.config.lifecycle.enabled=false")
 				.run(context -> {
 
@@ -68,8 +68,7 @@ public class VaultReactiveBootstrapConfigurationTests {
 	@Test
 	public void shouldNotConfigureIfHttpClientIsMissing() {
 
-		contextRunner
-				.withUserConfiguration(AuthenticationFactoryConfiguration.class)
+		this.contextRunner.withUserConfiguration(AuthenticationFactoryConfiguration.class)
 				.withClassLoader(
 						new FilteredClassLoader("reactor.netty.http.client.HttpClient"))
 				.run(context -> {
@@ -82,8 +81,7 @@ public class VaultReactiveBootstrapConfigurationTests {
 	@Test
 	public void shouldConfigureTemplateWithTokenSupplier() {
 
-		contextRunner
-				.withUserConfiguration(TokenSupplierConfiguration.class)
+		this.contextRunner.withUserConfiguration(TokenSupplierConfiguration.class)
 				.withPropertyValues("spring.cloud.vault.config.lifecycle.enabled=false")
 				.run(context -> {
 
@@ -99,16 +97,15 @@ public class VaultReactiveBootstrapConfigurationTests {
 	@Test
 	public void shouldNotConfigureReactiveSupport() {
 
-		contextRunner
-				.withUserConfiguration(VaultBootstrapConfiguration.class)
+		this.contextRunner.withUserConfiguration(VaultBootstrapConfiguration.class)
 				.withPropertyValues("spring.cloud.vault.reactive.enabled=false",
 						"spring.cloud.vault.token=foo")
 				.run(context -> {
 
 					assertThat(context.getBeanNamesForType(ReactiveVaultOperations.class))
 							.isEmpty();
-					assertThat(context.getBean(SessionManager.class)).isInstanceOf(
-							LifecycleAwareSessionManager.class);
+					assertThat(context.getBean(SessionManager.class))
+							.isInstanceOf(LifecycleAwareSessionManager.class);
 				});
 	}
 
@@ -119,6 +116,7 @@ public class VaultReactiveBootstrapConfigurationTests {
 		AuthenticationStepsFactory authenticationStepsFactory() {
 			return () -> AuthenticationSteps.just(VaultToken.of("foo"));
 		}
+
 	}
 
 	@Configuration
@@ -128,5 +126,7 @@ public class VaultReactiveBootstrapConfigurationTests {
 		VaultTokenSupplier vaultTokenSupplier() {
 			return () -> Mono.just(VaultToken.of("foo"));
 		}
+
 	}
+
 }

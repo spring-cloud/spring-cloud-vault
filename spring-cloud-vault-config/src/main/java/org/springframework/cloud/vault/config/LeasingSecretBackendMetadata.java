@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
@@ -29,11 +30,11 @@ public interface LeasingSecretBackendMetadata extends SecretBackendMetadata {
 
 	/**
 	 * Return the lease mode of this secret backend.
-	 * <p/>
+	 * <p>
 	 * Lease mode is considered only by lease-aware property sources.
-	 *
 	 * @return the lease mode of this secret backend.
 	 * @since 1.1
 	 */
 	Mode getLeaseMode();
+
 }

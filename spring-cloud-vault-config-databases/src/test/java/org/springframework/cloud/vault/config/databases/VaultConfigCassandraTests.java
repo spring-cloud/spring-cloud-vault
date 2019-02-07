@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.databases;
 
 import java.net.InetSocketAddress;
@@ -36,8 +37,8 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests using the cassandra secret backend. In case this test should fail
@@ -54,13 +55,15 @@ import static org.junit.Assume.*;
 		"spring.data.cassandra.jmx-enabled=false" })
 public class VaultConfigCassandraTests {
 
-	private final static String CASSANDRA_HOST = "localhost";
-	private final static int CASSANDRA_PORT = 9042;
+	private static final String CASSANDRA_HOST = "localhost";
 
-	private final static String CASSANDRA_USERNAME = "springvault";
-	private final static String CASSANDRA_PASSWORD = "springvault";
+	private static final int CASSANDRA_PORT = 9042;
 
-	private final static String CREATE_USER_AND_GRANT_CQL = "CREATE USER '{{username}}' WITH PASSWORD '{{password}}' NOSUPERUSER;"
+	private static final String CASSANDRA_USERNAME = "springvault";
+
+	private static final String CASSANDRA_PASSWORD = "springvault";
+
+	private static final String CREATE_USER_AND_GRANT_CQL = "CREATE USER '{{username}}' WITH PASSWORD '{{password}}' NOSUPERUSER;"
 			+ "GRANT SELECT ON ALL KEYSPACES TO {{username}};";
 
 	/**
@@ -107,12 +110,12 @@ public class VaultConfigCassandraTests {
 
 	@Test
 	public void shouldConnectUsingCluster() {
-		cluster.connect().close();
+		this.cluster.connect().close();
 	}
 
 	@Test
 	public void shouldUseAuthenticationSet() {
-		assertThat(cluster.getConfiguration().getProtocolOptions().getAuthProvider())
+		assertThat(this.cluster.getConfiguration().getProtocolOptions().getAuthProvider())
 				.isInstanceOf(PlainTextAuthProvider.class);
 	}
 
@@ -120,7 +123,8 @@ public class VaultConfigCassandraTests {
 	public void shouldConnectUsingCassandraClient() {
 
 		try (Cluster cluster = Cluster.builder().addContactPoint(CASSANDRA_HOST)
-				.withAuthProvider(new PlainTextAuthProvider(username, password)).build()) {
+				.withAuthProvider(new PlainTextAuthProvider(this.username, this.password))
+				.build()) {
 			Session session = cluster.connect();
 			session.close();
 		}
@@ -132,5 +136,7 @@ public class VaultConfigCassandraTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

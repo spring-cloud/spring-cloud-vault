@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.rabbitmq;
 
 import java.util.HashMap;
@@ -73,7 +74,6 @@ public class VaultConfigRabbitMqBootstrapConfiguration {
 		 * username/password property names to names provided with
 		 * {@link VaultRabbitMqProperties#getUsernameProperty()} and
 		 * {@link VaultRabbitMqProperties#getPasswordProperty()}.
-		 *
 		 * @param properties must not be {@literal null}.
 		 * @return the {@link SecretBackendMetadata}
 		 */
@@ -119,5 +119,7 @@ public class VaultConfigRabbitMqBootstrapConfiguration {
 				}
 			};
 		}
+
 	}
+
 }
