@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.aws;
 
 import java.util.HashMap;
@@ -68,7 +69,6 @@ public class VaultConfigAwsBootstrapConfiguration {
 		 * property names to names provided with
 		 * {@link VaultAwsProperties#getAccessKeyProperty()} and
 		 * {@link VaultAwsProperties#getSecretKeyProperty()}.
-		 *
 		 * @param properties must not be {@literal null}.
 		 * @return the {@link SecretBackendMetadata}
 		 */
@@ -113,5 +113,7 @@ public class VaultConfigAwsBootstrapConfiguration {
 				}
 			};
 		}
+
 	}
+
 }

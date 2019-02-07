@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
@@ -41,7 +42,7 @@ import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Paluch
@@ -51,8 +52,8 @@ import static org.assertj.core.api.Assertions.*;
 		VaultConfigAppIdCustomMechanismTests.TestApplication.class }, properties = {
 				"spring.cloud.vault.authentication=appid",
 				"VaultConfigAppIdCustomMechanismTests.custom.config=true",
-		"spring.cloud.vault.applicationName=VaultConfigAppIdCustomMechanismTests",
-		"spring.main.allow-bean-definition-overriding=true" })
+				"spring.cloud.vault.applicationName=VaultConfigAppIdCustomMechanismTests",
+				"spring.main.allow-bean-definition-overriding=true" })
 public class VaultConfigAppIdCustomMechanismTests {
 
 	@BeforeClass
@@ -106,7 +107,7 @@ public class VaultConfigAppIdCustomMechanismTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(configValue).isEqualTo(getClass().getSimpleName());
+		assertThat(this.configValue).isEqualTo(getClass().getSimpleName());
 	}
 
 	@SpringBootApplication
@@ -115,6 +116,7 @@ public class VaultConfigAppIdCustomMechanismTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
 
 	@Configuration
@@ -134,6 +136,7 @@ public class VaultConfigAppIdCustomMechanismTests {
 							.userIdMechanism(new StaticUserIdMechanism()).build(),
 					restTemplate);
 		}
+
 	}
 
 	public static class StaticUserIdMechanism implements AppIdUserIdMechanism {
@@ -142,5 +145,7 @@ public class VaultConfigAppIdCustomMechanismTests {
 		public String createUserId() {
 			return "static-string";
 		}
+
 	}
+
 }

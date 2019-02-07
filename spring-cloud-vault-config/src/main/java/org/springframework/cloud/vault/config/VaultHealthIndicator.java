@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
@@ -38,7 +39,7 @@ public class VaultHealthIndicator extends AbstractHealthIndicator {
 	@Override
 	protected void doHealthCheck(Builder builder) {
 
-		VaultHealth vaultHealthResponse = vaultOperations.opsForSys().health();
+		VaultHealth vaultHealthResponse = this.vaultOperations.opsForSys().health();
 
 		if (!vaultHealthResponse.isInitialized()) {
 			builder.down().withDetail("state", "Vault uninitialized");
@@ -61,4 +62,5 @@ public class VaultHealthIndicator extends AbstractHealthIndicator {
 			builder.withDetail("version", vaultHealthResponse.getVersion());
 		}
 	}
+
 }

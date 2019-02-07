@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import org.springframework.vault.core.VaultOperations;
@@ -31,10 +32,9 @@ public interface VaultConfigOperations {
 	 * Read secrets from a secret backend encapsulated within a
 	 * {@link SecretBackendMetadata}. Reading data using this method is suitable for
 	 * secret backends that do not require a request body.
-	 *
 	 * @param secretBackendMetadata must not be {@literal null}.
 	 * @return the configuration data. May be empty but never {@literal null}.
-	 * @throws IllegalStateException if {@link VaultProperties#isFailFast()} is enabled.
+	 * @throws IllegalStateException if {@link VaultProperties#failFast} is enabled.
 	 */
 	Secrets read(SecretBackendMetadata secretBackendMetadata);
 
@@ -42,4 +42,5 @@ public interface VaultConfigOperations {
 	 * @return the underlying {@link VaultOperations}.
 	 */
 	VaultOperations getVaultOperations();
+
 }

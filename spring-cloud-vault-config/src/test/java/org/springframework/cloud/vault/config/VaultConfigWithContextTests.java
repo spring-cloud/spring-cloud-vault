@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
@@ -30,7 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test using config infrastructure with token authentication.
@@ -43,7 +44,8 @@ import static org.assertj.core.api.Assertions.*;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = VaultConfigWithContextTests.TestApplication.class, properties = "spring.cloud.vault.application-name=testVaultApp") // see
+@SpringBootTest(classes = VaultConfigWithContextTests.TestApplication.class, properties = "spring.cloud.vault.application-name=testVaultApp")
+// see
 // https://github.com/spring-cloud/spring-cloud-commons/issues/214
 @ActiveProfiles("my-profile")
 public class VaultConfigWithContextTests {
@@ -68,7 +70,7 @@ public class VaultConfigWithContextTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(configValue).isEqualTo("hello");
+		assertThat(this.configValue).isEqualTo("hello");
 	}
 
 	@SpringBootApplication
@@ -77,5 +79,7 @@ public class VaultConfigWithContextTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

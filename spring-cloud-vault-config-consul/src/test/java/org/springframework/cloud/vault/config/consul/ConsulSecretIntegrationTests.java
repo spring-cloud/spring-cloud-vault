@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.consul;
 
 import java.net.InetSocketAddress;
@@ -38,9 +39,9 @@ import org.springframework.util.Base64Utils;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration.ConsulSecretBackendMetadataFactory.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+import static org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration.ConsulSecretBackendMetadataFactory.forConsul;
 
 /**
  * Integration tests for {@link VaultConfigTemplate} using the consul secret backend. This
@@ -50,21 +51,26 @@ import static org.springframework.cloud.vault.config.consul.VaultConfigConsulBoo
  */
 public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 
-	private final static String CONSUL_HOST = "localhost";
-	private final static int CONSUL_PORT = 8500;
+	private static final String CONSUL_HOST = "localhost";
 
-	private final static String CONNECTION_URL = String.format("%s:%d", CONSUL_HOST,
+	private static final int CONSUL_PORT = 8500;
+
+	private static final String CONNECTION_URL = String.format("%s:%d", CONSUL_HOST,
 			CONSUL_PORT);
 
-	private final static String POLICY = "key \"\" { policy = \"read\" }";
-	private final static String CONSUL_ACL_MASTER_TOKEN = "consul-master-token";
+	private static final String POLICY = "key \"\" { policy = \"read\" }";
 
-	private final static ParameterizedTypeReference<Map<String, String>> STRING_MAP = new ParameterizedTypeReference<Map<String, String>>() {
+	private static final String CONSUL_ACL_MASTER_TOKEN = "consul-master-token";
+
+	private static final ParameterizedTypeReference<Map<String, String>> STRING_MAP = new ParameterizedTypeReference<Map<String, String>>() {
 	};
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
+
 	private VaultConfigOperations configOperations;
+
 	private VaultConsulProperties consul = new VaultConsulProperties();
+
 	private RestTemplate restTemplate = new RestTemplate();
 
 	/**
@@ -75,20 +81,20 @@ public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(CONSUL_HOST, CONSUL_PORT)));
 
-		consul.setEnabled(true);
-		consul.setRole("readonly");
+		this.consul.setEnabled(true);
+		this.consul.setRole("readonly");
 
-		if (!prepare().hasSecretBackend(consul.getBackend())) {
-			prepare().mountSecret(consul.getBackend());
+		if (!prepare().hasSecretBackend(this.consul.getBackend())) {
+			prepare().mountSecret(this.consul.getBackend());
 		}
 
-		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
+		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("X-Consul-Token", CONSUL_ACL_MASTER_TOKEN);
 		HttpEntity<String> requestEntity = new HttpEntity<>(
 				"{\"Name\": \"sample\", \"Type\": \"management\"}", headers);
-		ResponseEntity<Map<String, String>> tokenResponse = restTemplate.exchange(
+		ResponseEntity<Map<String, String>> tokenResponse = this.restTemplate.exchange(
 				"http://{host}:{port}/v1/acl/create", HttpMethod.PUT, requestEntity,
 				STRING_MAP, CONSUL_HOST, CONSUL_PORT);
 
@@ -96,23 +102,26 @@ public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 		consulAccess.put("address", CONNECTION_URL);
 		consulAccess.put("token", tokenResponse.getBody().get("ID"));
 
-		vaultOperations.write(String.format("%s/config/access", consul.getBackend()),
+		vaultOperations.write(String.format("%s/config/access", this.consul.getBackend()),
 				consulAccess);
 
 		vaultOperations.write(
-				String.format("%s/roles/%s", consul.getBackend(), consul.getRole()),
+				String.format("%s/roles/%s", this.consul.getBackend(),
+						this.consul.getRole()),
 				Collections.singletonMap("policy",
 						Base64Utils.encodeToString(POLICY.getBytes())));
 
-		configOperations = new VaultConfigTemplate(vaultOperations, vaultProperties);
+		this.configOperations = new VaultConfigTemplate(vaultOperations,
+				this.vaultProperties);
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, Object> secretProperties = configOperations.read(forConsul(consul))
-				.getData();
+		Map<String, Object> secretProperties = this.configOperations
+				.read(forConsul(this.consul)).getData();
 
 		assertThat(secretProperties).containsKeys("spring.cloud.consul.token");
 	}
+
 }

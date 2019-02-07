@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.consul;
 
 import java.net.InetSocketAddress;
@@ -49,8 +50,9 @@ import static org.junit.Assume.assumeTrue;
 @Ignore("Consul discovery client is set up in the main context, no longer in the bootstrap context")
 public class DiscoveryBootstrapConfigurationTests extends IntegrationTestSupport {
 
-	private final static String CONSUL_HOST = "localhost";
-	private final static int CONSUL_PORT = 8500;
+	private static final String CONSUL_HOST = "localhost";
+
+	private static final int CONSUL_PORT = 8500;
 
 	@Autowired
 	VaultOperations vaultOperations;
@@ -80,8 +82,9 @@ public class DiscoveryBootstrapConfigurationTests extends IntegrationTestSupport
 	@Test
 	public void shouldDiscoverThroughConsul() {
 
-		VaultHealth health = vaultOperations.opsForSys().health();
+		VaultHealth health = this.vaultOperations.opsForSys().health();
 
 		assertThat(health).isNotNull();
 	}
+
 }

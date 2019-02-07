@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import org.junit.Before;
@@ -50,10 +51,10 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 	@Before
 	public void before() {
 
-		propertySourceLocator = new LeasingVaultPropertySourceLocator(
+		this.propertySourceLocator = new LeasingVaultPropertySourceLocator(
 				new VaultProperties(), VaultPropertySourceLocatorSupport
 						.createConfiguration(new VaultGenericBackendProperties()),
-				secretLeaseContainer);
+				this.secretLeaseContainer);
 	}
 
 	@Test
@@ -62,27 +63,27 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 		VaultProperties vaultProperties = new VaultProperties();
 		vaultProperties.getConfig().setOrder(10);
 
-		propertySourceLocator = new LeasingVaultPropertySourceLocator(vaultProperties,
-				VaultPropertySourceLocatorSupport.createConfiguration(
+		this.propertySourceLocator = new LeasingVaultPropertySourceLocator(
+				vaultProperties, VaultPropertySourceLocatorSupport.createConfiguration(
 						new VaultGenericBackendProperties()),
-				secretLeaseContainer);
+				this.secretLeaseContainer);
 
-		assertThat(propertySourceLocator.getOrder()).isEqualTo(10);
+		assertThat(this.propertySourceLocator.getOrder()).isEqualTo(10);
 	}
 
 	@Test
 	public void shouldLocatePropertySources() {
 
-		when(configurableEnvironment.getActiveProfiles()).thenReturn(new String[0]);
+		when(this.configurableEnvironment.getActiveProfiles()).thenReturn(new String[0]);
 
-		PropertySource<?> propertySource = propertySourceLocator
-				.locate(configurableEnvironment);
+		PropertySource<?> propertySource = this.propertySourceLocator
+				.locate(this.configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
 		CompositePropertySource composite = (CompositePropertySource) propertySource;
 		assertThat(composite.getPropertySources()).hasSize(1);
-		verify(secretLeaseContainer)
+		verify(this.secretLeaseContainer)
 				.addRequestedSecret(RequestedSecret.rotating("secret/application"));
 	}
 
@@ -94,16 +95,17 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 		configurer.add(rotating);
 		configurer.add("database/mysql/creds/readonly");
 
-		propertySourceLocator = new LeasingVaultPropertySourceLocator(
-				new VaultProperties(), configurer, secretLeaseContainer);
+		this.propertySourceLocator = new LeasingVaultPropertySourceLocator(
+				new VaultProperties(), configurer, this.secretLeaseContainer);
 
-		PropertySource<?> propertySource = propertySourceLocator
-				.locate(configurableEnvironment);
+		PropertySource<?> propertySource = this.propertySourceLocator
+				.locate(this.configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
-		verify(secretLeaseContainer).addRequestedSecret(rotating);
-		verify(secretLeaseContainer).addRequestedSecret(
+		verify(this.secretLeaseContainer).addRequestedSecret(rotating);
+		verify(this.secretLeaseContainer).addRequestedSecret(
 				RequestedSecret.renewable("database/mysql/creds/readonly"));
 	}
+
 }

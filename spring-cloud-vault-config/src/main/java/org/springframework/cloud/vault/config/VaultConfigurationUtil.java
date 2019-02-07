@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.net.URI;
@@ -25,17 +26,16 @@ import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 
 /**
  * Support class for Vault configuration providing utility methods.
- * 
+ *
  * @author Mark Paluch
  * @since 2.1
  */
-class VaultConfigurationUtil {
+final class VaultConfigurationUtil {
 
 	/**
 	 * Create a {@link SslConfiguration} given {@link Ssl SSL properties}.
-	 * 
-	 * @param ssl
-	 * @return
+	 * @param ssl the SSL properties.
+	 * @return the SSL configuration.
 	 */
 	static SslConfiguration createSslConfiguration(Ssl ssl) {
 
@@ -48,8 +48,8 @@ class VaultConfigurationUtil {
 
 		if (ssl.getKeyStore() != null) {
 			if (StringUtils.hasText(ssl.getKeyStorePassword())) {
-				keyStore = KeyStoreConfiguration.of(ssl.getKeyStore(), ssl
-						.getKeyStorePassword().toCharArray());
+				keyStore = KeyStoreConfiguration.of(ssl.getKeyStore(),
+						ssl.getKeyStorePassword().toCharArray());
 			}
 			else {
 				keyStore = KeyStoreConfiguration.of(ssl.getKeyStore());
@@ -59,8 +59,8 @@ class VaultConfigurationUtil {
 		if (ssl.getTrustStore() != null) {
 
 			if (StringUtils.hasText(ssl.getTrustStorePassword())) {
-				trustStore = KeyStoreConfiguration.of(ssl.getTrustStore(), ssl
-						.getTrustStorePassword().toCharArray());
+				trustStore = KeyStoreConfiguration.of(ssl.getTrustStore(),
+						ssl.getTrustStorePassword().toCharArray());
 			}
 			else {
 				trustStore = KeyStoreConfiguration.of(ssl.getTrustStore());
@@ -72,9 +72,8 @@ class VaultConfigurationUtil {
 
 	/**
 	 * Create a {@link VaultEndpoint} given {@link VaultProperties}.
-	 * 
-	 * @param vaultProperties
-	 * @return
+	 * @param vaultProperties the Vault properties.
+	 * @return the endpoint.
 	 */
 	static VaultEndpoint createVaultEndpoint(VaultProperties vaultProperties) {
 
@@ -89,4 +88,9 @@ class VaultConfigurationUtil {
 
 		return vaultEndpoint;
 	}
+
+	private VaultConfigurationUtil() {
+
+	}
+
 }

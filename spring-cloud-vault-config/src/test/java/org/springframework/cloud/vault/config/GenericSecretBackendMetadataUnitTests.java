@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Arrays;
@@ -21,7 +22,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link GenericSecretBackendMetadata}.
@@ -35,8 +36,8 @@ public class GenericSecretBackendMetadataUnitTests {
 	@Test
 	public void shouldCreateDefaultContexts() {
 
-		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				Collections.emptyList());
+		List<String> contexts = GenericSecretBackendMetadata
+				.buildContexts(this.properties, Collections.emptyList());
 
 		assertThat(contexts).hasSize(1).contains("application");
 	}
@@ -44,10 +45,10 @@ public class GenericSecretBackendMetadataUnitTests {
 	@Test
 	public void shouldCreateDefaultForAppNameAndDefaultContext() {
 
-		properties.setApplicationName("my-app");
+		this.properties.setApplicationName("my-app");
 
-		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				Collections.emptyList());
+		List<String> contexts = GenericSecretBackendMetadata
+				.buildContexts(this.properties, Collections.emptyList());
 
 		assertThat(contexts).hasSize(2).containsSequence("my-app", "application");
 	}
@@ -55,10 +56,10 @@ public class GenericSecretBackendMetadataUnitTests {
 	@Test
 	public void shouldCreateDefaultForAppNameAndDefaultContextWithProfiles() {
 
-		properties.setApplicationName("my-app");
+		this.properties.setApplicationName("my-app");
 
-		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				Arrays.asList("cloud", "local"));
+		List<String> contexts = GenericSecretBackendMetadata
+				.buildContexts(this.properties, Arrays.asList("cloud", "local"));
 
 		assertThat(contexts).hasSize(6).containsSequence("my-app/local", "my-app/cloud",
 				"my-app", "application/local", "application/cloud", "application");
@@ -67,11 +68,11 @@ public class GenericSecretBackendMetadataUnitTests {
 	@Test
 	public void shouldCreateAppNameContextIfDefaultIsDisabled() {
 
-		properties.setApplicationName("my-app");
-		properties.setDefaultContext("");
+		this.properties.setApplicationName("my-app");
+		this.properties.setDefaultContext("");
 
-		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				Collections.emptyList());
+		List<String> contexts = GenericSecretBackendMetadata
+				.buildContexts(this.properties, Collections.emptyList());
 
 		assertThat(contexts).hasSize(1).containsSequence("my-app");
 	}
@@ -79,10 +80,10 @@ public class GenericSecretBackendMetadataUnitTests {
 	@Test
 	public void shouldCreateContextsForCommaSeparatedAppName() {
 
-		properties.setApplicationName("foo,bar");
+		this.properties.setApplicationName("foo,bar");
 
-		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				Collections.emptyList());
+		List<String> contexts = GenericSecretBackendMetadata
+				.buildContexts(this.properties, Collections.emptyList());
 
 		assertThat(contexts).hasSize(3).containsSequence("bar", "foo", "application");
 	}
@@ -90,13 +91,14 @@ public class GenericSecretBackendMetadataUnitTests {
 	@Test
 	public void shouldCreateContextsWithProfile() {
 
-		properties.setApplicationName("foo,bar");
+		this.properties.setApplicationName("foo,bar");
 
-		List<String> contexts = GenericSecretBackendMetadata.buildContexts(properties,
-				Arrays.asList("cloud", "local"));
+		List<String> contexts = GenericSecretBackendMetadata
+				.buildContexts(this.properties, Arrays.asList("cloud", "local"));
 
 		assertThat(contexts).hasSize(9).containsSequence("bar/local", "bar/cloud", "bar",
 				"foo/local", "foo/cloud", "foo", "application/local", "application/cloud",
 				"application");
 	}
+
 }

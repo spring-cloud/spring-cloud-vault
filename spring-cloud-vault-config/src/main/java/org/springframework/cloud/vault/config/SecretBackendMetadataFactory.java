@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 /**
@@ -31,6 +32,7 @@ package org.springframework.cloud.vault.config;
  * Typically implemented by secret backend providers that implement access to a particular
  * backend using read operations.
  *
+ * @param <T> descriptor type.
  * @author Mark Paluch
  * @see SecretBackendMetadata
  * @see LeasingSecretBackendMetadata
@@ -41,7 +43,6 @@ public interface SecretBackendMetadataFactory<T extends VaultSecretBackendDescri
 	/**
 	 * Converts a {@link VaultSecretBackendDescriptor} into a
 	 * {@link SecretBackendMetadata}.
-	 *
 	 * @param backendDescriptor must not be {@literal null}.
 	 * @return the {@link SecretBackendMetadata}.
 	 * @see LeasingSecretBackendMetadata
@@ -51,10 +52,10 @@ public interface SecretBackendMetadataFactory<T extends VaultSecretBackendDescri
 	/**
 	 * Checks whether the {@link VaultSecretBackendDescriptor} is supported by this
 	 * {@link SecretBackendMetadataFactory}.
-	 *
 	 * @param backendDescriptor must not be {@literal null}.
 	 * @return {@literal true} if the given {@link VaultSecretBackendDescriptor} is
 	 * supported.
 	 */
 	boolean supports(VaultSecretBackendDescriptor backendDescriptor);
+
 }

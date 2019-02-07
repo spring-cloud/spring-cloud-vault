@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.databases;
 
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
@@ -26,25 +27,23 @@ public interface DatabaseSecretProperties extends VaultSecretBackendDescriptor {
 
 	/**
 	 * Role name.
-	 *
 	 * @return the role name
 	 */
 	String getRole();
 
 	/**
 	 * Backend path.
-	 *
 	 * @return the backend path.
 	 */
 	String getBackend();
 
 	/**
-	 * Name of the target property for the obtained username.
+	 * @return name of the target property for the obtained username.
 	 */
 	String getUsernameProperty();
 
 	/**
-	 * Name of the target property for the obtained password.
+	 * @return name of the target property for the obtained password.
 	 */
 	String getPasswordProperty();
 

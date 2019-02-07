@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.io.File;
@@ -66,9 +67,8 @@ public class VaultConfigKubernetesTests {
 		vaultRule.before();
 
 		String minikubeIp = System.getProperty("MINIKUBE_IP");
-		assumeTrue(StringUtils.hasText(minikubeIp)
-				&& vaultRule.prepare().getVersion()
-						.isGreaterThanOrEqualTo(Version.parse("0.8.3")));
+		assumeTrue(StringUtils.hasText(minikubeIp) && vaultRule.prepare().getVersion()
+				.isGreaterThanOrEqualTo(Version.parse("0.8.3")));
 
 		if (!vaultRule.prepare().hasAuth("kubernetes")) {
 			vaultRule.prepare().mountAuth("kubernetes");
@@ -76,8 +76,8 @@ public class VaultConfigKubernetesTests {
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
-		Policy policy = Policy.of(Rule.builder().path("*")
-				.capabilities(BuiltinCapabilities.READ).build());
+		Policy policy = Policy.of(
+				Rule.builder().path("*").capabilities(BuiltinCapabilities.READ).build());
 
 		vaultOperations.opsForSys().createOrUpdatePolicy("testpolicy", policy);
 
@@ -105,7 +105,7 @@ public class VaultConfigKubernetesTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(configValue).isEqualTo("foo");
+		assertThat(this.configValue).isEqualTo("foo");
 	}
 
 	@SpringBootApplication
@@ -114,5 +114,7 @@ public class VaultConfigKubernetesTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

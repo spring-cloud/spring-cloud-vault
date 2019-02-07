@@ -31,7 +31,6 @@ public interface VaultSecretBackendDescriptor {
 
 	/**
 	 * Backend path without leading/trailing slashes.
-	 *
 	 * @return the backend path such as {@code secret} or {@code mysql}.
 	 */
 	String getBackend();
@@ -40,4 +39,5 @@ public interface VaultSecretBackendDescriptor {
 	 * @return {@literal true} if the backend is enabled.
 	 */
 	boolean isEnabled();
+
 }

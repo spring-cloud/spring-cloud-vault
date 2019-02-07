@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
@@ -33,7 +34,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.authentication.IpAddressUserId;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test using config infrastructure with AppId authentication.
@@ -49,7 +50,9 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest(classes = VaultConfigAppIdTests.TestApplication.class, properties = {
 		"spring.cloud.vault.authentication=appid",
 		"spring.cloud.vault.app-id.user-id=IP_ADDRESS",
-		"spring.cloud.vault.application-name=VaultConfigAppIdTests" }) // see https://github.com/spring-cloud/spring-cloud-commons/issues/214
+		"spring.cloud.vault.application-name=VaultConfigAppIdTests" })
+// see
+// https://github.com/spring-cloud/spring-cloud-commons/issues/214
 public class VaultConfigAppIdTests {
 
 	@BeforeClass
@@ -104,7 +107,7 @@ public class VaultConfigAppIdTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(configValue).isEqualTo("foo");
+		assertThat(this.configValue).isEqualTo("foo");
 	}
 
 	@SpringBootApplication
@@ -113,5 +116,7 @@ public class VaultConfigAppIdTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

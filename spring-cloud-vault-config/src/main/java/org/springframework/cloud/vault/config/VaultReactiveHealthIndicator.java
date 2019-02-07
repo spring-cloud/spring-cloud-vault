@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.lang.reflect.UndeclaredThrowableException;
@@ -49,14 +50,12 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 	@Override
 	protected Mono<Health> doHealthCheck(Builder builder) {
 
-		return vaultOperations
-				.doWithSession(it -> it.get().uri("sys/health").exchange())
-				.flatMap(it -> it.bodyToMono(VaultHealthImpl.class))
+		return this.vaultOperations
+				.doWithSession((it) -> it.get().uri("sys/health").exchange())
+				.flatMap((it) -> it.bodyToMono(VaultHealthImpl.class))
 				.onErrorResume(WebClientResponseException.class,
 						VaultReactiveHealthIndicator::deserializeError)
-				.map(vaultHealthResponse -> {
-					return getHealth(builder, vaultHealthResponse);
-				});
+				.map((vaultHealthResponse) -> getHealth(builder, vaultHealthResponse));
 	}
 
 	private static Mono<? extends VaultHealthImpl> deserializeError(
@@ -74,7 +73,8 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 		}
 	}
 
-	private static Health getHealth(Builder builder, VaultHealthImpl vaultHealthResponse) {
+	private static Health getHealth(Builder builder,
+			VaultHealthImpl vaultHealthResponse) {
 
 		if (!vaultHealthResponse.isInitialized()) {
 			builder.withDetail("state", "Vault uninitialized");
@@ -101,11 +101,14 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 
 	@Data
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	static class VaultHealthImpl implements VaultHealth {
+	private static final class VaultHealthImpl implements VaultHealth {
 
 		private final boolean initialized;
+
 		private final boolean sealed;
+
 		private final boolean standby;
+
 		private final int serverTimeUtc;
 
 		@Nullable
@@ -123,5 +126,7 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 			this.serverTimeUtc = serverTimeUtc;
 			this.version = version;
 		}
+
 	}
+
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.consul;
 
 import java.net.InetSocketAddress;
@@ -40,8 +41,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Java6Assertions.*;
-import static org.junit.Assume.*;
+import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests using the consul secret backend. In case this test should fail
@@ -57,16 +58,18 @@ import static org.junit.Assume.*;
 		"spring.cloud.vault.consul.role=readonly" })
 public class VaultConfigConsulTests {
 
-	private final static String CONSUL_HOST = "localhost";
-	private final static int CONSUL_PORT = 8500;
+	private static final String CONSUL_HOST = "localhost";
 
-	private final static String CONNECTION_URL = String.format("%s:%d", CONSUL_HOST,
+	private static final int CONSUL_PORT = 8500;
+
+	private static final String CONNECTION_URL = String.format("%s:%d", CONSUL_HOST,
 			CONSUL_PORT);
 
-	private final static String POLICY = "key \"\" { policy = \"read\" }";
-	private final static String CONSUL_ACL_MASTER_TOKEN = "consul-master-token";
+	private static final String POLICY = "key \"\" { policy = \"read\" }";
 
-	private final static ParameterizedTypeReference<Map<String, String>> STRING_MAP = new ParameterizedTypeReference<Map<String, String>>() {
+	private static final String CONSUL_ACL_MASTER_TOKEN = "consul-master-token";
+
+	private static final ParameterizedTypeReference<Map<String, String>> STRING_MAP = new ParameterizedTypeReference<Map<String, String>>() {
 	};
 
 	/**
@@ -110,7 +113,7 @@ public class VaultConfigConsulTests {
 
 	@Test
 	public void shouldHaveToken() {
-		assertThat(token).isNotEmpty();
+		assertThat(this.token).isNotEmpty();
 	}
 
 	@SpringBootApplication
@@ -119,5 +122,7 @@ public class VaultConfigConsulTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

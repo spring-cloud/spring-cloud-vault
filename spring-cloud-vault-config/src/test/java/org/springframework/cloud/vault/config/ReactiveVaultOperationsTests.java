@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
@@ -32,7 +33,7 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.ReactiveVaultOperations;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test using config infrastructure with token authentication.
@@ -68,7 +69,7 @@ public class ReactiveVaultOperationsTests {
 	@Test
 	public void shouldAccessVault() {
 
-		StepVerifier.create(reactiveOperations.read("secret/testVaultApp"))
+		StepVerifier.create(this.reactiveOperations.read("secret/testVaultApp"))
 				.consumeNextWith(actual -> {
 					assertThat(actual.getData()).containsEntry("vault.value", "foo");
 				}).verifyComplete();
@@ -80,5 +81,7 @@ public class ReactiveVaultOperationsTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

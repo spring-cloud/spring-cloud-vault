@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Map;
@@ -36,11 +37,11 @@ import org.springframework.vault.support.VaultResponse;
 public class VaultConfigTemplate implements VaultConfigOperations {
 
 	private final VaultOperations vaultOperations;
+
 	private final VaultProperties properties;
 
 	/**
 	 * Create a new {@link VaultConfigTemplate} given {@link VaultOperations}.
-	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param properties must not be {@literal null}.
 	 */
@@ -63,7 +64,7 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 				secretBackendMetadata.getPath()));
 
 		try {
-			VaultResponse vaultResponse = vaultOperations
+			VaultResponse vaultResponse = this.vaultOperations
 					.read(secretBackendMetadata.getPath());
 
 			if (vaultResponse == null) {
@@ -85,7 +86,7 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 		}
 		catch (VaultException e) {
 
-			if (properties.isFailFast()) {
+			if (this.properties.isFailFast()) {
 				throw new IllegalStateException(
 						"Could not locate PropertySource and the fail fast property is set, failing.",
 						e);
@@ -118,6 +119,7 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 	}
 
 	public VaultOperations getVaultOperations() {
-		return vaultOperations;
+		return this.vaultOperations;
 	}
+
 }

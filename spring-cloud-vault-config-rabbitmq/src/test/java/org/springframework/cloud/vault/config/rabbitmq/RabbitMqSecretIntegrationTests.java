@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.rabbitmq;
 
 import java.net.InetSocketAddress;
@@ -31,9 +32,9 @@ import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.Version;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration.RabbitMqSecretBackendMetadataFactory.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration.RabbitMqSecretBackendMetadataFactory.forRabbitMq;
 
 /**
  * Integration tests for {@link VaultConfigTemplate} using the rabbitmq secret backend.
@@ -43,19 +44,23 @@ import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitM
  */
 public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 
-	private final static int RABBITMQ_HTTP_MANAGEMENT_PORT = 15672;
-	private final static String RABBITMQ_HOST = "localhost";
+	private static final int RABBITMQ_HTTP_MANAGEMENT_PORT = 15672;
 
-	private final static String RABBITMQ_USERNAME = "guest";
-	private final static String RABBITMQ_PASSWORD = "guest";
+	private static final String RABBITMQ_HOST = "localhost";
 
-	private final static String RABBITMQ_URI = String.format("http://%s:%d",
+	private static final String RABBITMQ_USERNAME = "guest";
+
+	private static final String RABBITMQ_PASSWORD = "guest";
+
+	private static final String RABBITMQ_URI = String.format("http://%s:%d",
 			RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT);
 
-	private final static String VHOSTS_ROLE = "{\"/\":{\"write\": \".*\", \"read\": \".*\"}}";
+	private static final String VHOSTS_ROLE = "{\"/\":{\"write\": \".*\", \"read\": \".*\"}}";
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
+
 	private VaultConfigTemplate configOperations;
+
 	private VaultRabbitMqProperties rabbitmq = new VaultRabbitMqProperties();
 
 	/**
@@ -68,11 +73,11 @@ public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 				.to(new InetSocketAddress(RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT)));
 		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.2")));
 
-		rabbitmq.setEnabled(true);
-		rabbitmq.setRole("readonly");
+		this.rabbitmq.setEnabled(true);
+		this.rabbitmq.setRole("readonly");
 
-		if (!prepare().hasSecretBackend(rabbitmq.getBackend())) {
-			prepare().mountSecret(rabbitmq.getBackend());
+		if (!prepare().hasSecretBackend(this.rabbitmq.getBackend())) {
+			prepare().mountSecret(this.rabbitmq.getBackend());
 		}
 
 		Map<String, String> connection = new HashMap<>();
@@ -83,22 +88,26 @@ public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 		VaultOperations vaultOperations = prepare().getVaultOperations();
 
 		vaultOperations.write(
-				String.format("%s/config/connection", rabbitmq.getBackend()), connection);
+				String.format("%s/config/connection", this.rabbitmq.getBackend()),
+				connection);
 
 		vaultOperations.write(
-				String.format("%s/roles/%s", rabbitmq.getBackend(), rabbitmq.getRole()),
+				String.format("%s/roles/%s", this.rabbitmq.getBackend(),
+						this.rabbitmq.getRole()),
 				Collections.singletonMap("vhosts", VHOSTS_ROLE));
 
-		configOperations = new VaultConfigTemplate(vaultOperations, vaultProperties);
+		this.configOperations = new VaultConfigTemplate(vaultOperations,
+				this.vaultProperties);
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, Object> secretProperties = configOperations
-				.read(forRabbitMq(rabbitmq)).getData();
+		Map<String, Object> secretProperties = this.configOperations
+				.read(forRabbitMq(this.rabbitmq)).getData();
 
 		assertThat(secretProperties).containsKeys("spring.rabbitmq.username",
 				"spring.rabbitmq.password");
 	}
+
 }

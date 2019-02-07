@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.LinkedHashMap;
@@ -43,12 +44,11 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations
 
 	/**
 	 * Creates a new {@link VaultPropertySource}.
-	 *
 	 * @param operations must not be {@literal null}.
 	 * @param failFast fail if properties could not be read because of access errors.
 	 * @param secretBackendMetadata must not be {@literal null}.
 	 */
-	public VaultPropertySource(VaultConfigOperations operations, boolean failFast,
+	VaultPropertySource(VaultConfigOperations operations, boolean failFast,
 			SecretBackendMetadata secretBackendMetadata) {
 
 		super(secretBackendMetadata.getName(), operations);
@@ -68,16 +68,16 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations
 		try {
 			this.secrets = this.source.read(this.secretBackendMetadata);
 			if (this.secrets != null) {
-				this.properties.putAll(secrets.getData());
+				this.properties.putAll(this.secrets.getData());
 			}
 		}
 		catch (RuntimeException e) {
 
 			String message = String.format(
 					"Unable to read properties from Vault using %s for %s ", getName(),
-					secretBackendMetadata.getVariables());
+					this.secretBackendMetadata.getVariables());
 
-			if (failFast) {
+			if (this.failFast) {
 				throw e;
 			}
 
@@ -95,4 +95,5 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations
 		Set<String> strings = this.properties.keySet();
 		return strings.toArray(new String[strings.size()]);
 	}
+
 }

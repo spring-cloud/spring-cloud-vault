@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
@@ -29,7 +30,7 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test using config infrastructure with token authentication.
@@ -60,7 +61,7 @@ public class VaultConfigGenericBackendDisabledTests {
 
 	@Test
 	public void shouldNotContainVaultProperties() {
-		assertThat(environment.containsProperty("vault.value")).isFalse();
+		assertThat(this.environment.containsProperty("vault.value")).isFalse();
 	}
 
 	@SpringBootApplication
@@ -69,5 +70,7 @@ public class VaultConfigGenericBackendDisabledTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
@@ -34,8 +35,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration test using config infrastructure with Cubbyhole authentication.
@@ -69,15 +70,14 @@ public class VaultConfigCubbyholeAuthenticationTests {
 				Collections.singletonMap("vault.value",
 						VaultConfigCubbyholeAuthenticationTests.class.getSimpleName()));
 
-		VaultResponse vaultResponse = vaultOperations
-.doWithSession(restOperations -> {
+		VaultResponse vaultResponse = vaultOperations.doWithSession(restOperations -> {
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("X-Vault-Wrap-TTL", "1h");
 
-			return restOperations.postForObject("/auth/token/create", new HttpEntity<>(
-					headers), VaultResponse.class);
-				});
+			return restOperations.postForObject("/auth/token/create",
+					new HttpEntity<>(headers), VaultResponse.class);
+		});
 
 		String initialToken = vaultResponse.getWrapInfo().get("token");
 		System.setProperty("spring.cloud.vault.token", initialToken);
@@ -93,7 +93,7 @@ public class VaultConfigCubbyholeAuthenticationTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(configValue).isEqualTo(getClass().getSimpleName());
+		assertThat(this.configValue).isEqualTo(getClass().getSimpleName());
 	}
 
 	@SpringBootApplication
@@ -102,5 +102,7 @@ public class VaultConfigCubbyholeAuthenticationTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

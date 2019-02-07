@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.util;
 
 import java.net.InetAddress;
@@ -58,7 +59,6 @@ public class VaultRule extends ExternalResource {
 	/**
 	 * Create a new {@link VaultRule} with the given {@link SslConfiguration} and
 	 * {@link VaultEndpoint}.
-	 *
 	 * @param sslConfiguration must not be {@literal null}.
 	 * @param vaultEndpoint must not be {@literal null}.
 	 */
@@ -67,8 +67,8 @@ public class VaultRule extends ExternalResource {
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
 		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
 
-		ClientHttpRequestFactory requestFactory = TestRestTemplateFactory.create(
-				sslConfiguration).getRequestFactory();
+		ClientHttpRequestFactory requestFactory = TestRestTemplateFactory
+				.create(sslConfiguration).getRequestFactory();
 
 		VaultTemplate vaultTemplate = new VaultTemplate(vaultEndpoint, requestFactory,
 				new PreparingSessionManager());
@@ -84,22 +84,21 @@ public class VaultRule extends ExternalResource {
 		try (Socket socket = new Socket()) {
 
 			socket.connect(new InetSocketAddress(InetAddress.getByName("localhost"),
-					vaultEndpoint.getPort()));
+					this.vaultEndpoint.getPort()));
 		}
 		catch (Exception ex) {
-			throw new IllegalStateException(
-					String.format(
-							"Vault is not running on localhost:%d which is required to run a test using @Rule %s",
-							vaultEndpoint.getPort(), getClass().getSimpleName()));
+			throw new IllegalStateException(String.format(
+					"Vault is not running on localhost:%d which is required to run a test using @Rule %s",
+					this.vaultEndpoint.getPort(), getClass().getSimpleName()));
 		}
 
 		if (!this.prepareVault.isAvailable()) {
 
-			this.token = prepareVault.initializeVault();
+			this.token = this.prepareVault.initializeVault();
 			this.prepareVault.createToken(Settings.token().getToken(), "root");
 
-			if (this.prepareVault.getVersion().isGreaterThanOrEqualTo(
-					VERSIONING_INTRODUCED_WITH)) {
+			if (this.prepareVault.getVersion()
+					.isGreaterThanOrEqualTo(VERSIONING_INTRODUCED_WITH)) {
 				this.prepareVault.disableGenericVersioning();
 				this.prepareVault.mountVersionedKvBackend();
 			}
@@ -109,14 +108,16 @@ public class VaultRule extends ExternalResource {
 	}
 
 	public PrepareVault prepare() {
-		return prepareVault;
+		return this.prepareVault;
 	}
 
 	private class PreparingSessionManager implements SessionManager {
 
 		@Override
 		public VaultToken getSessionToken() {
-			return token;
+			return VaultRule.this.token;
 		}
+
 	}
+
 }

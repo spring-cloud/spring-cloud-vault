@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.net.URI;
@@ -41,7 +42,7 @@ import org.springframework.vault.client.VaultEndpointProvider;
  * @since 1.1
  */
 @Configuration
-@ConditionalOnProperty(value = "spring.cloud.vault.discovery.enabled")
+@ConditionalOnProperty("spring.cloud.vault.discovery.enabled")
 @EnableConfigurationProperties(VaultProperties.class)
 @Order(Ordered.LOWEST_PRECEDENCE - 2)
 @EnableDiscoveryClient
@@ -93,4 +94,5 @@ public class DiscoveryClientVaultBootstrapConfiguration {
 
 		return () -> vaultEndpoint;
 	}
+
 }

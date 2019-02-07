@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.List;
@@ -24,8 +25,8 @@ import org.springframework.util.Assert;
  *
  * @author Mark Paluch
  */
-public class GenericSecretBackendMetadata extends KeyValueSecretBackendMetadata implements
-		SecretBackendMetadata {
+public final class GenericSecretBackendMetadata extends KeyValueSecretBackendMetadata
+		implements SecretBackendMetadata {
 
 	private GenericSecretBackendMetadata(String path) {
 		super(path);
@@ -34,7 +35,6 @@ public class GenericSecretBackendMetadata extends KeyValueSecretBackendMetadata 
 	/**
 	 * Create a {@link SecretBackendMetadata} for the {@code generic} secret backend given
 	 * a {@code secretBackendPath} and {@code key}.
-	 *
 	 * @param secretBackendPath the secret backend mount path without leading/trailing
 	 * slashes, must not be empty or {@literal null}.
 	 * @param key the key within the secret backend. May contain slashes but not
@@ -43,7 +43,8 @@ public class GenericSecretBackendMetadata extends KeyValueSecretBackendMetadata 
 	 */
 	public static SecretBackendMetadata create(String secretBackendPath, String key) {
 
-		Assert.hasText(secretBackendPath, "Secret backend path must not be null or empty");
+		Assert.hasText(secretBackendPath,
+				"Secret backend path must not be null or empty");
 		Assert.hasText(key, "Key must not be null or empty");
 
 		return create(String.format("%s/%s", secretBackendPath, key));
@@ -52,7 +53,6 @@ public class GenericSecretBackendMetadata extends KeyValueSecretBackendMetadata 
 	/**
 	 * Create a {@link SecretBackendMetadata} for the {@code generic} secret backend given
 	 * a {@code path}.
-	 *
 	 * @param path the relative path of the secret. slashes, must not be empty or
 	 * {@literal null}.
 	 * @return the {@link SecretBackendMetadata}
@@ -65,8 +65,7 @@ public class GenericSecretBackendMetadata extends KeyValueSecretBackendMetadata 
 	/**
 	 * Build a list of context paths from application name and the active profile names.
 	 * Application name and profiles support multiple (comma-separated) values.
-	 *
-	 * @param properties
+	 * @param properties the generic backend properties.
 	 * @param profiles active application profiles.
 	 * @return list of context paths.
 	 */
@@ -79,7 +78,6 @@ public class GenericSecretBackendMetadata extends KeyValueSecretBackendMetadata 
 	 * Create a list of context names from a combination of application name and
 	 * application name with profile name. Using an empty application name will return an
 	 * empty list.
-	 *
 	 * @param applicationName the application name. May be empty.
 	 * @param profiles active application profiles.
 	 * @param profileSeparator profile separator character between application name and
@@ -92,4 +90,5 @@ public class GenericSecretBackendMetadata extends KeyValueSecretBackendMetadata 
 		return KeyValueSecretBackendMetadata.buildContexts(applicationName, profiles,
 				profileSeparator);
 	}
+
 }

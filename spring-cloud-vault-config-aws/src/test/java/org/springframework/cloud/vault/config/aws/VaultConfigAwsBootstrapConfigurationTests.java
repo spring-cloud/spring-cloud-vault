@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.aws;
 
 import org.junit.Test;
@@ -52,10 +53,10 @@ public class VaultConfigAwsBootstrapConfigurationTests extends IntegrationTestSu
 	@Test
 	public void shouldApplyCustomConfiguration() {
 
-		SecretBackendMetadata metadata = factory.createMetadata(properties);
+		SecretBackendMetadata metadata = this.factory.createMetadata(this.properties);
 
 		assertThat(metadata).isInstanceOf(GenericSecretBackendMetadata.class);
-		assertThat(metadata.getPath()).isEqualTo(properties.getRole());
+		assertThat(metadata.getPath()).isEqualTo(this.properties.getRole());
 	}
 
 	@Configuration
@@ -74,5 +75,7 @@ public class VaultConfigAwsBootstrapConfigurationTests extends IntegrationTestSu
 				}
 			};
 		}
+
 	}
+
 }

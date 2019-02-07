@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import org.springframework.cloud.client.ServiceInstance;
@@ -28,10 +29,10 @@ public interface VaultServiceInstanceProvider {
 
 	/**
 	 * Lookup {@link ServiceInstance} by {@code serviceId}.
-	 *
 	 * @param serviceId the service Id.
 	 * @return {@link ServiceInstance} for the given {@code serviceId}.
 	 * @throws IllegalStateException if no service with {@code serviceId} was found.
 	 */
 	ServiceInstance getVaultServerInstance(String serviceId);
+
 }

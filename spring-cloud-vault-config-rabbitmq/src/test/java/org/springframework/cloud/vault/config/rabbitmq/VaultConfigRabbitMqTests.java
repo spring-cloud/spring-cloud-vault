@@ -38,7 +38,7 @@ import org.springframework.cloud.vault.util.Version;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
 
-import static org.junit.Assume.*;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests using the rabbitmq secret backend. In case this test should fail
@@ -55,17 +55,20 @@ import static org.junit.Assume.*;
 		"spring.rabbitmq.address=localhost" })
 public class VaultConfigRabbitMqTests {
 
-	private final static int RABBITMQ_HTTP_MANAGEMENT_PORT = 15672;
-	private final static int RABBITMQ_PORT = 5672;
-	private final static String RABBITMQ_HOST = "localhost";
+	private static final int RABBITMQ_HTTP_MANAGEMENT_PORT = 15672;
 
-	private final static String RABBITMQ_USERNAME = "guest";
-	private final static String RABBITMQ_PASSWORD = "guest";
+	private static final int RABBITMQ_PORT = 5672;
 
-	private final static String RABBITMQ_URI = String.format("http://%s:%d",
+	private static final String RABBITMQ_HOST = "localhost";
+
+	private static final String RABBITMQ_USERNAME = "guest";
+
+	private static final String RABBITMQ_PASSWORD = "guest";
+
+	private static final String RABBITMQ_URI = String.format("http://%s:%d",
 			RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT);
 
-	private final static String VHOSTS_ROLE = "{\"/\":{\"write\": \".*\", \"read\": \".*\"}}";
+	private static final String VHOSTS_ROLE = "{\"/\":{\"write\": \".*\", \"read\": \".*\"}}";
 
 	/**
 	 * Initialize the rabbitmq secret backend.
@@ -110,7 +113,7 @@ public class VaultConfigRabbitMqTests {
 
 	@Test
 	public void shouldConnectSpringConnectionFactory() {
-		connectionFactory.createConnection().close();
+		this.connectionFactory.createConnection().close();
 	}
 
 	@Test
@@ -119,8 +122,8 @@ public class VaultConfigRabbitMqTests {
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(RABBITMQ_HOST);
 		factory.setPort(RABBITMQ_PORT);
-		factory.setUsername(username);
-		factory.setPassword(password);
+		factory.setUsername(this.username);
+		factory.setPassword(this.password);
 
 		try (Connection connection = factory.newConnection()) {
 			connection.createChannel().close();
@@ -133,5 +136,7 @@ public class VaultConfigRabbitMqTests {
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
 		}
+
 	}
+
 }

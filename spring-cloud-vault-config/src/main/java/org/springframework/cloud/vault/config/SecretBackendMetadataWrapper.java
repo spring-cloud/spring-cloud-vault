@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.util.Map;
@@ -23,7 +24,7 @@ import org.springframework.vault.core.util.PropertyTransformer;
 /**
  * Provides a convenient implementation of the {@link SecretBackendMetadata} interface
  * that can be subclassed to override specific methods.
- * <p/>
+ * <p>
  * This class implements the Wrapper or Decorator pattern. Methods default to calling
  * through to the wrapped request object.
  *
@@ -37,7 +38,6 @@ public class SecretBackendMetadataWrapper implements SecretBackendMetadata {
 	/**
 	 * Create a new {@link SecretBackendMetadataWrapper} given
 	 * {@link SecretBackendMetadata}.
-	 *
 	 * @param delegate must not be {@literal null}.
 	 */
 	public SecretBackendMetadataWrapper(SecretBackendMetadata delegate) {
@@ -49,21 +49,22 @@ public class SecretBackendMetadataWrapper implements SecretBackendMetadata {
 
 	@Override
 	public String getName() {
-		return delegate.getName();
+		return this.delegate.getName();
 	}
 
 	@Override
 	public String getPath() {
-		return delegate.getPath();
+		return this.delegate.getPath();
 	}
 
 	@Override
 	public PropertyTransformer getPropertyTransformer() {
-		return delegate.getPropertyTransformer();
+		return this.delegate.getPropertyTransformer();
 	}
 
 	@Override
 	public Map<String, String> getVariables() {
-		return delegate.getVariables();
+		return this.delegate.getVariables();
 	}
+
 }

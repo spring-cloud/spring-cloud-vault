@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import java.time.Duration;
@@ -73,12 +74,12 @@ public class VaultProperties implements EnvironmentAware {
 	private Discovery discovery = new Discovery();
 
 	/**
-	 * Connection timeout;
+	 * Connection timeout.
 	 */
 	private int connectionTimeout = 5000;
 
 	/**
-	 * Read timeout;
+	 * Read timeout.
 	 */
 	private int readTimeout = 15000;
 
@@ -129,9 +130,15 @@ public class VaultProperties implements EnvironmentAware {
 		}
 	}
 
+	/**
+	 * Discovery properties.
+	 */
 	@Data
 	public static class Discovery {
 
+		/**
+		 * Default service Id.
+		 */
 		public static final String DEFAULT_VAULT = "vault";
 
 		/**
@@ -144,8 +151,12 @@ public class VaultProperties implements EnvironmentAware {
 		 * Service id to locate Vault.
 		 */
 		private String serviceId = DEFAULT_VAULT;
+
 	}
 
+	/**
+	 * AppId properties.
+	 */
 	@Data
 	@Validated
 	public static class AppIdProperties {
@@ -155,14 +166,14 @@ public class VaultProperties implements EnvironmentAware {
 		 *
 		 * @see org.springframework.vault.authentication.MacAddressUserId
 		 */
-		public final static String MAC_ADDRESS = "MAC_ADDRESS";
+		public static final String MAC_ADDRESS = "MAC_ADDRESS";
 
 		/**
 		 * Property value for UserId generation using an IP-Address.
 		 *
 		 * @see org.springframework.vault.authentication.IpAddressUserId
 		 */
-		public final static String IP_ADDRESS = "IP_ADDRESS";
+		public static final String IP_ADDRESS = "IP_ADDRESS";
 
 		/**
 		 * Mount path of the AppId authentication backend.
@@ -180,8 +191,12 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		@NotEmpty
 		private String userId = MAC_ADDRESS;
+
 	}
 
+	/**
+	 * AppRole properties.
+	 */
 	@Data
 	@Validated
 	public static class AppRoleProperties {
@@ -205,8 +220,12 @@ public class VaultProperties implements EnvironmentAware {
 		 * The SecretId.
 		 */
 		private String secretId = null;
+
 	}
 
+	/**
+	 * AWS-EC2 properties.
+	 */
 	@Data
 	@Validated
 	public static class AwsEc2Properties {
@@ -233,8 +252,12 @@ public class VaultProperties implements EnvironmentAware {
 		 * generation.
 		 */
 		private String nonce;
+
 	}
 
+	/**
+	 * AWS-IAM properties.
+	 */
 	@Data
 	public static class AwsIamProperties {
 
@@ -254,8 +277,12 @@ public class VaultProperties implements EnvironmentAware {
 		 * headers of login requests.
 		 */
 		private String serverName;
+
 	}
 
+	/**
+	 * Azure MSI properties.
+	 */
 	@Data
 	public static class AzureMsiProperties {
 
@@ -269,8 +296,12 @@ public class VaultProperties implements EnvironmentAware {
 		 * Name of the role.
 		 */
 		private String role = "";
+
 	}
 
+	/**
+	 * GCP-GCE properties.
+	 */
 	@Data
 	public static class GcpGceProperties {
 
@@ -289,8 +320,12 @@ public class VaultProperties implements EnvironmentAware {
 		 * Optional service account id. Using the default id if left unconfigured.
 		 */
 		private String serviceAccount = "";
+
 	}
 
+	/**
+	 * GCP-IAM properties.
+	 */
 	@Data
 	public static class GcpIamProperties {
 
@@ -324,8 +359,12 @@ public class VaultProperties implements EnvironmentAware {
 		 * Credentials configuration.
 		 */
 		private final GcpCredentials credentials = new GcpCredentials();
+
 	}
 
+	/**
+	 * GCP credential properties.
+	 */
 	@Data
 	public static class GcpCredentials {
 
@@ -342,8 +381,12 @@ public class VaultProperties implements EnvironmentAware {
 		 * The base64 encoded contents of an OAuth2 account private key in JSON format.
 		 */
 		private String encodedKey;
+
 	}
 
+	/**
+	 * Kubernetes properties.
+	 */
 	@Data
 	public static class KubernetesProperties {
 
@@ -363,8 +406,12 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		@NotEmpty
 		private String serviceAccountTokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token";
+
 	}
 
+	/**
+	 * SSL properties.
+	 */
 	@Data
 	@Validated
 	public static class Ssl {
@@ -394,8 +441,12 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		@NotEmpty
 		private String certAuthPath = "cert";
+
 	}
 
+	/**
+	 * Property source properties.
+	 */
 	@Data
 	public static class Config {
 
@@ -408,6 +459,7 @@ public class VaultProperties implements EnvironmentAware {
 		private int order = 0;
 
 		private Lifecycle lifecycle = new Lifecycle();
+
 	}
 
 	/**
@@ -421,9 +473,16 @@ public class VaultProperties implements EnvironmentAware {
 		 * Enable lifecycle management.
 		 */
 		private boolean enabled = true;
+
 	}
 
+	/**
+	 * Enumeration of authentication methods.
+	 */
 	public enum AuthenticationMethod {
+
 		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, KUBERNETES
+
 	}
+
 }

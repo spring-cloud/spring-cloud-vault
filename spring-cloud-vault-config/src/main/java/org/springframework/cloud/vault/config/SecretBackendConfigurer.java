@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import org.springframework.vault.core.lease.domain.RequestedSecret;
@@ -40,7 +41,6 @@ public interface SecretBackendConfigurer {
 
 	/**
 	 * Add a {@link SecretBackendMetadata} given its {@code path}.
-	 *
 	 * @param path must not be {@literal null} or empty.
 	 * @return {@code this} {@link SecretBackendConfigurer}.
 	 */
@@ -49,7 +49,6 @@ public interface SecretBackendConfigurer {
 	/**
 	 * Add a {@link SecretBackendMetadata} given its {@code path} and
 	 * {@link PropertyTransformer}.
-	 *
 	 * @param path must not be {@literal null} or empty.
 	 * @param propertyTransformer must not be {@literal null}.
 	 * @return {@code this} {@link SecretBackendConfigurer}.
@@ -58,7 +57,6 @@ public interface SecretBackendConfigurer {
 
 	/**
 	 * Add a {@link SecretBackendMetadata}.
-	 *
 	 * @param metadata must not be {@literal null}.
 	 * @return {@code this} {@link SecretBackendConfigurer}.
 	 */
@@ -68,7 +66,6 @@ public interface SecretBackendConfigurer {
 	 * Add a {@link SecretBackendMetadata} given {@link RequestedSecret}. Property sources
 	 * supporting leasing will derive lease renewal/rotation from
 	 * {@link RequestedSecret.Mode}.
-	 *
 	 * @param requestedSecret must not be {@literal null} or empty.
 	 * @return {@code this} {@link SecretBackendConfigurer}.
 	 */
@@ -78,7 +75,6 @@ public interface SecretBackendConfigurer {
 	 * Add a {@link SecretBackendMetadata} given {@link RequestedSecret} and
 	 * {@link PropertyTransformer}. Property sources supporting leasing will derive lease
 	 * renewal/rotation from {@link RequestedSecret.Mode}.
-	 *
 	 * @param requestedSecret must not be {@literal null} or empty.
 	 * @param propertyTransformer must not be {@literal null}.
 	 * @return {@code this} {@link SecretBackendConfigurer}.
@@ -88,7 +84,6 @@ public interface SecretBackendConfigurer {
 
 	/**
 	 * Register default generic secret backend property sources.
-	 *
 	 * @param registerDefault {@literal true} to enable default generic secret backend
 	 * registration.
 	 * @return {@code this} {@link SecretBackendConfigurer}.
@@ -98,11 +93,11 @@ public interface SecretBackendConfigurer {
 	/**
 	 * Register default discovered secret backend property sources from
 	 * {@link SecretBackendMetadata} via {@link VaultSecretBackendDescriptor} beans.
-	 *
 	 * @param registerDefault {@literal true} to enable default discovered secret backend
 	 * registration via {@link VaultSecretBackendDescriptor} beans.
 	 * @return {@code this} {@link SecretBackendConfigurer}.
 	 */
 	SecretBackendConfigurer registerDefaultDiscoveredSecretBackends(
 			boolean registerDefault);
+
 }

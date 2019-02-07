@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config;
 
 import org.junit.Test;
@@ -22,7 +23,8 @@ import org.springframework.vault.authentication.AppRoleAuthenticationOptions.Rol
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.support.VaultToken;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link }ClientAuthenticationFactory}.
@@ -42,8 +44,8 @@ public class ClientAuthenticationFactoryUnitTests {
 				.getAppRoleAuthenticationOptions(properties);
 
 		assertThat(options.getRoleId()).isInstanceOf(RoleId.provided("foo").getClass());
-		assertThat(options.getSecretId()).isInstanceOf(
-				SecretId.provided("bar").getClass());
+		assertThat(options.getSecretId())
+				.isInstanceOf(SecretId.provided("bar").getClass());
 	}
 
 	@Test
@@ -72,8 +74,8 @@ public class ClientAuthenticationFactoryUnitTests {
 
 		assertThat(options.getAppRole()).isEqualTo("my-role");
 		assertThat(options.getRoleId()).isInstanceOf(RoleId.provided("foo").getClass());
-		assertThat(options.getSecretId()).isInstanceOf(
-				SecretId.pull(VaultToken.of("token")).getClass());
+		assertThat(options.getSecretId())
+				.isInstanceOf(SecretId.pull(VaultToken.of("token")).getClass());
 	}
 
 	@Test
@@ -87,10 +89,10 @@ public class ClientAuthenticationFactoryUnitTests {
 				.getAppRoleAuthenticationOptions(properties);
 
 		assertThat(options.getAppRole()).isEqualTo("my-role");
-		assertThat(options.getRoleId()).isInstanceOf(
-				RoleId.pull(VaultToken.of("token")).getClass());
-		assertThat(options.getSecretId()).isInstanceOf(
-				SecretId.pull(VaultToken.of("token")).getClass());
+		assertThat(options.getRoleId())
+				.isInstanceOf(RoleId.pull(VaultToken.of("token")).getClass());
+		assertThat(options.getSecretId())
+				.isInstanceOf(SecretId.pull(VaultToken.of("token")).getClass());
 	}
 
 	@Test
@@ -102,10 +104,10 @@ public class ClientAuthenticationFactoryUnitTests {
 		AppRoleAuthenticationOptions options = ClientAuthenticationFactory
 				.getAppRoleAuthenticationOptions(properties);
 
-		assertThat(options.getRoleId()).isInstanceOf(
-				RoleId.wrapped(VaultToken.of("token")).getClass());
-		assertThat(options.getSecretId()).isInstanceOf(
-				SecretId.wrapped(VaultToken.of("token")).getClass());
+		assertThat(options.getRoleId())
+				.isInstanceOf(RoleId.wrapped(VaultToken.of("token")).getClass());
+		assertThat(options.getSecretId())
+				.isInstanceOf(SecretId.wrapped(VaultToken.of("token")).getClass());
 	}
 
 	@Test
@@ -118,10 +120,10 @@ public class ClientAuthenticationFactoryUnitTests {
 		AppRoleAuthenticationOptions options = ClientAuthenticationFactory
 				.getAppRoleAuthenticationOptions(properties);
 
-		assertThat(options.getRoleId()).isInstanceOf(
-				RoleId.wrapped(VaultToken.of("token")).getClass());
-		assertThat(options.getSecretId()).isInstanceOf(
-				SecretId.provided("bar").getClass());
+		assertThat(options.getRoleId())
+				.isInstanceOf(RoleId.wrapped(VaultToken.of("token")).getClass());
+		assertThat(options.getSecretId())
+				.isInstanceOf(SecretId.provided("bar").getClass());
 	}
 
 	@Test
@@ -135,8 +137,8 @@ public class ClientAuthenticationFactoryUnitTests {
 				.getAppRoleAuthenticationOptions(properties);
 
 		assertThat(options.getRoleId()).isInstanceOf(RoleId.provided("foo").getClass());
-		assertThat(options.getSecretId()).isInstanceOf(
-				SecretId.wrapped(VaultToken.of("token")).getClass());
+		assertThat(options.getSecretId())
+				.isInstanceOf(SecretId.wrapped(VaultToken.of("token")).getClass());
 	}
 
 	@Test
@@ -144,10 +146,9 @@ public class ClientAuthenticationFactoryUnitTests {
 
 		VaultProperties properties = new VaultProperties();
 
-		assertThatThrownBy(
-				() -> ClientAuthenticationFactory
-						.getAppRoleAuthenticationOptions(properties)).isInstanceOf(
-				IllegalArgumentException.class);
+		assertThatThrownBy(() -> ClientAuthenticationFactory
+				.getAppRoleAuthenticationOptions(properties))
+						.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -156,9 +157,9 @@ public class ClientAuthenticationFactoryUnitTests {
 		VaultProperties properties = new VaultProperties();
 		properties.getAppRole().setRole("my-role");
 
-		assertThatThrownBy(
-				() -> ClientAuthenticationFactory
-						.getAppRoleAuthenticationOptions(properties)).isInstanceOf(
-				IllegalArgumentException.class);
+		assertThatThrownBy(() -> ClientAuthenticationFactory
+				.getAppRoleAuthenticationOptions(properties))
+						.isInstanceOf(IllegalArgumentException.class);
 	}
+
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.vault.config.rabbitmq;
 
 import javax.validation.constraints.NotEmpty;
@@ -60,4 +61,5 @@ public class VaultRabbitMqProperties implements VaultSecretBackendDescriptor {
 	 */
 	@NotEmpty
 	private String passwordProperty = "spring.rabbitmq.password";
+
 }
