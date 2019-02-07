@@ -39,9 +39,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.vault.core.VaultOperations;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -94,18 +96,28 @@ public class VaultConfigConsulTests {
 		headers.add("X-Consul-Token", CONSUL_ACL_MASTER_TOKEN);
 		HttpEntity<String> requestEntity = new HttpEntity<>(
 				"{\"Name\": \"sample\", \"Type\": \"management\"}", headers);
-		ResponseEntity<Map<String, String>> tokenResponse = restTemplate.exchange(
-				"http://{host}:{port}/v1/acl/create", HttpMethod.PUT, requestEntity,
-				STRING_MAP, CONSUL_HOST, CONSUL_PORT);
 
-		Map<String, String> consulAccess = new HashMap<>();
-		consulAccess.put("address", CONNECTION_URL);
-		consulAccess.put("token", tokenResponse.getBody().get("ID"));
+		try {
+			ResponseEntity<Map<String, String>> tokenResponse = restTemplate.exchange(
+					"http://{host}:{port}/v1/acl/create", HttpMethod.PUT, requestEntity,
+					STRING_MAP, CONSUL_HOST, CONSUL_PORT);
 
-		vaultOperations.write("consul/config/access", consulAccess);
+			Map<String, String> consulAccess = new HashMap<>();
+			consulAccess.put("address", CONNECTION_URL);
+			consulAccess.put("token", tokenResponse.getBody().get("ID"));
 
-		vaultOperations.write("consul/roles/readonly", Collections.singletonMap("policy",
-				new String(Base64.getEncoder().encode(POLICY.getBytes()))));
+			vaultOperations.write("consul/config/access", consulAccess);
+
+			vaultOperations.write("consul/roles/readonly", Collections.singletonMap(
+					"policy", new String(Base64.getEncoder().encode(POLICY.getBytes()))));
+		}
+		catch (HttpStatusCodeException e) {
+
+			assumeFalse("Skipping because Consul is not configured as we expect it to be",
+					e.getStatusCode().is4xxClientError());
+
+			throw e;
+		}
 	}
 
 	@Value("${spring.cloud.consul.token}")
