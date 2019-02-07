@@ -48,6 +48,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = VaultConfigWithVaultConfigurerTests.TestApplication.class, properties = "VaultConfigWithVaultConfigurerTests.custom.config=true")
 public class VaultConfigWithVaultConfigurerTests {
 
+	@Value("${vault.value}")
+	String configValue;
+
 	@BeforeClass
 	public static void beforeClass() {
 
@@ -62,9 +65,6 @@ public class VaultConfigWithVaultConfigurerTests {
 		vaultOperations.write("secret/testVaultApp",
 				Collections.singletonMap("vault.value", "world"));
 	}
-
-	@Value("${vault.value}")
-	String configValue;
 
 	@Test
 	public void contextLoads() {

@@ -55,6 +55,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 // https://github.com/spring-cloud/spring-cloud-commons/issues/214
 public class VaultConfigAppIdTests {
 
+	@Value("${vault.value}")
+	String configValue;
+
 	@BeforeClass
 	public static void beforeClass() {
 
@@ -101,9 +104,6 @@ public class VaultConfigAppIdTests {
 		vaultOperations.write(String.format("auth/app-id/map/user-id/%s", userId),
 				userIdData);
 	}
-
-	@Value("${vault.value}")
-	String configValue;
 
 	@Test
 	public void contextLoads() {

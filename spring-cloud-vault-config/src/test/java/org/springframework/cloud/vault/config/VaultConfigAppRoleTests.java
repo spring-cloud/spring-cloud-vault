@@ -55,6 +55,9 @@ import static org.junit.Assume.assumeTrue;
 // https://github.com/spring-cloud/spring-cloud-commons/issues/214
 public class VaultConfigAppRoleTests {
 
+	@Value("${vault.value}")
+	String configValue;
+
 	@BeforeClass
 	public static void beforeClass() {
 
@@ -105,9 +108,6 @@ public class VaultConfigAppRoleTests {
 		System.setProperty("spring.cloud.vault.app-role.secret-id", secretId);
 
 	}
-
-	@Value("${vault.value}")
-	String configValue;
 
 	@Test
 	public void contextLoads() {

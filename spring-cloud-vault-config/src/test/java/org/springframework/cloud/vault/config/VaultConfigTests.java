@@ -58,6 +58,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 // https://github.com/spring-cloud/spring-cloud-commons/issues/214
 public class VaultConfigTests {
 
+	@Value("${vault.value}")
+	String configValue;
+
+	@Autowired
+	Environment environment;
+
+	@Autowired
+	ApplicationContext applicationContext;
+
 	@BeforeClass
 	public static void beforeClass() {
 
@@ -70,15 +79,6 @@ public class VaultConfigTests {
 
 		vaultRule.prepare().getVaultOperations().write("secret/testVaultApp", object);
 	}
-
-	@Value("${vault.value}")
-	String configValue;
-
-	@Autowired
-	Environment environment;
-
-	@Autowired
-	ApplicationContext applicationContext;
 
 	@Test
 	public void contextLoads() {

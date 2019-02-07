@@ -32,6 +32,10 @@ import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
  */
 final class VaultConfigurationUtil {
 
+	private VaultConfigurationUtil() {
+
+	}
+
 	/**
 	 * Create a {@link SslConfiguration} given {@link Ssl SSL properties}.
 	 * @param ssl the SSL properties.
@@ -87,10 +91,6 @@ final class VaultConfigurationUtil {
 		vaultEndpoint.setScheme(vaultProperties.getScheme());
 
 		return vaultEndpoint;
-	}
-
-	private VaultConfigurationUtil() {
-
 	}
 
 }

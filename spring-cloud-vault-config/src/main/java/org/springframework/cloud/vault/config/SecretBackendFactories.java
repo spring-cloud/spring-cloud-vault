@@ -31,6 +31,10 @@ import lombok.extern.apachecommons.CommonsLog;
 @CommonsLog
 final class SecretBackendFactories {
 
+	private SecretBackendFactories() {
+
+	}
+
 	static Collection<SecretBackendMetadata> createSecretBackendMetadata(
 			Collection<VaultSecretBackendDescriptor> vaultSecretBackendDescriptors,
 			Collection<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> factories) {
@@ -71,10 +75,6 @@ final class SecretBackendFactories {
 			}
 		}
 		return accessor;
-	}
-
-	private SecretBackendFactories() {
-
 	}
 
 }

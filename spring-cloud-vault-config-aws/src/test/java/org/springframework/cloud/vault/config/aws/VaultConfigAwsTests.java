@@ -63,6 +63,12 @@ public class VaultConfigAwsTests {
 
 	private static final String ARN = "arn:aws:iam::aws:policy/ReadOnlyAccess";
 
+	@Value("${cloud.aws.credentials.accessKey}")
+	String accessKey;
+
+	@Value("${cloud.aws.credentials.secretKey}")
+	String secretKey;
+
 	/**
 	 * Initialize the aws secret backend.
 	 */
@@ -90,12 +96,6 @@ public class VaultConfigAwsTests {
 
 		vaultOperations.write("aws/roles/readonly", Collections.singletonMap("arn", ARN));
 	}
-
-	@Value("${cloud.aws.credentials.accessKey}")
-	String accessKey;
-
-	@Value("${cloud.aws.credentials.secretKey}")
-	String secretKey;
 
 	@Test
 	public void shouldInitializeAwsProperties() {

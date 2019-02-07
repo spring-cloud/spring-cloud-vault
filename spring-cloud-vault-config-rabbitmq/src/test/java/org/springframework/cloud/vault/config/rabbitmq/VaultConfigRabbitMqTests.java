@@ -70,6 +70,15 @@ public class VaultConfigRabbitMqTests {
 
 	private static final String VHOSTS_ROLE = "{\"/\":{\"write\": \".*\", \"read\": \".*\"}}";
 
+	@Value("${spring.rabbitmq.username}")
+	String username;
+
+	@Value("${spring.rabbitmq.password}")
+	String password;
+
+	@Autowired
+	org.springframework.amqp.rabbit.connection.ConnectionFactory connectionFactory;
+
 	/**
 	 * Initialize the rabbitmq secret backend.
 	 */
@@ -101,15 +110,6 @@ public class VaultConfigRabbitMqTests {
 		vaultOperations.write(String.format("rabbitmq/roles/readonly"),
 				Collections.singletonMap("vhosts", VHOSTS_ROLE));
 	}
-
-	@Value("${spring.rabbitmq.username}")
-	String username;
-
-	@Value("${spring.rabbitmq.password}")
-	String password;
-
-	@Autowired
-	org.springframework.amqp.rabbit.connection.ConnectionFactory connectionFactory;
 
 	@Test
 	public void shouldConnectSpringConnectionFactory() {

@@ -57,17 +57,6 @@ public class VaultConfigRabbitMqBootstrapConfiguration {
 	public static class RabbitMqSecretBackendMetadataFactory
 			implements SecretBackendMetadataFactory<VaultRabbitMqProperties> {
 
-		@Override
-		public SecretBackendMetadata createMetadata(
-				VaultRabbitMqProperties backendDescriptor) {
-			return forRabbitMq(backendDescriptor);
-		}
-
-		@Override
-		public boolean supports(VaultSecretBackendDescriptor backendDescriptor) {
-			return backendDescriptor instanceof VaultRabbitMqProperties;
-		}
-
 		/**
 		 * Creates a {@link SecretBackendMetadata} for a secret backend using
 		 * {@link VaultRabbitMqProperties}. This accessor transforms Vault's
@@ -118,6 +107,17 @@ public class VaultConfigRabbitMqBootstrapConfiguration {
 					return variables;
 				}
 			};
+		}
+
+		@Override
+		public SecretBackendMetadata createMetadata(
+				VaultRabbitMqProperties backendDescriptor) {
+			return forRabbitMq(backendDescriptor);
+		}
+
+		@Override
+		public boolean supports(VaultSecretBackendDescriptor backendDescriptor) {
+			return backendDescriptor instanceof VaultRabbitMqProperties;
 		}
 
 	}

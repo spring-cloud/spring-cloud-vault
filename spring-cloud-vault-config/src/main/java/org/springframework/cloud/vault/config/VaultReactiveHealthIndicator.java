@@ -47,17 +47,6 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 		this.vaultOperations = vaultOperations;
 	}
 
-	@Override
-	protected Mono<Health> doHealthCheck(Builder builder) {
-
-		return this.vaultOperations
-				.doWithSession((it) -> it.get().uri("sys/health").exchange())
-				.flatMap((it) -> it.bodyToMono(VaultHealthImpl.class))
-				.onErrorResume(WebClientResponseException.class,
-						VaultReactiveHealthIndicator::deserializeError)
-				.map((vaultHealthResponse) -> getHealth(builder, vaultHealthResponse));
-	}
-
 	private static Mono<? extends VaultHealthImpl> deserializeError(
 			WebClientResponseException e) {
 
@@ -97,6 +86,17 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 			builder.withDetail("version", vaultHealthResponse.getVersion());
 		}
 		return builder.build();
+	}
+
+	@Override
+	protected Mono<Health> doHealthCheck(Builder builder) {
+
+		return this.vaultOperations
+				.doWithSession((it) -> it.get().uri("sys/health").exchange())
+				.flatMap((it) -> it.bodyToMono(VaultHealthImpl.class))
+				.onErrorResume(WebClientResponseException.class,
+						VaultReactiveHealthIndicator::deserializeError)
+				.map((vaultHealthResponse) -> getHealth(builder, vaultHealthResponse));
 	}
 
 	@Data

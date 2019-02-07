@@ -47,10 +47,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles({ "integrationtest" })
 public class VaultPropertySourceLocatorIntegrationTests extends IntegrationTestSupport {
 
-	@SpringBootApplication
-	public static class TestApplication {
+	@Value("${vault.value}")
+	String configValue;
 
-	}
+	@Value("${icebreaker.value}")
+	String additionalValue;
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -76,12 +77,6 @@ public class VaultPropertySourceLocatorIntegrationTests extends IntegrationTestS
 						"icebreaker.value", "additional context:integrationtest value"));
 	}
 
-	@Value("${vault.value}")
-	String configValue;
-
-	@Value("${icebreaker.value}")
-	String additionalValue;
-
 	@Test
 	public void getsSecretFromVaultUsingVaultApplicationName() {
 		assertThat(this.configValue)
@@ -92,6 +87,11 @@ public class VaultPropertySourceLocatorIntegrationTests extends IntegrationTestS
 	public void getsSecretFromVaultUsingAdditionalContext() {
 		assertThat(this.additionalValue)
 				.isEqualTo("additional context:integrationtest value");
+	}
+
+	@SpringBootApplication
+	public static class TestApplication {
+
 	}
 
 }

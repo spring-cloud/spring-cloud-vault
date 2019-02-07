@@ -102,16 +102,6 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 		return new KeyValueSecretBackendMetadata(path, propertyTransformer);
 	}
 
-	@Override
-	public String getPath() {
-		return this.path;
-	}
-
-	@Override
-	public PropertyTransformer getPropertyTransformer() {
-		return this.propertyTransformer;
-	}
-
 	/**
 	 * Build a list of context paths from application name and the active profile names.
 	 * Application name and profiles support multiple (comma-separated) values.
@@ -178,6 +168,16 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 		}
 
 		return contexts;
+	}
+
+	@Override
+	public String getPath() {
+		return this.path;
+	}
+
+	@Override
+	public PropertyTransformer getPropertyTransformer() {
+		return this.propertyTransformer;
 	}
 
 	/**

@@ -50,6 +50,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("my-profile")
 public class VaultConfigWithContextTests {
 
+	@Value("${vault.value}")
+	String configValue;
+
 	@BeforeClass
 	public static void beforeClass() {
 
@@ -64,9 +67,6 @@ public class VaultConfigWithContextTests {
 		vaultOperations.write("secret/testVaultApp",
 				Collections.singletonMap("vault.value", "world"));
 	}
-
-	@Value("${vault.value}")
-	String configValue;
 
 	@Test
 	public void contextLoads() {

@@ -60,6 +60,15 @@ import static org.junit.Assume.assumeTrue;
 		"spring.cloud.vault.application-name=testVaultApp" })
 public class VaultVersionedKvBackendConfigTests {
 
+	@Value("${vault.value}")
+	String configValue;
+
+	@Autowired
+	Environment environment;
+
+	@Autowired
+	ApplicationContext applicationContext;
+
 	@BeforeClass
 	public static void beforeClass() {
 
@@ -76,15 +85,6 @@ public class VaultVersionedKvBackendConfigTests {
 		vaultRule.prepare().getVaultOperations().write("versioned/data/testVaultApp",
 				Collections.singletonMap("data", object));
 	}
-
-	@Value("${vault.value}")
-	String configValue;
-
-	@Autowired
-	Environment environment;
-
-	@Autowired
-	ApplicationContext applicationContext;
 
 	@Test
 	public void contextLoads() {
