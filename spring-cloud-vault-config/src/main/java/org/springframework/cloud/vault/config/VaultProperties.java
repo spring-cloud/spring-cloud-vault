@@ -483,6 +483,16 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private boolean enabled = true;
 
+		/**
+		 * The amount of seconds that is at least required before renewing a lease.
+		 */
+		private Duration minRenewal;
+
+		/**
+		 * The expiry threshold. {@link Lease} is renewed the given seconds before it expires.
+		 */
+		private Duration expiryThreshold;
+
 	}
 
 }

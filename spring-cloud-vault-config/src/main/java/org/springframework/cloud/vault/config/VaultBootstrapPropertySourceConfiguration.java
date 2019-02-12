@@ -95,6 +95,17 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 
 			SecretLeaseContainer secretLeaseContainer = secretLeaseContainerObjectFactory
 					.getObject();
+
+			if (vaultProperties.getConfig().getLifecycle().getMinRenewal() != null) {
+				secretLeaseContainer.setMinRenewal(
+						vaultProperties.getConfig().getLifecycle().getMinRenewal());
+			}
+
+			if (vaultProperties.getConfig().getLifecycle().getExpiryThreshold() != null) {
+				secretLeaseContainer.setMinRenewal(
+						vaultProperties.getConfig().getLifecycle().getExpiryThreshold());
+			}
+
 			secretLeaseContainer.start();
 
 			return new LeasingVaultPropertySourceLocator(vaultProperties, configuration,
