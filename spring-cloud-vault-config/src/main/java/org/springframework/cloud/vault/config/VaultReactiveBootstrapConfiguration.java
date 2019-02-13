@@ -70,9 +70,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @ConditionalOnExpression("${spring.cloud.vault.reactive.enabled:true}")
-@ConditionalOnClass({Flux.class, WebClient.class, ReactiveVaultOperations.class,
-		HttpClient.class})
-@EnableConfigurationProperties({VaultProperties.class})
+@ConditionalOnClass({ Flux.class, WebClient.class, ReactiveVaultOperations.class,
+		HttpClient.class })
+@EnableConfigurationProperties({ VaultProperties.class })
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
 public class VaultReactiveBootstrapConfiguration {
 
