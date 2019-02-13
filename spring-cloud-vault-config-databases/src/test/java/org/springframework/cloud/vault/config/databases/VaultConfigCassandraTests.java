@@ -124,7 +124,7 @@ public class VaultConfigCassandraTests {
 
 		try (Cluster cluster = Cluster.builder().addContactPoint(CASSANDRA_HOST)
 				.withAuthProvider(new PlainTextAuthProvider(this.username, this.password))
-				.build()) {
+				.withoutJMXReporting().build()) {
 			Session session = cluster.connect();
 			session.close();
 		}
