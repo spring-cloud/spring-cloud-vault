@@ -6,7 +6,7 @@
 :toc: left
 :nofooter:
 
-(C) 2016-2018 The original authors.
+(C) 2016-2019 The original authors.
 
 NOTE: _Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically._
 
@@ -486,7 +486,7 @@ See also:
 * https://www.vaultproject.io/docs/concepts/response-wrapping.html[Vault Documentation: Response Wrapping]
 
 [[vault.config.authentication.gcpgce]]
-== GCP-GCE authentication
+=== GCP-GCE authentication
 
 The https://www.vaultproject.io/docs/auth/gcp.html[gcp]
 auth backend allows Vault login by using existing GCP (Google Cloud Platform) IAM and GCE credentials.
@@ -537,7 +537,7 @@ See also:
 * https://cloud.google.com/compute/docs/instances/verifying-instance-identity[GCP Documentation: Verifying the Identity of Instances]
 
 [[vault.config.authentication.gcpiam]]
-== GCP-IAM authentication
+=== GCP-IAM authentication
 
 The https://www.vaultproject.io/docs/auth/gcp.html[gcp]
 auth backend allows Vault login by using existing GCP (Google Cloud Platform) IAM and GCE credentials.
