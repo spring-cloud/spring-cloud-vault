@@ -492,8 +492,8 @@ public class VaultProperties implements EnvironmentAware {
 		private Duration minRenewal;
 
 		/**
-		 * The expiry threshold. {@link Lease} is renewed the given {@link Duration} before it
-		 * expires.
+		 * The expiry threshold. {@link Lease} is renewed the given {@link Duration}
+		 * before it expires.
 		 *
 		 * @since 2.2
 		 */
