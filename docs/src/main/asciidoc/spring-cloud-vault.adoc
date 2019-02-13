@@ -408,7 +408,7 @@ spring.cloud.vault:
 * `role` sets the name of the role against which the login is being attempted.
 * `azure-path` sets the path of the Azure mount to use
 
-Azure MSI authentication fetches environmental details about the virtual machine 
+Azure MSI authentication fetches environmental details about the virtual machine
 (subscription Id, resource group, VM name) from the instance metadata service.
 
 See also: https://www.vaultproject.io/docs/auth/azure.html[Vault Documentation: Using the azure auth backend]
@@ -549,9 +549,9 @@ and proves thereby its identity. This Vault backend treats GCP as a Trusted Thir
 
 IAM credentials can be obtained from either the runtime environment
 , specifically the https://cloud.google.com/docs/authentication/production[`GOOGLE_APPLICATION_CREDENTIALS`]
-environment variable, the Google Compute metadata service, 
-or supplied externally as e.g. JSON or base64 encoded. 
-JSON is the preferred form as it carries the project id and 
+environment variable, the Google Compute metadata service,
+or supplied externally as e.g. JSON or base64 encoded.
+JSON is the preferred form as it carries the project id and
 service account identifier required for calling ``projects.serviceAccounts.signJwt``.
 
 .bootstrap.yml with required GCP-IAM Authentication properties
@@ -1304,8 +1304,16 @@ after application shutdown.
 [source,yaml]
 ----
 spring.cloud.vault:
-    config.lifecycle.enabled: true
+    config.lifecycle:
+    	enabled: true
+    	min-renewal: 10s
+    	expiry-threshold: 1m
+
 ----
 ====
+
+* `enabled` controls whether leases associated with secrets are considered to be renewed and expired secrets are rotated. Enabled by default.
+* `min-renewal` sets the duration that is at least required before renewing a lease. This setting prevents renewals from happening too often.
+* `expiry-threshold` sets the expiry threshold. A lease is renewed the configured period of time before it expires.
 
 See also: https://www.vaultproject.io/docs/concepts/lease.html[Vault Documentation: Lease, Renew, and Revoke]

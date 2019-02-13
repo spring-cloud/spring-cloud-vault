@@ -35,6 +35,7 @@ import org.springframework.validation.annotation.Validated;
  * @author Mark Paluch
  * @author Kevin Holditch
  * @author Michal Budzyn
+ * @author Grenville Wilson
  */
 @ConfigurationProperties("spring.cloud.vault")
 @Data
@@ -484,12 +485,17 @@ public class VaultProperties implements EnvironmentAware {
 		private boolean enabled = true;
 
 		/**
-		 * The amount of seconds that is at least required before renewing a lease.
+		 * The time period that is at least required before renewing a lease.
+		 *
+		 * @since 2.2
 		 */
 		private Duration minRenewal;
 
 		/**
-		 * The expiry threshold. {@link Lease} is renewed the given seconds before it expires.
+		 * The expiry threshold. {@link Lease} is renewed the given {@link Duration} before it
+		 * expires.
+		 *
+		 * @since 2.2
 		 */
 		private Duration expiryThreshold;
 
