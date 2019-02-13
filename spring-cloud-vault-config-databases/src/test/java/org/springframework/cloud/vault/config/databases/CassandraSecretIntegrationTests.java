@@ -78,10 +78,11 @@ public class CassandraSecretIntegrationTests extends IntegrationTestSupport {
 
 		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();
 
-		Map<String, String> connection = new HashMap<>();
+		Map<String, Object> connection = new HashMap<>();
 		connection.put("hosts", CASSANDRA_HOST);
 		connection.put("username", CASSANDRA_USERNAME);
 		connection.put("password", CASSANDRA_PASSWORD);
+		connection.put("protocol_version", 3);
 
 		vaultOperations.write(
 				String.format("%s/config/connection", this.cassandra.getBackend()),
