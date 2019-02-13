@@ -43,6 +43,7 @@ import org.springframework.vault.core.lease.SecretLeaseContainer;
  * for Spring Vault's {@link PropertySourceLocator} support.
  *
  * @author Mark Paluch
+ * @author Grenville Wilson
  * @since 1.1
  */
 @Configuration
@@ -87,7 +88,9 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 		PropertySourceLocatorConfiguration configuration = getPropertySourceConfiguration(
 				Arrays.asList(kvBackendProperties, genericBackendProperties));
 
-		if (vaultProperties.getConfig().getLifecycle().isEnabled()) {
+		VaultProperties.Lifecycle lifecycle = vaultProperties.getConfig().getLifecycle();
+
+		if (lifecycle.isEnabled()) {
 
 			// This is to destroy bootstrap resources
 			// otherwise, the bootstrap context is not shut down cleanly
@@ -96,14 +99,12 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 			SecretLeaseContainer secretLeaseContainer = secretLeaseContainerObjectFactory
 					.getObject();
 
-			if (vaultProperties.getConfig().getLifecycle().getMinRenewal() != null) {
-				secretLeaseContainer.setMinRenewal(
-						vaultProperties.getConfig().getLifecycle().getMinRenewal());
+			if (lifecycle.getMinRenewal() != null) {
+				secretLeaseContainer.setMinRenewal(lifecycle.getMinRenewal());
 			}
 
-			if (vaultProperties.getConfig().getLifecycle().getExpiryThreshold() != null) {
-				secretLeaseContainer.setMinRenewal(
-						vaultProperties.getConfig().getLifecycle().getExpiryThreshold());
+			if (lifecycle.getExpiryThreshold() != null) {
+				secretLeaseContainer.setExpiryThreshold(lifecycle.getExpiryThreshold());
 			}
 
 			secretLeaseContainer.start();
