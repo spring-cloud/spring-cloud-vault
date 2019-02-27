@@ -1,0 +1,22 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>10.&nbsp;Lease lifecycle management (renewal and revocation)</title><link rel="stylesheet" type="text/css" href="css/manual-multipage.css"><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"><link rel="home" href="multi_spring-cloud-vault.html" title="Spring Cloud Vault"><link rel="up" href="multi_spring-cloud-vault.html" title="Spring Cloud Vault"><link rel="prev" href="multi_vault.config.ssl.html" title="9.&nbsp;Vault Client SSL configuration"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">10.&nbsp;Lease lifecycle management (renewal and revocation)</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="multi_vault.config.ssl.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;</td></tr></table><hr></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="vault-lease-renewal" href="#vault-lease-renewal"></a>10.&nbsp;Lease lifecycle management (renewal and revocation)</h1></div></div></div><p>With every secret, Vault creates a lease:
+metadata containing information such as a time duration,
+renewability, and more.</p><p>Vault promises that the data will be valid for the given duration,
+or Time To Live (TTL). Once the lease is expired, Vault can
+revoke the data, and the consumer of the secret can no longer
+be certain that it is valid.</p><p>Spring Cloud Vault maintains a lease lifecycle beyond
+the creation of login tokens and secrets. That said,
+login tokens and secrets associated with a lease
+are scheduled for renewal just before the lease expires
+until terminal expiry.
+Application shutdown revokes obtained login tokens and renewable
+leases.</p><p>Secret service and database backends (such as MongoDB or MySQL)
+usually generate a renewable lease so generated credentials will
+be disabled on application shutdown.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>Static tokens are not renewed or revoked.</p></td></tr></table></div><p>Lease renewal and revocation is enabled by default and can
+be disabled by setting <code class="literal">spring.cloud.vault.config.lifecycle.enabled</code>
+to <code class="literal">false</code>. This is not recommended as leases can expire and
+Spring Cloud Vault cannot longer access Vault or services
+using generated credentials and valid credentials remain active
+after application shutdown.</p><div class="informalexample"><pre class="programlisting"><span xmlns:d="http://docbook.org/ns/docbook" class="hl-attribute">spring.cloud.vault</span>:
+<span xmlns:d="http://docbook.org/ns/docbook" class="hl-attribute">    config.lifecycle.enabled</span>: <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">true</span></pre></div><p>See also: <a class="link" href="https://www.vaultproject.io/docs/concepts/lease.html" target="_top">Vault Documentation: Lease, Renew, and Revoke</a></p></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="multi_vault.config.ssl.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;</td></tr><tr><td width="40%" align="left" valign="top">9.&nbsp;Vault Client SSL configuration&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="multi_spring-cloud-vault.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;</td></tr></table></div></body></html>
