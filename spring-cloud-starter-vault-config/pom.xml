@@ -16,10 +16,10 @@
 	<name>Spring Cloud Starter Vault Config</name>
 	<description>Starter for exposing Spring Cloud Vault Config</description>
 
-	<url>http://cloud.spring.io/spring-cloud-vault/</url>
+	<url>https://cloud.spring.io/spring-cloud-vault/</url>
 	<organization>
 		<name>Pivotal Software, Inc.</name>
-		<url>http://www.spring.io</url>
+		<url>https://www.spring.io</url>
 	</organization>
 
 	<dependencies>
