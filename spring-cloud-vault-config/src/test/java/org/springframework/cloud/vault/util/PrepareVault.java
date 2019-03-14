@@ -75,9 +75,9 @@ public class PrepareVault {
 
 	/**
 	 * Create a token for the given {@code tokenId} and {@code policy}.
-	 * @param tokenId
-	 * @param policy
-	 * @return
+	 * @param tokenId the must not be {@literal null}.
+	 * @param policy the must not be {@literal null}.
+	 * @return the token.
 	 */
 	public VaultToken createToken(String tokenId, String policy) {
 
@@ -94,7 +94,7 @@ public class PrepareVault {
 
 	/**
 	 * Check whether Vault is available (vault created and unsealed).
-	 * @return
+	 * @return whether Vault is available.
 	 */
 	public boolean isAvailable() {
 		return this.adminOperations.isInitialized()
@@ -103,7 +103,7 @@ public class PrepareVault {
 
 	/**
 	 * Mount an auth backend.
-	 * @param authBackend
+	 * @param authBackend the must not be {@literal null}.
 	 */
 	public void mountAuth(String authBackend) {
 
@@ -114,8 +114,8 @@ public class PrepareVault {
 
 	/**
 	 * Check whether a auth-backend is enabled.
-	 * @param authBackend
-	 * @return
+	 * @param authBackend the must not be {@literal null}.
+	 * @return whether the backend is mounted.
 	 */
 	public boolean hasAuth(String authBackend) {
 
@@ -152,8 +152,8 @@ public class PrepareVault {
 
 	/**
 	 * Check whether a auth-backend is enabled.
-	 * @param secretBackend
-	 * @return
+	 * @param secretBackend the must not be {@literal null}.
+	 * @return whether the backend is mounted.
 	 */
 	public boolean hasSecretBackend(String secretBackend) {
 

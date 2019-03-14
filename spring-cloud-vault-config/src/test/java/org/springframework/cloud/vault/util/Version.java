@@ -27,7 +27,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Mark Paluch
  */
-public class Version implements Comparable<Version> {
+public final class Version implements Comparable<Version> {
 
 	private static final String VERSION_PARSE_ERROR = "Invalid version string! Could not parse segment %s within %s.";
 
@@ -64,11 +64,11 @@ public class Version implements Comparable<Version> {
 	/**
 	 * Parses the given string representation of a version into a {@link Version} object.
 	 * @param version must not be {@literal null} or empty.
-	 * @return
+	 * @return the version.
 	 */
 	public static Version parse(String version) {
 
-		Assert.hasText(version);
+		Assert.hasText(version, "Version must not be empty");
 
 		String[] parts = version.trim().split("\\.");
 		int[] intParts = new int[parts.length];
@@ -94,8 +94,8 @@ public class Version implements Comparable<Version> {
 
 	/**
 	 * Returns whether the current {@link Version} is greater (newer) than the given one.
-	 * @param version
-	 * @return
+	 * @param version must not be {@literal null}.
+	 * @return comparison result.
 	 */
 	public boolean isGreaterThan(Version version) {
 		return compareTo(version) > 0;
@@ -104,8 +104,8 @@ public class Version implements Comparable<Version> {
 	/**
 	 * Returns whether the current {@link Version} is greater (newer) or the same as the
 	 * given one.
-	 * @param version
-	 * @return
+	 * @param version must not be {@literal null}.
+	 * @return comparison result.
 	 */
 	public boolean isGreaterThanOrEqualTo(Version version) {
 		return compareTo(version) >= 0;
@@ -113,8 +113,8 @@ public class Version implements Comparable<Version> {
 
 	/**
 	 * Returns whether the current {@link Version} is the same as the given one.
-	 * @param version
-	 * @return
+	 * @param version must not be {@literal null}.
+	 * @return comparison result.
 	 */
 	public boolean is(Version version) {
 		return equals(version);
@@ -122,8 +122,8 @@ public class Version implements Comparable<Version> {
 
 	/**
 	 * Returns whether the current {@link Version} is less (older) than the given one.
-	 * @param version
-	 * @return
+	 * @param version must not be {@literal null}.
+	 * @return comparison result.
 	 */
 	public boolean isLessThan(Version version) {
 		return compareTo(version) < 0;
@@ -132,8 +132,8 @@ public class Version implements Comparable<Version> {
 	/**
 	 * Returns whether the current {@link Version} is less (older) or equal to the current
 	 * one.
-	 * @param version
-	 * @return
+	 * @param version must not be {@literal null}.
+	 * @return comparison result.
 	 */
 	public boolean isLessThanOrEqualTo(Version version) {
 		return compareTo(version) <= 0;
