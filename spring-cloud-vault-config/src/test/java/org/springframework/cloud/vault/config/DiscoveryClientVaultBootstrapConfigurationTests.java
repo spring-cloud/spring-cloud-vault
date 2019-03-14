@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,11 +128,11 @@ public class DiscoveryClientVaultBootstrapConfigurationTests {
 
 		private String serviceId;
 
-		public SimpleServiceInstance(URI uri) {
+		SimpleServiceInstance(URI uri) {
 			this.setUri(uri);
 		}
 
-		public void setUri(URI uri) {
+		void setUri(URI uri) {
 			this.uri = uri;
 			this.host = this.uri.getHost();
 			this.port = this.uri.getPort();
