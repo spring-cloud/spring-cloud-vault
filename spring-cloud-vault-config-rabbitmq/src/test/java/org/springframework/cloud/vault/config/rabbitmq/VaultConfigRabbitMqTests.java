@@ -65,7 +65,7 @@ public class VaultConfigRabbitMqTests {
 
 	private static final String RABBITMQ_PASSWORD = "guest";
 
-	private static final String RABBITMQ_URI = String.format("http://%s:%d",
+	private static final String RABBITMQ_URI = String.format("https://%s:%d",
 			RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT);
 
 	private static final String VHOSTS_ROLE = "{\"/\":{\"write\": \".*\", \"read\": \".*\"}}";
