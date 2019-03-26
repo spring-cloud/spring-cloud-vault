@@ -32,7 +32,7 @@ Specifically for Spring applications:
 {docs}#vault.config.authentication.awsec2[AWS-EC2] authentication,
 {docs}#vault.config.authentication.awsiam[AWS-IAM] authentication, and
 {docs}#vault.config.authentication.kubernetes[Kubernetes] authentication.
-
+* Transmit data to Vault for encryption and decryption.
 * Bootstrap application context: a parent context for the main application that can be trained to do anything.
 
 
