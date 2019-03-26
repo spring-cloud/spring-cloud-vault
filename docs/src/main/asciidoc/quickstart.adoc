@@ -1,4 +1,4 @@
-:docs: http://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html
+:docs: https://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html
 
 *Prerequisites*
 
