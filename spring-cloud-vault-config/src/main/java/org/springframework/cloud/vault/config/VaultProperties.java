@@ -243,7 +243,7 @@ public class VaultProperties implements EnvironmentAware {
 		 * URL of the AWS-EC2 PKCS7 identity document.
 		 */
 		@NotEmpty
-		private String identityDocument = "http://169.254.169.254/latest/dynamic/instance-identity/pkcs7";
+		private String identityDocument = "https://169.254.169.254/latest/dynamic/instance-identity/pkcs7";
 
 		/**
 		 * Mount path of the AWS-EC2 authentication backend.
