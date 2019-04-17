@@ -986,7 +986,7 @@ spring.cloud.vault:
         role: readonly
         backend: database
         username-property: spring.datasource.username
-        password-property: spring.datasource.username
+        password-property: spring.datasource.password
 ----
 ====
 
