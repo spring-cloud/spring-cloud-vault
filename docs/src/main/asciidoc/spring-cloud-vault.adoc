@@ -1025,7 +1025,7 @@ spring.cloud.vault:
         role: readonly
         backend: cassandra
         username-property: spring.data.cassandra.username
-        password-property: spring.data.cassandra.username
+        password-property: spring.data.cassandra.password
 ----
 ====
 
@@ -1104,7 +1104,7 @@ spring.cloud.vault:
         role: readonly
         backend: mysql
         username-property: spring.datasource.username
-        password-property: spring.datasource.username
+        password-property: spring.datasource.password
 ----
 ====
 
@@ -1144,7 +1144,7 @@ spring.cloud.vault:
         role: readonly
         backend: postgresql
         username-property: spring.datasource.username
-        password-property: spring.datasource.username
+        password-property: spring.datasource.password
 ----
 ====
 
