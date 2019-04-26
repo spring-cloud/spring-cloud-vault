@@ -26,7 +26,7 @@ env:
     - VAULT_VER=0.10.3
     - VAULT_VER=0.11.5
     - VAULT_VER=1.0.3
-    - VAULT_VER=1.1.1
+    - VAULT_VER=1.1.2
 
 before_install:
   - sed -i.bak -e 's|https://nexus.codehaus.org/snapshots/|https://oss.sonatype.org/content/repositories/codehaus-snapshots/|g' ~/.m2/settings.xml
