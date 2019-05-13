@@ -16,19 +16,17 @@
 
 package org.springframework.cloud.vault.config;
 
-import java.time.Duration;
-
-import javax.validation.constraints.NotEmpty;
-
 import lombok.Data;
 import org.hibernate.validator.constraints.Range;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotEmpty;
+import java.time.Duration;
 
 /**
  * @author Spencer Gibb
@@ -93,6 +91,11 @@ public class VaultProperties implements EnvironmentAware {
 	 * Static vault token. Required if {@link #authentication} is {@code TOKEN}.
 	 */
 	private String token;
+
+	/**
+	 * Namespace to create the header X-VAULT-NAMESPACE Used by Vault Enterprise Edition
+	 */
+	private String namespace;
 
 	private AppIdProperties appId = new AppIdProperties();
 

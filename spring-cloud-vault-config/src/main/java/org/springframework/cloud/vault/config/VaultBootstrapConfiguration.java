@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.vault.config;
 
-import java.time.Duration;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectFactory;
@@ -34,6 +32,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.InterceptingClientHttpRequestFactory;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.vault.authentication.ClientAuthentication;
@@ -51,6 +51,10 @@ import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for Spring Vault support.
@@ -121,7 +125,26 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@Bean
 	@ConditionalOnMissingBean
 	public ClientFactoryWrapper clientHttpRequestFactoryWrapper() {
+		return new ClientFactoryWrapper(getClientHttpRequestFactory());
 
+	}
+
+	private ClientHttpRequestFactory getClientHttpRequestFactory() {
+
+		if (this.vaultProperties.getNamespace() == null) {
+			return createClientHttpRequestFactory();
+		}
+		else {
+			List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+			interceptors.add(VaultClients
+					.createNamespaceInterceptor(this.vaultProperties.getNamespace()));
+			return new InterceptingClientHttpRequestFactory(
+					createClientHttpRequestFactory(), interceptors);
+		}
+
+	}
+
+	private ClientHttpRequestFactory createClientHttpRequestFactory() {
 		ClientOptions clientOptions = new ClientOptions(
 				Duration.ofMillis(this.vaultProperties.getConnectionTimeout()),
 				Duration.ofMillis(this.vaultProperties.getReadTimeout()));
@@ -129,8 +152,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		SslConfiguration sslConfiguration = VaultConfigurationUtil
 				.createSslConfiguration(this.vaultProperties.getSsl());
 
-		return new ClientFactoryWrapper(
-				ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration));
+		return ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration);
 	}
 
 	/**

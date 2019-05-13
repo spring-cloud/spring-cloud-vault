@@ -16,12 +16,6 @@
 
 package org.springframework.cloud.vault.config;
 
-import java.time.Duration;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.netty.http.client.HttpClient;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectFactory;
@@ -29,7 +23,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.vault.config.VaultBootstrapConfiguration.TaskSchedulerWrapper;
 import org.springframework.context.annotation.Bean;
@@ -56,6 +49,11 @@ import org.springframework.vault.core.ReactiveVaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
+
+import java.time.Duration;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for reactive Spring Vault support.
@@ -68,7 +66,6 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @since 2.0.0
  */
 @Configuration
-@ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @ConditionalOnExpression("${spring.cloud.vault.reactive.enabled:true}")
 @ConditionalOnClass({ Flux.class, WebClient.class, ReactiveVaultOperations.class,
 		HttpClient.class })
@@ -139,11 +136,9 @@ public class VaultReactiveBootstrapConfiguration {
 				VaultTokenSupplier.class);
 
 		if (this.vaultProperties.getConfig().getLifecycle().isEnabled()) {
-
-			WebClient webClient = ReactiveVaultClients.createWebClient(this.vaultEndpoint,
-					this.clientHttpConnector);
 			return new ReactiveLifecycleAwareSessionManager(vaultTokenSupplier,
-					asyncTaskExecutorFactory.getObject().getTaskScheduler(), webClient);
+					asyncTaskExecutorFactory.getObject().getTaskScheduler(),
+					getWebClient());
 		}
 
 		return CachingVaultTokenSupplier.of(vaultTokenSupplier);
@@ -213,10 +208,27 @@ public class VaultReactiveBootstrapConfiguration {
 
 	private VaultTokenSupplier createAuthenticationStepsOperator(
 			AuthenticationStepsFactory factory) {
-		WebClient webClient = ReactiveVaultClients.createWebClient(this.vaultEndpoint,
-				this.clientHttpConnector);
 		return new AuthenticationStepsOperator(factory.getAuthenticationSteps(),
-				webClient);
+				getWebClient());
+	}
+
+	/**
+	 * Method to override WebClient to insert Filter to set Vault Namespace for
+	 * authenticate the project.
+	 * @return {@link WebClient} the WebClient that we use in this class
+	 */
+	private WebClient getWebClient() {
+		if (this.vaultProperties.getNamespace() == null) {
+			return ReactiveVaultClients.createWebClient(this.vaultEndpoint,
+					this.clientHttpConnector);
+		}
+		else {
+			return ReactiveVaultClients
+					.createWebClient(this.vaultEndpoint, this.clientHttpConnector)
+					.mutate().filter(ReactiveVaultClients
+							.namespace(this.vaultProperties.getNamespace()))
+					.build();
+		}
 	}
 
 }
