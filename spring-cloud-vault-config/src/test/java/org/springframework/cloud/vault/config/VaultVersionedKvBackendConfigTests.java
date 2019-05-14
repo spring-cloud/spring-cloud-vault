@@ -52,15 +52,16 @@ import static org.junit.Assume.assumeTrue;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = VaultVersionedKvBackendConfigTests.TestApplication.class, properties = {
-		"spring.cloud.vault.host=foo", "spring.cloud.vault.port=80",
-		"spring.cloud.vault.uri=https://localhost:8200",
-		"spring.cloud.vault.generic.enabled=false", "spring.cloud.vault.kv.enabled=true",
-		"spring.cloud.vault.kv.backend=versioned",
-		"spring.cloud.vault.application-name=testVaultApp" })
+@SpringBootTest(classes = VaultVersionedKvBackendConfigTests.TestApplication.class,
+		properties = { "spring.cloud.vault.host=foo", "spring.cloud.vault.port=80",
+				"spring.cloud.vault.uri=https://localhost:8200",
+				"spring.cloud.vault.generic.enabled=false",
+				"spring.cloud.vault.kv.enabled=true",
+				"spring.cloud.vault.kv.backend=versioned",
+				"spring.cloud.vault.application-name=testVaultApp" })
 public class VaultVersionedKvBackendConfigTests {
 
-	@Value("${vault.value}")
+	@Value("${vault.value}:null")
 	String configValue;
 
 	@Autowired
