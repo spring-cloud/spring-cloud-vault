@@ -66,7 +66,7 @@ import java.time.Duration;
  * @since 2.0.0
  */
 @Configuration
-@ConditionalOnExpression("${spring.cloud.vault.reactive.enabled:true}")
+@ConditionalOnExpression("${spring.cloud.vault.reactive.enabled:true} && ${spring.cloud.vault.enabled:true}")
 @ConditionalOnClass({ Flux.class, WebClient.class, ReactiveVaultOperations.class,
 		HttpClient.class })
 @EnableConfigurationProperties({ VaultProperties.class })
