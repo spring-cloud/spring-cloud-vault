@@ -48,7 +48,8 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 		this.contextRunner.withUserConfiguration(MockConfiguration.class)
 				.withPropertyValues("spring.cloud.vault.generic.enabled=false",
 						"spring.cloud.vault.config.lifecycle.expiry-threshold=5m",
-						"spring.cloud.vault.config.lifecycle.min-renewal=6m")
+						"spring.cloud.vault.config.lifecycle.min-renewal=6m",
+						"spring.cloud.vault.config.lifecycle.lease-endpoints=SysLeases")
 				.run(context -> {
 
 					SecretLeaseContainer container = context
