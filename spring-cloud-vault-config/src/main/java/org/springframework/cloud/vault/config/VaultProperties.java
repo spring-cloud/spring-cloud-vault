@@ -29,6 +29,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.vault.core.lease.LeaseEndpoints;
 
 /**
  * @author Spencer Gibb
@@ -499,6 +500,17 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private Duration expiryThreshold;
 
+		/**
+		 * Set the {@link LeaseEndpoints} to delegate renewal/revocation calls to.
+		 * {@link LeaseEndpoints} encapsulates differences between Vault versions that affect
+		 * the location of renewal/revocation endpoints.
+		 *
+		 * Can be SysLeases for version 0.8 or above of vault or Legacy for older versions (the default)
+		 *
+		 * @since 2.3
+		 */
+
+		private LeaseEndpoints leaseEndpoints;
 	}
 
 }
