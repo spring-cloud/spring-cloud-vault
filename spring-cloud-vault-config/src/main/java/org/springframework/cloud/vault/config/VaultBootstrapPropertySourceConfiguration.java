@@ -107,6 +107,10 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 				secretLeaseContainer.setExpiryThreshold(lifecycle.getExpiryThreshold());
 			}
 
+			if (lifecycle.getLeaseEndpoints() != null) {
+				secretLeaseContainer.setLeaseEndpoints(lifecycle.getLeaseEndpoints());
+			}
+
 			secretLeaseContainer.start();
 
 			return new LeasingVaultPropertySourceLocator(vaultProperties, configuration,

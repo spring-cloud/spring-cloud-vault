@@ -1308,6 +1308,7 @@ spring.cloud.vault:
     	enabled: true
     	min-renewal: 10s
     	expiry-threshold: 1m
+    	lease-endpoints: Legacy
 
 ----
 ====
@@ -1315,5 +1316,6 @@ spring.cloud.vault:
 * `enabled` controls whether leases associated with secrets are considered to be renewed and expired secrets are rotated. Enabled by default.
 * `min-renewal` sets the duration that is at least required before renewing a lease. This setting prevents renewals from happening too often.
 * `expiry-threshold` sets the expiry threshold. A lease is renewed the configured period of time before it expires.
+* `lease-endpoints` sets the endpoints for renew and revoke. Legacy for vault versions before 0.8 and SysLeases for later.
 
 See also: https://www.vaultproject.io/docs/concepts/lease.html[Vault Documentation: Lease, Renew, and Revoke]
