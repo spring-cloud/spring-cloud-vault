@@ -16,20 +16,20 @@
 
 package org.springframework.cloud.vault.config;
 
-import java.time.Duration;
-
 import org.junit.Test;
-
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.core.lease.LeaseEndpoints;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.time.Duration;
+
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link VaultBootstrapPropertySourceConfiguration}.
@@ -54,10 +54,9 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 
 					SecretLeaseContainer container = context
 							.getBean(SecretLeaseContainer.class);
-					assertThat(container.getExpiryThreshold())
-							.isEqualTo(Duration.ofMinutes(5));
-					assertThat(container.getMinRenewal())
-							.isEqualTo(Duration.ofMinutes(6));
+					verify(container).setExpiryThreshold(Duration.ofMinutes(5));
+					verify(container).setMinRenewal(Duration.ofMinutes(6));
+					verify(container).setLeaseEndpoints(LeaseEndpoints.SysLeases);
 				});
 	}
 
@@ -75,6 +74,10 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 					mock(ThreadPoolTaskScheduler.class));
 		}
 
+		@Bean
+		SecretLeaseContainer secretLeaseContainer() {
+			return mock(SecretLeaseContainer.class);
+		}
 	}
 
 }
