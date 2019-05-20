@@ -47,10 +47,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = VaultConfigAppIdTests.TestApplication.class, properties = {
-		"spring.cloud.vault.authentication=appid",
-		"spring.cloud.vault.app-id.user-id=IP_ADDRESS",
-		"spring.cloud.vault.application-name=VaultConfigAppIdTests" })
+@SpringBootTest(classes = VaultConfigAppIdTests.TestApplication.class,
+		properties = { "spring.cloud.vault.authentication=appid",
+				"spring.cloud.vault.app-id.user-id=IP_ADDRESS",
+				"spring.cloud.vault.application-name=VaultConfigAppIdTests" })
 // see
 // https://github.com/spring-cloud/spring-cloud-commons/issues/214
 public class VaultConfigAppIdTests {

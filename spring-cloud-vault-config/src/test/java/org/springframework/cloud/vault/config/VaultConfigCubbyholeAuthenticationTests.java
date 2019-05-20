@@ -49,9 +49,9 @@ import static org.junit.Assume.assumeTrue;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = VaultConfigCubbyholeAuthenticationTests.TestApplication.class, properties = {
-		"spring.cloud.vault.authentication=cubbyhole",
-		"spring.cloud.vault.generic.applicationName=VaultConfigCubbyholeAuthenticationTests" })
+@SpringBootTest(classes = VaultConfigCubbyholeAuthenticationTests.TestApplication.class,
+		properties = { "spring.cloud.vault.authentication=cubbyhole",
+				"spring.cloud.vault.generic.applicationName=VaultConfigCubbyholeAuthenticationTests" })
 public class VaultConfigCubbyholeAuthenticationTests {
 
 	@Value("${vault.value}")

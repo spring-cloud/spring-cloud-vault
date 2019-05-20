@@ -17,8 +17,8 @@
 package org.springframework.cloud.vault.config;
 
 /**
- * Interface to be implemented by objects that describe a Vault secret backend.
- * Mainly for internal use within the framework.
+ * Interface to be implemented by objects that describe a Vault secret backend. Mainly for
+ * internal use within the framework.
  *
  * <p>
  * Typically used by {@link SecretBackendMetadataFactory} to provide path and

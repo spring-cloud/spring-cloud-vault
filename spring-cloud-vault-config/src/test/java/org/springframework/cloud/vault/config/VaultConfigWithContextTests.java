@@ -44,7 +44,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = VaultConfigWithContextTests.TestApplication.class, properties = "spring.cloud.vault.application-name=testVaultApp")
+@SpringBootTest(classes = VaultConfigWithContextTests.TestApplication.class,
+		properties = "spring.cloud.vault.application-name=testVaultApp")
 // see
 // https://github.com/spring-cloud/spring-cloud-commons/issues/214
 @ActiveProfiles("my-profile")

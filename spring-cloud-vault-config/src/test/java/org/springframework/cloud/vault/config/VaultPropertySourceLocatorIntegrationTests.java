@@ -40,10 +40,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = VaultPropertySourceLocatorIntegrationTests.TestApplication.class, properties = {
-		"spring.application.name=wintermute",
-		"spring.cloud.vault.application-name=neuromancer",
-		"spring.cloud.vault.generic.application-name=neuromancer,icebreaker" })
+@SpringBootTest(
+		classes = VaultPropertySourceLocatorIntegrationTests.TestApplication.class,
+		properties = { "spring.application.name=wintermute",
+				"spring.cloud.vault.application-name=neuromancer",
+				"spring.cloud.vault.generic.application-name=neuromancer,icebreaker" })
 @ActiveProfiles({ "integrationtest" })
 public class VaultPropertySourceLocatorIntegrationTests extends IntegrationTestSupport {
 
