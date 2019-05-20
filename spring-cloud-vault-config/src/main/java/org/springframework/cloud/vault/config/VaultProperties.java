@@ -32,11 +32,14 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.vault.core.lease.LeaseEndpoints;
 
 /**
+ * Properties to configure Vault support.
+ *
  * @author Spencer Gibb
  * @author Mark Paluch
  * @author Kevin Holditch
  * @author Michal Budzyn
  * @author Grenville Wilson
+ * @author Mårten Svantesson
  */
 @ConfigurationProperties("spring.cloud.vault")
 @Data
@@ -502,15 +505,16 @@ public class VaultProperties implements EnvironmentAware {
 
 		/**
 		 * Set the {@link LeaseEndpoints} to delegate renewal/revocation calls to.
-		 * {@link LeaseEndpoints} encapsulates differences between Vault versions that affect
-		 * the location of renewal/revocation endpoints.
+		 * {@link LeaseEndpoints} encapsulates differences between Vault versions that
+		 * affect the location of renewal/revocation endpoints.
 		 *
-		 * Can be SysLeases for version 0.8 or above of vault or Legacy for older versions (the default)
+		 * Can be {@link LeaseEndpoints#SysLeases} for version 0.8 or above of Vault or
+		 * {@link LeaseEndpoints#Legacy} for older versions (the default).
 		 *
-		 * @since 2.3
+		 * @since 2.2
 		 */
-
 		private LeaseEndpoints leaseEndpoints;
+
 	}
 
 }

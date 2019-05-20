@@ -41,15 +41,15 @@ public class VaultPostgreSqlProperties implements DatabaseSecretProperties {
 	 * Enable postgresql backend usage.
 	 */
 	@Deprecated
-	@Getter(onMethod_ = {
-			@DeprecatedConfigurationProperty(reason = "Use spring.cloud.vault.database") })
+	@Getter(onMethod_ = { @DeprecatedConfigurationProperty(
+			reason = "Use spring.cloud.vault.database") })
 	private boolean enabled = false;
 
 	/**
 	 * Role name for credentials.
 	 */
-	@Getter(onMethod_ = {
-			@DeprecatedConfigurationProperty(reason = "Use spring.cloud.vault.database") })
+	@Getter(onMethod_ = { @DeprecatedConfigurationProperty(
+			reason = "Use spring.cloud.vault.database") })
 	private String role;
 
 	/**

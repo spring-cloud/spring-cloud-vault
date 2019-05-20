@@ -49,10 +49,10 @@ import static org.junit.Assume.assumeTrue;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = VaultConfigRabbitMqTests.TestApplication.class, properties = {
-		"spring.cloud.vault.rabbitmq.enabled=true",
-		"spring.cloud.vault.rabbitmq.role=readonly",
-		"spring.rabbitmq.address=localhost" })
+@SpringBootTest(classes = VaultConfigRabbitMqTests.TestApplication.class,
+		properties = { "spring.cloud.vault.rabbitmq.enabled=true",
+				"spring.cloud.vault.rabbitmq.role=readonly",
+				"spring.rabbitmq.address=localhost" })
 public class VaultConfigRabbitMqTests {
 
 	private static final int RABBITMQ_HTTP_MANAGEMENT_PORT = 15672;

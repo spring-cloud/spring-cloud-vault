@@ -44,6 +44,7 @@ import org.springframework.vault.core.lease.SecretLeaseContainer;
  *
  * @author Mark Paluch
  * @author Grenville Wilson
+ * @author Mårten Svantesson
  * @since 1.1
  */
 @Configuration

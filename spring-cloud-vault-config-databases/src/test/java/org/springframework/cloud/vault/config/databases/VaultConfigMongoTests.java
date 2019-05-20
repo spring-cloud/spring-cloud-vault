@@ -52,11 +52,11 @@ import static org.junit.Assume.assumeTrue;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = VaultConfigMongoTests.TestApplication.class, properties = {
-		"spring.cloud.vault.mongodb.enabled=true",
-		"spring.cloud.vault.mongodb.role=readonly",
-		"spring.data.mongodb.url=mongodb://localhost",
-		"spring.data.mongodb.database=admin" })
+@SpringBootTest(classes = VaultConfigMongoTests.TestApplication.class,
+		properties = { "spring.cloud.vault.mongodb.enabled=true",
+				"spring.cloud.vault.mongodb.role=readonly",
+				"spring.data.mongodb.url=mongodb://localhost",
+				"spring.data.mongodb.database=admin" })
 public class VaultConfigMongoTests {
 
 	private static final int MONGODB_PORT = 27017;
