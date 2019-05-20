@@ -2590,7 +2590,8 @@ after application shutdown.</p>
     config.lifecycle:
     	enabled: true
     	min-renewal: 10s
-    	expiry-threshold: 1m</code></pre>
+    	expiry-threshold: 1m
+    	lease-endpoints: Legacy</code></pre>
 </div>
 </div>
 </div>
@@ -2605,6 +2606,9 @@ after application shutdown.</p>
 </li>
 <li>
 <p><code>expiry-threshold</code> sets the expiry threshold. A lease is renewed the configured period of time before it expires.</p>
+</li>
+<li>
+<p><code>lease-endpoints</code> sets the endpoints for renew and revoke. Legacy for vault versions before 0.8 and SysLeases for later.</p>
 </li>
 </ul>
 </div>
