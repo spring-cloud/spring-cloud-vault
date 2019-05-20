@@ -45,7 +45,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = VaultConfigWithVaultConfigurerTests.TestApplication.class, properties = "VaultConfigWithVaultConfigurerTests.custom.config=true")
+@SpringBootTest(classes = VaultConfigWithVaultConfigurerTests.TestApplication.class,
+		properties = "VaultConfigWithVaultConfigurerTests.custom.config=true")
 public class VaultConfigWithVaultConfigurerTests {
 
 	@Value("${vault.value}")

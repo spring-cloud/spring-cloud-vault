@@ -48,9 +48,9 @@ import static org.junit.Assume.assumeTrue;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = VaultConfigAppRoleTests.TestApplication.class, properties = {
-		"spring.cloud.vault.authentication=approle",
-		"spring.cloud.vault.application-name=VaultConfigAppRoleTests" })
+@SpringBootTest(classes = VaultConfigAppRoleTests.TestApplication.class,
+		properties = { "spring.cloud.vault.authentication=approle",
+				"spring.cloud.vault.application-name=VaultConfigAppRoleTests" })
 // see
 // https://github.com/spring-cloud/spring-cloud-commons/issues/214
 public class VaultConfigAppRoleTests {

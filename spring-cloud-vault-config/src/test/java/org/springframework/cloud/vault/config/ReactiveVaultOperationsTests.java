@@ -46,8 +46,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = ReactiveVaultOperationsTests.TestApplication.class, properties = {
-		"spring.cloud.vault.host=foo", "spring.cloud.vault.uri=https://localhost:8200" })
+@SpringBootTest(classes = ReactiveVaultOperationsTests.TestApplication.class,
+		properties = { "spring.cloud.vault.host=foo",
+				"spring.cloud.vault.uri=https://localhost:8200" })
 public class ReactiveVaultOperationsTests {
 
 	@Autowired

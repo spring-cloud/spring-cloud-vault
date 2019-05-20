@@ -48,12 +48,12 @@ import static org.springframework.cloud.vault.util.Settings.findWorkDir;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = VaultConfigTlsCertAuthenticationTests.TestApplication.class, properties = {
-		"spring.cloud.vault.authentication=cert",
-		"spring.cloud.vault.ssl.key-store=file:../work/client-cert.jks",
-		"spring.cloud.vault.ssl.key-store-password=changeit",
-		"spring.cloud.vault.application-name=VaultConfigTlsCertAuthenticationTests",
-		"spring.cloud.vault.reactive.enabled=false" })
+@SpringBootTest(classes = VaultConfigTlsCertAuthenticationTests.TestApplication.class,
+		properties = { "spring.cloud.vault.authentication=cert",
+				"spring.cloud.vault.ssl.key-store=file:../work/client-cert.jks",
+				"spring.cloud.vault.ssl.key-store-password=changeit",
+				"spring.cloud.vault.application-name=VaultConfigTlsCertAuthenticationTests",
+				"spring.cloud.vault.reactive.enabled=false" })
 public class VaultConfigTlsCertAuthenticationTests {
 
 	@Value("${vault.value}")

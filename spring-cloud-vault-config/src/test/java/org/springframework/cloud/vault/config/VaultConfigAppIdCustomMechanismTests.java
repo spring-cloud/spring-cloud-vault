@@ -48,9 +48,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = {
-		VaultConfigAppIdCustomMechanismTests.TestApplication.class }, properties = {
-				"spring.cloud.vault.authentication=appid",
+@SpringBootTest(classes = { VaultConfigAppIdCustomMechanismTests.TestApplication.class },
+		properties = { "spring.cloud.vault.authentication=appid",
 				"VaultConfigAppIdCustomMechanismTests.custom.config=true",
 				"spring.cloud.vault.applicationName=VaultConfigAppIdCustomMechanismTests",
 				"spring.main.allow-bean-definition-overriding=true" })
