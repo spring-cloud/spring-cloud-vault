@@ -50,11 +50,11 @@ import static org.junit.Assume.assumeTrue;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = VaultConfigMySqlDatabaseTests.TestApplication.class, properties = {
-		"spring.cloud.vault.database.enabled=true",
-		"spring.cloud.vault.database.role=readonly",
-		"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=UTC",
-		"spring.main.allow-bean-definition-overriding=true" })
+@SpringBootTest(classes = VaultConfigMySqlDatabaseTests.TestApplication.class,
+		properties = { "spring.cloud.vault.database.enabled=true",
+				"spring.cloud.vault.database.role=readonly",
+				"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=UTC",
+				"spring.main.allow-bean-definition-overriding=true" })
 public class VaultConfigMySqlDatabaseTests {
 
 	private static final int MYSQL_PORT = 3306;

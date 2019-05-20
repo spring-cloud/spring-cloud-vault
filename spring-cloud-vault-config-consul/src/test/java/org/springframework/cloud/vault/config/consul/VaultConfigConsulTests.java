@@ -55,9 +55,9 @@ import static org.junit.Assume.assumeTrue;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = VaultConfigConsulTests.TestApplication.class, properties = {
-		"spring.cloud.vault.consul.enabled=true",
-		"spring.cloud.vault.consul.role=readonly" })
+@SpringBootTest(classes = VaultConfigConsulTests.TestApplication.class,
+		properties = { "spring.cloud.vault.consul.enabled=true",
+				"spring.cloud.vault.consul.role=readonly" })
 public class VaultConfigConsulTests {
 
 	private static final String CONSUL_HOST = "localhost";

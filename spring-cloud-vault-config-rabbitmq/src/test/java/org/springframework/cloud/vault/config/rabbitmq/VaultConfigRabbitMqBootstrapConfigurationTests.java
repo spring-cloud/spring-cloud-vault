@@ -39,9 +39,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = CustomBootstrapConfiguration.class, properties = {
-		"VaultConfigRabbitMqBootstrapConfigurationTests.custom.config=true",
-		"spring.cloud.vault.rabbitmq.role=foo" })
+@SpringBootTest(classes = CustomBootstrapConfiguration.class,
+		properties = {
+				"VaultConfigRabbitMqBootstrapConfigurationTests.custom.config=true",
+				"spring.cloud.vault.rabbitmq.role=foo" })
 public class VaultConfigRabbitMqBootstrapConfigurationTests
 		extends IntegrationTestSupport {
 

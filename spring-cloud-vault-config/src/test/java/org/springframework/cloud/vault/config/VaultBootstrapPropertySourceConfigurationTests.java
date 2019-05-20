@@ -16,7 +16,10 @@
 
 package org.springframework.cloud.vault.config;
 
+import java.time.Duration;
+
 import org.junit.Test;
+
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -26,8 +29,6 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.lease.LeaseEndpoints;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 
-import java.time.Duration;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.verify;
  * Unit tests for {@link VaultBootstrapPropertySourceConfiguration}.
  *
  * @author Mark Paluch
+ * @author Mårten Svantesson
  */
 public class VaultBootstrapPropertySourceConfigurationTests {
 
@@ -78,6 +80,7 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 		SecretLeaseContainer secretLeaseContainer() {
 			return mock(SecretLeaseContainer.class);
 		}
+
 	}
 
 }

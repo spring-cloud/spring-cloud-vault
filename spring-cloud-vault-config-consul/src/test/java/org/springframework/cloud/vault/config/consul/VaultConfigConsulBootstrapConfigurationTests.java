@@ -39,10 +39,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringBootTest(classes = CustomBootstrapConfiguration.class, properties = {
-		"VaultConfigConsulBootstrapConfigurationTests.custom.config=true",
-		"spring.cloud.vault.consul.role=foo", "spring.cloud.vault.consul.enabled=true",
-		"spring.cloud.consul.config.enabled=false" })
+@SpringBootTest(classes = CustomBootstrapConfiguration.class,
+		properties = { "VaultConfigConsulBootstrapConfigurationTests.custom.config=true",
+				"spring.cloud.vault.consul.role=foo",
+				"spring.cloud.vault.consul.enabled=true",
+				"spring.cloud.consul.config.enabled=false" })
 public class VaultConfigConsulBootstrapConfigurationTests extends IntegrationTestSupport {
 
 	@Autowired
