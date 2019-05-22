@@ -998,9 +998,11 @@ spring.cloud.vault:
 
 See also: https://www.vaultproject.io/docs/secrets/databases/index.html[Vault Documentation: Database Secrets backend]
 
-WARNING: Spring Cloud Vault does not support getting new credentials and configuring your `DataSource` with them when
-the maximum lease time has been reached. That is if `max_ttl` of the Database role in Vault is set to `24h` that means
-that 24 hours after your application has started it can no longer authenticate with the database.
+WARNING: Spring Cloud Vault does not support getting new credentials and
+configuring your `DataSource` with them when the maximum lease time
+has been reached. That is, if `max_ttl` of the Database role in Vault
+is set to `24h` that means that 24 hours after your application has
+started it can no longer authenticate with the database.
 
 [[vault.config.backends.cassandra]]
 === Apache Cassandra
