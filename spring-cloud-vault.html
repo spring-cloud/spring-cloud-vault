@@ -2108,6 +2108,22 @@ You can configure the property names by setting
 <div class="paragraph">
 <p>See also: <a href="https://www.vaultproject.io/docs/secrets/databases/index.html">Vault Documentation: Database Secrets backend</a></p>
 </div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Spring Cloud Vault does not support getting new credentials and
+configuring your <code>DataSource</code> with them when the maximum lease time
+has been reached. That is, if <code>max_ttl</code> of the Database role in Vault
+is set to <code>24h</code> that means that 24 hours after your application has
+started it can no longer authenticate with the database.
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect2">
 <h3 id="vault.config.backends.cassandra"><a class="link" href="#vault.config.backends.cassandra">Apache Cassandra</a></h3>
