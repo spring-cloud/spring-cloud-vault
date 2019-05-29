@@ -9,7 +9,7 @@ Default generic and discovered backend registration is disabled if Spring Cloud 
 at least one <code class="literal">VaultConfigurer</code> bean. You can however enable default registration with
 <code class="literal">SecretBackendConfigurer.registerDefaultGenericSecretBackends()</code> and <code class="literal">SecretBackendConfigurer.registerDefaultDiscoveredSecretBackends()</code>.</p><div class="informalexample"><pre class="programlisting"><span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> CustomizationBean <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">implements</span> VaultConfigurer {
 
-    <em><span class="hl-annotation" style="color: gray">@Override</span></em>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Override</xslthl:annotation>
     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">void</span> addSecretBackends(SecretBackendConfigurer configurer) {
 
         configurer.add(<span xmlns:d="http://docbook.org/ns/docbook" class="hl-string">"secret/my-application"</span>);
