@@ -18,8 +18,7 @@ package org.springframework.cloud.vault.config;
 
 /**
  * Strategy interface to create {@link SecretBackendMetadata} from
- * {@link VaultSecretBackendDescriptor} properties. Mainly for internal use within the
- * framework.
+ * {@link VaultSecretBackendDescriptor} properties. Mainly for internal use within the framework.
  *
  * <p>
  * Classes implementing this interface must implement
