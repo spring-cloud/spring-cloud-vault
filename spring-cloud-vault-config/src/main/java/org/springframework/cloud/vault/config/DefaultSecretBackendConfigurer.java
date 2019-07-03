@@ -22,8 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.util.Assert;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
@@ -132,12 +130,17 @@ class DefaultSecretBackendConfigurer
 		return new ArrayList<>(this.secretBackends.values());
 	}
 
-	@RequiredArgsConstructor
 	private static class SimpleSecretBackendMetadata implements SecretBackendMetadata {
 
 		private final String path;
 
 		private final PropertyTransformer propertyTransformer;
+
+		SimpleSecretBackendMetadata(String path,
+				PropertyTransformer propertyTransformer) {
+			this.path = path;
+			this.propertyTransformer = propertyTransformer;
+		}
 
 		@Override
 		public String getName() {

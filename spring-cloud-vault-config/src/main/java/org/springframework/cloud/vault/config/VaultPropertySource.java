@@ -20,7 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.extern.apachecommons.CommonsLog;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.util.Assert;
@@ -31,8 +32,9 @@ import org.springframework.util.Assert;
  * @author Spencer Gibb
  * @author Mark Paluch
  */
-@CommonsLog
 class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations> {
+
+	private static final Log log = LogFactory.getLog(VaultPropertySource.class);
 
 	private final boolean failFast;
 
@@ -93,7 +95,7 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations
 	@Override
 	public String[] getPropertyNames() {
 		Set<String> strings = this.properties.keySet();
-		return strings.toArray(new String[strings.size()]);
+		return strings.toArray(new String[0]);
 	}
 
 }

@@ -18,8 +18,6 @@ package org.springframework.cloud.vault.config.databases;
 
 import javax.validation.constraints.NotEmpty;
 
-import lombok.Data;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -30,7 +28,6 @@ import org.springframework.validation.annotation.Validated;
  * @since 2.0
  */
 @ConfigurationProperties("spring.cloud.vault.database")
-@Data
 @Validated
 public class VaultDatabaseProperties implements DatabaseSecretProperties {
 
@@ -61,5 +58,45 @@ public class VaultDatabaseProperties implements DatabaseSecretProperties {
 	 */
 	@NotEmpty
 	private String passwordProperty = "spring.datasource.password";
+
+	public boolean isEnabled() {
+		return this.enabled;
+	}
+
+	public String getRole() {
+		return this.role;
+	}
+
+	public String getBackend() {
+		return this.backend;
+	}
+
+	public String getUsernameProperty() {
+		return this.usernameProperty;
+	}
+
+	public String getPasswordProperty() {
+		return this.passwordProperty;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	public void setBackend(String backend) {
+		this.backend = backend;
+	}
+
+	public void setUsernameProperty(String usernameProperty) {
+		this.usernameProperty = usernameProperty;
+	}
+
+	public void setPasswordProperty(String passwordProperty) {
+		this.passwordProperty = passwordProperty;
+	}
 
 }

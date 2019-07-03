@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import lombok.Data;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -113,7 +112,6 @@ public class DiscoveryClientVaultBootstrapConfigurationTests {
 
 	}
 
-	@Data
 	static class SimpleServiceInstance implements ServiceInstance {
 
 		private URI uri;
@@ -141,6 +139,50 @@ public class DiscoveryClientVaultBootstrapConfigurationTests {
 				this.secure = true;
 			}
 
+		}
+
+		public URI getUri() {
+			return this.uri;
+		}
+
+		public String getHost() {
+			return this.host;
+		}
+
+		public int getPort() {
+			return this.port;
+		}
+
+		public boolean isSecure() {
+			return this.secure;
+		}
+
+		public Map<String, String> getMetadata() {
+			return this.metadata;
+		}
+
+		public String getServiceId() {
+			return this.serviceId;
+		}
+
+		public void setHost(String host) {
+			this.host = host;
+		}
+
+		public void setPort(int port) {
+			this.port = port;
+		}
+
+		public void setSecure(boolean secure) {
+			this.secure = secure;
+		}
+
+		public void setMetadata(Map<String, String> metadata) {
+			this.metadata = metadata;
+		}
+
+		public void setServiceId(String serviceId) {
+			this.serviceId = serviceId;
 		}
 
 	}

@@ -20,9 +20,6 @@ import java.time.Duration;
 
 import javax.validation.constraints.NotEmpty;
 
-import lombok.Data;
-import org.hibernate.validator.constraints.Range;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
@@ -42,7 +39,6 @@ import org.springframework.vault.core.lease.LeaseEndpoints;
  * @author Mårten Svantesson
  */
 @ConfigurationProperties("spring.cloud.vault")
-@Data
 @Validated
 public class VaultProperties implements EnvironmentAware {
 
@@ -54,13 +50,13 @@ public class VaultProperties implements EnvironmentAware {
 	/**
 	 * Vault server host.
 	 */
-	@NotEmpty
+	// @NotEmpty
 	private String host = "localhost";
 
 	/**
 	 * Vault server port.
 	 */
-	@Range(min = 1, max = 65535)
+	// @Range(min = 1, max = 65535)
 	private int port = 8200;
 
 	/**
@@ -135,6 +131,182 @@ public class VaultProperties implements EnvironmentAware {
 		}
 	}
 
+	public boolean isEnabled() {
+		return this.enabled;
+	}
+
+	public String getHost() {
+		return this.host;
+	}
+
+	public int getPort() {
+		return this.port;
+	}
+
+	public String getScheme() {
+		return this.scheme;
+	}
+
+	public String getUri() {
+		return this.uri;
+	}
+
+	public Discovery getDiscovery() {
+		return this.discovery;
+	}
+
+	public int getConnectionTimeout() {
+		return this.connectionTimeout;
+	}
+
+	public int getReadTimeout() {
+		return this.readTimeout;
+	}
+
+	public boolean isFailFast() {
+		return this.failFast;
+	}
+
+	public String getToken() {
+		return this.token;
+	}
+
+	public AppIdProperties getAppId() {
+		return this.appId;
+	}
+
+	public AppRoleProperties getAppRole() {
+		return this.appRole;
+	}
+
+	public AwsEc2Properties getAwsEc2() {
+		return this.awsEc2;
+	}
+
+	public AwsIamProperties getAwsIam() {
+		return this.awsIam;
+	}
+
+	public AzureMsiProperties getAzureMsi() {
+		return this.azureMsi;
+	}
+
+	public GcpGceProperties getGcpGce() {
+		return this.gcpGce;
+	}
+
+	public GcpIamProperties getGcpIam() {
+		return this.gcpIam;
+	}
+
+	public KubernetesProperties getKubernetes() {
+		return this.kubernetes;
+	}
+
+	public Ssl getSsl() {
+		return this.ssl;
+	}
+
+	public Config getConfig() {
+		return this.config;
+	}
+
+	public String getApplicationName() {
+		return this.applicationName;
+	}
+
+	public AuthenticationMethod getAuthentication() {
+		return this.authentication;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public void setScheme(String scheme) {
+		this.scheme = scheme;
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
+
+	public void setDiscovery(Discovery discovery) {
+		this.discovery = discovery;
+	}
+
+	public void setConnectionTimeout(int connectionTimeout) {
+		this.connectionTimeout = connectionTimeout;
+	}
+
+	public void setReadTimeout(int readTimeout) {
+		this.readTimeout = readTimeout;
+	}
+
+	public void setFailFast(boolean failFast) {
+		this.failFast = failFast;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	public void setAppId(AppIdProperties appId) {
+		this.appId = appId;
+	}
+
+	public void setAppRole(AppRoleProperties appRole) {
+		this.appRole = appRole;
+	}
+
+	public void setAwsEc2(AwsEc2Properties awsEc2) {
+		this.awsEc2 = awsEc2;
+	}
+
+	public void setAwsIam(AwsIamProperties awsIam) {
+		this.awsIam = awsIam;
+	}
+
+	public void setAzureMsi(AzureMsiProperties azureMsi) {
+		this.azureMsi = azureMsi;
+	}
+
+	public void setGcpGce(GcpGceProperties gcpGce) {
+		this.gcpGce = gcpGce;
+	}
+
+	public void setGcpIam(GcpIamProperties gcpIam) {
+		this.gcpIam = gcpIam;
+	}
+
+	public void setKubernetes(KubernetesProperties kubernetes) {
+		this.kubernetes = kubernetes;
+	}
+
+	public void setSsl(Ssl ssl) {
+		this.ssl = ssl;
+	}
+
+	public void setConfig(Config config) {
+		this.config = config;
+	}
+
+	public void setApplicationName(String applicationName) {
+		this.applicationName = applicationName;
+	}
+
+	public void setAuthentication(AuthenticationMethod authentication) {
+		this.authentication = authentication;
+	}
+
 	/**
 	 * Enumeration of authentication methods.
 	 */
@@ -147,7 +319,6 @@ public class VaultProperties implements EnvironmentAware {
 	/**
 	 * Discovery properties.
 	 */
-	@Data
 	public static class Discovery {
 
 		/**
@@ -166,12 +337,27 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private String serviceId = DEFAULT_VAULT;
 
+		public boolean isEnabled() {
+			return this.enabled;
+		}
+
+		public String getServiceId() {
+			return this.serviceId;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+
+		public void setServiceId(String serviceId) {
+			this.serviceId = serviceId;
+		}
+
 	}
 
 	/**
 	 * AppId properties.
 	 */
-	@Data
 	@Validated
 	public static class AppIdProperties {
 
@@ -206,12 +392,35 @@ public class VaultProperties implements EnvironmentAware {
 		@NotEmpty
 		private String userId = MAC_ADDRESS;
 
+		public String getAppIdPath() {
+			return this.appIdPath;
+		}
+
+		public String getNetworkInterface() {
+			return this.networkInterface;
+		}
+
+		public String getUserId() {
+			return this.userId;
+		}
+
+		public void setAppIdPath(String appIdPath) {
+			this.appIdPath = appIdPath;
+		}
+
+		public void setNetworkInterface(String networkInterface) {
+			this.networkInterface = networkInterface;
+		}
+
+		public void setUserId(String userId) {
+			this.userId = userId;
+		}
+
 	}
 
 	/**
 	 * AppRole properties.
 	 */
-	@Data
 	@Validated
 	public static class AppRoleProperties {
 
@@ -235,12 +444,43 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private String secretId = null;
 
+		public String getAppRolePath() {
+			return this.appRolePath;
+		}
+
+		public String getRole() {
+			return this.role;
+		}
+
+		public String getRoleId() {
+			return this.roleId;
+		}
+
+		public String getSecretId() {
+			return this.secretId;
+		}
+
+		public void setAppRolePath(String appRolePath) {
+			this.appRolePath = appRolePath;
+		}
+
+		public void setRole(String role) {
+			this.role = role;
+		}
+
+		public void setRoleId(String roleId) {
+			this.roleId = roleId;
+		}
+
+		public void setSecretId(String secretId) {
+			this.secretId = secretId;
+		}
+
 	}
 
 	/**
 	 * AWS-EC2 properties.
 	 */
-	@Data
 	@Validated
 	public static class AwsEc2Properties {
 
@@ -267,12 +507,43 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private String nonce;
 
+		public String getIdentityDocument() {
+			return this.identityDocument;
+		}
+
+		public String getAwsEc2Path() {
+			return this.awsEc2Path;
+		}
+
+		public String getRole() {
+			return this.role;
+		}
+
+		public String getNonce() {
+			return this.nonce;
+		}
+
+		public void setIdentityDocument(String identityDocument) {
+			this.identityDocument = identityDocument;
+		}
+
+		public void setAwsEc2Path(String awsEc2Path) {
+			this.awsEc2Path = awsEc2Path;
+		}
+
+		public void setRole(String role) {
+			this.role = role;
+		}
+
+		public void setNonce(String nonce) {
+			this.nonce = nonce;
+		}
+
 	}
 
 	/**
 	 * AWS-IAM properties.
 	 */
-	@Data
 	public static class AwsIamProperties {
 
 		/**
@@ -292,12 +563,35 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private String serverName;
 
+		public String getAwsPath() {
+			return this.awsPath;
+		}
+
+		public String getRole() {
+			return this.role;
+		}
+
+		public String getServerName() {
+			return this.serverName;
+		}
+
+		public void setAwsPath(String awsPath) {
+			this.awsPath = awsPath;
+		}
+
+		public void setRole(String role) {
+			this.role = role;
+		}
+
+		public void setServerName(String serverName) {
+			this.serverName = serverName;
+		}
+
 	}
 
 	/**
 	 * Azure MSI properties.
 	 */
-	@Data
 	public static class AzureMsiProperties {
 
 		/**
@@ -311,12 +605,27 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private String role = "";
 
+		public String getAzurePath() {
+			return this.azurePath;
+		}
+
+		public String getRole() {
+			return this.role;
+		}
+
+		public void setAzurePath(String azurePath) {
+			this.azurePath = azurePath;
+		}
+
+		public void setRole(String role) {
+			this.role = role;
+		}
+
 	}
 
 	/**
 	 * GCP-GCE properties.
 	 */
-	@Data
 	public static class GcpGceProperties {
 
 		/**
@@ -335,12 +644,35 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private String serviceAccount = "";
 
+		public String getGcpPath() {
+			return this.gcpPath;
+		}
+
+		public String getRole() {
+			return this.role;
+		}
+
+		public String getServiceAccount() {
+			return this.serviceAccount;
+		}
+
+		public void setGcpPath(String gcpPath) {
+			this.gcpPath = gcpPath;
+		}
+
+		public void setRole(String role) {
+			this.role = role;
+		}
+
+		public void setServiceAccount(String serviceAccount) {
+			this.serviceAccount = serviceAccount;
+		}
+
 	}
 
 	/**
 	 * GCP-IAM properties.
 	 */
-	@Data
 	public static class GcpIamProperties {
 
 		/**
@@ -374,12 +706,55 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private Duration jwtValidity = Duration.ofMinutes(15);
 
+		public GcpCredentials getCredentials() {
+			return this.credentials;
+		}
+
+		public String getGcpPath() {
+			return this.gcpPath;
+		}
+
+		public String getRole() {
+			return this.role;
+		}
+
+		public String getProjectId() {
+			return this.projectId;
+		}
+
+		public String getServiceAccountId() {
+			return this.serviceAccountId;
+		}
+
+		public Duration getJwtValidity() {
+			return this.jwtValidity;
+		}
+
+		public void setGcpPath(String gcpPath) {
+			this.gcpPath = gcpPath;
+		}
+
+		public void setRole(String role) {
+			this.role = role;
+		}
+
+		public void setProjectId(String projectId) {
+			this.projectId = projectId;
+		}
+
+		public void setServiceAccountId(String serviceAccountId) {
+			this.serviceAccountId = serviceAccountId;
+		}
+
+		public void setJwtValidity(Duration jwtValidity) {
+			this.jwtValidity = jwtValidity;
+		}
+
 	}
 
 	/**
 	 * GCP credential properties.
 	 */
-	@Data
 	public static class GcpCredentials {
 
 		/**
@@ -396,12 +771,27 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private String encodedKey;
 
+		public Resource getLocation() {
+			return this.location;
+		}
+
+		public String getEncodedKey() {
+			return this.encodedKey;
+		}
+
+		public void setLocation(Resource location) {
+			this.location = location;
+		}
+
+		public void setEncodedKey(String encodedKey) {
+			this.encodedKey = encodedKey;
+		}
+
 	}
 
 	/**
 	 * Kubernetes properties.
 	 */
-	@Data
 	public static class KubernetesProperties {
 
 		/**
@@ -421,12 +811,35 @@ public class VaultProperties implements EnvironmentAware {
 		@NotEmpty
 		private String serviceAccountTokenFile = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
+		public String getKubernetesPath() {
+			return this.kubernetesPath;
+		}
+
+		public String getRole() {
+			return this.role;
+		}
+
+		public String getServiceAccountTokenFile() {
+			return this.serviceAccountTokenFile;
+		}
+
+		public void setKubernetesPath(String kubernetesPath) {
+			this.kubernetesPath = kubernetesPath;
+		}
+
+		public void setRole(String role) {
+			this.role = role;
+		}
+
+		public void setServiceAccountTokenFile(String serviceAccountTokenFile) {
+			this.serviceAccountTokenFile = serviceAccountTokenFile;
+		}
+
 	}
 
 	/**
 	 * SSL properties.
 	 */
-	@Data
 	@Validated
 	public static class Ssl {
 
@@ -456,12 +869,51 @@ public class VaultProperties implements EnvironmentAware {
 		@NotEmpty
 		private String certAuthPath = "cert";
 
+		public Resource getKeyStore() {
+			return this.keyStore;
+		}
+
+		public String getKeyStorePassword() {
+			return this.keyStorePassword;
+		}
+
+		public Resource getTrustStore() {
+			return this.trustStore;
+		}
+
+		public String getTrustStorePassword() {
+			return this.trustStorePassword;
+		}
+
+		public String getCertAuthPath() {
+			return this.certAuthPath;
+		}
+
+		public void setKeyStore(Resource keyStore) {
+			this.keyStore = keyStore;
+		}
+
+		public void setKeyStorePassword(String keyStorePassword) {
+			this.keyStorePassword = keyStorePassword;
+		}
+
+		public void setTrustStore(Resource trustStore) {
+			this.trustStore = trustStore;
+		}
+
+		public void setTrustStorePassword(String trustStorePassword) {
+			this.trustStorePassword = trustStorePassword;
+		}
+
+		public void setCertAuthPath(String certAuthPath) {
+			this.certAuthPath = certAuthPath;
+		}
+
 	}
 
 	/**
 	 * Property source properties.
 	 */
-	@Data
 	public static class Config {
 
 		/**
@@ -474,13 +926,28 @@ public class VaultProperties implements EnvironmentAware {
 
 		private Lifecycle lifecycle = new Lifecycle();
 
+		public int getOrder() {
+			return this.order;
+		}
+
+		public Lifecycle getLifecycle() {
+			return this.lifecycle;
+		}
+
+		public void setOrder(int order) {
+			this.order = order;
+		}
+
+		public void setLifecycle(Lifecycle lifecycle) {
+			this.lifecycle = lifecycle;
+		}
+
 	}
 
 	/**
 	 * Configuration to Vault lifecycle management (renewal, revocation of tokens and
 	 * secrets).
 	 */
-	@Data
 	public static class Lifecycle {
 
 		/**
@@ -514,6 +981,38 @@ public class VaultProperties implements EnvironmentAware {
 		 * @since 2.2
 		 */
 		private LeaseEndpoints leaseEndpoints;
+
+		public boolean isEnabled() {
+			return this.enabled;
+		}
+
+		public Duration getMinRenewal() {
+			return this.minRenewal;
+		}
+
+		public Duration getExpiryThreshold() {
+			return this.expiryThreshold;
+		}
+
+		public LeaseEndpoints getLeaseEndpoints() {
+			return this.leaseEndpoints;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+
+		public void setMinRenewal(Duration minRenewal) {
+			this.minRenewal = minRenewal;
+		}
+
+		public void setExpiryThreshold(Duration expiryThreshold) {
+			this.expiryThreshold = expiryThreshold;
+		}
+
+		public void setLeaseEndpoints(LeaseEndpoints leaseEndpoints) {
+			this.leaseEndpoints = leaseEndpoints;
+		}
 
 	}
 
