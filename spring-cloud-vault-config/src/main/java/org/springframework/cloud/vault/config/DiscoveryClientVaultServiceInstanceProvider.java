@@ -18,8 +18,8 @@ package org.springframework.cloud.vault.config;
 
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.apachecommons.CommonsLog;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -30,12 +30,17 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
  * @author Mark Paluch
  * @since 1.1
  */
-@CommonsLog
-@RequiredArgsConstructor
 public class DiscoveryClientVaultServiceInstanceProvider
 		implements VaultServiceInstanceProvider {
 
+	private static final Log log = LogFactory
+			.getLog(DiscoveryClientVaultServiceInstanceProvider.class);
+
 	private final DiscoveryClient client;
+
+	public DiscoveryClientVaultServiceInstanceProvider(DiscoveryClient client) {
+		this.client = client;
+	}
 
 	@Override
 	public ServiceInstance getVaultServerInstance(String serviceId) {

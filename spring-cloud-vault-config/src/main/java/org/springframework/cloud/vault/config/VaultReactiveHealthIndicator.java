@@ -17,11 +17,11 @@
 package org.springframework.cloud.vault.config;
 
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Data;
 import reactor.core.publisher.Mono;
 
 import org.springframework.boot.actuate.health.AbstractReactiveHealthIndicator;
@@ -95,7 +95,6 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 				.map((vaultHealthResponse) -> getHealth(builder, vaultHealthResponse));
 	}
 
-	@Data
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	private static final class VaultHealthImpl implements VaultHealth {
 
@@ -121,6 +120,61 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 			this.standby = standby;
 			this.serverTimeUtc = serverTimeUtc;
 			this.version = version;
+		}
+
+		public boolean isInitialized() {
+			return this.initialized;
+		}
+
+		public boolean isSealed() {
+			return this.sealed;
+		}
+
+		public boolean isStandby() {
+			return this.standby;
+		}
+
+		public int getServerTimeUtc() {
+			return this.serverTimeUtc;
+		}
+
+		@Nullable
+		public String getVersion() {
+			return this.version;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (!(o instanceof VaultHealthImpl)) {
+				return false;
+			}
+			VaultHealthImpl that = (VaultHealthImpl) o;
+			return this.initialized == that.initialized && this.sealed == that.sealed
+					&& this.standby == that.standby
+					&& this.serverTimeUtc == that.serverTimeUtc
+					&& Objects.equals(this.version, that.version);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.initialized, this.sealed, this.standby,
+					this.serverTimeUtc, this.version);
+		}
+
+		@Override
+		public String toString() {
+			StringBuffer sb = new StringBuffer();
+			sb.append(getClass().getSimpleName());
+			sb.append(" [initialized=").append(this.initialized);
+			sb.append(", sealed=").append(this.sealed);
+			sb.append(", standby=").append(this.standby);
+			sb.append(", serverTimeUtc=").append(this.serverTimeUtc);
+			sb.append(", version='").append(this.version).append('\'');
+			sb.append(']');
+			return sb.toString();
 		}
 
 	}

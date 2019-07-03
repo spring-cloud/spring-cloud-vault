@@ -18,8 +18,6 @@ package org.springframework.cloud.vault.config;
 
 import javax.validation.constraints.NotEmpty;
 
-import lombok.Data;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
@@ -32,7 +30,6 @@ import org.springframework.validation.annotation.Validated;
  * @author Mark Paluch
  */
 @ConfigurationProperties("spring.cloud.vault.generic")
-@Data
 @Validated
 public class VaultGenericBackendProperties
 		implements EnvironmentAware, VaultKeyValueBackendPropertiesSupport {
@@ -65,6 +62,9 @@ public class VaultGenericBackendProperties
 	 */
 	private String applicationName = "application";
 
+	public VaultGenericBackendProperties() {
+	}
+
 	@Override
 	public void setEnvironment(Environment environment) {
 
@@ -81,6 +81,59 @@ public class VaultGenericBackendProperties
 				this.applicationName = springAppName;
 			}
 		}
+	}
+
+	public boolean isEnabled() {
+		return this.enabled;
+	}
+
+	public String getBackend() {
+		return this.backend;
+	}
+
+	public String getDefaultContext() {
+		return this.defaultContext;
+	}
+
+	public String getProfileSeparator() {
+		return this.profileSeparator;
+	}
+
+	public String getApplicationName() {
+		return this.applicationName;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public void setBackend(String backend) {
+		this.backend = backend;
+	}
+
+	public void setDefaultContext(String defaultContext) {
+		this.defaultContext = defaultContext;
+	}
+
+	public void setProfileSeparator(String profileSeparator) {
+		this.profileSeparator = profileSeparator;
+	}
+
+	public void setApplicationName(String applicationName) {
+		this.applicationName = applicationName;
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(getClass().getSimpleName());
+		sb.append(" [enabled=").append(this.enabled);
+		sb.append(", backend='").append(this.backend).append('\'');
+		sb.append(", defaultContext='").append(this.defaultContext).append('\'');
+		sb.append(", profileSeparator='").append(this.profileSeparator).append('\'');
+		sb.append(", applicationName='").append(this.applicationName).append('\'');
+		sb.append(']');
+		return sb.toString();
 	}
 
 }

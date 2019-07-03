@@ -18,7 +18,8 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Map;
 
-import lombok.extern.apachecommons.CommonsLog;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
@@ -33,8 +34,9 @@ import org.springframework.vault.support.VaultResponse;
  * @author Mark Paluch
  * @see VaultOperations
  */
-@CommonsLog
 public class VaultConfigTemplate implements VaultConfigOperations {
+
+	private static final Log log = LogFactory.getLog(VaultConfigTemplate.class);
 
 	private final VaultOperations vaultOperations;
 

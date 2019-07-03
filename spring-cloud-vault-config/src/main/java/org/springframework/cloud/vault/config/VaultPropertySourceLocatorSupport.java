@@ -22,8 +22,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -210,13 +208,17 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	protected abstract PropertySource<?> createVaultPropertySource(
 			SecretBackendMetadata accessor);
 
-	@RequiredArgsConstructor
 	private static class GenericPropertySourceLocatorConfiguration
 			implements EnvironmentAware, PropertySourceLocatorConfiguration {
 
 		private final VaultKeyValueBackendPropertiesSupport genericBackendProperties;
 
 		private Environment environment;
+
+		GenericPropertySourceLocatorConfiguration(
+				VaultKeyValueBackendPropertiesSupport genericBackendProperties) {
+			this.genericBackendProperties = genericBackendProperties;
+		}
 
 		@Override
 		public void setEnvironment(Environment environment) {
@@ -247,11 +249,14 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 
 	}
 
-	@RequiredArgsConstructor
 	private static class WrappedPropertySourceLocatorConfiguration
 			implements PropertySourceLocatorConfiguration {
 
 		private final List<SecretBackendMetadata> metadata;
+
+		WrappedPropertySourceLocatorConfiguration(List<SecretBackendMetadata> metadata) {
+			this.metadata = metadata;
+		}
 
 		@Override
 		public Collection<SecretBackendMetadata> getSecretBackends() {

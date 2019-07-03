@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import lombok.extern.apachecommons.CommonsLog;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Utility class to create {@link SecretBackendMetadata} from a
@@ -28,8 +29,9 @@ import lombok.extern.apachecommons.CommonsLog;
  *
  * @author Mark Paluch
  */
-@CommonsLog
 final class SecretBackendFactories {
+
+	private static final Log log = LogFactory.getLog(SecretBackendFactories.class);
 
 	private SecretBackendFactories() {
 

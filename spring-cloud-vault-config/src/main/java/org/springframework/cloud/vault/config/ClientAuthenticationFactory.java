@@ -27,8 +27,6 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.apachecommons.CommonsLog;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.cloud.vault.config.VaultProperties.AppRoleProperties;
@@ -84,8 +82,6 @@ import org.springframework.web.client.RestOperations;
  * @author Michal Budzyn
  * @since 1.1
  */
-@RequiredArgsConstructor
-@CommonsLog
 class ClientAuthenticationFactory {
 
 	private final VaultProperties vaultProperties;
@@ -93,6 +89,13 @@ class ClientAuthenticationFactory {
 	private final RestOperations restOperations;
 
 	private final RestOperations externalRestOperations;
+
+	ClientAuthenticationFactory(VaultProperties vaultProperties,
+			RestOperations restOperations, RestOperations externalRestOperations) {
+		this.vaultProperties = vaultProperties;
+		this.restOperations = restOperations;
+		this.externalRestOperations = externalRestOperations;
+	}
 
 	static AppRoleAuthenticationOptions getAppRoleAuthenticationOptions(
 			VaultProperties vaultProperties) {

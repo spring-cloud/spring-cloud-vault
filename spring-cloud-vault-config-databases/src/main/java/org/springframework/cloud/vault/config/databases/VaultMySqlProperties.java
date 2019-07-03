@@ -18,11 +18,7 @@ package org.springframework.cloud.vault.config.databases;
 
 import javax.validation.constraints.NotEmpty;
 
-import lombok.Data;
-import lombok.Getter;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 import org.springframework.validation.annotation.Validated;
 
@@ -33,7 +29,6 @@ import org.springframework.validation.annotation.Validated;
  * @deprecated since 2.0. Use {@link VaultDatabaseProperties}.
  */
 @ConfigurationProperties("spring.cloud.vault.mysql")
-@Data
 @Validated
 @Deprecated
 public class VaultMySqlProperties
@@ -42,15 +37,11 @@ public class VaultMySqlProperties
 	/**
 	 * Enable mysql backend usage.
 	 */
-	@Getter(onMethod_ = { @DeprecatedConfigurationProperty(
-			reason = "Use spring.cloud.vault.database") })
 	private boolean enabled = false;
 
 	/**
 	 * Role name for credentials.
 	 */
-	@Getter(onMethod_ = { @DeprecatedConfigurationProperty(
-			reason = "Use spring.cloud.vault.database") })
 	private String role;
 
 	/**
@@ -70,5 +61,48 @@ public class VaultMySqlProperties
 	 */
 	@NotEmpty
 	private String passwordProperty = "spring.datasource.password";
+
+	public VaultMySqlProperties() {
+	}
+
+	public String getBackend() {
+		return this.backend;
+	}
+
+	public String getUsernameProperty() {
+		return this.usernameProperty;
+	}
+
+	public String getPasswordProperty() {
+		return this.passwordProperty;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	public void setBackend(String backend) {
+		this.backend = backend;
+	}
+
+	public void setUsernameProperty(String usernameProperty) {
+		this.usernameProperty = usernameProperty;
+	}
+
+	public void setPasswordProperty(String passwordProperty) {
+		this.passwordProperty = passwordProperty;
+	}
+
+	public boolean isEnabled() {
+		return this.enabled;
+	}
+
+	public String getRole() {
+		return this.role;
+	}
 
 }

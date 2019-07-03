@@ -18,7 +18,7 @@ package org.springframework.cloud.vault.config;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import lombok.extern.apachecommons.CommonsLog;
+import org.apache.commons.logging.Log;
 
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.env.PropertySource;
@@ -36,9 +36,11 @@ import org.springframework.vault.core.lease.event.LeaseErrorListener;
  * @author Mark Paluch
  * @see LeaseAwareVaultPropertySource
  */
-@CommonsLog
 class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSupport
 		implements PriorityOrdered {
+
+	private static final Log log = org.apache.commons.logging.LogFactory
+			.getLog(LeasingVaultPropertySourceLocator.class);
 
 	private final SecretLeaseContainer secretLeaseContainer;
 

@@ -18,8 +18,6 @@ package org.springframework.cloud.vault.config.aws;
 
 import javax.validation.constraints.NotEmpty;
 
-import lombok.Data;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 import org.springframework.validation.annotation.Validated;
@@ -30,7 +28,6 @@ import org.springframework.validation.annotation.Validated;
  * @author Mark Paluch
  */
 @ConfigurationProperties("spring.cloud.vault.aws")
-@Data
 @Validated
 public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 
@@ -61,5 +58,45 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 	 */
 	@NotEmpty
 	private String secretKeyProperty = "cloud.aws.credentials.secretKey";
+
+	public boolean isEnabled() {
+		return this.enabled;
+	}
+
+	public String getRole() {
+		return this.role;
+	}
+
+	public String getBackend() {
+		return this.backend;
+	}
+
+	public String getAccessKeyProperty() {
+		return this.accessKeyProperty;
+	}
+
+	public String getSecretKeyProperty() {
+		return this.secretKeyProperty;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	public void setBackend(String backend) {
+		this.backend = backend;
+	}
+
+	public void setAccessKeyProperty(String accessKeyProperty) {
+		this.accessKeyProperty = accessKeyProperty;
+	}
+
+	public void setSecretKeyProperty(String secretKeyProperty) {
+		this.secretKeyProperty = secretKeyProperty;
+	}
 
 }
