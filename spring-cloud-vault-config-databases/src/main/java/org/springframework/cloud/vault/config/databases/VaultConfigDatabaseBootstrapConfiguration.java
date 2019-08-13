@@ -78,6 +78,9 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 
 			return new SecretBackendMetadata() {
 
+				private String credPath = properties.isStaticRole() ? "static-creds"
+						: "creds";
+
 				@Override
 				public String getName() {
 					return String.format("%s with Role %s", properties.getBackend(),
@@ -86,7 +89,7 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 
 				@Override
 				public String getPath() {
-					return String.format("%s/creds/%s", properties.getBackend(),
+					return String.format("%s/%s/%s", properties.getBackend(), credPath,
 							properties.getRole());
 				}
 
@@ -100,7 +103,8 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 
 					Map<String, String> variables = new HashMap<>();
 					variables.put("backend", properties.getBackend());
-					variables.put("key", String.format("creds/%s", properties.getRole()));
+					variables.put("key",
+							String.format("%s/%s", credPath, properties.getRole()));
 					return variables;
 				}
 			};

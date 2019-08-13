@@ -59,6 +59,11 @@ public class VaultDatabaseProperties implements DatabaseSecretProperties {
 	@NotEmpty
 	private String passwordProperty = "spring.datasource.password";
 
+	/**
+	 * Enable static role usage.
+	 */
+	private boolean staticRole = false;
+
 	public boolean isEnabled() {
 		return this.enabled;
 	}

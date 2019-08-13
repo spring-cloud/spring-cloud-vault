@@ -58,6 +58,11 @@ public class VaultCassandraProperties implements DatabaseSecretProperties {
 	@NotEmpty
 	private String passwordProperty = "spring.data.cassandra.password";
 
+	/**
+	 * Enable static role usage.
+	 */
+	private boolean staticRole = false;
+
 	public boolean isEnabled() {
 		return this.enabled;
 	}
