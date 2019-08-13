@@ -47,4 +47,10 @@ public interface DatabaseSecretProperties extends VaultSecretBackendDescriptor {
 	 */
 	String getPasswordProperty();
 
+	/**
+	 * see https://learn.hashicorp.com/vault/secrets-management/db-creds-rotation
+	 * @return is vault configured to use static role or not.
+	 */
+	boolean isStaticRole();
+
 }

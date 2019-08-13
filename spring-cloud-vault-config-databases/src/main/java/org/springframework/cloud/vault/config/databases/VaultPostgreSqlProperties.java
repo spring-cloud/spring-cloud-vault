@@ -70,4 +70,9 @@ public class VaultPostgreSqlProperties implements DatabaseSecretProperties {
 	@NotEmpty
 	private String passwordProperty = "spring.datasource.password";
 
+	/**
+	 * Enable static role usage.
+	 */
+	private boolean staticRole = false;
+
 }

@@ -61,4 +61,9 @@ public class VaultMongoProperties implements DatabaseSecretProperties {
 	@NotEmpty
 	private String passwordProperty = "spring.data.mongodb.password";
 
+	/**
+	 * Enable static role usage.
+	 */
+	private boolean staticRole = false;
+
 }
