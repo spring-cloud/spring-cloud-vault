@@ -1092,7 +1092,8 @@ the friendly name the current IAM role.</p>
     aws-iam:
         role: my-dev-role
         aws-path: aws
-        server-id: some.server.name</code></pre>
+        server-id: some.server.name
+        endpoint-uri: https://sts.eu-central-1.amazonaws.com</code></pre>
 </div>
 </div>
 </div>
@@ -1107,6 +1108,9 @@ the friendly name the current IAM role.</p>
 </li>
 <li>
 <p><code>server-id</code> sets the value to use for the <code>X-Vault-AWS-IAM-Server-ID</code> header preventing certain types of replay attacks.</p>
+</li>
+<li>
+<p><code>endpoint-uri</code> sets the value to use for the AWS STS API used for the <code>iam_request_url</code> parameter.</p>
 </li>
 </ul>
 </div>
