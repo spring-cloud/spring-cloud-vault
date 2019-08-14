@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.vault.config;
 
+import java.net.URI;
 import java.time.Duration;
 
 import javax.validation.constraints.NotEmpty;
@@ -563,6 +564,13 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private String serverName;
 
+		/**
+		 * STS server URI.
+		 *
+		 * @since 2.2
+		 */
+		private URI endpointUri;
+
 		public String getAwsPath() {
 			return this.awsPath;
 		}
@@ -585,6 +593,14 @@ public class VaultProperties implements EnvironmentAware {
 
 		public void setServerName(String serverName) {
 			this.serverName = serverName;
+		}
+
+		public URI getEndpointUri() {
+			return this.endpointUri;
+		}
+
+		public void setEndpointUri(URI endpointUri) {
+			this.endpointUri = endpointUri;
 		}
 
 	}
