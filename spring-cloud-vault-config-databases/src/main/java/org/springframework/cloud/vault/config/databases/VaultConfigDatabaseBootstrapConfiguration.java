@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.vault.core.util.PropertyTransformer;
  *
  * @author Mark Paluch
  * @author Per Abich
+ * @author Sebastien Nahelou
  */
 @Configuration
 @EnableConfigurationProperties({ VaultMySqlProperties.class,
@@ -78,7 +79,7 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 
 			return new SecretBackendMetadata() {
 
-				private String credPath = properties.isStaticRole() ? "static-creds"
+				private final String credPath = properties.isStaticRole() ? "static-creds"
 						: "creds";
 
 				@Override
@@ -89,8 +90,8 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 
 				@Override
 				public String getPath() {
-					return String.format("%s/%s/%s", properties.getBackend(), credPath,
-							properties.getRole());
+					return String.format("%s/%s/%s", properties.getBackend(),
+							this.credPath, properties.getRole());
 				}
 
 				@Override
@@ -104,7 +105,7 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 					Map<String, String> variables = new HashMap<>();
 					variables.put("backend", properties.getBackend());
 					variables.put("key",
-							String.format("%s/%s", credPath, properties.getRole()));
+							String.format("%s/%s", this.credPath, properties.getRole()));
 					return variables;
 				}
 			};
