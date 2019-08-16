@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
  * Configuration properties interface for database secrets.
  *
  * @author Mark Paluch
+ * @author Sebastien Nahelou
  */
 public interface DatabaseSecretProperties extends VaultSecretBackendDescriptor {
 
@@ -30,6 +31,13 @@ public interface DatabaseSecretProperties extends VaultSecretBackendDescriptor {
 	 * @return the role name
 	 */
 	String getRole();
+
+	/**
+	 * Whether the configuration uses static roles.
+	 * @return {@literal true} if the configuration uses static roles.
+	 * @since 2.2
+	 */
+	boolean isStaticRole();
 
 	/**
 	 * Backend path.
@@ -46,11 +54,5 @@ public interface DatabaseSecretProperties extends VaultSecretBackendDescriptor {
 	 * @return name of the target property for the obtained password.
 	 */
 	String getPasswordProperty();
-
-	/**
-	 * see https://learn.hashicorp.com/vault/secrets-management/db-creds-rotation
-	 * @return is vault configured to use static role or not.
-	 */
-	boolean isStaticRole();
 
 }
