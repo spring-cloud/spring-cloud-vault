@@ -178,7 +178,7 @@ public class ClientAuthenticationFactoryUnitTests {
 
 		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(
 				properties, new RestTemplate(), new RestTemplate())
-				.createClientAuthentication();
+						.createClientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(PcfAuthentication.class);
 	}
