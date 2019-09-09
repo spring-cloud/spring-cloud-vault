@@ -71,6 +71,11 @@ public class VaultProperties implements EnvironmentAware {
 	private String uri;
 
 	/**
+	 * Vault namespace (requires Vault Enterprise).
+	 */
+	private String namespace;
+
+	/**
 	 * Discovery properties.
 	 */
 	private Discovery discovery = new Discovery();
@@ -152,6 +157,10 @@ public class VaultProperties implements EnvironmentAware {
 
 	public String getUri() {
 		return this.uri;
+	}
+
+	public String getNamespace() {
+		return this.namespace;
 	}
 
 	public Discovery getDiscovery() {
@@ -244,6 +253,10 @@ public class VaultProperties implements EnvironmentAware {
 
 	public void setUri(String uri) {
 		this.uri = uri;
+	}
+
+	public void setNamespace(String namespace) {
+		this.namespace = namespace;
 	}
 
 	public void setDiscovery(Discovery discovery) {

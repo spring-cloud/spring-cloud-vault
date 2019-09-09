@@ -1291,6 +1291,28 @@ spring.cloud.vault:
 ----
 ====
 
+[[vault.config.namespaces]]
+== Vault Enterprise Namespace Support
+
+Vault Enterprise allows using namespaces to isolate multiple Vaults
+on a single Vault server. Configuring a namespace by setting
+`spring.cloud.vault.namespace=…` enables the namespace header
+`X-Vault-Namespace` on every outgoing HTTP request when using the Vault
+`RestTemplate` or `WebClient`.
+
+Please note that this feature is not supported by Vault Community edition
+and has no effect on Vault operations.
+
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    namespace: my-namespace
+----
+====
+
+See also: https://www.vaultproject.io/docs/enterprise/namespaces/index.html[Vault Enterprise: Namespaces]
+
 [[vault.config.ssl]]
 == Vault Client SSL configuration
 
