@@ -47,6 +47,7 @@
 		<httpcore.version>4.4.9</httpcore.version>
 		<netty.version>4.1.30.Final</netty.version>
 		<okhttp3.version>3.10.0</okhttp3.version>
+		<bcpkix-jdk15on.version>1.62</bcpkix-jdk15on.version>
 
 		<google-api-services-iam.version>v1-rev259-1.25.0
 		</google-api-services-iam.version>
@@ -110,6 +111,15 @@
 				<groupId>io.netty</groupId>
 				<artifactId>netty-all</artifactId>
 				<version>${netty.version}</version>
+			</dependency>
+
+			<!-- BouncyCastle -->
+
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk15on</artifactId>
+				<version>${bcpkix-jdk15on.version}</version>
+				<optional>true</optional>
 			</dependency>
 
 			<!-- GCP SDK -->

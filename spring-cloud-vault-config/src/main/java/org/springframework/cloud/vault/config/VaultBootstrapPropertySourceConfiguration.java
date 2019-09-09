@@ -49,8 +49,8 @@ import org.springframework.vault.core.lease.SecretLeaseContainer;
  */
 @Configuration
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
-@EnableConfigurationProperties({ VaultGenericBackendProperties.class,
-		VaultKeyValueBackendProperties.class })
+@EnableConfigurationProperties({VaultGenericBackendProperties.class,
+		VaultKeyValueBackendProperties.class})
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
 public class VaultBootstrapPropertySourceConfiguration implements InitializingBean {
 
@@ -158,20 +158,9 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 						keyValueBackend, Arrays.asList(this.applicationContext
 								.getEnvironment().getActiveProfiles()));
 
-				if (keyValueBackend instanceof VaultKeyValueBackendProperties
-						&& ((VaultKeyValueBackendProperties) keyValueBackend)
-								.getBackendVersion() == 2) {
-
-					for (String context : contexts) {
-						secretBackendConfigurer.add(KeyValueSecretBackendMetadata
-								.create(keyValueBackend.getBackend(), context));
-					}
-				}
-				else {
-					for (String context : contexts) {
-						secretBackendConfigurer.add(GenericSecretBackendMetadata
-								.create(keyValueBackend.getBackend(), context));
-					}
+				for (String context : contexts) {
+					secretBackendConfigurer.add(GenericSecretBackendMetadata
+							.create(keyValueBackend.getBackend(), context));
 				}
 			}
 
