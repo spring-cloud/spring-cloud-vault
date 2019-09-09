@@ -49,8 +49,8 @@ import org.springframework.vault.core.lease.SecretLeaseContainer;
  */
 @Configuration
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
-@EnableConfigurationProperties({VaultGenericBackendProperties.class,
-		VaultKeyValueBackendProperties.class})
+@EnableConfigurationProperties({ VaultGenericBackendProperties.class,
+		VaultKeyValueBackendProperties.class })
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
 public class VaultBootstrapPropertySourceConfiguration implements InitializingBean {
 

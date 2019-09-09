@@ -114,7 +114,6 @@
 			</dependency>
 
 			<!-- BouncyCastle -->
-
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcpkix-jdk15on</artifactId>

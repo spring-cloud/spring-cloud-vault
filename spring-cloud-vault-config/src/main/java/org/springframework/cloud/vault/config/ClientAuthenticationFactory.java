@@ -159,12 +159,12 @@ class ClientAuthenticationFactory {
 		AppIdAuthenticationOptions authenticationOptions = AppIdAuthenticationOptions
 				.builder().appId(vaultProperties.getApplicationName()) //
 				.path(appId.getAppIdPath()) //
-				.userIdMechanism(getClientAuthentication(appId)).build();
+				.userIdMechanism(getAppIdMechanism(appId)).build();
 
 		return new AppIdAuthentication(authenticationOptions, this.restOperations);
 	}
 
-	private AppIdUserIdMechanism getClientAuthentication(
+	private AppIdUserIdMechanism getAppIdMechanism(
 			VaultProperties.AppIdProperties appId) {
 
 		try {
@@ -195,6 +195,14 @@ class ClientAuthenticationFactory {
 				return new StaticUserId(appId.getUserId());
 			}
 		}
+	}
+
+	private ClientAuthentication appRoleAuthentication(VaultProperties vaultProperties) {
+
+		AppRoleAuthenticationOptions options = getAppRoleAuthenticationOptions(
+				vaultProperties);
+
+		return new AppRoleAuthentication(options, this.restOperations);
 	}
 
 	static AppRoleAuthenticationOptions getAppRoleAuthenticationOptions(
@@ -254,14 +262,6 @@ class ClientAuthenticationFactory {
 		}
 
 		return SecretId.absent();
-	}
-
-	private ClientAuthentication appRoleAuthentication(VaultProperties vaultProperties) {
-
-		AppRoleAuthenticationOptions options = getAppRoleAuthenticationOptions(
-				vaultProperties);
-
-		return new AppRoleAuthentication(options, this.restOperations);
 	}
 
 	private ClientAuthentication awsEc2Authentication(VaultProperties vaultProperties) {
