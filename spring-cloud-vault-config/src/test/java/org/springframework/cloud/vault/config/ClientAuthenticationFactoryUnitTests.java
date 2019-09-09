@@ -18,10 +18,14 @@ package org.springframework.cloud.vault.config;
 
 import org.junit.Test;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
+import org.springframework.vault.authentication.ClientAuthentication;
+import org.springframework.vault.authentication.PcfAuthentication;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -160,6 +164,23 @@ public class ClientAuthenticationFactoryUnitTests {
 		assertThatThrownBy(() -> ClientAuthenticationFactory
 				.getAppRoleAuthenticationOptions(properties))
 						.isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	public void shouldSupportPcfAuthentication() {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.PCF);
+		properties.getPcf().setRole("my-role");
+		properties.getPcf().setInstanceKey(new ClassPathResource("bootstrap.yml"));
+		properties.getPcf()
+				.setInstanceCertificate(new ClassPathResource("bootstrap.yml"));
+
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(
+				properties, new RestTemplate(), new RestTemplate())
+				.createClientAuthentication();
+
+		assertThat(clientAuthentication).isInstanceOf(PcfAuthentication.class);
 	}
 
 }
