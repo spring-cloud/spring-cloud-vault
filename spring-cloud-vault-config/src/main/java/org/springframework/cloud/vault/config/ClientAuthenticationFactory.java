@@ -19,7 +19,6 @@ package org.springframework.cloud.vault.config;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.security.GeneralSecurityException;
 import java.util.Base64;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -69,6 +68,9 @@ import org.springframework.vault.authentication.KubernetesAuthentication;
 import org.springframework.vault.authentication.KubernetesAuthenticationOptions;
 import org.springframework.vault.authentication.KubernetesServiceAccountTokenFile;
 import org.springframework.vault.authentication.MacAddressUserId;
+import org.springframework.vault.authentication.PcfAuthentication;
+import org.springframework.vault.authentication.PcfAuthenticationOptions;
+import org.springframework.vault.authentication.ResourceCredentialSupplier;
 import org.springframework.vault.authentication.StaticUserId;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.support.VaultToken;
@@ -95,6 +97,104 @@ class ClientAuthenticationFactory {
 		this.vaultProperties = vaultProperties;
 		this.restOperations = restOperations;
 		this.externalRestOperations = externalRestOperations;
+	}
+
+	/**
+	 * @return a new {@link ClientAuthentication}.
+	 */
+	ClientAuthentication createClientAuthentication() {
+
+		switch (this.vaultProperties.getAuthentication()) {
+
+		case APPID:
+			return appIdAuthentication(this.vaultProperties);
+
+		case APPROLE:
+			return appRoleAuthentication(this.vaultProperties);
+
+		case AWS_EC2:
+			return awsEc2Authentication(this.vaultProperties);
+
+		case AWS_IAM:
+			return awsIamAuthentication(this.vaultProperties);
+
+		case AZURE_MSI:
+			return azureMsiAuthentication(this.vaultProperties);
+
+		case CERT:
+			return new ClientCertificateAuthentication(this.restOperations);
+
+		case CUBBYHOLE:
+			return cubbyholeAuthentication();
+
+		case GCP_GCE:
+			return gcpGceAuthentication(this.vaultProperties);
+
+		case GCP_IAM:
+			return gcpIamAuthentication(this.vaultProperties);
+
+		case KUBERNETES:
+			return kubernetesAuthentication(this.vaultProperties);
+
+		case PCF:
+			return pcfAuthentication(this.vaultProperties);
+
+		case TOKEN:
+			Assert.hasText(this.vaultProperties.getToken(),
+					"Token (spring.cloud.vault.token) must not be empty");
+			return new TokenAuthentication(this.vaultProperties.getToken());
+		}
+
+		throw new UnsupportedOperationException(
+				String.format("Client authentication %s not supported",
+						this.vaultProperties.getAuthentication()));
+	}
+
+	private ClientAuthentication appIdAuthentication(VaultProperties vaultProperties) {
+
+		VaultProperties.AppIdProperties appId = vaultProperties.getAppId();
+		Assert.hasText(appId.getUserId(),
+				"UserId (spring.cloud.vault.app-id.user-id) must not be empty");
+
+		AppIdAuthenticationOptions authenticationOptions = AppIdAuthenticationOptions
+				.builder().appId(vaultProperties.getApplicationName()) //
+				.path(appId.getAppIdPath()) //
+				.userIdMechanism(getClientAuthentication(appId)).build();
+
+		return new AppIdAuthentication(authenticationOptions, this.restOperations);
+	}
+
+	private AppIdUserIdMechanism getClientAuthentication(
+			VaultProperties.AppIdProperties appId) {
+
+		try {
+			Class<?> userIdClass = ClassUtils.forName(appId.getUserId(), null);
+			return (AppIdUserIdMechanism) BeanUtils.instantiateClass(userIdClass);
+		}
+		catch (ClassNotFoundException ex) {
+
+			switch (appId.getUserId().toUpperCase()) {
+
+			case VaultProperties.AppIdProperties.IP_ADDRESS:
+				return new IpAddressUserId();
+
+			case VaultProperties.AppIdProperties.MAC_ADDRESS:
+
+				if (StringUtils.hasText(appId.getNetworkInterface())) {
+					try {
+						return new MacAddressUserId(
+								Integer.parseInt(appId.getNetworkInterface()));
+					}
+					catch (NumberFormatException e) {
+						return new MacAddressUserId(appId.getNetworkInterface());
+					}
+				}
+
+				return new MacAddressUserId();
+			default:
+				return new StaticUserId(appId.getUserId());
+			}
+		}
 	}
 
 	static AppRoleAuthenticationOptions getAppRoleAuthenticationOptions(
@@ -154,101 +254,6 @@ class ClientAuthenticationFactory {
 		}
 
 		return SecretId.absent();
-	}
-
-	/**
-	 * @return a new {@link ClientAuthentication}.
-	 */
-	ClientAuthentication createClientAuthentication() {
-
-		switch (this.vaultProperties.getAuthentication()) {
-
-		case APPID:
-			return appIdAuthentication(this.vaultProperties);
-
-		case APPROLE:
-			return appRoleAuthentication(this.vaultProperties);
-
-		case AWS_EC2:
-			return awsEc2Authentication(this.vaultProperties);
-
-		case AWS_IAM:
-			return awsIamAuthentication(this.vaultProperties);
-
-		case AZURE_MSI:
-			return azureMsiAuthentication(this.vaultProperties);
-
-		case CERT:
-			return new ClientCertificateAuthentication(this.restOperations);
-
-		case CUBBYHOLE:
-			return cubbyholeAuthentication();
-
-		case GCP_GCE:
-			return gcpGceAuthentication(this.vaultProperties);
-
-		case GCP_IAM:
-			return gcpIamAuthentication(this.vaultProperties);
-
-		case KUBERNETES:
-			return kubernetesAuthentication(this.vaultProperties);
-
-		case TOKEN:
-			Assert.hasText(this.vaultProperties.getToken(),
-					"Token (spring.cloud.vault.token) must not be empty");
-			return new TokenAuthentication(this.vaultProperties.getToken());
-		}
-
-		throw new UnsupportedOperationException(
-				String.format("Client authentication %s not supported",
-						this.vaultProperties.getAuthentication()));
-	}
-
-	private ClientAuthentication appIdAuthentication(VaultProperties vaultProperties) {
-
-		VaultProperties.AppIdProperties appId = vaultProperties.getAppId();
-		Assert.hasText(appId.getUserId(),
-				"UserId (spring.cloud.vault.app-id.user-id) must not be empty");
-
-		AppIdAuthenticationOptions authenticationOptions = AppIdAuthenticationOptions
-				.builder().appId(vaultProperties.getApplicationName()) //
-				.path(appId.getAppIdPath()) //
-				.userIdMechanism(getClientAuthentication(appId)).build();
-
-		return new AppIdAuthentication(authenticationOptions, this.restOperations);
-	}
-
-	private AppIdUserIdMechanism getClientAuthentication(
-			VaultProperties.AppIdProperties appId) {
-
-		try {
-			Class<?> userIdClass = ClassUtils.forName(appId.getUserId(), null);
-			return (AppIdUserIdMechanism) BeanUtils.instantiateClass(userIdClass);
-		}
-		catch (ClassNotFoundException ex) {
-
-			switch (appId.getUserId().toUpperCase()) {
-
-			case VaultProperties.AppIdProperties.IP_ADDRESS:
-				return new IpAddressUserId();
-
-			case VaultProperties.AppIdProperties.MAC_ADDRESS:
-
-				if (StringUtils.hasText(appId.getNetworkInterface())) {
-					try {
-						return new MacAddressUserId(
-								Integer.parseInt(appId.getNetworkInterface()));
-					}
-					catch (NumberFormatException e) {
-						return new MacAddressUserId(appId.getNetworkInterface());
-					}
-				}
-
-				return new MacAddressUserId();
-			default:
-				return new StaticUserId(appId.getUserId());
-			}
-		}
 	}
 
 	private ClientAuthentication appRoleAuthentication(VaultProperties vaultProperties) {
@@ -377,12 +382,7 @@ class ClientAuthenticationFactory {
 
 		GcpIamAuthenticationOptions options = builder.build();
 
-		try {
-			return new GcpIamAuthentication(options, this.restOperations);
-		}
-		catch (IOException | GeneralSecurityException e) {
-			throw new IllegalStateException("Cannot create GcpIamAuthentication", e);
-		}
+		return new GcpIamAuthentication(options, this.restOperations);
 	}
 
 	private GoogleCredential getGoogleCredential(GcpIamProperties gcp)
@@ -419,6 +419,33 @@ class ClientAuthenticationFactory {
 				.build();
 
 		return new KubernetesAuthentication(options, this.restOperations);
+	}
+
+	private ClientAuthentication pcfAuthentication(VaultProperties vaultProperties) {
+
+		VaultProperties.PcfProperties pcfProperties = vaultProperties.getPcf();
+
+		Assert.isTrue(
+				ClassUtils.isPresent("org.bouncycastle.crypto.signers.PSSSigner",
+						getClass().getClassLoader()),
+				"BouncyCastle (bcpkix-jdk15on) must be on the classpath");
+		Assert.hasText(pcfProperties.getRole(),
+				"Role (spring.cloud.vault.pcf.role) must not be empty");
+
+		PcfAuthenticationOptions.PcfAuthenticationOptionsBuilder builder = PcfAuthenticationOptions
+				.builder().role(pcfProperties.getRole()).path(pcfProperties.getPcfPath());
+
+		if (pcfProperties.getInstanceCertificate() != null) {
+			builder.instanceCertificate(new ResourceCredentialSupplier(
+					pcfProperties.getInstanceCertificate()));
+		}
+
+		if (pcfProperties.getInstanceKey() != null) {
+			builder.instanceKey(
+					new ResourceCredentialSupplier(pcfProperties.getInstanceKey()));
+		}
+
+		return new PcfAuthentication(builder.build(), this.restOperations);
 	}
 
 	private static class AwsCredentialProvider {

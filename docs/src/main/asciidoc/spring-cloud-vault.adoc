@@ -636,6 +636,50 @@ See also:
 * https://www.vaultproject.io/docs/auth/kubernetes.html[Vault Documentation: Kubernetes]
 * https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/[Kubernetes Documentation: Configure Service Accounts for Pods]
 
+[[vault.config.authentication.pcf]]
+=== Pivotal CloudFoundry authentication
+
+The https://www.vaultproject.io/docs/auth/pcf.html[pcf]
+auth backend provides a secure introduction mechanism for applications running within Pivotal's CloudFoundry instances allowing automated retrieval of a Vault token.
+Unlike most Vault authentication backends, this backend does not require first-deploying, or provisioning security-sensitive credentials (tokens, username/password, client certificates, etc.) as identity provisioning is handled by PCF itself.
+Instead, it treats PCF as a Trusted Third Party and uses the managed instance identity.
+
+.bootstrap.yml with required PCF Authentication properties
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    authentication: PCF
+    pcf:
+        role: my-dev-role
+----
+====
+
+.bootstrap.yml with all PCF Authentication properties
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    authentication: PCF
+    pcf:
+        role: my-dev-role
+        pcf-path: path
+        instance-certificate: /etc/cf-instance-credentials/instance.crt
+        instance-key: /etc/cf-instance-credentials/instance.key
+----
+====
+
+* `role` sets the name of the role against which the login is being attempted.
+* `pcf-path` sets the path of the PCF mount to use.
+* `instance-certificate` sets the path to the PCF instance identity certificate.
+Defaults to `${CF_INSTANCE_CERT}` env variable.
+* `instance-key` sets the path to the PCF instance identity key.
+Defaults to `${CF_INSTANCE_KEY}` env variable.
+
+NOTE: PCF authentication requires BouncyCastle (bcpkix-jdk15on) to be on the classpath for RSA PSS signing.
+
+See also: https://www.vaultproject.io/docs/auth/pcf.html[Vault Documentation: Using the pcf auth backend]
+
 [[vault.config.backends]]
 == Secret Backends
 

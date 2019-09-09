@@ -111,6 +111,8 @@ public class VaultProperties implements EnvironmentAware {
 
 	private KubernetesProperties kubernetes = new KubernetesProperties();
 
+	private PcfProperties pcf = new PcfProperties();
+
 	private Ssl ssl = new Ssl();
 
 	private Config config = new Config();
@@ -204,6 +206,10 @@ public class VaultProperties implements EnvironmentAware {
 		return this.kubernetes;
 	}
 
+	public PcfProperties getPcf() {
+		return this.pcf;
+	}
+
 	public Ssl getSsl() {
 		return this.ssl;
 	}
@@ -292,6 +298,10 @@ public class VaultProperties implements EnvironmentAware {
 		this.kubernetes = kubernetes;
 	}
 
+	public void setPcf(PcfProperties pcf) {
+		this.pcf = pcf;
+	}
+
 	public void setSsl(Ssl ssl) {
 		this.ssl = ssl;
 	}
@@ -313,7 +323,7 @@ public class VaultProperties implements EnvironmentAware {
 	 */
 	public enum AuthenticationMethod {
 
-		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, KUBERNETES
+		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, KUBERNETES, PCF;
 
 	}
 
@@ -849,6 +859,68 @@ public class VaultProperties implements EnvironmentAware {
 
 		public void setServiceAccountTokenFile(String serviceAccountTokenFile) {
 			this.serviceAccountTokenFile = serviceAccountTokenFile;
+		}
+
+	}
+
+	/**
+	 * PCF properties.
+	 */
+	public static class PcfProperties {
+
+		/**
+		 * Mount path of the Kubernetes authentication backend.
+		 */
+		@NotEmpty
+		private String pcfPath = "pcf";
+
+		/**
+		 * Name of the role against which the login is being attempted.
+		 */
+		private String role = "";
+
+		/**
+		 * Path to the instance certificate (PEM). Defaults to {@code CF_INSTANCE_CERT}
+		 * env variable.
+		 */
+		private Resource instanceCertificate;
+
+		/**
+		 * Path to the instance key (PEM). Defaults to {@code CF_INSTANCE_KEY} env
+		 * variable.
+		 */
+		private Resource instanceKey;
+
+		public String getPcfPath() {
+			return this.pcfPath;
+		}
+
+		public void setPcfPath(String pcfPath) {
+			this.pcfPath = pcfPath;
+		}
+
+		public String getRole() {
+			return this.role;
+		}
+
+		public void setRole(String role) {
+			this.role = role;
+		}
+
+		public Resource getInstanceCertificate() {
+			return this.instanceCertificate;
+		}
+
+		public void setInstanceCertificate(Resource instanceCertificate) {
+			this.instanceCertificate = instanceCertificate;
+		}
+
+		public Resource getInstanceKey() {
+			return this.instanceKey;
+		}
+
+		public void setInstanceKey(Resource instanceKey) {
+			this.instanceKey = instanceKey;
 		}
 
 	}
