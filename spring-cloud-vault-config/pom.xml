@@ -42,7 +42,7 @@
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-core</artifactId>
 			<optional>true</optional>
-			<version>1.11.345</version>
+			<version>1.11.627</version>
 			<exclusions>
 				<exclusion>
 					<groupId>software.amazon.ion</groupId>
@@ -53,6 +53,12 @@
 					<artifactId>jackson-dataformat-cbor</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
