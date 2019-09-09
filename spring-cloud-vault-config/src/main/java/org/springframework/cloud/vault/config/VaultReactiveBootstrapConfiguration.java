@@ -17,6 +17,9 @@
 package org.springframework.cloud.vault.config;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -36,10 +39,12 @@ import org.springframework.cloud.vault.config.VaultBootstrapConfiguration.TaskSc
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.AuthenticationStepsFactory;
 import org.springframework.vault.authentication.AuthenticationStepsOperator;
 import org.springframework.vault.authentication.CachingVaultTokenSupplier;
@@ -49,10 +54,12 @@ import org.springframework.vault.authentication.ReactiveSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.authentication.VaultTokenSupplier;
-import org.springframework.vault.client.ReactiveVaultClients;
+import org.springframework.vault.client.ClientHttpConnectorFactory;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpointProvider;
-import org.springframework.vault.config.ClientHttpConnectorFactory;
+import org.springframework.vault.client.VaultHttpHeaders;
+import org.springframework.vault.client.WebClientBuilder;
+import org.springframework.vault.client.WebClientCustomizer;
 import org.springframework.vault.core.ReactiveVaultOperations;
 import org.springframework.vault.core.ReactiveVaultTemplate;
 import org.springframework.vault.support.ClientOptions;
@@ -80,12 +87,14 @@ public class VaultReactiveBootstrapConfiguration {
 
 	private final VaultProperties vaultProperties;
 
-	private final VaultEndpointProvider endpointProvider;
-
-	private final ClientHttpConnector clientHttpConnector;
+	/**
+	 * Used for Vault communication.
+	 */
+	private final WebClientBuilder webClientBuilder;
 
 	public VaultReactiveBootstrapConfiguration(VaultProperties vaultProperties,
-			ObjectProvider<VaultEndpointProvider> endpointProvider) {
+			ObjectProvider<VaultEndpointProvider> endpointProvider,
+			ObjectProvider<List<WebClientCustomizer>> webClientCustomizers) {
 
 		this.vaultProperties = vaultProperties;
 
@@ -96,9 +105,19 @@ public class VaultReactiveBootstrapConfiguration {
 					.of(VaultConfigurationUtil.createVaultEndpoint(vaultProperties));
 		}
 
-		this.endpointProvider = provider;
+		this.webClientBuilder = WebClientBuilder.builder()
+				.httpConnector(createConnector(this.vaultProperties))
+				.endpointProvider(provider);
+		List<WebClientCustomizer> customizers = new ArrayList<>(
+				webClientCustomizers.getIfAvailable(Collections::emptyList));
+		AnnotationAwareOrderComparator.sort(customizers);
 
-		this.clientHttpConnector = createConnector(this.vaultProperties);
+		customizers.forEach(this.webClientBuilder::customizers);
+
+		if (StringUtils.hasText(this.vaultProperties.getNamespace())) {
+			this.webClientBuilder.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE,
+					this.vaultProperties.getNamespace());
+		}
 	}
 
 	/**
@@ -130,8 +149,7 @@ public class VaultReactiveBootstrapConfiguration {
 	@ConditionalOnMissingBean(ReactiveVaultOperations.class)
 	public ReactiveVaultTemplate reactiveVaultTemplate(
 			ReactiveSessionManager tokenSupplier) {
-		return new ReactiveVaultTemplate(this.endpointProvider, this.clientHttpConnector,
-				tokenSupplier);
+		return new ReactiveVaultTemplate(this.webClientBuilder, tokenSupplier);
 	}
 
 	/**
@@ -152,8 +170,7 @@ public class VaultReactiveBootstrapConfiguration {
 
 		if (this.vaultProperties.getConfig().getLifecycle().isEnabled()) {
 
-			WebClient webClient = ReactiveVaultClients
-					.createWebClient(this.endpointProvider, this.clientHttpConnector);
+			WebClient webClient = this.webClientBuilder.build();
 			return new ReactiveLifecycleAwareSessionManager(vaultTokenSupplier,
 					asyncTaskExecutorFactory.getObject().getTaskScheduler(), webClient);
 		}
@@ -225,8 +242,7 @@ public class VaultReactiveBootstrapConfiguration {
 
 	private VaultTokenSupplier createAuthenticationStepsOperator(
 			AuthenticationStepsFactory factory) {
-		WebClient webClient = ReactiveVaultClients.createWebClient(this.endpointProvider,
-				this.clientHttpConnector);
+		WebClient webClient = this.webClientBuilder.build();
 		return new AuthenticationStepsOperator(factory.getAuthenticationSteps(),
 				webClient);
 	}

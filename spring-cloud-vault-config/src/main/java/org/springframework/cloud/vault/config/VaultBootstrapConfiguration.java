@@ -17,6 +17,9 @@
 package org.springframework.cloud.vault.config;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -31,20 +34,25 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
+import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
+import org.springframework.vault.client.RestTemplateBuilder;
+import org.springframework.vault.client.RestTemplateCustomizer;
+import org.springframework.vault.client.RestTemplateRequestCustomizer;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
-import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpointProvider;
+import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
-import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.ClientOptions;
@@ -70,10 +78,14 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 	private final VaultEndpointProvider endpointProvider;
 
+	private final List<RestTemplateCustomizer> customizers;
+
+	private final List<RestTemplateRequestCustomizer<?>> requestCustomizers;
+
 	/**
 	 * Used for Vault communication.
 	 */
-	private RestOperations restOperations;
+	private RestTemplateBuilder restTemplateBuilder;
 
 	/**
 	 * Used for external (AWS, GCP) communication.
@@ -82,7 +94,9 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 	public VaultBootstrapConfiguration(ConfigurableApplicationContext applicationContext,
 			VaultProperties vaultProperties,
-			ObjectProvider<VaultEndpointProvider> endpointProvider) {
+			ObjectProvider<VaultEndpointProvider> endpointProvider,
+			ObjectProvider<List<RestTemplateCustomizer>> customizers,
+			ObjectProvider<List<RestTemplateRequestCustomizer<?>>> requestCustomizers) {
 
 		this.applicationContext = applicationContext;
 		this.vaultProperties = vaultProperties;
@@ -95,6 +109,13 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		}
 
 		this.endpointProvider = provider;
+		this.customizers = new ArrayList<>(
+				customizers.getIfAvailable(Collections::emptyList));
+		AnnotationAwareOrderComparator.sort(this.customizers);
+
+		this.requestCustomizers = new ArrayList<>(
+				requestCustomizers.getIfAvailable(Collections::emptyList));
+		AnnotationAwareOrderComparator.sort(this.requestCustomizers);
 	}
 
 	@Override
@@ -103,8 +124,17 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		ClientHttpRequestFactory clientHttpRequestFactory = clientHttpRequestFactoryWrapper()
 				.getClientHttpRequestFactory();
 
-		this.restOperations = VaultClients.createRestTemplate(this.endpointProvider,
-				clientHttpRequestFactory);
+		this.restTemplateBuilder = RestTemplateBuilder.builder()
+				.requestFactory(clientHttpRequestFactory)
+				.endpointProvider(this.endpointProvider);
+
+		this.customizers.forEach(this.restTemplateBuilder::customizers);
+		this.requestCustomizers.forEach(this.restTemplateBuilder::requestCustomizers);
+
+		if (StringUtils.hasText(this.vaultProperties.getNamespace())) {
+			this.restTemplateBuilder.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE,
+					this.vaultProperties.getNamespace());
+		}
 
 		this.externalRestOperations = new RestTemplate(clientHttpRequestFactory);
 	}
@@ -142,9 +172,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@Bean
 	@ConditionalOnMissingBean(VaultOperations.class)
 	public VaultTemplate vaultTemplate(SessionManager sessionManager) {
-		return new VaultTemplate(this.endpointProvider,
-				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory(),
-				sessionManager);
+		return new VaultTemplate(this.restTemplateBuilder, sessionManager);
 	}
 
 	/**
@@ -184,9 +212,10 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 			ObjectFactory<TaskSchedulerWrapper> asyncTaskExecutorFactory) {
 
 		if (this.vaultProperties.getConfig().getLifecycle().isEnabled()) {
+			RestTemplate restTemplate = this.restTemplateBuilder.build();
 			return new LifecycleAwareSessionManager(clientAuthentication,
 					asyncTaskExecutorFactory.getObject().getTaskScheduler(),
-					this.restOperations);
+					restTemplate);
 		}
 
 		return new SimpleSessionManager(clientAuthentication);
@@ -202,8 +231,9 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@ConditionalOnMissingBean
 	public ClientAuthentication clientAuthentication() {
 
+		RestTemplate restTemplate = this.restTemplateBuilder.build();
 		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(
-				this.vaultProperties, this.restOperations, this.externalRestOperations);
+				this.vaultProperties, restTemplate, this.externalRestOperations);
 
 		return factory.createClientAuthentication();
 	}
