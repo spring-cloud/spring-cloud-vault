@@ -20,7 +20,7 @@
 	<description>Spring Cloud Vault Dependencies</description>
 
 	<properties>
-		<spring-vault.version>2.2.0.BUILD-SNAPSHOT</spring-vault.version>
+		<spring-vault.version>2.2.0.M1</spring-vault.version>
 	</properties>
 
 	<dependencyManagement>
@@ -127,7 +127,7 @@
 		<repository>
 			<id>spring-snapshots</id>
 			<name>Spring Snapshots</name>
-			<url>https://repo.spring.io/libs-snapshot</url>
+			<url>https://repo.spring.io/libs-mi</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
