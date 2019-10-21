@@ -18,8 +18,8 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Map;
 
-import org.springframework.boot.actuate.autoconfigure.health.CompositeHealthIndicatorConfiguration;
-import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.actuate.autoconfigure.health.CompositeHealthContributorConfiguration;
+import org.springframework.boot.actuate.health.HealthContributor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -36,7 +36,7 @@ import org.springframework.vault.core.VaultOperations;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnBean(VaultOperations.class)
 class VaultHealthIndicatorConfiguration extends
-		CompositeHealthIndicatorConfiguration<VaultHealthIndicator, VaultOperations> {
+		CompositeHealthContributorConfiguration<VaultHealthIndicator, VaultOperations> {
 
 	private final Map<String, VaultOperations> vaultTemplates;
 
@@ -46,8 +46,8 @@ class VaultHealthIndicatorConfiguration extends
 
 	@Bean
 	@ConditionalOnMissingBean(name = { "vaultHealthIndicator" })
-	public HealthIndicator vaultHealthIndicator() {
-		return this.createHealthIndicator(this.vaultTemplates);
+	public HealthContributor vaultHealthIndicator() {
+		return createContributor(this.vaultTemplates);
 	}
 
 }

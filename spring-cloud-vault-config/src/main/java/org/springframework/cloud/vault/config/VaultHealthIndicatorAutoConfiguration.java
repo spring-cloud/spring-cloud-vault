@@ -17,7 +17,7 @@
 package org.springframework.cloud.vault.config;
 
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
-import org.springframework.boot.actuate.autoconfigure.health.HealthIndicatorAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.health.HealthContributorAutoConfiguration;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -38,7 +38,7 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnBean(VaultBootstrapConfiguration.class)
 @ConditionalOnClass(HealthIndicator.class)
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
-@AutoConfigureBefore(HealthIndicatorAutoConfiguration.class)
+@AutoConfigureBefore(HealthContributorAutoConfiguration.class)
 @Import({ VaultHealthIndicatorConfiguration.class,
 		VaultReactiveHealthIndicatorConfiguration.class })
 public class VaultHealthIndicatorAutoConfiguration {

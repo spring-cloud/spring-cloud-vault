@@ -20,8 +20,8 @@ import java.util.Map;
 
 import reactor.core.publisher.Flux;
 
-import org.springframework.boot.actuate.autoconfigure.health.CompositeReactiveHealthIndicatorConfiguration;
-import org.springframework.boot.actuate.health.ReactiveHealthIndicator;
+import org.springframework.boot.actuate.autoconfigure.health.CompositeReactiveHealthContributorConfiguration;
+import org.springframework.boot.actuate.health.ReactiveHealthContributor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -39,7 +39,7 @@ import org.springframework.vault.core.ReactiveVaultOperations;
 @ConditionalOnClass(Flux.class)
 @ConditionalOnBean(ReactiveVaultOperations.class)
 class VaultReactiveHealthIndicatorConfiguration extends
-		CompositeReactiveHealthIndicatorConfiguration<VaultReactiveHealthIndicator, ReactiveVaultOperations> {
+		CompositeReactiveHealthContributorConfiguration<VaultReactiveHealthIndicator, ReactiveVaultOperations> {
 
 	private final Map<String, ReactiveVaultOperations> reactiveVaultTemplates;
 
@@ -50,8 +50,8 @@ class VaultReactiveHealthIndicatorConfiguration extends
 
 	@Bean
 	@ConditionalOnMissingBean(name = { "vaultReactiveHealthIndicator" })
-	ReactiveHealthIndicator vaultReactiveHealthIndicator() {
-		return this.createHealthIndicator(this.reactiveVaultTemplates);
+	ReactiveHealthContributor vaultReactiveHealthIndicator() {
+		return createContributor(this.reactiveVaultTemplates);
 	}
 
 }
