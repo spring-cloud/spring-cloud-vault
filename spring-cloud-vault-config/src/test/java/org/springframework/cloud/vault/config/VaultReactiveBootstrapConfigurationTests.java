@@ -109,7 +109,7 @@ public class VaultReactiveBootstrapConfigurationTests {
 				});
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class AuthenticationFactoryConfiguration {
 
 		@Bean
@@ -119,7 +119,7 @@ public class VaultReactiveBootstrapConfigurationTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class TokenSupplierConfiguration {
 
 		@Bean

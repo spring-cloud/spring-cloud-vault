@@ -35,7 +35,7 @@ import org.springframework.vault.core.ReactiveVaultOperations;
  * @author Mark Paluch
  * @since 2.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(Flux.class)
 @ConditionalOnBean(ReactiveVaultOperations.class)
 class VaultReactiveHealthIndicatorConfiguration extends

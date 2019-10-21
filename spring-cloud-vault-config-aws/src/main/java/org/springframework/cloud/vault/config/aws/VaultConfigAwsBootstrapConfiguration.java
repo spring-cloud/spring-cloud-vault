@@ -35,7 +35,7 @@ import org.springframework.vault.core.util.PropertyTransformer;
  *
  * @author Mark Paluch
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(VaultAwsProperties.class)
 public class VaultConfigAwsBootstrapConfiguration {
 
@@ -65,7 +65,7 @@ public class VaultConfigAwsBootstrapConfiguration {
 
 			Assert.notNull(properties, "VaultAwsProperties must not be null");
 
-			final PropertyNameTransformer transformer = new PropertyNameTransformer();
+			PropertyNameTransformer transformer = new PropertyNameTransformer();
 			transformer.addKeyTransformation("access_key",
 					properties.getAccessKeyProperty());
 			transformer.addKeyTransformation("secret_key",
