@@ -118,7 +118,7 @@ public class VaultConfigAppIdCustomMechanismTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	public static class BootstrapConfiguration {
 
 		@ConditionalOnProperty("VaultConfigAppIdCustomMechanismTests.custom.config")

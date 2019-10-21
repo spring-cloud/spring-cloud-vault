@@ -35,7 +35,7 @@ import org.springframework.vault.core.util.PropertyTransformer;
  *
  * @author Mark Paluch
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(VaultConsulProperties.class)
 public class VaultConfigConsulBootstrapConfiguration {
 
@@ -63,7 +63,7 @@ public class VaultConfigConsulBootstrapConfiguration {
 
 			Assert.notNull(properties, "VaultConsulProperties must not be null");
 
-			final PropertyNameTransformer transformer = new PropertyNameTransformer();
+			PropertyNameTransformer transformer = new PropertyNameTransformer();
 			transformer.addKeyTransformation("token", properties.getTokenProperty());
 
 			return new SecretBackendMetadata() {

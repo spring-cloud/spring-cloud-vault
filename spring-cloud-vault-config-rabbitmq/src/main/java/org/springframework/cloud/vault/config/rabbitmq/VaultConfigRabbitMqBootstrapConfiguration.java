@@ -35,7 +35,7 @@ import org.springframework.vault.core.util.PropertyTransformer;
  *
  * @author Mark Paluch
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties
 public class VaultConfigRabbitMqBootstrapConfiguration {
 
@@ -71,7 +71,7 @@ public class VaultConfigRabbitMqBootstrapConfiguration {
 
 			Assert.notNull(properties, "VaultRabbitMqProperties must not be null");
 
-			final PropertyNameTransformer transformer = new PropertyNameTransformer();
+			PropertyNameTransformer transformer = new PropertyNameTransformer();
 			transformer.addKeyTransformation("username",
 					properties.getUsernameProperty());
 			transformer.addKeyTransformation("password",

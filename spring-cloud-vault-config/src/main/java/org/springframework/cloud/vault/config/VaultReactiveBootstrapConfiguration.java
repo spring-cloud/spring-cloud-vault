@@ -76,7 +76,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author Mark Paluch
  * @since 2.0.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @ConditionalOnExpression("${spring.cloud.vault.reactive.enabled:true}")
 @ConditionalOnClass({ Flux.class, WebClient.class, ReactiveVaultOperations.class,

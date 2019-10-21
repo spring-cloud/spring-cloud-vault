@@ -33,7 +33,7 @@ import org.springframework.vault.core.VaultOperations;
  * @author Mark Paluch
  * @since 1.1
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnBean(VaultOperations.class)
 class VaultHealthIndicatorConfiguration extends
 		CompositeHealthIndicatorConfiguration<VaultHealthIndicator, VaultOperations> {

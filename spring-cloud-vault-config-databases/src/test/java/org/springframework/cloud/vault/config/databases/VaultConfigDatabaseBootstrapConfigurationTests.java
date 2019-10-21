@@ -61,7 +61,7 @@ public class VaultConfigDatabaseBootstrapConfigurationTests
 		assertThat(metadata.getPath()).isEqualTo(this.properties.getRole());
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	public static class CustomBootstrapConfiguration {
 
 		@Bean

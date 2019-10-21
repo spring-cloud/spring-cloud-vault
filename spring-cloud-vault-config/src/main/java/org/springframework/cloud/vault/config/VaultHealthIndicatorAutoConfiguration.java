@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Import;
  * @author Mark Paluch
  * @since 2.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnEnabledHealthIndicator("vault")
 @ConditionalOnBean(VaultBootstrapConfiguration.class)
 @ConditionalOnClass(HealthIndicator.class)

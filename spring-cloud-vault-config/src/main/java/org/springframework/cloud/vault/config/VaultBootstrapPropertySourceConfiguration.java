@@ -47,7 +47,7 @@ import org.springframework.vault.core.lease.SecretLeaseContainer;
  * @author Mårten Svantesson
  * @since 1.1
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @EnableConfigurationProperties({ VaultGenericBackendProperties.class,
 		VaultKeyValueBackendProperties.class })

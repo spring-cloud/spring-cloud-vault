@@ -38,7 +38,7 @@ import org.springframework.vault.core.util.PropertyTransformer;
  * @author Per Abich
  * @author Sebastien Nahelou
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({ VaultMySqlProperties.class,
 		VaultPostgreSqlProperties.class, VaultCassandraProperties.class,
 		VaultMongoProperties.class, VaultDatabaseProperties.class })
@@ -71,7 +71,7 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 
 			Assert.notNull(properties, "DatabaseSecretProperties must not be null");
 
-			final PropertyNameTransformer transformer = new PropertyNameTransformer();
+			PropertyNameTransformer transformer = new PropertyNameTransformer();
 			transformer.addKeyTransformation("username",
 					properties.getUsernameProperty());
 			transformer.addKeyTransformation("password",

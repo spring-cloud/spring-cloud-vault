@@ -66,7 +66,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Spencer Gibb
  * @author Mark Paluch
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(VaultProperties.class)
 @Order(Ordered.LOWEST_PRECEDENCE - 5)

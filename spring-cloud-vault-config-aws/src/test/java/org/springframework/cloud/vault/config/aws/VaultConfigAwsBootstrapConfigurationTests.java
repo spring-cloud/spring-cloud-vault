@@ -59,7 +59,7 @@ public class VaultConfigAwsBootstrapConfigurationTests extends IntegrationTestSu
 		assertThat(metadata.getPath()).isEqualTo(this.properties.getRole());
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	public static class CustomBootstrapConfiguration {
 
 		@Bean

@@ -97,7 +97,7 @@ public class DiscoveryClientVaultBootstrapConfigurationTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class DiscoveryConfiguration {
 
 		@Bean

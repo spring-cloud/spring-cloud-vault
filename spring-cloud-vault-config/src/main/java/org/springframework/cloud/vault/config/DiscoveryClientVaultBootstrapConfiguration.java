@@ -41,7 +41,7 @@ import org.springframework.vault.client.VaultEndpointProvider;
  * @author Mark Paluch
  * @since 1.1
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty("spring.cloud.vault.discovery.enabled")
 @EnableConfigurationProperties(VaultProperties.class)
 @Order(Ordered.LOWEST_PRECEDENCE - 2)
@@ -69,9 +69,8 @@ public class DiscoveryClientVaultBootstrapConfiguration {
 	public VaultEndpointProvider vaultEndpointProvider(
 			VaultServiceInstanceProvider instanceProvider) {
 
-		final String serviceId = this.vaultProperties.getDiscovery().getServiceId();
-
-		final String fallbackScheme;
+		String serviceId = this.vaultProperties.getDiscovery().getServiceId();
+		String fallbackScheme;
 
 		if (StringUtils.hasText(this.vaultProperties.getUri())) {
 			fallbackScheme = URI.create(this.vaultProperties.getUri()).getScheme();
@@ -82,7 +81,7 @@ public class DiscoveryClientVaultBootstrapConfiguration {
 
 		ServiceInstance server = instanceProvider.getVaultServerInstance(serviceId);
 
-		final VaultEndpoint vaultEndpoint = VaultEndpoint.create(server.getHost(),
+		VaultEndpoint vaultEndpoint = VaultEndpoint.create(server.getHost(),
 				server.getPort());
 
 		if (server.getMetadata().containsKey("scheme")) {
