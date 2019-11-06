@@ -28,7 +28,6 @@ import org.springframework.boot.actuate.health.AbstractReactiveHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Health.Builder;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.core.ReactiveVaultOperations;
 import org.springframework.vault.support.VaultHealth;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -65,22 +64,7 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 	private static Health getHealth(Builder builder,
 			VaultHealthImpl vaultHealthResponse) {
 
-		if (!vaultHealthResponse.isInitialized()) {
-			builder.withDetail("state", "Vault uninitialized");
-		}
-		else if (vaultHealthResponse.isSealed()) {
-			builder.down().withDetail("state", "Vault sealed");
-		}
-		else if (vaultHealthResponse.isStandby()) {
-			builder.up().withDetail("state", "Vault in standby");
-		}
-		else {
-			builder.up();
-		}
-
-		if (StringUtils.hasText(vaultHealthResponse.getVersion())) {
-			builder.withDetail("version", vaultHealthResponse.getVersion());
-		}
+		HealthBuilderDelegate.contributeToHealth(vaultHealthResponse, builder);
 		return builder.build();
 	}
 
@@ -96,7 +80,7 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	private static final class VaultHealthImpl implements VaultHealth {
+	static class VaultHealthImpl implements VaultHealth {
 
 		private final boolean initialized;
 
@@ -104,20 +88,29 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 
 		private final boolean standby;
 
+		private final boolean performanceStandby;
+
+		private final boolean replicationRecoverySecondary;
+
 		private final int serverTimeUtc;
 
 		@Nullable
 		private final String version;
 
-		private VaultHealthImpl(@JsonProperty("initialized") boolean initialized,
+		VaultHealthImpl(@JsonProperty("initialized") boolean initialized,
 				@JsonProperty("sealed") boolean sealed,
 				@JsonProperty("standby") boolean standby,
+				@JsonProperty("performance_standby") boolean performanceStandby,
+				@Nullable @JsonProperty("replication_dr_mode") String replicationRecoverySecondary,
 				@JsonProperty("server_time_utc") int serverTimeUtc,
 				@Nullable @JsonProperty("version") String version) {
 
 			this.initialized = initialized;
 			this.sealed = sealed;
 			this.standby = standby;
+			this.performanceStandby = performanceStandby;
+			this.replicationRecoverySecondary = replicationRecoverySecondary != null
+					&& !"disabled".equalsIgnoreCase(replicationRecoverySecondary);
 			this.serverTimeUtc = serverTimeUtc;
 			this.version = version;
 		}
@@ -132,6 +125,14 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 
 		public boolean isStandby() {
 			return this.standby;
+		}
+
+		public boolean isPerformanceStandby() {
+			return this.performanceStandby;
+		}
+
+		public boolean isRecoveryReplicationSecondary() {
+			return this.replicationRecoverySecondary;
 		}
 
 		public int getServerTimeUtc() {
@@ -154,6 +155,8 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 			VaultHealthImpl that = (VaultHealthImpl) o;
 			return this.initialized == that.initialized && this.sealed == that.sealed
 					&& this.standby == that.standby
+					&& this.performanceStandby == that.performanceStandby
+					&& this.replicationRecoverySecondary == that.replicationRecoverySecondary
 					&& this.serverTimeUtc == that.serverTimeUtc
 					&& Objects.equals(this.version, that.version);
 		}
@@ -161,20 +164,8 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 		@Override
 		public int hashCode() {
 			return Objects.hash(this.initialized, this.sealed, this.standby,
+					this.performanceStandby, this.replicationRecoverySecondary,
 					this.serverTimeUtc, this.version);
-		}
-
-		@Override
-		public String toString() {
-			StringBuffer sb = new StringBuffer();
-			sb.append(getClass().getSimpleName());
-			sb.append(" [initialized=").append(this.initialized);
-			sb.append(", sealed=").append(this.sealed);
-			sb.append(", standby=").append(this.standby);
-			sb.append(", serverTimeUtc=").append(this.serverTimeUtc);
-			sb.append(", version='").append(this.version).append('\'');
-			sb.append(']');
-			return sb.toString();
 		}
 
 	}

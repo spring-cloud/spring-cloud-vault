@@ -18,7 +18,6 @@ package org.springframework.cloud.vault.config;
 
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health.Builder;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultHealth;
 
@@ -40,23 +39,7 @@ public class VaultHealthIndicator extends AbstractHealthIndicator {
 	protected void doHealthCheck(Builder builder) {
 
 		VaultHealth vaultHealthResponse = this.vaultOperations.opsForSys().health();
-
-		if (!vaultHealthResponse.isInitialized()) {
-			builder.down().withDetail("state", "Vault uninitialized");
-		}
-		else if (vaultHealthResponse.isSealed()) {
-			builder.down().withDetail("state", "Vault sealed");
-		}
-		else if (vaultHealthResponse.isStandby()) {
-			builder.up().withDetail("state", "Vault in standby");
-		}
-		else {
-			builder.up();
-		}
-
-		if (StringUtils.hasText(vaultHealthResponse.getVersion())) {
-			builder.withDetail("version", vaultHealthResponse.getVersion());
-		}
+		HealthBuilderDelegate.contributeToHealth(vaultHealthResponse, builder);
 	}
 
 }

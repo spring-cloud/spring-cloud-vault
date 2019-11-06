@@ -115,4 +115,30 @@ public class VaultHealthIndicatorUnitTests {
 		assertThat(health.getDetails()).containsKey("error");
 	}
 
+	@Test
+	public void shouldReportPerformanceStandby() {
+
+		when(this.healthResponse.isInitialized()).thenReturn(true);
+		when(this.healthResponse.isPerformanceStandby()).thenReturn(true);
+
+		Health health = this.healthIndicator.health();
+
+		assertThat(health.getStatus()).isEqualTo(Status.UP);
+		assertThat(health.getDetails()).containsEntry("state",
+				"Vault in performance standby");
+	}
+
+	@Test
+	public void shouldReportRecoveryReplication() {
+
+		when(this.healthResponse.isInitialized()).thenReturn(true);
+		when(this.healthResponse.isRecoveryReplicationSecondary()).thenReturn(true);
+
+		Health health = this.healthIndicator.health();
+
+		assertThat(health.getStatus()).isEqualTo(Status.UP);
+		assertThat(health.getDetails()).containsEntry("state",
+				"Vault in recovery replication secondary mode");
+	}
+
 }
