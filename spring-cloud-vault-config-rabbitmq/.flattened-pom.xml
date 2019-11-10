@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-vault-parent</artifactId>
-    <version>2.2.0.BUILD-SNAPSHOT</version>
+    <version>2.2.0.RC2</version>
     <relativePath>..</relativePath>
   </parent>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-vault-config-rabbitmq</artifactId>
-  <version>2.2.0.BUILD-SNAPSHOT</version>
+  <version>2.2.0.RC2</version>
   <name>Spring Cloud Vault Config RabbitMQ support</name>
   <description>Spring Cloud Vault Config RabbitMQ support</description>
   <url>https://spring.io/spring-cloud/spring-cloud-vault-parent/spring-cloud-vault-config-rabbitmq</url>
@@ -100,7 +100,7 @@
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-vault-config</artifactId>
-      <version>2.2.0.BUILD-SNAPSHOT</version>
+      <version>2.2.0.RC2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
