@@ -403,7 +403,7 @@ spring.cloud.vault:
     authentication: AZURE_MSI
     azure-msi:
         role: my-dev-role
-        azure-path: aws
+        azure-path: azure
 ----
 ====
 
