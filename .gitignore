@@ -21,5 +21,7 @@ download/
 work
 build/
 pom.xml.releaseBackup
+.flattened-pom.xml
 release.properties
 .vscode/
+
