@@ -121,7 +121,7 @@ the test cases). Example Maven configuration:
     <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-starter-vault-config</artifactId>
-        <version>{spring-cloud-version}</version>
+        <version>{project-version}</version>
     </dependency>
     <dependency>
         <groupId>org.springframework.boot</groupId>

@@ -1,7 +1,7 @@
 = Spring Cloud Vault
 :github: https://github.com/spring-cloud/spring-cloud-vault
 :githubmaster: {github}/tree/master
-:revnumber: {spring-cloud-version}
+:revnumber: {project-version}
 :docslink: {githubmaster}/docs/src/main/asciidoc
 :toc: left
 :nofooter:
@@ -775,7 +775,7 @@ dependency.
     <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-vault-config-consul</artifactId>
-        <version>{spring-cloud-version}</version>
+        <version>{project-version}</version>
     </dependency>
 </dependencies>
 ----
@@ -825,7 +825,7 @@ dependency.
     <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-vault-config-rabbitmq</artifactId>
-        <version>{spring-cloud-version}</version>
+        <version>{project-version}</version>
     </dependency>
 </dependencies>
 ----
@@ -878,7 +878,7 @@ dependency.
     <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-vault-config-aws</artifactId>
-        <version>{spring-cloud-version}</version>
+        <version>{project-version}</version>
     </dependency>
 </dependencies>
 ----
@@ -949,7 +949,7 @@ backend path, e.g. `spring.cloud.vault.mysql.role.backend=database`.
     <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-vault-config-databases</artifactId>
-        <version>{spring-cloud-version}</version>
+        <version>{project-version}</version>
     </dependency>
 </dependencies>
 ----
