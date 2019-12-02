@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.core.util.KeyValueDelegate;
 import org.springframework.vault.core.util.PropertyTransformer;
 import org.springframework.vault.support.JsonMapFlattener;
 import org.springframework.vault.support.VaultResponse;
@@ -42,6 +43,8 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 
 	private final VaultProperties properties;
 
+	private final KeyValueDelegate keyValueDelegate;
+
 	/**
 	 * Create a new {@link VaultConfigTemplate} given {@link VaultOperations}.
 	 * @param vaultOperations must not be {@literal null}.
@@ -55,6 +58,7 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 
 		this.vaultOperations = vaultOperations;
 		this.properties = properties;
+		this.keyValueDelegate = new KeyValueDelegate(vaultOperations);
 	}
 
 	@Override
@@ -66,8 +70,17 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 				secretBackendMetadata.getPath()));
 
 		try {
-			VaultResponse vaultResponse = this.vaultOperations
-					.read(secretBackendMetadata.getPath());
+
+			VaultResponse vaultResponse;
+
+			if (this.keyValueDelegate.isVersioned(secretBackendMetadata.getPath())) {
+				vaultResponse = this.keyValueDelegate
+						.getSecret(secretBackendMetadata.getPath());
+			}
+			else {
+				vaultResponse = this.vaultOperations
+						.read(secretBackendMetadata.getPath());
+			}
 
 			if (vaultResponse == null) {
 
