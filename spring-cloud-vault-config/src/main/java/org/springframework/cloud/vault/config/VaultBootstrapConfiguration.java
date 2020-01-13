@@ -165,14 +165,22 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 	/**
 	 * Creates a {@link VaultTemplate}.
-	 * @param sessionManager the {@link SessionManager}.
 	 * @return the {@link VaultTemplate} bean.
 	 * @see VaultBootstrapConfiguration#clientHttpRequestFactoryWrapper()
 	 */
 	@Bean
 	@ConditionalOnMissingBean(VaultOperations.class)
-	public VaultTemplate vaultTemplate(SessionManager sessionManager) {
-		return new VaultTemplate(this.restTemplateBuilder, sessionManager);
+	public VaultTemplate vaultTemplate() {
+
+		VaultProperties.AuthenticationMethod authentication = this.vaultProperties
+				.getAuthentication();
+
+		if (authentication == VaultProperties.AuthenticationMethod.NONE) {
+			return new VaultTemplate(this.restTemplateBuilder);
+		}
+
+		return new VaultTemplate(this.restTemplateBuilder,
+				this.applicationContext.getBean(SessionManager.class));
 	}
 
 	/**
@@ -208,6 +216,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	 */
 	@Bean
 	@ConditionalOnMissingBean
+	@ConditionalOnAuthentication
 	public SessionManager vaultSessionManager(ClientAuthentication clientAuthentication,
 			ObjectFactory<TaskSchedulerWrapper> asyncTaskExecutorFactory) {
 
@@ -229,6 +238,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	 */
 	@Bean
 	@ConditionalOnMissingBean
+	@ConditionalOnAuthentication
 	public ClientAuthentication clientAuthentication() {
 
 		RestTemplate restTemplate = this.restTemplateBuilder.build();

@@ -6,7 +6,7 @@
 :toc: left
 :nofooter:
 
-(C) 2016-2019 The original authors.
+(C) 2016-2020 The original authors.
 
 NOTE: _Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically._
 
@@ -49,6 +49,30 @@ authentication method
 * `token` sets the static token to use
 
 See also: https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
+
+[[vault.config.authentication.vault-agent]]
+=== Vault Agent authentication
+
+Vault ships a sidecar utility with Vault Agent since version 0.11.0.
+Vault Agent implements the functionality of Spring Vault's `SessionManager`
+with its Auto-Auth feature. Applications can reuse cached session credentials by relying
+on Vault Agent running on `localhost`. Spring Vault can send requests without the
+`X-Vault-Token` header. Disable Spring Vault's authentication infrastructure to
+disable client authentication and session management.
+
+.bootstrap.yml
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    authentication: NONE
+----
+====
+
+* `authentication` setting this value to `NONE` disables `ClientAuthentication`
+and `SessionManager`.
+
+See also: https://www.vaultproject.io/docs/agent/index.html[Vault Documentation: Agent]
 
 [[vault.config.authentication.appid]]
 === AppId authentication
