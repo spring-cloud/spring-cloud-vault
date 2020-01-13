@@ -85,6 +85,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
 public class VaultReactiveBootstrapConfiguration {
 
+	private final BeanFactory beanFactory;
+
 	private final VaultProperties vaultProperties;
 
 	/**
@@ -92,10 +94,12 @@ public class VaultReactiveBootstrapConfiguration {
 	 */
 	private final WebClientBuilder webClientBuilder;
 
-	public VaultReactiveBootstrapConfiguration(VaultProperties vaultProperties,
+	public VaultReactiveBootstrapConfiguration(BeanFactory beanFactory,
+			VaultProperties vaultProperties,
 			ObjectProvider<VaultEndpointProvider> endpointProvider,
 			ObjectProvider<List<WebClientCustomizer>> webClientCustomizers) {
 
+		this.beanFactory = beanFactory;
 		this.vaultProperties = vaultProperties;
 
 		VaultEndpointProvider provider = endpointProvider.getIfAvailable();
@@ -141,15 +145,20 @@ public class VaultReactiveBootstrapConfiguration {
 
 	/**
 	 * Creates a {@link ReactiveVaultTemplate}.
-	 * @param tokenSupplier the {@link VaultTokenSupplier}.
 	 * @return the {@link ReactiveVaultTemplate} bean.
 	 * @see #reactiveVaultSessionManager(BeanFactory, ObjectFactory)
 	 */
 	@Bean
 	@ConditionalOnMissingBean(ReactiveVaultOperations.class)
-	public ReactiveVaultTemplate reactiveVaultTemplate(
-			ReactiveSessionManager tokenSupplier) {
-		return new ReactiveVaultTemplate(this.webClientBuilder, tokenSupplier);
+	public ReactiveVaultTemplate reactiveVaultTemplate() {
+
+		if (this.vaultProperties
+				.getAuthentication() == VaultProperties.AuthenticationMethod.NONE) {
+			return new ReactiveVaultTemplate(this.webClientBuilder);
+		}
+
+		return new ReactiveVaultTemplate(this.webClientBuilder,
+				beanFactory.getBean(ReactiveSessionManager.class));
 	}
 
 	/**
@@ -162,6 +171,7 @@ public class VaultReactiveBootstrapConfiguration {
 	 */
 	@Bean
 	@ConditionalOnMissingBean
+	@ConditionalOnAuthentication
 	public ReactiveSessionManager reactiveVaultSessionManager(BeanFactory beanFactory,
 			ObjectFactory<TaskSchedulerWrapper> asyncTaskExecutorFactory) {
 
@@ -184,6 +194,7 @@ public class VaultReactiveBootstrapConfiguration {
 	 */
 	@Bean
 	@ConditionalOnMissingBean
+	@ConditionalOnAuthentication
 	public SessionManager vaultSessionManager(ReactiveSessionManager sessionManager) {
 		return sessionManager.getSessionToken()::block;
 	}
@@ -197,6 +208,7 @@ public class VaultReactiveBootstrapConfiguration {
 	 */
 	@Bean
 	@ConditionalOnMissingBean(name = "vaultTokenSupplier")
+	@ConditionalOnAuthentication
 	public VaultTokenSupplier vaultTokenSupplier(ListableBeanFactory beanFactory) {
 
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
