@@ -108,6 +108,7 @@ $(addBlockSwitches);
 <li><a href="#vault.config.authentication">Authentication methods</a>
 <ul class="sectlevel2">
 <li><a href="#vault.config.authentication.token">Token authentication</a></li>
+<li><a href="#vault.config.authentication.vault-agent">Vault Agent authentication</a></li>
 <li><a href="#vault.config.authentication.appid">AppId authentication</a></li>
 <li><a href="#_approle_authentication">AppRole authentication</a></li>
 <li><a href="#vault.config.authentication.awsec2">AWS-EC2 authentication</a></li>
@@ -152,7 +153,7 @@ $(addBlockSwitches);
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>&#169; 2016-2019 The original authors.</p>
+<p>&#169; 2016-2020 The original authors.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -546,6 +547,39 @@ authentication method</p>
 </div>
 </div>
 <div class="sect2">
+<h3 id="vault.config.authentication.vault-agent"><a class="link" href="#vault.config.authentication.vault-agent">Vault Agent authentication</a></h3>
+<div class="paragraph">
+<p>Vault ships a sidecar utility with Vault Agent since version 0.11.0.
+Vault Agent implements the functionality of Spring Vault&#8217;s <code>SessionManager</code>
+with its Auto-Auth feature. Applications can reuse cached session credentials by relying
+on Vault Agent running on <code>localhost</code>. Spring Vault can send requests without the
+<code>X-Vault-Token</code> header. Disable Spring Vault&#8217;s authentication infrastructure to
+disable client authentication and session management.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 5. bootstrap.yml</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">spring.cloud.vault:
+    authentication: NONE</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>authentication</code> setting this value to <code>NONE</code> disables <code>ClientAuthentication</code>
+and <code>SessionManager</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>See also: <a href="https://www.vaultproject.io/docs/agent/index.html">Vault Documentation: Agent</a></p>
+</div>
+</div>
+<div class="sect2">
 <h3 id="vault.config.authentication.appid"><a class="link" href="#vault.config.authentication.appid">AppId authentication</a></h3>
 <div class="paragraph">
 <p>Vault supports <a href="https://www.vaultproject.io/docs/auth/app-id.html">AppId</a>
@@ -561,7 +595,7 @@ The IP and Mac address are represented as Hex-encoded SHA256 hash.</p>
 <p>IP address-based UserId&#8217;s use the local host&#8217;s IP address.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 5. bootstrap.yml using SHA256 IP-Address UserId&#8217;s</div>
+<div class="title">Example 6. bootstrap.yml using SHA256 IP-Address UserId&#8217;s</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -617,7 +651,7 @@ a <code>network-interface</code> hint to pick the right device. The value of
 name or interface index (0-based).</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 6. bootstrap.yml using SHA256 Mac-Address UserId&#8217;s</div>
+<div class="title">Example 7. bootstrap.yml using SHA256 Mac-Address UserId&#8217;s</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -675,7 +709,7 @@ by calling <code>createUserId</code> each time it authenticates using AppId to
 obtain a token.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 7. bootstrap.yml</div>
+<div class="title">Example 8. bootstrap.yml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -688,7 +722,7 @@ obtain a token.</p>
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 8. MyUserIdMechanism.java</div>
+<div class="title">Example 9. MyUserIdMechanism.java</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -724,7 +758,7 @@ AppRole authentication consists of two hard to guess (secret) tokens: RoleId and
 Spring Vault will not look up these or create a custom SecretId.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 9. bootstrap.yml with AppRole authentication properties</div>
+<div class="title">Example 10. bootstrap.yml with AppRole authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -914,7 +948,7 @@ AppRole authentication is limited to simple pull mode using reactive infrastruct
 </table>
 </div>
 <div class="exampleblock">
-<div class="title">Example 10. bootstrap.yml with all AppRole authentication properties</div>
+<div class="title">Example 11. bootstrap.yml with all AppRole authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -963,7 +997,7 @@ cryptographically signed dynamic metadata information that uniquely
 represents each EC2 instance.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 11. bootstrap.yml using AWS-EC2 Authentication</div>
+<div class="title">Example 12. bootstrap.yml using AWS-EC2 Authentication</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -996,7 +1030,7 @@ You can configure the authentication role by setting the
 <code>spring.cloud.vault.aws-ec2.role</code> property.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 12. bootstrap.yml with configured role</div>
+<div class="title">Example 13. bootstrap.yml with configured role</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1009,7 +1043,7 @@ You can configure the authentication role by setting the
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 13. bootstrap.yml with all AWS EC2 authentication properties</div>
+<div class="title">Example 14. bootstrap.yml with all AWS EC2 authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1074,7 +1108,7 @@ and assign it to your IAM role. An empty <code>role</code> defaults to
 the friendly name the current IAM role.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 14. bootstrap.yml with required AWS-IAM Authentication properties</div>
+<div class="title">Example 15. bootstrap.yml with required AWS-IAM Authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1085,7 +1119,7 @@ the friendly name the current IAM role.</p>
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 15. bootstrap.yml with all AWS-IAM Authentication properties</div>
+<div class="title">Example 16. bootstrap.yml with all AWS-IAM Authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1138,7 +1172,7 @@ managed service identity and instance metadata information that can be
 bound to a VM instance.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 16. bootstrap.yml with required Azure Authentication properties</div>
+<div class="title">Example 17. bootstrap.yml with required Azure Authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1151,7 +1185,7 @@ bound to a VM instance.</p>
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 17. bootstrap.yml with all Azure Authentication properties</div>
+<div class="title">Example 18. bootstrap.yml with all Azure Authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1206,7 +1240,7 @@ certificate and the private key</p>
 </ol>
 </div>
 <div class="exampleblock">
-<div class="title">Example 18. bootstrap.yml</div>
+<div class="title">Example 19. bootstrap.yml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1250,7 +1284,7 @@ Response Wrapping for token creation requires Vault 0.6.0 or higher.
 </table>
 </div>
 <div class="exampleblock">
-<div class="title">Example 19. Creating and storing tokens</div>
+<div class="title">Example 20. Creating and storing tokens</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1266,7 +1300,7 @@ wrapped_accessor:              46b6aebb-187f-932a-26d7-4f3d86a68319</code></pre>
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 20. bootstrap.yml</div>
+<div class="title">Example 21. bootstrap.yml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1315,7 +1349,7 @@ cryptographically signed dynamic metadata information that uniquely
 represents each GCP service account.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 21. bootstrap.yml with required GCP-GCE Authentication properties</div>
+<div class="title">Example 22. bootstrap.yml with required GCP-GCE Authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1328,7 +1362,7 @@ represents each GCP service account.</p>
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 22. bootstrap.yml with all GCP-GCE Authentication properties</div>
+<div class="title">Example 23. bootstrap.yml with all GCP-GCE Authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1390,7 +1424,7 @@ JSON is the preferred form as it carries the project id and
 service account identifier required for calling <code>projects.serviceAccounts.signJwt</code>.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 23. bootstrap.yml with required GCP-IAM Authentication properties</div>
+<div class="title">Example 24. bootstrap.yml with required GCP-IAM Authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1403,7 +1437,7 @@ service account identifier required for calling <code>projects.serviceAccounts.s
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 24. bootstrap.yml with all GCP-IAM Authentication properties</div>
+<div class="title">Example 25. bootstrap.yml with all GCP-IAM Authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1490,7 +1524,7 @@ The authentication is role based and the role is bound to a service account name
 <p>A file containing a JWT token for a pod’s service account is automatically mounted at <code>/var/run/secrets/kubernetes.io/serviceaccount/token</code>.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 25. bootstrap.yml with all Kubernetes authentication properties</div>
+<div class="title">Example 26. bootstrap.yml with all Kubernetes authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1540,7 +1574,7 @@ Unlike most Vault authentication backends, this backend does not require first-d
 Instead, it treats PCF as a Trusted Third Party and uses the managed instance identity.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 26. bootstrap.yml with required PCF Authentication properties</div>
+<div class="title">Example 27. bootstrap.yml with required PCF Authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1553,7 +1587,7 @@ Instead, it treats PCF as a Trusted Third Party and uses the managed instance id
 </div>
 </div>
 <div class="exampleblock">
-<div class="title">Example 27. bootstrap.yml with all PCF Authentication properties</div>
+<div class="title">Example 28. bootstrap.yml with all PCF Authentication properties</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1851,7 +1885,7 @@ The Consul integration requires the <code>spring-cloud-vault-config-consul</code
 dependency.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 28. pom.xml</div>
+<div class="title">Example 29. pom.xml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1921,7 +1955,7 @@ the property name by setting <code>spring.cloud.vault.consul.token-property</cod
 dependency.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 29. pom.xml</div>
+<div class="title">Example 30. pom.xml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -1996,7 +2030,7 @@ by setting <code>spring.cloud.vault.rabbitmq.username-property</code> and
 dependency.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 30. pom.xml</div>
+<div class="title">Example 31. pom.xml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
@@ -2107,7 +2141,7 @@ generic database backend. Make sure to specify the appropriate
 backend path, e.g. <code>spring.cloud.vault.mysql.role.backend=database</code>.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 31. pom.xml</div>
+<div class="title">Example 32. pom.xml</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
