@@ -34,7 +34,7 @@ import org.springframework.cloud.vault.util.TestRestTemplateFactory;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.authentication.AppIdAuthentication;
 import org.springframework.vault.authentication.AppIdAuthenticationOptions;
 import org.springframework.vault.authentication.AppIdUserIdMechanism;
@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Mark Paluch
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { VaultConfigAppIdCustomMechanismTests.TestApplication.class },
 		properties = { "spring.cloud.vault.authentication=appid",
 				"VaultConfigAppIdCustomMechanismTests.custom.config=true",

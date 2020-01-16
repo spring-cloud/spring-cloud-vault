@@ -30,7 +30,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.ReactiveVaultOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = ReactiveVaultOperationsTests.TestApplication.class,
 		properties = { "spring.cloud.vault.host=foo",
 				"spring.cloud.vault.uri=https://localhost:8200" })

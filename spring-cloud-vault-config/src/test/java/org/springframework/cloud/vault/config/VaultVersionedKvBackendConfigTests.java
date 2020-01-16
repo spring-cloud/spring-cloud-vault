@@ -34,7 +34,7 @@ import org.springframework.cloud.vault.util.Version;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.web.client.RestTemplate;
 
@@ -51,7 +51,7 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultVersionedKvBackendConfigTests.TestApplication.class,
 		properties = { "spring.cloud.vault.host=foo", "spring.cloud.vault.port=80",
 				"spring.cloud.vault.uri=https://localhost:8200",

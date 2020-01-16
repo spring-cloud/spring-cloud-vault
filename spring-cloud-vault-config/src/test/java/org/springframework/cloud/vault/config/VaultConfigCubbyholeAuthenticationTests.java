@@ -31,7 +31,7 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.cloud.vault.util.Version;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 
@@ -48,7 +48,7 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigCubbyholeAuthenticationTests.TestApplication.class,
 		properties = { "spring.cloud.vault.authentication=cubbyhole",
 				"spring.cloud.vault.generic.applicationName=VaultConfigCubbyholeAuthenticationTests" })
