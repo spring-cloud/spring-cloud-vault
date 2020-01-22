@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-vault-parent</artifactId>
-		<version>2.2.2.BUILD-SNAPSHOT</version>
+		<version>3.0.0.BUILD-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -37,8 +37,8 @@
 
 		<!-- Test -->
 		<dependency>
-			<groupId>com.datastax.cassandra</groupId>
-			<artifactId>cassandra-driver-core</artifactId>
+			<groupId>com.datastax.oss</groupId>
+			<artifactId>java-driver-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 
