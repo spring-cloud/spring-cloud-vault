@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.vault.config;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
@@ -27,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.vault.authentication.AuthenticationSteps;
 import org.springframework.vault.authentication.AuthenticationStepsFactory;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
+import org.springframework.vault.authentication.ReactiveSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.authentication.VaultTokenSupplier;
@@ -109,6 +112,20 @@ public class VaultReactiveBootstrapConfigurationTests {
 				});
 	}
 
+	@Test
+	public void sessionManagerBridgeShouldNotCacheTokens() {
+		this.contextRunner.withUserConfiguration(TokenSupplierConfiguration.class,
+				CustomSessionManager.class).run(context -> {
+
+					SessionManager sessionManager = context.getBean(SessionManager.class);
+
+					assertThat(sessionManager.getSessionToken().getToken())
+							.isEqualTo("token-1");
+					assertThat(sessionManager.getSessionToken().getToken())
+							.isEqualTo("token-2");
+				});
+	}
+
 	@Configuration
 	static class AuthenticationFactoryConfiguration {
 
@@ -124,7 +141,19 @@ public class VaultReactiveBootstrapConfigurationTests {
 
 		@Bean
 		VaultTokenSupplier vaultTokenSupplier() {
-			return () -> Mono.just(VaultToken.of("foo"));
+			AtomicLong counter = new AtomicLong();
+			return () -> Mono.just(VaultToken.of("token-" + counter.incrementAndGet()));
+		}
+
+	}
+
+	@Configuration
+	static class CustomSessionManager {
+
+		@Bean
+		ReactiveSessionManager reactiveVaultSessionManager(
+				VaultTokenSupplier tokenSupplier) {
+			return tokenSupplier::getVaultToken;
 		}
 
 	}
