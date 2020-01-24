@@ -64,6 +64,7 @@ import org.springframework.vault.core.ReactiveVaultOperations;
 import org.springframework.vault.core.ReactiveVaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
+import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -196,7 +197,13 @@ public class VaultReactiveBootstrapConfiguration {
 	@ConditionalOnMissingBean
 	@ConditionalOnAuthentication
 	public SessionManager vaultSessionManager(ReactiveSessionManager sessionManager) {
-		return sessionManager.getSessionToken()::block;
+		return () -> {
+
+			VaultToken token = sessionManager.getSessionToken().block();
+			Assert.state(token != null,
+					"ReactiveSessionManager returned a null VaultToken");
+			return token;
+		};
 	}
 
 	/**
