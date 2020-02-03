@@ -24,6 +24,7 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.lease.LeaseEndpoints;
@@ -48,6 +49,7 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 	public void shouldConfigureExpiryTimeouts() {
 
 		this.contextRunner.withUserConfiguration(MockConfiguration.class)
+				.withAllowBeanDefinitionOverriding(true)
 				.withPropertyValues("spring.cloud.vault.generic.enabled=false",
 						"spring.cloud.vault.config.lifecycle.expiry-threshold=5m",
 						"spring.cloud.vault.config.lifecycle.min-renewal=6m",
@@ -63,6 +65,7 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 	}
 
 	@EnableConfigurationProperties(VaultProperties.class)
+	@Configuration(proxyBeanMethods = false)
 	private static class MockConfiguration {
 
 		@Bean
