@@ -28,6 +28,7 @@ import org.springframework.boot.actuate.health.AbstractReactiveHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Health.Builder;
 import org.springframework.lang.Nullable;
+import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.core.ReactiveVaultOperations;
 import org.springframework.vault.support.VaultHealth;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -72,7 +73,8 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 	protected Mono<Health> doHealthCheck(Builder builder) {
 
 		return this.vaultOperations
-				.doWithSession((it) -> it.get().uri("sys/health").exchange())
+				.doWithSession((it) -> it.get().uri("sys/health")
+						.header(VaultHttpHeaders.VAULT_NAMESPACE, "").exchange())
 				.flatMap((it) -> it.bodyToMono(VaultHealthImpl.class))
 				.onErrorResume(WebClientResponseException.class,
 						VaultReactiveHealthIndicator::deserializeError)

@@ -18,6 +18,7 @@ package org.springframework.cloud.vault.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -39,12 +40,14 @@ public final class Version implements Comparable<Version> {
 
 	private final int build;
 
+	private final boolean enterprise;
+
 	/**
 	 * Creates a new {@link Version} from the given integer values. At least one value has
 	 * to be given but a maximum of 4.
 	 * @param parts must not be {@literal null} or empty.
 	 */
-	private Version(int... parts) {
+	private Version(boolean enterprise, int... parts) {
 
 		Assert.notNull(parts, "Parts must not be null!");
 		Assert.isTrue(parts.length > 0 && parts.length < 5,
@@ -54,6 +57,7 @@ public final class Version implements Comparable<Version> {
 		this.minor = parts.length > 1 ? parts[1] : 0;
 		this.bugfix = parts.length > 2 ? parts[2] : 0;
 		this.build = parts.length > 3 ? parts[3] : 0;
+		this.enterprise = enterprise;
 
 		Assert.isTrue(this.major >= 0, "Major version must be greater or equal zero!");
 		Assert.isTrue(this.minor >= 0, "Minor version must be greater or equal zero!");
@@ -72,6 +76,7 @@ public final class Version implements Comparable<Version> {
 
 		String[] parts = version.trim().split("\\.");
 		int[] intParts = new int[parts.length];
+		boolean enterprise = version.endsWith("+ent");
 
 		for (int i = 0; i < parts.length; i++) {
 
@@ -89,7 +94,7 @@ public final class Version implements Comparable<Version> {
 			}
 		}
 
-		return new Version(intParts);
+		return new Version(enterprise, intParts);
 	}
 
 	/**
@@ -169,42 +174,8 @@ public final class Version implements Comparable<Version> {
 		return 0;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-
-		if (this == obj) {
-			return true;
-		}
-
-		if (!(obj instanceof Version)) {
-			return false;
-		}
-
-		Version that = (Version) obj;
-
-		return this.major == that.major && this.minor == that.minor
-				&& this.bugfix == that.bugfix && this.build == that.build;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-
-		int result = 17;
-		result += 31 * this.major;
-		result += 31 * this.minor;
-		result += 31 * this.bugfix;
-		result += 31 * this.build;
-		return result;
+	public boolean isEnterprise() {
+		return this.enterprise;
 	}
 
 	/*
@@ -215,7 +186,7 @@ public final class Version implements Comparable<Version> {
 	@Override
 	public String toString() {
 
-		List<Integer> digits = new ArrayList<>();
+		List<Integer> digits = new ArrayList<Integer>();
 		digits.add(this.major);
 		digits.add(this.minor);
 
@@ -227,7 +198,28 @@ public final class Version implements Comparable<Version> {
 			digits.add(this.build);
 		}
 
-		return StringUtils.collectionToDelimitedString(digits, ".");
+		return StringUtils.collectionToDelimitedString(digits, ".")
+				+ (isEnterprise() ? "+ent" : "");
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Version)) {
+			return false;
+		}
+		Version version = (Version) o;
+		return this.major == version.major && this.minor == version.minor
+				&& this.bugfix == version.bugfix && this.build == version.build
+				&& this.enterprise == version.enterprise;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.major, this.minor, this.bugfix, this.build,
+				this.enterprise);
 	}
 
 }
