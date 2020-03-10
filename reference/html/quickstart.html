@@ -119,24 +119,29 @@ $(addBlockSwitches);
 <p><code>wget</code>, <code>openssl</code> and <code>unzip</code></p>
 </li>
 <li>
-<p>at least Java 7 and a properly configured <code>JAVA_HOME</code> environment variable</p>
+<p>at least Java 8 and a properly configured <code>JAVA_HOME</code> environment variable</p>
 </li>
 </ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This guide explains Vault setup from a Spring Cloud Vault perspective for integration testing. You can find a getting started guide directly on the Vault project site: <a href="https://learn.hashicorp.com/vault" class="bare">https://learn.hashicorp.com/vault</a>
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p><strong>Install Vault</strong></p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ src/test/bash/install_vault.sh</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><strong>Create SSL certificates for Vault</strong></p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ src/test/bash/create_certificates.sh</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ wget https://releases.hashicorp.com/vault/${vault_version}/vault_${vault_version}_${platform}.zip
+$ unzip vault_${vault_version}_${platform}.zip</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -146,7 +151,41 @@ $(addBlockSwitches);
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-<code>create_certificates.sh</code> creates certificates in <code>work/ca</code> and a JKS truststore <code>work/keystore.jks</code>. If you want to run Spring Cloud Vault using this quickstart guide you need to configure the truststore the <code>spring.cloud.vault.ssl.trust-store</code> property to <code>file:work/keystore.jks</code>.
+These steps can be achieved by downloading and running <a href="https://github.com/spring-cloud/spring-cloud-vault/blob/master/src/test/bash/install_vault.sh"><code>install_vault.sh</code></a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><strong>Create SSL certificates for Vault</strong></p>
+</div>
+<div class="paragraph">
+<p>Next, you&#8217;r required to generate a set of certificates:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Root CA</p>
+</li>
+<li>
+<p>Vault Certificate (decryted key <code>work/ca/private/localhost.decrypted.key.pem</code> and certificate <code>work/ca/certs/localhost.cert.pem</code>)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Make sure to import the Root Certificate into a Java-compliant truststore.</p>
+</div>
+<div class="paragraph">
+<p>The easiest way to achieve this is by using OpenSSL.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<a href="https://github.com/spring-cloud/spring-cloud-vault/blob/master/src/test/bash/"><code>create_certificates.sh</code></a> creates certificates in <code>work/ca</code> and a JKS truststore <code>work/keystore.jks</code>. If you want to run Spring Cloud Vault using this quickstart guide you need to configure the truststore the <code>spring.cloud.vault.ssl.trust-store</code> property to <code>file:work/keystore.jks</code>.
 </td>
 </tr>
 </table>
@@ -154,14 +193,42 @@ $(addBlockSwitches);
 <div id="quickstart.vault.start" class="paragraph">
 <p><strong>Start Vault server</strong></p>
 </div>
+<div class="paragraph">
+<p>Next create a config file along the lines of:</p>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ src/test/bash/local_run_vault.sh</code></pre>
+<pre class="highlightjs highlight"><code>backend "inmem" {
+}
+
+listener "tcp" {
+  address = "0.0.0.0:8200"
+  tls_cert_file = "work/ca/certs/localhost.cert.pem"
+  tls_key_file = "work/ca/private/localhost.decrypted.key.pem"
+}
+
+disable_mlock = true</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You can find an example config file at  <a href="https://github.com/spring-clod/spring-cloud-vault/blob/master/src/test/bash/vault.conf"><code>vault.conf</code></a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ vault server -config=vault.conf</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Vault is started listening on <code>0.0.0.0:8200</code> using the <code>inmem</code> storage and
-<code>https</code>.
+<p>Vault is started listening on <code>0.0.0.0:8200</code> using the <code>inmem</code> storage and <code>https</code>.
 Vault is sealed and not initialized when starting up.</p>
 </div>
 <div class="admonitionblock note">
