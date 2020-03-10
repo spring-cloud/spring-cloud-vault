@@ -46,34 +46,60 @@ To get started with Vault and this guide you need a
 *NIX-like operating systems that provides:
 
 * `wget`, `openssl` and `unzip`
-* at least Java 7 and a properly configured `JAVA_HOME` environment variable
+* at least Java 8 and a properly configured `JAVA_HOME` environment variable
+
+NOTE: This guide explains Vault setup from a Spring Cloud Vault perspective for integration testing. You can find a getting started guide directly on the Vault project site: https://learn.hashicorp.com/vault
 
 *Install Vault*
 
 [source,bash]
 ----
-$ src/test/bash/install_vault.sh
+$ wget https://releases.hashicorp.com/vault/${vault_version}/vault_${vault_version}_${platform}.zip
+$ unzip vault_${vault_version}_${platform}.zip
 ----
+
+NOTE: These steps can be achieved by downloading and running https://github.com/spring-cloud/spring-cloud-vault/blob/master/src/test/bash/install_vault.sh[`install_vault.sh`].
 
 *Create SSL certificates for Vault*
 
-[source,bash]
-----
-$ src/test/bash/create_certificates.sh
-----
+Next, you'r required to generate a set of certificates:
 
-NOTE: `create_certificates.sh` creates certificates in `work/ca` and a JKS truststore `work/keystore.jks`. If you want to run Spring Cloud Vault using this quickstart guide you need to configure the truststore the `spring.cloud.vault.ssl.trust-store` property to `file:work/keystore.jks`.
+* Root CA
+* Vault Certificate (decrypted key `work/ca/private/localhost.decrypted.key.pem` and certificate `work/ca/certs/localhost.cert.pem`)
+
+Make sure to import the Root Certificate into a Java-compliant truststore.
+
+The easiest way to achieve this is by using OpenSSL.
+
+NOTE: https://github.com/spring-cloud/spring-cloud-vault/blob/master/src/test/bash/[`create_certificates.sh`] creates certificates in `work/ca` and a JKS truststore `work/keystore.jks`. If you want to run Spring Cloud Vault using this quickstart guide you need to configure the truststore the `spring.cloud.vault.ssl.trust-store` property to `file:work/keystore.jks`.
 
 [[quickstart.vault.start]]
 *Start Vault server*
 
-[source,bash]
+Next create a config file along the lines of:
+
+[source]
 ----
-$ src/test/bash/local_run_vault.sh
+backend "inmem" {
+}
+
+listener "tcp" {
+  address = "0.0.0.0:8200"
+  tls_cert_file = "work/ca/certs/localhost.cert.pem"
+  tls_key_file = "work/ca/private/localhost.decrypted.key.pem"
+}
+
+disable_mlock = true
 ----
 
-Vault is started listening on `0.0.0.0:8200` using the `inmem` storage and
-`https`.
+NOTE: You can find an example config file at  https://github.com/spring-clod/spring-cloud-vault/blob/master/src/test/bash/vault.conf[`vault.conf`].
+
+[source,bash]
+----
+$ vault server -config=vault.conf
+----
+
+Vault is started listening on `0.0.0.0:8200` using the `inmem` storage and `https`.
 Vault is sealed and not initialized when starting up.
 
 NOTE: If you want to run tests, leave Vault uninitialized. The tests will
