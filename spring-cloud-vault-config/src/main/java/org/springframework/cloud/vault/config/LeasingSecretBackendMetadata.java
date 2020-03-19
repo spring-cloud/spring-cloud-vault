@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.vault.config;
 
+import org.springframework.vault.core.lease.SecretLeaseContainer;
+import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
 
 /**
@@ -36,5 +38,28 @@ public interface LeasingSecretBackendMetadata extends SecretBackendMetadata {
 	 * @since 1.1
 	 */
 	Mode getLeaseMode();
+
+	/**
+	 * Callback method before registering a {@link RequestedSecret secret} with {@link SecretLeaseContainer}.
+	 * Registering a {@code before} callback allows event consumption before the secrets are visible in the associated property source.
+	 *
+	 * @param secret the requested secret.
+	 * @param container the lease container that was used to request the secret.
+	 * @since 3.0
+	 */
+	default void beforeRegistration(RequestedSecret secret, SecretLeaseContainer container) {
+	}
+
+	/**
+	 * Callback method after registering a {@link RequestedSecret secret} with {@link SecretLeaseContainer}.
+	 * Registering a {@code after} callback allows event consumption after the secrets are visible in the associated property source.
+	 * Note that this callback does not necessarily guarantee notification of the initial secrets retrieval.
+	 *
+	 * @param secret the requested secret.
+	 * @param container the lease container that was used to request the secret.
+	 * @since 3.0
+	 */
+	default void afterRegistration(RequestedSecret secret, SecretLeaseContainer container) {
+	}
 
 }
