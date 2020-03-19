@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2013-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
 import org.springframework.cloud.vault.config.LeasingSecretBackendMetadata;
-import org.springframework.cloud.vault.config.PropertyNameTransformer;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent;
@@ -35,17 +35,19 @@ import org.springframework.vault.core.util.PropertyTransformer;
  */
 class ConsulBackendMetadata implements LeasingSecretBackendMetadata {
 
-	private final Log log = LogFactory
-			.getLog(getClass());
+	private final Log log = LogFactory.getLog(getClass());
 
 	private final VaultConsulProperties properties;
-	private final PropertyNameTransformer transformer;
-	private final ConfigurationPropertiesRebinder rebinder;
 
-	public ConsulBackendMetadata(VaultConsulProperties properties, PropertyNameTransformer transformer, ConfigurationPropertiesRebinder rebinder) {
+	private final PropertyTransformer transformer;
+
+	private final ApplicationEventPublisher eventPublisher;
+
+	ConsulBackendMetadata(VaultConsulProperties properties,
+			PropertyTransformer transformer, ApplicationEventPublisher eventPublisher) {
 		this.properties = properties;
 		this.transformer = transformer;
-		this.rebinder = rebinder;
+		this.eventPublisher = eventPublisher;
 	}
 
 	@Override
@@ -66,8 +68,7 @@ class ConsulBackendMetadata implements LeasingSecretBackendMetadata {
 		Map<String, String> variables = new HashMap<>();
 
 		variables.put("backend", this.properties.getBackend());
-		variables
-				.put("key", String.format("creds/%s", this.properties.getRole()));
+		variables.put("key", String.format("creds/%s", this.properties.getRole()));
 
 		return variables;
 	}
@@ -83,28 +84,30 @@ class ConsulBackendMetadata implements LeasingSecretBackendMetadata {
 	}
 
 	@Override
-	public void afterRegistration(RequestedSecret secret, SecretLeaseContainer container) {
-
+	public void afterRegistration(RequestedSecret secret,
+			SecretLeaseContainer container) {
 		container.addLeaseListener(leaseEvent -> {
 
-			if (leaseEvent
-					.getSource() == secret && leaseEvent instanceof SecretLeaseCreatedEvent) {
-				rebind("consulDiscoveryProperties");
-				rebind("consulConfigProperties");
+			if (leaseEvent.getSource() == secret
+					&& leaseEvent instanceof SecretLeaseCreatedEvent) {
+				if (this.eventPublisher != null) {
+					if (log.isDebugEnabled()) {
+						log.debug("Publishing a RebindConsulEvent");
+					}
+					this.eventPublisher.publishEvent(new RebindConsulEvent(this));
+				}
 			}
 		});
 
-		// initial rebind after requesting these properties
-		rebind("consulDiscoveryProperties");
-		rebind("consulConfigProperties");
+		// no need to rebind here since the transformer creats all appropriate properties.
 	}
 
-	private void rebind(String bean) {
+	public static class RebindConsulEvent extends ApplicationEvent {
 
-		boolean success = this.rebinder.rebind(bean);
-		if (this.log.isInfoEnabled()) {
-			this.log.info(String
-					.format("Attempted to rebind Consul bean '%s' with updated ACL token from vault, success: %s", bean, success));
+		RebindConsulEvent(Object source) {
+			super(source);
 		}
+
 	}
+
 }

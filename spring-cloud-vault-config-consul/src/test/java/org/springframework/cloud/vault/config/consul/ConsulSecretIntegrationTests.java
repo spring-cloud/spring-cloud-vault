@@ -131,7 +131,8 @@ public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
-		ConsulSecretBackendMetadataFactory factory = new ConsulSecretBackendMetadataFactory(null);
+		ConsulSecretBackendMetadataFactory factory = new ConsulSecretBackendMetadataFactory(
+				null);
 		Map<String, Object> secretProperties = this.configOperations
 				.read(factory.forConsul(this.consul)).getData();
 

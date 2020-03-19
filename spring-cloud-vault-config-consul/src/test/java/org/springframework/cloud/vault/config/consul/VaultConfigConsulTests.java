@@ -31,10 +31,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.consul.config.ConsulConfigProperties;
 import org.springframework.cloud.consul.discovery.ConsulDiscoveryProperties;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -58,8 +60,9 @@ import static org.junit.Assume.assumeTrue;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigConsulTests.TestApplication.class,
-		properties = {"spring.cloud.vault.consul.enabled=true",
-				"spring.cloud.vault.consul.role=readonly"})
+		properties = { "spring.cloud.vault.consul.enabled=true",
+				"spring.cloud.vault.consul.role=readonly",
+				"spring.cloud.consul.discovery.catalog-services-watch.enabled=false" })
 public class VaultConfigConsulTests {
 
 	private static final String CONSUL_HOST = "localhost";
@@ -76,11 +79,20 @@ public class VaultConfigConsulTests {
 	private static final ParameterizedTypeReference<Map<String, String>> STRING_MAP = new ParameterizedTypeReference<Map<String, String>>() {
 	};
 
-	@Value("${spring.cloud.consul.token}")
-	String token;
+	@Value("${spring.cloud.consul.discovery.acl-token:}")
+	String discoveryToken;
+
+	@Value("${spring.cloud.consul.config.acl-token:}")
+	String configToken;
+
+	@Autowired
+	Environment env;
 
 	@Autowired
 	ConsulDiscoveryProperties discoveryProperties;
+
+	@Autowired
+	ConsulConfigProperties configProperties;
 
 	/**
 	 * Initialize the consul secret backend.
@@ -132,22 +144,25 @@ public class VaultConfigConsulTests {
 		}
 	}
 
-	@Test
-	public void shouldHaveToken() {
-		assertThat(this.token).isNotEmpty();
-		assertThat(this.discoveryProperties.getAclToken()).isEqualTo(this.token);
-	}
+	/*
+	 * @Test public void shouldHaveToken() { assertThat(this.token).isNotEmpty();
+	 * assertThat(this.discoveryProperties.getAclToken()).isEqualTo(this.token); }
+	 */
 
 	@Test
 	public void shouldHaveRenewedToken() throws InterruptedException {
-
-		assertThat(this.token).isNotEmpty();
-		assertThat(this.discoveryProperties.getAclToken()).isEqualTo(this.token);
+		assertThat(configToken).isNotEmpty();
+		assertThat(discoveryToken).isNotEmpty();
+		assertThat(this.configProperties.getAclToken()).isEqualTo(configToken);
+		assertThat(this.discoveryProperties.getAclToken()).isEqualTo(discoveryToken);
 
 		Thread.sleep(20_000L);
 
 		// TODO: The properties weren't rebound so this test fails.
-		assertThat(this.discoveryProperties.getAclToken()).isNotEmpty().isNotEqualTo(this.token);
+		assertThat(this.configProperties.getAclToken()).isNotEmpty()
+				.isNotEqualTo(configToken);
+		assertThat(this.discoveryProperties.getAclToken()).isNotEmpty()
+				.isNotEqualTo(discoveryToken);
 	}
 
 	@SpringBootApplication

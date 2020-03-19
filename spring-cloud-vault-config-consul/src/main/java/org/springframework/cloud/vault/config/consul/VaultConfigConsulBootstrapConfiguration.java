@@ -16,19 +16,19 @@
 
 package org.springframework.cloud.vault.config.consul;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
-import org.springframework.cloud.vault.config.PropertyNameTransformer;
 import org.springframework.cloud.vault.config.SecretBackendMetadata;
 import org.springframework.cloud.vault.config.SecretBackendMetadataFactory;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
+import org.springframework.vault.core.util.PropertyTransformer;
 
 /**
  * Bootstrap configuration providing support for the Consul secret backend.
@@ -41,8 +41,9 @@ public class VaultConfigConsulBootstrapConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public ConsulSecretBackendMetadataFactory consulSecretBackendAccessorFactory(ConfigurationPropertiesRebinder rebinder) {
-		return new ConsulSecretBackendMetadataFactory(rebinder);
+	public ConsulSecretBackendMetadataFactory consulSecretBackendMetadataFactory(
+			ApplicationContext context) {
+		return new ConsulSecretBackendMetadataFactory(context);
 	}
 
 	/**
@@ -52,10 +53,14 @@ public class VaultConfigConsulBootstrapConfiguration {
 	public static class ConsulSecretBackendMetadataFactory
 			implements SecretBackendMetadataFactory<VaultConsulProperties> {
 
-		private final ConfigurationPropertiesRebinder rebinder;
+		private final ApplicationContext context;
 
-		public ConsulSecretBackendMetadataFactory(ConfigurationPropertiesRebinder rebinder) {
-			this.rebinder = rebinder;
+		public ConsulSecretBackendMetadataFactory(ApplicationContext context) {
+			this.context = context;
+		}
+
+		public ApplicationContext getContext() {
+			return this.context;
 		}
 
 		/**
@@ -69,10 +74,26 @@ public class VaultConfigConsulBootstrapConfiguration {
 
 			Assert.notNull(properties, "VaultConsulProperties must not be null");
 
-			PropertyNameTransformer transformer = new PropertyNameTransformer();
-			transformer.addKeyTransformation("token", properties.getTokenProperty());
+			/*
+			 * PropertyNameTransformer transformer = new PropertyNameTransformer();
+			 * transformer.addKeyTransformation("token", properties.getTokenProperty());
+			 */
 
-			return new ConsulBackendMetadata(properties, transformer, this.rebinder);
+			// spring.cloud.consul.token is a shortcut for initialization
+			// for this I couldn't get it to work without specifiying each property
+			// specifically
+			PropertyTransformer transformer = input -> {
+
+				Map<String, Object> transformed = new LinkedHashMap<>();
+				transformed.put("spring.cloud.consul.config.acl-token",
+						input.get("token"));
+				transformed.put("spring.cloud.consul.discovery.acl-token",
+						input.get("token"));
+
+				return transformed;
+			};
+
+			return new ConsulBackendMetadata(properties, transformer, context);
 		}
 
 		@Override

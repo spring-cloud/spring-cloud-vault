@@ -69,7 +69,7 @@ public class VaultConfigConsulBootstrapConfigurationTests extends IntegrationTes
 		@ConditionalOnProperty("VaultConfigConsulBootstrapConfigurationTests.custom.config")
 		ConsulSecretBackendMetadataFactory customFactory(ConfigurationPropertiesRebinder rebinder) {
 
-			return new ConsulSecretBackendMetadataFactory(rebinder) {
+			return new ConsulSecretBackendMetadataFactory(null) {
 				@Override
 				public SecretBackendMetadata createMetadata(
 						VaultConsulProperties backendDescriptor) {
