@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.springframework.cloud.vault.config.VaultConfigOperations;
 import org.springframework.cloud.vault.config.VaultConfigTemplate;
 import org.springframework.cloud.vault.config.VaultProperties;
+import org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration.ConsulSecretBackendMetadataFactory;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
@@ -43,7 +44,6 @@ import org.springframework.web.client.RestTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
-import static org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration.ConsulSecretBackendMetadataFactory.forConsul;
 
 /**
  * Integration tests for {@link VaultConfigTemplate} using the consul secret backend. This
@@ -131,8 +131,9 @@ public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
+		ConsulSecretBackendMetadataFactory factory = new ConsulSecretBackendMetadataFactory(null);
 		Map<String, Object> secretProperties = this.configOperations
-				.read(forConsul(this.consul)).getData();
+				.read(factory.forConsul(this.consul)).getData();
 
 		assertThat(secretProperties).containsKeys("spring.cloud.consul.token");
 	}

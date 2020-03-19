@@ -16,11 +16,12 @@
 
 package org.springframework.cloud.vault.config.consul;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
 import org.springframework.cloud.vault.config.PropertyNameTransformer;
 import org.springframework.cloud.vault.config.SecretBackendMetadata;
 import org.springframework.cloud.vault.config.SecretBackendMetadataFactory;
@@ -28,7 +29,6 @@ import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
-import org.springframework.vault.core.util.PropertyTransformer;
 
 /**
  * Bootstrap configuration providing support for the Consul secret backend.
@@ -41,8 +41,8 @@ public class VaultConfigConsulBootstrapConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public ConsulSecretBackendMetadataFactory consulSecretBackendAccessorFactory() {
-		return new ConsulSecretBackendMetadataFactory();
+	public ConsulSecretBackendMetadataFactory consulSecretBackendAccessorFactory(ConfigurationPropertiesRebinder rebinder) {
+		return new ConsulSecretBackendMetadataFactory(rebinder);
 	}
 
 	/**
@@ -52,6 +52,12 @@ public class VaultConfigConsulBootstrapConfiguration {
 	public static class ConsulSecretBackendMetadataFactory
 			implements SecretBackendMetadataFactory<VaultConsulProperties> {
 
+		private final ConfigurationPropertiesRebinder rebinder;
+
+		public ConsulSecretBackendMetadataFactory(ConfigurationPropertiesRebinder rebinder) {
+			this.rebinder = rebinder;
+		}
+
 		/**
 		 * Creates a {@link SecretBackendMetadata} for a secret backend using
 		 * {@link VaultConsulProperties}. This accessor transforms Vault's token property
@@ -59,43 +65,14 @@ public class VaultConfigConsulBootstrapConfiguration {
 		 * @param properties must not be {@literal null}.
 		 * @return the {@link SecretBackendMetadata}
 		 */
-		static SecretBackendMetadata forConsul(final VaultConsulProperties properties) {
+		SecretBackendMetadata forConsul(VaultConsulProperties properties) {
 
 			Assert.notNull(properties, "VaultConsulProperties must not be null");
 
 			PropertyNameTransformer transformer = new PropertyNameTransformer();
 			transformer.addKeyTransformation("token", properties.getTokenProperty());
 
-			return new SecretBackendMetadata() {
-
-				@Override
-				public String getName() {
-					return String.format("%s with Role %s", properties.getBackend(),
-							properties.getRole());
-				}
-
-				@Override
-				public String getPath() {
-					return String.format("%s/creds/%s", properties.getBackend(),
-							properties.getRole());
-				}
-
-				@Override
-				public Map<String, String> getVariables() {
-
-					Map<String, String> variables = new HashMap<>();
-
-					variables.put("backend", properties.getBackend());
-					variables.put("key", String.format("creds/%s", properties.getRole()));
-
-					return variables;
-				}
-
-				@Override
-				public PropertyTransformer getPropertyTransformer() {
-					return transformer;
-				}
-			};
+			return new ConsulBackendMetadata(properties, transformer, this.rebinder);
 		}
 
 		@Override
