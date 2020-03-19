@@ -1,3 +1,6 @@
 # Bootstrap Configuration
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
 org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration
+
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.springframework.cloud.vault.config.consul.VaultConfigConsulAutoConfiguration
