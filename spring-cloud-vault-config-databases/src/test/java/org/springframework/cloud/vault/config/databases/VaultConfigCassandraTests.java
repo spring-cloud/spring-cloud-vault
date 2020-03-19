@@ -20,10 +20,12 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.datastax.oss.driver.api.core.CqlSession;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -33,12 +35,8 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultOperations;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
-
-// FIXME: 3.0.0
-//import com.datastax.driver.core.Cluster;
-//import com.datastax.driver.core.PlainTextAuthProvider;
-//import com.datastax.driver.core.Session;
 
 /**
  * Integration tests using the cassandra secret backend. In case this test should fail
@@ -72,8 +70,8 @@ public class VaultConfigCassandraTests {
 	@Value("${spring.data.cassandra.password}")
 	String password;
 
-	// @Autowired
-	// Cluster cluster;
+	@Autowired
+	CqlSession cqlSession;
 
 	/**
 	 * Initialize the cassandra secret backend.
@@ -110,25 +108,18 @@ public class VaultConfigCassandraTests {
 	}
 
 	@Test
-	public void shouldConnectUsingCluster() {
-		// this.cluster.connect().close();
-	}
-
-	@Test
-	public void shouldUseAuthenticationSet() {
-		// assertThat(this.cluster.getConfiguration().getProtocolOptions().getAuthProvider())
-		// .isInstanceOf(PlainTextAuthProvider.class);
+	public void shouldUseAuthenticatedSession() {
+		assertThat(this.cqlSession.getMetadata().getKeyspace("system")).isNotEmpty();
 	}
 
 	@Test
 	public void shouldConnectUsingCassandraClient() {
 
-		// try (Cluster cluster = Cluster.builder().addContactPoint(CASSANDRA_HOST)
-		// .withAuthProvider(new PlainTextAuthProvider(this.username, this.password))
-		// .withoutJMXReporting().build()) {
-		// Session session = cluster.connect();
-		// session.close();
-		// }
+		try (CqlSession session = CqlSession.builder().withLocalDatacenter("dc1")
+				.addContactPoint(new InetSocketAddress(CASSANDRA_HOST, CASSANDRA_PORT))
+				.withAuthCredentials(this.username, this.password).build()) {
+			assertThat(session.getMetadata().getKeyspace("system")).isNotEmpty();
+		}
 	}
 
 	@SpringBootApplication
