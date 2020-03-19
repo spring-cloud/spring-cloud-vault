@@ -48,6 +48,7 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 	public void shouldConfigureExpiryTimeouts() {
 
 		this.contextRunner.withUserConfiguration(MockConfiguration.class)
+				.withAllowBeanDefinitionOverriding(true)
 				.withPropertyValues("spring.cloud.vault.generic.enabled=false",
 						"spring.cloud.vault.config.lifecycle.expiry-threshold=5m",
 						"spring.cloud.vault.config.lifecycle.min-renewal=6m",

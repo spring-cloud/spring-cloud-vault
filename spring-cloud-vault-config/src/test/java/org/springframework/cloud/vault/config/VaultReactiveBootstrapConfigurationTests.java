@@ -48,7 +48,8 @@ public class VaultReactiveBootstrapConfigurationTests {
 
 	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 			.withConfiguration(
-					AutoConfigurations.of(VaultReactiveBootstrapConfiguration.class));
+					AutoConfigurations.of(VaultReactiveBootstrapConfiguration.class))
+			.withAllowBeanDefinitionOverriding(true);
 
 	@Test
 	public void shouldConfigureTemplate() {
