@@ -1,4 +1,3 @@
 # Bootstrap Configuration
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
-org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfigurationTests.CustomBootstrapConfiguration,\
-org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration
+org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfigurationTests.CustomBootstrapConfiguration
