@@ -18,18 +18,20 @@ package org.springframework.cloud.vault.config.consul;
 
 import java.net.InetSocketAddress;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.consul.discovery.ConsulDiscoveryProperties;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.core.ParameterizedTypeReference;
@@ -56,8 +58,8 @@ import static org.junit.Assume.assumeTrue;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigConsulTests.TestApplication.class,
-		properties = { "spring.cloud.vault.consul.enabled=true",
-				"spring.cloud.vault.consul.role=readonly" })
+		properties = {"spring.cloud.vault.consul.enabled=true",
+				"spring.cloud.vault.consul.role=readonly"})
 public class VaultConfigConsulTests {
 
 	private static final String CONSUL_HOST = "localhost";
@@ -76,6 +78,9 @@ public class VaultConfigConsulTests {
 
 	@Value("${spring.cloud.consul.token}")
 	String token;
+
+	@Autowired
+	ConsulDiscoveryProperties discoveryProperties;
 
 	/**
 	 * Initialize the consul secret backend.
@@ -111,8 +116,12 @@ public class VaultConfigConsulTests {
 
 			vaultOperations.write("consul/config/access", consulAccess);
 
-			vaultOperations.write("consul/roles/readonly", Collections.singletonMap(
-					"policy", new String(Base64.getEncoder().encode(POLICY.getBytes()))));
+			Map<String, Object> role = new LinkedHashMap<>();
+			role.put("policy", new String(Base64.getEncoder().encode(POLICY.getBytes())));
+			role.put("ttl", "15s");
+			role.put("max_ttl", "15s");
+
+			vaultOperations.write("consul/roles/readonly", role);
 		}
 		catch (HttpStatusCodeException e) {
 
@@ -126,6 +135,19 @@ public class VaultConfigConsulTests {
 	@Test
 	public void shouldHaveToken() {
 		assertThat(this.token).isNotEmpty();
+		assertThat(this.discoveryProperties.getAclToken()).isEqualTo(this.token);
+	}
+
+	@Test
+	public void shouldHaveRenewedToken() throws InterruptedException {
+
+		assertThat(this.token).isNotEmpty();
+		assertThat(this.discoveryProperties.getAclToken()).isEqualTo(this.token);
+
+		Thread.sleep(20_000L);
+
+		// TODO: The properties weren't rebound so this test fails.
+		assertThat(this.discoveryProperties.getAclToken()).isNotEmpty().isNotEqualTo(this.token);
 	}
 
 	@SpringBootApplication
