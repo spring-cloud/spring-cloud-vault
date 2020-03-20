@@ -100,18 +100,6 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 			SecretLeaseContainer secretLeaseContainer = secretLeaseContainerObjectFactory
 					.getObject();
 
-			if (lifecycle.getMinRenewal() != null) {
-				secretLeaseContainer.setMinRenewal(lifecycle.getMinRenewal());
-			}
-
-			if (lifecycle.getExpiryThreshold() != null) {
-				secretLeaseContainer.setExpiryThreshold(lifecycle.getExpiryThreshold());
-			}
-
-			if (lifecycle.getLeaseEndpoints() != null) {
-				secretLeaseContainer.setLeaseEndpoints(lifecycle.getLeaseEndpoints());
-			}
-
 			secretLeaseContainer.start();
 
 			return new LeasingVaultPropertySourceLocator(vaultProperties, configuration,
@@ -184,6 +172,7 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	}
 
 	/**
+	 * @param vaultProperties the {@link VaultProperties}.
 	 * @param vaultOperations the {@link VaultOperations}.
 	 * @param taskSchedulerWrapper the {@link TaskSchedulerWrapper}.
 	 * @return the {@link SessionManager} for Vault session management.
@@ -193,10 +182,36 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	@Bean
 	@Lazy
 	@ConditionalOnMissingBean
-	public SecretLeaseContainer secretLeaseContainer(VaultOperations vaultOperations,
-			TaskSchedulerWrapper taskSchedulerWrapper) {
-		return new SecretLeaseContainer(vaultOperations,
+	public SecretLeaseContainer secretLeaseContainer(VaultProperties vaultProperties,
+			VaultOperations vaultOperations, TaskSchedulerWrapper taskSchedulerWrapper) {
+
+		VaultProperties.Lifecycle lifecycle = vaultProperties.getConfig().getLifecycle();
+
+		SecretLeaseContainer container = new SecretLeaseContainer(vaultOperations,
 				taskSchedulerWrapper.getTaskScheduler());
+
+		customizeContainer(lifecycle, container);
+
+		return container;
+	}
+
+	static void customizeContainer(VaultProperties.Lifecycle lifecycle,
+			SecretLeaseContainer container) {
+
+		if (lifecycle.isEnabled()) {
+
+			if (lifecycle.getMinRenewal() != null) {
+				container.setMinRenewal(lifecycle.getMinRenewal());
+			}
+
+			if (lifecycle.getExpiryThreshold() != null) {
+				container.setExpiryThreshold(lifecycle.getExpiryThreshold());
+			}
+
+			if (lifecycle.getLeaseEndpoints() != null) {
+				container.setLeaseEndpoints(lifecycle.getLeaseEndpoints());
+			}
+		}
 	}
 
 }

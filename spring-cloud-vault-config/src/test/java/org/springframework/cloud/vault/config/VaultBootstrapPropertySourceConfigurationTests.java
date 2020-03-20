@@ -78,8 +78,14 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 		}
 
 		@Bean
-		SecretLeaseContainer secretLeaseContainer() {
-			return mock(SecretLeaseContainer.class);
+		SecretLeaseContainer secretLeaseContainer(VaultProperties properties) {
+
+			SecretLeaseContainer mock = mock(SecretLeaseContainer.class);
+
+			VaultBootstrapPropertySourceConfiguration
+					.customizeContainer(properties.getConfig().getLifecycle(), mock);
+
+			return mock;
 		}
 
 	}
