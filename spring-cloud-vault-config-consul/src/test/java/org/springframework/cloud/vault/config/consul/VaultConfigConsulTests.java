@@ -57,6 +57,7 @@ import static org.junit.Assume.assumeTrue;
  * referenced with {@code ../work/keystore.jks}.
  *
  * @author Mark Paluch
+ * @author Spencer Gibb
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigConsulTests.TestApplication.class,
@@ -130,8 +131,8 @@ public class VaultConfigConsulTests {
 
 			Map<String, Object> role = new LinkedHashMap<>();
 			role.put("policy", new String(Base64.getEncoder().encode(POLICY.getBytes())));
-			role.put("ttl", "15s");
-			role.put("max_ttl", "15s");
+			role.put("ttl", "5s");
+			role.put("max_ttl", "5s");
 
 			vaultOperations.write("consul/roles/readonly", role);
 		}
@@ -144,11 +145,6 @@ public class VaultConfigConsulTests {
 		}
 	}
 
-	/*
-	 * @Test public void shouldHaveToken() { assertThat(this.token).isNotEmpty();
-	 * assertThat(this.discoveryProperties.getAclToken()).isEqualTo(this.token); }
-	 */
-
 	@Test
 	public void shouldHaveRenewedToken() throws InterruptedException {
 		assertThat(configToken).isNotEmpty();
@@ -156,9 +152,8 @@ public class VaultConfigConsulTests {
 		assertThat(this.configProperties.getAclToken()).isEqualTo(configToken);
 		assertThat(this.discoveryProperties.getAclToken()).isEqualTo(discoveryToken);
 
-		Thread.sleep(20_000L);
+		Thread.sleep(8_000L);
 
-		// TODO: The properties weren't rebound so this test fails.
 		assertThat(this.configProperties.getAclToken()).isNotEmpty()
 				.isNotEqualTo(configToken);
 		assertThat(this.discoveryProperties.getAclToken()).isNotEmpty()
