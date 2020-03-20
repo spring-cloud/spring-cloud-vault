@@ -90,12 +90,10 @@ class ConsulBackendMetadata implements LeasingSecretBackendMetadata {
 
 			if (leaseEvent.getSource() == secret
 					&& leaseEvent instanceof SecretLeaseCreatedEvent) {
-				if (this.eventPublisher != null) {
-					if (log.isDebugEnabled()) {
-						log.debug("Publishing a RebindConsulEvent");
-					}
-					this.eventPublisher.publishEvent(new RebindConsulEvent(this));
+				if (this.log.isDebugEnabled()) {
+					this.log.debug("Publishing a RebindConsulEvent");
 				}
+				this.eventPublisher.publishEvent(new RebindConsulEvent(this));
 			}
 		});
 

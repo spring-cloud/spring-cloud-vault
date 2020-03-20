@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Bootstrap configuration providing support for the Consul secret backend.
  *
- * @author Mark Paluch
+ * @author Spencer Gibb
  */
 @Configuration(proxyBeanMethods = false)
 public class VaultConfigConsulAutoConfiguration {
@@ -69,8 +69,8 @@ public class VaultConfigConsulAutoConfiguration {
 
 		@Override
 		public void onApplicationEvent(ConsulBackendMetadata.RebindConsulEvent event) {
-			if (log.isDebugEnabled()) {
-				log.debug("received RebindConsulEvent");
+			if (this.log.isDebugEnabled()) {
+				this.log.debug("received RebindConsulEvent");
 			}
 			rebind("consulDiscoveryProperties");
 			rebind("consulConfigProperties");

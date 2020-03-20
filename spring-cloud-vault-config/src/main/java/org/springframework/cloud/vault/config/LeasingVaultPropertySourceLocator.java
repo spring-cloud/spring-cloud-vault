@@ -148,17 +148,17 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 			SecretBackendMetadata accessor) {
 
 		if (accessor instanceof LeasingSecretBackendMetadata) {
-			((LeasingSecretBackendMetadata) accessor)
-					.beforeRegistration(secret, this.secretLeaseContainer);
+			((LeasingSecretBackendMetadata) accessor).beforeRegistration(secret,
+					this.secretLeaseContainer);
 		}
 
-		LeaseAwareVaultPropertySource propertySource = new LeaseAwareVaultPropertySource(accessor
-				.getName(),
-				this.secretLeaseContainer, secret, accessor.getPropertyTransformer());
+		LeaseAwareVaultPropertySource propertySource = new LeaseAwareVaultPropertySource(
+				accessor.getName(), this.secretLeaseContainer, secret,
+				accessor.getPropertyTransformer());
 
 		if (accessor instanceof LeasingSecretBackendMetadata) {
-			((LeasingSecretBackendMetadata) accessor)
-					.afterRegistration(secret, this.secretLeaseContainer);
+			((LeasingSecretBackendMetadata) accessor).afterRegistration(secret,
+					this.secretLeaseContainer);
 		}
 
 		return propertySource;

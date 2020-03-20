@@ -136,7 +136,8 @@ public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 		Map<String, Object> secretProperties = this.configOperations
 				.read(factory.forConsul(this.consul)).getData();
 
-		assertThat(secretProperties).containsKeys("spring.cloud.consul.token");
+		assertThat(secretProperties).containsKeys("spring.cloud.consul.config.acl-token",
+				"spring.cloud.consul.discovery.acl-token");
 	}
 
 }
