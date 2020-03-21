@@ -6,7 +6,7 @@
 ###########################################################################
 
 
-CONSUL_VER="1.7.1"
+CONSUL_VER="1.7.2"
 UNAME=$(uname -s |  tr '[:upper:]' '[:lower:]')
 CONSUL_ZIP="consul_${CONSUL_VER}_${UNAME}_amd64.zip"
 IGNORE_CERTS="${IGNORE_CERTS:-no}"
