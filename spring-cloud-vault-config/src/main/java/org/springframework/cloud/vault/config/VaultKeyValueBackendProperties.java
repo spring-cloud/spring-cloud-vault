@@ -19,6 +19,7 @@ package org.springframework.cloud.vault.config;
 import javax.validation.constraints.NotEmpty;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
@@ -112,6 +113,9 @@ public class VaultKeyValueBackendProperties
 		return this.applicationName;
 	}
 
+	@Deprecated
+	@DeprecatedConfigurationProperty(
+			reason = "Backend version no longer required. The kv version is determined during secret retrieval")
 	public int getBackendVersion() {
 		return this.backendVersion;
 	}

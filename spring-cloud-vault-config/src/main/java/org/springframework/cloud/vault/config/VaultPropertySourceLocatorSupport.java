@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
 
 /**
  * Abstract {@link PropertySourceLocator} to create {@link PropertySource}s based on
- * {@link VaultGenericBackendProperties} and {@link SecretBackendMetadata}.
+ * {@link VaultKeyValueBackendProperties} and {@link SecretBackendMetadata}.
  *
  * @author Mark Paluch
  */
@@ -82,7 +82,7 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 				"VaultGenericBackendProperties must not be null");
 		Assert.notNull(backendAccessors, "BackendAccessors must not be null");
 
-		GenericPropertySourceLocatorConfiguration generic = new GenericPropertySourceLocatorConfiguration(
+		KeyValuePropertySourceLocatorConfiguration generic = new KeyValuePropertySourceLocatorConfiguration(
 				genericBackendProperties);
 
 		WrappedPropertySourceLocatorConfiguration backends = new WrappedPropertySourceLocatorConfiguration(
@@ -97,7 +97,7 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 		Assert.notNull(genericBackendProperties,
 				"VaultGenericBackendProperties must not be null");
 
-		return new GenericPropertySourceLocatorConfiguration(genericBackendProperties);
+		return new KeyValuePropertySourceLocatorConfiguration(genericBackendProperties);
 	}
 
 	@Override
@@ -155,7 +155,7 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 
 		AnnotationAwareOrderComparator.sort(sorted);
 
-		propertySources.addAll(doCreateGenericPropertySources(environment));
+		propertySources.addAll(doCreateKeyValuePropertySources(environment));
 
 		for (SecretBackendMetadata backendAccessor : sorted) {
 
@@ -168,13 +168,13 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	}
 
 	/**
-	 * Create {@link PropertySource}s using the generic {@literal secret} backend.
-	 * Property sources for the generic secret backend derive from the application name
-	 * and active profiles to generate context paths.
+	 * Create {@link PropertySource}s using the kv {@literal secret} backend. Property
+	 * sources for the kv secret backend derive from the application name and active
+	 * profiles to generate context paths.
 	 * @param environment must not be {@literal null}.
 	 * @return {@link List} of {@link PropertySource}s.
 	 */
-	protected List<PropertySource<?>> doCreateGenericPropertySources(
+	protected List<PropertySource<?>> doCreateKeyValuePropertySources(
 			Environment environment) {
 		return new ArrayList<>();
 	}
@@ -208,16 +208,16 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	protected abstract PropertySource<?> createVaultPropertySource(
 			SecretBackendMetadata accessor);
 
-	private static class GenericPropertySourceLocatorConfiguration
+	private static class KeyValuePropertySourceLocatorConfiguration
 			implements EnvironmentAware, PropertySourceLocatorConfiguration {
 
-		private final VaultKeyValueBackendPropertiesSupport genericBackendProperties;
+		private final VaultKeyValueBackendPropertiesSupport keyValueBackendProperties;
 
 		private Environment environment;
 
-		GenericPropertySourceLocatorConfiguration(
-				VaultKeyValueBackendPropertiesSupport genericBackendProperties) {
-			this.genericBackendProperties = genericBackendProperties;
+		KeyValuePropertySourceLocatorConfiguration(
+				VaultKeyValueBackendPropertiesSupport keyValueBackendProperties) {
+			this.keyValueBackendProperties = keyValueBackendProperties;
 		}
 
 		@Override
@@ -228,17 +228,17 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 		@Override
 		public Collection<SecretBackendMetadata> getSecretBackends() {
 
-			if (this.genericBackendProperties.isEnabled()) {
+			if (this.keyValueBackendProperties.isEnabled()) {
 
 				List<String> contexts = GenericSecretBackendMetadata.buildContexts(
-						this.genericBackendProperties,
+						this.keyValueBackendProperties,
 						Arrays.asList(this.environment.getActiveProfiles()));
 
 				List<SecretBackendMetadata> result = new ArrayList<>(contexts.size());
 
 				for (String context : contexts) {
-					result.add(GenericSecretBackendMetadata
-							.create(this.genericBackendProperties.getBackend(), context));
+					result.add(GenericSecretBackendMetadata.create(
+							this.keyValueBackendProperties.getBackend(), context));
 				}
 
 				return result;

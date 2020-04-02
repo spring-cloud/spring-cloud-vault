@@ -79,8 +79,8 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 	}
 
 	/**
-	 * Create a {@link SecretBackendMetadata} for the {@code generic} secret backend given
-	 * a {@code path}.
+	 * Create a {@link SecretBackendMetadata} for the {@code kv} secret backend given a
+	 * {@code path}.
 	 * @param path the relative path of the secret. slashes, must not be empty or
 	 * {@literal null}.
 	 * @return the {@link SecretBackendMetadata}
@@ -90,8 +90,8 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 	}
 
 	/**
-	 * Create a {@link SecretBackendMetadata} for the {@code generic} secret backend given
-	 * a {@code path}.
+	 * Create a {@link SecretBackendMetadata} for the {@code kv} secret backend given a
+	 * {@code path}.
 	 * @param path the relative path of the secret. slashes, must not be empty or
 	 * {@literal null}.
 	 * @param propertyTransformer property transformer.

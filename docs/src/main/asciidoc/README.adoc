@@ -9,7 +9,7 @@ include::intro.adoc[]
 Specifically for Spring applications:
 
 * Retrieve secrets from Vault and initialize Spring Environment with remote property sources.
-* Obtain {docs}#vault.config.backends.generic[secrets] secured with SSL.
+* Obtain {docs}#vault.config.backends.kv[Key-Value secrets] secured with SSL.
 * Generate credentials for
 {docs}#vault.config.backends.mysql[MySQL],
 {docs}#vault.config.backends.postgresql[PostgreSQL],

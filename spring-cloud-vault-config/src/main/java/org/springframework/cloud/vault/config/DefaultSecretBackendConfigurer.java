@@ -39,7 +39,7 @@ class DefaultSecretBackendConfigurer
 
 	private final Map<String, SecretBackendMetadata> secretBackends = new LinkedHashMap<>();
 
-	private boolean registerDefaultGenericSecretBackends = false;
+	private boolean registerDefaultKeyValueSecretBackends = false;
 
 	private boolean registerDefaultDiscoveredSecretBackends = false;
 
@@ -100,10 +100,10 @@ class DefaultSecretBackendConfigurer
 	}
 
 	@Override
-	public SecretBackendConfigurer registerDefaultGenericSecretBackends(
-			boolean registerDefault) {
 
-		this.registerDefaultGenericSecretBackends = registerDefault;
+	public SecretBackendConfigurer registerDefaultKeyValueSecretBackends(
+			boolean registerDefault) {
+		this.registerDefaultKeyValueSecretBackends = registerDefault;
 
 		return this;
 	}
@@ -117,8 +117,8 @@ class DefaultSecretBackendConfigurer
 		return this;
 	}
 
-	public boolean isRegisterDefaultGenericSecretBackends() {
-		return this.registerDefaultGenericSecretBackends;
+	public boolean isRegisterDefaultKeyValueSecretBackends() {
+		return this.registerDefaultKeyValueSecretBackends;
 	}
 
 	public boolean isRegisterDefaultDiscoveredSecretBackends() {

@@ -19,6 +19,7 @@ package org.springframework.cloud.vault.config;
 import javax.validation.constraints.NotEmpty;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
@@ -83,22 +84,42 @@ public class VaultGenericBackendProperties
 		}
 	}
 
+	@Deprecated
+	@DeprecatedConfigurationProperty(
+			reason = "spring.cloud.vault.generic.* is deprecated in favor of spring.cloud.vault.kv",
+			replacement = "spring.cloud.vault.kv.enabled")
 	public boolean isEnabled() {
 		return this.enabled;
 	}
 
+	@Deprecated
+	@DeprecatedConfigurationProperty(
+			reason = "spring.cloud.vault.generic.* is deprecated in favor of spring.cloud.vault.kv",
+			replacement = "spring.cloud.vault.kv.backend")
 	public String getBackend() {
 		return this.backend;
 	}
 
+	@Deprecated
+	@DeprecatedConfigurationProperty(
+			reason = "spring.cloud.vault.generic.* is deprecated in favor of spring.cloud.vault.kv",
+			replacement = "spring.cloud.vault.kv.default-context")
 	public String getDefaultContext() {
 		return this.defaultContext;
 	}
 
+	@Deprecated
+	@DeprecatedConfigurationProperty(
+			reason = "spring.cloud.vault.generic.* is deprecated in favor of spring.cloud.vault.kv",
+			replacement = "spring.cloud.vault.kv.profile-separator")
 	public String getProfileSeparator() {
 		return this.profileSeparator;
 	}
 
+	@Deprecated
+	@DeprecatedConfigurationProperty(
+			reason = "spring.cloud.vault.generic.* is deprecated in favor of spring.cloud.vault.kv",
+			replacement = "spring.cloud.vault.kv.application-name")
 	public String getApplicationName() {
 		return this.applicationName;
 	}
