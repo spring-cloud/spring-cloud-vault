@@ -711,8 +711,11 @@ See also: https://www.vaultproject.io/docs/auth/pcf.html[Vault Documentation: Us
 [[vault.config.backends.generic]]
 === Generic Backend
 
-Spring Cloud Vault supports at the basic level the generic secret
-backend. The generic secret backend allows storage of arbitrary
+NOTE: This backend is deprecated in favor of the Key-Value backend and will be removed
+with the next major version.
+
+Spring Cloud Vault supports at the basic level the key-value secret
+backend. The key-value secret backend allows storage of arbitrary
 values as key-value store. A single context can store one or many
 key-value tuples. Contexts can be organized hierarchically.
 Spring Cloud Vault allows using the Application name
@@ -730,7 +733,7 @@ The application name is determined by the properties:
 * `spring.cloud.vault.application-name`
 * `spring.application.name`
 
-Secrets can be obtained from other contexts within the generic backend by adding their
+Secrets can be obtained from other contexts within the key-value backend by adding their
 paths to the application name, separated by commas. For example, given the application
 name `usefulapp,mysql1,projectx/aws`, each of these folders will be used:
 
@@ -760,21 +763,20 @@ spring.cloud.vault:
 config usage
 * `backend` sets the path of the secret mount to use
 * `default-context` sets the context name used by all applications
-* `application-name` overrides the application name for use in the generic backend
+* `application-name` overrides the application name for use in the key-value backend
 * `profile-separator` separates the profile name from the context in
 property sources with profiles
-
-NOTE: The key-value secret backend can be operated in versioned (v2) and non-versioned (v1) modes. Depending on the mode of operation, a different API is required to access secrets. Make sure to enable `generic` secret backend usage for non-versioned key-value backends and `kv` secret backend usage for versioned key-value backends.
 
 See also: https://www.vaultproject.io/docs/secrets/kv/kv-v1.html[Vault Documentation: Using the KV Secrets Engine - Version 1 (generic secret backend)]
 
 [[vault.config.backends.kv.versioned]]
-=== Versioned Key-Value Backend
+=== Key-Value Backend
 
-Spring Cloud Vault supports the versioned Key-Value secret
+Spring Cloud Vault supports the Key-Value secret
 backend. The key-value backend allows storage of arbitrary
 values as key-value store. A single context can store one or many
-key-value tuples. Contexts can be organized hierarchically.
+key-value tuples. Contexts can be organized hierarchically. Spring Cloud Vault
+determines itself whether a secret is using versioning.
 Spring Cloud Vault allows using the Application name
 and a default context name (`application`) in combination with active
 profiles.
@@ -822,13 +824,16 @@ spring.cloud.vault:
 config usage
 * `backend` sets the path of the secret mount to use
 * `default-context` sets the context name used by all applications
-* `application-name` overrides the application name for use in the generic backend
+* `application-name` overrides the application name for use in the key-value backend
 * `profile-separator` separates the profile name from the context in
 property sources with profiles
 
-NOTE: The key-value secret backend can be operated in versioned (v2) and non-versioned (v1) modes. Depending on the mode of operation, a different API is required to access secrets. Make sure to enable `generic` secret backend usage for non-versioned key-value backends and `kv` secret backend usage for versioned key-value backends.
+NOTE: The key-value secret backend can be operated in versioned (v2) and non-versioned (v1) modes.
 
-See also: https://www.vaultproject.io/docs/secrets/kv/kv-v2.html[Vault Documentation: Using the KV Secrets Engine - Version 2 (versioned key-value backend)]
+See also:
+
+* https://www.vaultproject.io/docs/secrets/kv/kv-v1.html[Vault Documentation: Using the KV Secrets Engine - Version 1 (generic secret backend)]
+* https://www.vaultproject.io/docs/secrets/kv/kv-v2.html[Vault Documentation: Using the KV Secrets Engine - Version 2 (versioned key-value backend)]
 
 [[vault.config.backends.consul]]
 === Consul
@@ -1236,7 +1241,7 @@ See also: https://www.vaultproject.io/docs/secrets/postgresql/index.html[Vault D
 == Configure `PropertySourceLocator` behavior
 
 Spring Cloud Vault uses property-based configuration to create ``PropertySource``s
-for generic and discovered secret backends.
+for key-value and discovered secret backends.
 
 Discovered backends provide `VaultSecretBackendDescriptor` beans to describe the configuration
 state to use secret backend as `PropertySource`. A `SecretBackendMetadataFactory` is required
@@ -1246,9 +1251,9 @@ configuration.
 `SecretBackendMetadata` is used to back a particular `PropertySource`.
 
 You can register an arbitrary number of beans implementing `VaultConfigurer` for customization.
-Default generic and discovered backend registration is disabled if Spring Cloud Vault discovers
+Default key-value and discovered backend registration is disabled if Spring Cloud Vault discovers
 at least one `VaultConfigurer` bean. You can however enable default registration with
-`SecretBackendConfigurer.registerDefaultGenericSecretBackends()` and `SecretBackendConfigurer.registerDefaultDiscoveredSecretBackends()`.
+`SecretBackendConfigurer.registerDefaultKeyValueSecretBackends()` and `SecretBackendConfigurer.registerDefaultDiscoveredSecretBackends()`.
 
 ====
 [source,java]
@@ -1260,7 +1265,7 @@ public class CustomizationBean implements VaultConfigurer {
 
         configurer.add("secret/my-application");
 
-        configurer.registerDefaultGenericSecretBackends(false);
+        configurer.registerDefaultKeyValueSecretBackends(false);
         configurer.registerDefaultDiscoveredSecretBackends(true);
     }
 }

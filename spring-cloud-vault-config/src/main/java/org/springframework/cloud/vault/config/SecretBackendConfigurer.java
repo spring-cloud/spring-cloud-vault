@@ -27,7 +27,7 @@ import org.springframework.vault.core.util.PropertyTransformer;
  * Assists configuration with a fluent style. This configurer allows configuration via
  * context paths and direct registration of {@link SecretBackendMetadata}.
  * <p>
- * Use {@link #registerDefaultGenericSecretBackends(boolean)} to register default generic
+ * Use {@link #registerDefaultKeyValueSecretBackends(boolean)} to register default kv
  * secret backend property sources and
  * {@link #registerDefaultDiscoveredSecretBackends(boolean)} to register additional secret
  * backend property sources such as MySQL and RabbitMQ.
@@ -87,8 +87,23 @@ public interface SecretBackendConfigurer {
 	 * @param registerDefault {@literal true} to enable default generic secret backend
 	 * registration.
 	 * @return {@code this} {@link SecretBackendConfigurer}.
+	 * @deprecated since 2.2.3
 	 */
-	SecretBackendConfigurer registerDefaultGenericSecretBackends(boolean registerDefault);
+	@Deprecated
+	default SecretBackendConfigurer registerDefaultGenericSecretBackends(
+			boolean registerDefault) {
+		return registerDefaultKeyValueSecretBackends(registerDefault);
+	}
+
+	/**
+	 * Register default key-value secret backend property sources.
+	 * @param registerDefault {@literal true} to enable default kv secret backend
+	 * registration.
+	 * @return {@code this} {@link SecretBackendConfigurer}.
+	 * @since 2.3.3
+	 */
+	SecretBackendConfigurer registerDefaultKeyValueSecretBackends(
+			boolean registerDefault);
 
 	/**
 	 * Register default discovered secret backend property sources from
