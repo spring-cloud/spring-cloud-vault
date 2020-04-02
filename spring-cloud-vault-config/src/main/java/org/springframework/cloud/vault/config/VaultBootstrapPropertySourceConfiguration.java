@@ -134,7 +134,7 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 			}
 		}
 
-		if (secretBackendConfigurer.isRegisterDefaultGenericSecretBackends()) {
+		if (secretBackendConfigurer.isRegisterDefaultKeyValueSecretBackends()) {
 
 			for (VaultKeyValueBackendPropertiesSupport keyValueBackend : keyValueBackends) {
 

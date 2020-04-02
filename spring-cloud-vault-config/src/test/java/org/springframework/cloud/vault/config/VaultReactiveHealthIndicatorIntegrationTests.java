@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,15 +42,18 @@ public class VaultReactiveHealthIndicatorIntegrationTests extends IntegrationTes
 	public void shouldReturnHealthState() {
 
 		ReactiveVaultTemplate vaultTemplate = new ReactiveVaultTemplate(
-				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, ClientHttpConnectorFactory
-				.create(new ClientOptions(), Settings
-						.createSslConfiguration()), () -> Mono.just(Settings.token()));
+				TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
+				ClientHttpConnectorFactory.create(new ClientOptions(),
+						Settings.createSslConfiguration()),
+				() -> Mono.just(Settings.token()));
 
-		VaultReactiveHealthIndicator healthIndicator = new VaultReactiveHealthIndicator(vaultTemplate);
+		VaultReactiveHealthIndicator healthIndicator = new VaultReactiveHealthIndicator(
+				vaultTemplate);
 
 		healthIndicator.doHealthCheck(Health.up()).as(StepVerifier::create)
 				.consumeNextWith(actual -> {
 					assertThat(actual.getStatus()).isEqualTo(Status.UP);
 				}).verifyComplete();
 	}
+
 }

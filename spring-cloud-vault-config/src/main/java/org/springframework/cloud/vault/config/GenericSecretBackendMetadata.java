@@ -24,7 +24,9 @@ import org.springframework.util.Assert;
  * {@link SecretBackendMetadata} for the {@code generic} secret backend.
  *
  * @author Mark Paluch
+ * @deprecated since 2.2.3, will be removed with 3.0.
  */
+@Deprecated
 public final class GenericSecretBackendMetadata extends KeyValueSecretBackendMetadata
 		implements SecretBackendMetadata {
 
@@ -33,8 +35,8 @@ public final class GenericSecretBackendMetadata extends KeyValueSecretBackendMet
 	}
 
 	/**
-	 * Create a {@link SecretBackendMetadata} for the {@code generic} secret backend given
-	 * a {@code secretBackendPath} and {@code key}.
+	 * Create a {@link SecretBackendMetadata} for the {@code kv} secret backend given a
+	 * {@code secretBackendPath} and {@code key}.
 	 * @param secretBackendPath the secret backend mount path without leading/trailing
 	 * slashes, must not be empty or {@literal null}.
 	 * @param key the key within the secret backend. May contain slashes but not
@@ -51,8 +53,8 @@ public final class GenericSecretBackendMetadata extends KeyValueSecretBackendMet
 	}
 
 	/**
-	 * Create a {@link SecretBackendMetadata} for the {@code generic} secret backend given
-	 * a {@code path}.
+	 * Create a {@link SecretBackendMetadata} for the {@code kv} secret backend given a
+	 * {@code path}.
 	 * @param path the relative path of the secret. slashes, must not be empty or
 	 * {@literal null}.
 	 * @return the {@link SecretBackendMetadata}
