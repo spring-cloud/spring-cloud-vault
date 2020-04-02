@@ -28,7 +28,6 @@ Specifically for Spring applications:
 
 * Bootstrap application context: a parent context for the main application that can be trained to do anything.
 
-
 == Quick Start
 
 include::quickstart.adoc[]
@@ -37,9 +36,8 @@ include::quickstart.adoc[]
 
 === Build requirements for Vault
 
-Spring Cloud Vault Config requires SSL certificates and a running
-Vault instance listening on `localhost:8200`. Certificates and the Vault
-setup are scripted, the scripts are located in `src/test/bash`.
+Spring Cloud Vault Config requires SSL certificates and a running Vault instance listening on `localhost:8200`.
+Certificates and the Vault setup are scripted, the scripts are located in `src/test/bash`.
 
 The following scripts need to be run prior to building the project for the tests to pass.
 
@@ -50,7 +48,8 @@ $ ./src/test/bash/create_certificates.sh
 $ ./src/test/bash/local_run_vault.sh
 ----
 
-Leave Vault uninitialized, the tests will initialize and unseal Vault. They will also create a root token `00000000-0000-0000-0000-000000000000`.
+Leave Vault uninitialized, the tests will initialize and unseal Vault.
+They will also create a root token `00000000-0000-0000-0000-000000000000`.
 
 Changes to the documentation should be made to the adocs found under `docs/src/main/asciidoc/`
 
