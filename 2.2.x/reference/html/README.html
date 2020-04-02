@@ -130,7 +130,9 @@ $(addBlockSwitches);
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Spring Cloud Vault Config provides client-side support for externalized configuration in a distributed system. With <a href="https://www.vaultproject.io">HashiCorp&#8217;s Vault</a> you have a central place to manage external secret properties for applications across all environments. Vault can manage static and dynamic secrets such as username/password for remote applications/resources and provide credentials for external services such as MySQL, PostgreSQL, Apache Cassandra, MongoDB, Consul, AWS and more.</p>
+<p>Spring Cloud Vault Config provides client-side support for externalized configuration in a distributed system.
+With <a href="https://www.vaultproject.io">HashiCorp&#8217;s Vault</a> you have a central place to manage external secret properties for applications across all environments.
+Vault can manage static and dynamic secrets such as username/password for remote applications/resources and provide credentials for external services such as MySQL, PostgreSQL, Apache Cassandra, MongoDB, Consul, AWS and more.</p>
 </div>
 </div>
 </div>
@@ -148,7 +150,7 @@ $(addBlockSwitches);
 <p>Retrieve secrets from Vault and initialize Spring Environment with remote property sources.</p>
 </li>
 <li>
-<p>Obtain <a href="https://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html#vault.config.backends.generic">secrets</a> secured with SSL.</p>
+<p>Obtain <a href="https://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html#vault.config.backends.kv">Key-Value secrets</a> secured with SSL.</p>
 </li>
 <li>
 <p>Generate credentials for
@@ -184,8 +186,7 @@ $(addBlockSwitches);
 <p><strong>Prerequisites</strong></p>
 </div>
 <div class="paragraph">
-<p>To get started with Vault and this guide you need a
-*NIX-like operating systems that provides:</p>
+<p>To get started with Vault and this guide you need a *NIX-like operating systems that provides:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -204,7 +205,8 @@ $(addBlockSwitches);
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-This guide explains Vault setup from a Spring Cloud Vault perspective for integration testing. You can find a getting started guide directly on the Vault project site: <a href="https://learn.hashicorp.com/vault" class="bare">https://learn.hashicorp.com/vault</a>
+This guide explains Vault setup from a Spring Cloud Vault perspective for integration testing.
+You can find a getting started guide directly on the Vault project site: <a href="https://learn.hashicorp.com/vault" class="bare">https://learn.hashicorp.com/vault</a>
 </td>
 </tr>
 </table>
@@ -259,7 +261,8 @@ These steps can be achieved by downloading and running <a href="https://github.c
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-<a href="https://github.com/spring-cloud/spring-cloud-vault/blob/master/src/test/bash/"><code>create_certificates.sh</code></a> creates certificates in <code>work/ca</code> and a JKS truststore <code>work/keystore.jks</code>. If you want to run Spring Cloud Vault using this quickstart guide you need to configure the truststore the <code>spring.cloud.vault.ssl.trust-store</code> property to <code>file:work/keystore.jks</code>.
+<a href="https://github.com/spring-cloud/spring-cloud-vault/blob/master/src/test/bash/"><code>create_certificates.sh</code></a> creates certificates in <code>work/ca</code> and a JKS truststore <code>work/keystore.jks</code>.
+If you want to run Spring Cloud Vault using this quickstart guide you need to configure the truststore the <code>spring.cloud.vault.ssl.trust-store</code> property to <code>file:work/keystore.jks</code>.
 </td>
 </tr>
 </table>
@@ -312,8 +315,8 @@ Vault is sealed and not initialized when starting up.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-If you want to run tests, leave Vault uninitialized. The tests will
-initialize Vault and create a root token <code>00000000-0000-0000-0000-000000000000</code>.
+If you want to run tests, leave Vault uninitialized.
+The tests will initialize Vault and create a root token <code>00000000-0000-0000-0000-000000000000</code>.
 </td>
 </tr>
 </table>
@@ -351,8 +354,9 @@ your Vault will remain permanently sealed.</code></pre>
 </div>
 <div class="paragraph">
 <p>Vault will initialize and return a set of unsealing keys and the root token.
-Pick 3 keys and unseal Vault. Store the Vault token in the <code>VAULT_TOKEN</code>
- environment variable.</p>
+Pick 3 keys and unseal Vault.
+Store the Vault token in the <code>VAULT_TOKEN</code>
+environment variable.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -365,8 +369,8 @@ $ vault token-create -id="00000000-0000-0000-0000-000000000000" -policy="root"</
 </div>
 </div>
 <div class="paragraph">
-<p>Spring Cloud Vault accesses different resources. By default, the secret
-backend is enabled which accesses secret config settings via JSON endpoints.</p>
+<p>Spring Cloud Vault accesses different resources.
+By default, the secret backend is enabled which accesses secret config settings via JSON endpoints.</p>
 </div>
 <div class="paragraph">
 <p>The HTTP service has resources in the form:</p>
@@ -381,10 +385,8 @@ backend is enabled which accesses secret config settings via JSON endpoints.</p>
 </div>
 <div class="paragraph">
 <p>where the "application" is injected as the <code>spring.application.name</code> in the
-<code>SpringApplication</code> (i.e. what is normally "application" in a regular
-Spring Boot app), "profile" is an active profile (or comma-separated
-list of properties). Properties retrieved from Vault will be used "as-is"
-without further prefixing of the property names.</p>
+<code>SpringApplication</code> (i.e. what is normally "application" in a regular Spring Boot app), "profile" is an active profile (or comma-separated list of properties).
+Properties retrieved from Vault will be used "as-is" without further prefixing of the property names.</p>
 </div>
 </div>
 </div>
@@ -392,9 +394,8 @@ without further prefixing of the property names.</p>
 <h2 id="_client_side_usage"><a class="link" href="#_client_side_usage">Client Side Usage</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>To use these features in an application, just build it as a Spring
-Boot application that depends on <code>spring-cloud-vault-config</code> (e.g. see
-the test cases). Example Maven configuration:</p>
+<p>To use these features in an application, just build it as a Spring Boot application that depends on <code>spring-cloud-vault-config</code> (e.g. see the test cases).
+Example Maven configuration:</p>
 </div>
 <div class="exampleblock">
 <div class="title">Example 1. pom.xml</div>
@@ -460,11 +461,8 @@ public class Application {
 </div>
 </div>
 <div class="paragraph">
-<p>When it runs it will pick up the external configuration from the
-default local Vault server on port <code>8200</code> if it is running. To modify
-the startup behavior you can change the location of the Vault server
-using <code>bootstrap.properties</code> (like <code>application.properties</code> but for
-the bootstrap phase of an application context), e.g.</p>
+<p>When it runs it will pick up the external configuration from the default local Vault server on port <code>8200</code> if it is running.
+To modify the startup behavior you can change the location of the Vault server using <code>bootstrap.properties</code> (like <code>application.properties</code> but for the bootstrap phase of an application context), e.g.</p>
 </div>
 <div class="exampleblock">
 <div class="title">Example 2. bootstrap.yml</div>
@@ -487,8 +485,8 @@ the bootstrap phase of an application context), e.g.</p>
 <div class="ulist">
 <ul>
 <li>
-<p><code>host</code> sets the hostname of the Vault host. The host name will be used
-for SSL certificate validation</p>
+<p><code>host</code> sets the hostname of the Vault host.
+The host name will be used for SSL certificate validation</p>
 </li>
 <li>
 <p><code>port</code> sets the Vault port</p>
@@ -512,15 +510,13 @@ Supported schemes are <code>http</code> and <code>https</code>.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>Enabling further integrations requires additional dependencies and
-configuration. Depending on how you have set up Vault you might need
-additional configuration like
+<p>Enabling further integrations requires additional dependencies and configuration.
+Depending on how you have set up Vault you might need additional configuration like
 <a href="https://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html#vault.config.ssl">SSL</a> and
 <a href="https://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html#vault.config.authentication">authentication</a>.</p>
 </div>
 <div class="paragraph">
-<p>If the application imports the <code>spring-boot-starter-actuator</code> project, the
-status of the vault server will be available via the <code>/health</code> endpoint.</p>
+<p>If the application imports the <code>spring-boot-starter-actuator</code> project, the status of the vault server will be available via the <code>/health</code> endpoint.</p>
 </div>
 <div class="paragraph">
 <p>The vault health indicator can be enabled or disabled through the property <code>management.health.vault.enabled</code> (default to <code>true</code>).</p>
@@ -554,7 +550,9 @@ status of the vault server will be available via the <code>/health</code> endpoi
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-Consider carefully your security requirements. Static token authentication is fine if you want quickly get started with Vault, but a static token is not protected any further. Any disclosure to unintended parties allows Vault use with the associated token roles.
+Consider carefully your security requirements.
+Static token authentication is fine if you want quickly get started with Vault, but a static token is not protected any further.
+Any disclosure to unintended parties allows Vault use with the associated token roles.
 </td>
 </tr>
 </table>
@@ -568,9 +566,8 @@ Consider carefully your security requirements. Static token authentication is fi
 <div class="sect2">
 <h3 id="_build_requirements_for_vault"><a class="link" href="#_build_requirements_for_vault">Build requirements for Vault</a></h3>
 <div class="paragraph">
-<p>Spring Cloud Vault Config requires SSL certificates and a running
-Vault instance listening on <code>localhost:8200</code>. Certificates and the Vault
-setup are scripted, the scripts are located in <code>src/test/bash</code>.</p>
+<p>Spring Cloud Vault Config requires SSL certificates and a running Vault instance listening on <code>localhost:8200</code>.
+Certificates and the Vault setup are scripted, the scripts are located in <code>src/test/bash</code>.</p>
 </div>
 <div class="paragraph">
 <p>The following scripts need to be run prior to building the project for the tests to pass.</p>
@@ -583,7 +580,8 @@ $ ./src/test/bash/local_run_vault.sh</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Leave Vault uninitialized, the tests will initialize and unseal Vault. They will also create a root token <code>00000000-0000-0000-0000-000000000000</code>.</p>
+<p>Leave Vault uninitialized, the tests will initialize and unseal Vault.
+They will also create a root token <code>00000000-0000-0000-0000-000000000000</code>.</p>
 </div>
 <div class="paragraph">
 <p>Changes to the documentation should be made to the adocs found under <code>docs/src/main/asciidoc/</code></p>
