@@ -19,9 +19,9 @@ include::quickstart.adoc[]
 [[vault.config.authentication]]
 == Authentication methods
 
-Different organizations have different requirements for security
-and authentication. Vault reflects that need by shipping multiple authentication
-methods. Spring Cloud Vault supports token and AppId authentication.
+Different organizations have different requirements for security and authentication.
+Vault reflects that need by shipping multiple authentication methods.
+Spring Cloud Vault supports token and AppId authentication.
 
 [[vault.config.authentication.token]]
 === Token authentication
@@ -31,8 +31,7 @@ Token authentication requires a static token to be provided using the
 https://github.com/spring-cloud/spring-cloud-commons/blob/master/docs/src/main/asciidoc/spring-cloud-commons.adoc#the-bootstrap-application-context[Bootstrap Application Context].
 
 NOTE: Token authentication is the default authentication method.
-If a token is disclosed an unintended party gains access to Vault and
-can access secrets for the intended client.
+If a token is disclosed an unintended party gains access to Vault and can access secrets for the intended client.
 
 .bootstrap.yml
 ====
@@ -44,8 +43,7 @@ spring.cloud.vault:
 ----
 ====
 
-* `authentication` setting this value to `TOKEN` selects the Token
-authentication method
+* `authentication` setting this value to `TOKEN` selects the Token authentication method
 * `token` sets the static token to use
 
 See also: https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
@@ -53,12 +51,12 @@ See also: https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentat
 [[vault.config.authentication.vault-agent]]
 === Vault Agent authentication
 
-Vault ships a sidecar utility with Vault Agent since version 0.11.0.
-Vault Agent implements the functionality of Spring Vault's `SessionManager`
-with its Auto-Auth feature. Applications can reuse cached session credentials by relying
-on Vault Agent running on `localhost`. Spring Vault can send requests without the
-`X-Vault-Token` header. Disable Spring Vault's authentication infrastructure to
-disable client authentication and session management.
+Vault ships a sidecar utility with Vault Agent since version 0.11.0. Vault Agent implements the functionality of Spring Vault's `SessionManager`
+with its Auto-Auth feature.
+Applications can reuse cached session credentials by relying on Vault Agent running on `localhost`.
+Spring Vault can send requests without the
+`X-Vault-Token` header.
+Disable Spring Vault's authentication infrastructure to disable client authentication and session management.
 
 .bootstrap.yml
 ====
@@ -78,12 +76,11 @@ See also: https://www.vaultproject.io/docs/agent/index.html[Vault Documentation:
 === AppId authentication
 
 Vault supports https://www.vaultproject.io/docs/auth/app-id.html[AppId]
-authentication that consists of two hard to guess tokens. The AppId
-defaults to `spring.application.name` that is statically configured.
-The second token is the UserId which is a part determined by the application,
-usually related to the runtime environment. IP address, Mac address or a
-Docker container name are good examples. Spring Cloud Vault Config supports
-IP address, Mac address and static UserId's (e.g. supplied via System properties).
+authentication that consists of two hard to guess tokens.
+The AppId defaults to `spring.application.name` that is statically configured.
+The second token is the UserId which is a part determined by the application, usually related to the runtime environment.
+IP address, Mac address or a Docker container name are good examples.
+Spring Cloud Vault Config supports IP address, Mac address and static UserId's (e.g. supplied via System properties).
 The IP and Mac address are represented as Hex-encoded SHA256 hash.
 
 IP address-based UserId's use the local host's IP address.
@@ -99,10 +96,10 @@ spring.cloud.vault:
 ----
 ====
 
-* `authentication` setting this value to `APPID` selects the AppId
-authentication method
+* `authentication` setting this value to `APPID` selects the AppId authentication method
 * `app-id-path` sets the path of the AppId mount to use
-* `user-id` sets the UserId method. Possible values are `IP_ADDRESS`,
+* `user-id` sets the UserId method.
+Possible values are `IP_ADDRESS`,
 `MAC_ADDRESS` or a class name implementing a custom `AppIdUserIdMechanism`
 
 The corresponding command to generate the IP address UserId from a command line is:
@@ -111,14 +108,12 @@ The corresponding command to generate the IP address UserId from a command line 
 $ echo -n 192.168.99.1 | sha256sum
 ----
 
-NOTE: Including the line break of `echo` leads to a different hash value
-so make sure to include the `-n` flag.
+NOTE: Including the line break of `echo` leads to a different hash value so make sure to include the `-n` flag.
 
-Mac address-based UserId's obtain their network device from the
-localhost-bound device. The configuration also allows specifying
-a `network-interface` hint to pick the right device. The value of
-`network-interface` is optional and can be either an interface
-name or interface index (0-based).
+Mac address-based UserId's obtain their network device from the localhost-bound device.
+The configuration also allows specifying a `network-interface` hint to pick the right device.
+The value of
+`network-interface` is optional and can be either an interface name or interface index (0-based).
 
 .bootstrap.yml using SHA256 Mac-Address UserId's
 ====
@@ -142,21 +137,17 @@ $ echo -n 0AFEDE1234AC | sha256sum
 ----
 
 NOTE: The Mac address is specified uppercase and without colons.
-Including the line break of `echo` leads to a different hash value
-so make sure to include the `-n` flag.
+Including the line break of `echo` leads to a different hash value so make sure to include the `-n` flag.
 
 ==== Custom UserId
 
-The UserId generation is an open mechanism. You can set
-`spring.cloud.vault.app-id.user-id` to any string and the configured
-value will be used as static UserId.
+The UserId generation is an open mechanism.
+You can set
+`spring.cloud.vault.app-id.user-id` to any string and the configured value will be used as static UserId.
 
-A more advanced approach lets you set `spring.cloud.vault.app-id.user-id` to a
-classname. This class must be on your classpath and must implement
-the `org.springframework.cloud.vault.AppIdUserIdMechanism` interface
-and the `createUserId` method. Spring Cloud Vault will obtain the UserId
-by calling `createUserId` each time it authenticates using AppId to
-obtain a token.
+A more advanced approach lets you set `spring.cloud.vault.app-id.user-id` to a classname.
+This class must be on your classpath and must implement the `org.springframework.cloud.vault.AppIdUserIdMechanism` interface and the `createUserId` method.
+Spring Cloud Vault will obtain the UserId by calling `createUserId` each time it authenticates using AppId to obtain a token.
 
 .bootstrap.yml
 ====
@@ -188,14 +179,12 @@ See also: https://www.vaultproject.io/docs/auth/app-id.html[Vault Documentation:
 
 === AppRole authentication
 
-https://www.vaultproject.io/docs/auth/app-id.html[AppRole] is intended for machine
-authentication, like the deprecated (since Vault 0.6.1) <<vault.config.authentication.appid>>.
+https://www.vaultproject.io/docs/auth/app-id.html[AppRole] is intended for machine authentication, like the deprecated (since Vault 0.6.1) <<vault.config.authentication.appid>>.
 AppRole authentication consists of two hard to guess (secret) tokens: RoleId and SecretId.
 
 Spring Vault supports various AppRole scenarios (push/pull mode and wrapped).
 
-RoleId and optionally SecretId must be provided by configuration,
-Spring Vault will not look up these or create a custom SecretId.
+RoleId and optionally SecretId must be provided by configuration, Spring Vault will not look up these or create a custom SecretId.
 
 .bootstrap.yml with AppRole authentication properties
 ====
@@ -240,9 +229,12 @@ The following scenarios are supported along the required configuration details:
 | Wrapped  | Absent     | ❌
 |===
 
-NOTE: You can use still all combinations of push/pull/wrapped modes by providing a configured `AppRoleAuthentication` bean within the bootstrap context. Spring Cloud Vault cannot derive all possible AppRole combinations from the configuration properties.
+NOTE: You can use still all combinations of push/pull/wrapped modes by providing a configured `AppRoleAuthentication` bean within the bootstrap context.
+Spring Cloud Vault cannot derive all possible AppRole combinations from the configuration properties.
 
-IMPORTANT: AppRole authentication is limited to simple pull mode using reactive infrastructure. Full pull mode is not yet supported. Using Spring Cloud Vault with the Spring WebFlux stack enables Vault's reactive auto-configuration which can be disabled by setting `spring.cloud.vault.reactive.enabled=false`.
+IMPORTANT: AppRole authentication is limited to simple pull mode using reactive infrastructure.
+Full pull mode is not yet supported.
+Using Spring Cloud Vault with the Spring WebFlux stack enables Vault's reactive auto-configuration which can be disabled by setting `spring.cloud.vault.reactive.enabled=false`.
 
 .bootstrap.yml with all AppRole authentication properties
 ====
@@ -259,7 +251,8 @@ spring.cloud.vault:
 ====
 
 * `role-id` sets the RoleId.
-* `secret-id` sets the SecretId. SecretId can be omitted if AppRole is configured without requiring SecretId (See `bind_secret_id`).
+* `secret-id` sets the SecretId.
+SecretId can be omitted if AppRole is configured without requiring SecretId (See `bind_secret_id`).
 * `role`: sets the AppRole name for pull mode.
 * `app-role-path` sets the path of the approle authentication mount to use.
 
@@ -269,14 +262,9 @@ See also: https://www.vaultproject.io/docs/auth/approle.html[Vault Documentation
 === AWS-EC2 authentication
 
 The https://www.vaultproject.io/docs/auth/aws-ec2.html[aws-ec2]
-auth backend provides a secure introduction mechanism
-for AWS EC2 instances, allowing automated retrieval of a Vault
-token. Unlike most Vault authentication backends, this backend
-does not require first-deploying, or provisioning security-sensitive
-credentials (tokens, username/password, client certificates, etc.).
-Instead, it treats AWS as a Trusted Third Party and uses the
-cryptographically signed dynamic metadata information that uniquely
-represents each EC2 instance.
+auth backend provides a secure introduction mechanism for AWS EC2 instances, allowing automated retrieval of a Vault token.
+Unlike most Vault authentication backends, this backend does not require first-deploying, or provisioning security-sensitive credentials (tokens, username/password, client certificates, etc.).
+Instead, it treats AWS as a Trusted Third Party and uses the cryptographically signed dynamic metadata information that uniquely represents each EC2 instance.
 
 .bootstrap.yml using AWS-EC2 Authentication
 ====
@@ -287,16 +275,12 @@ spring.cloud.vault:
 ----
 ====
 
-AWS-EC2 authentication enables nonce by default to follow
-the Trust On First Use (TOFU) principle. Any unintended party that
-gains access to the PKCS#7 identity metadata can authenticate
-against Vault.
+AWS-EC2 authentication enables nonce by default to follow the Trust On First Use (TOFU) principle.
+Any unintended party that gains access to the PKCS#7 identity metadata can authenticate against Vault.
 
-During the first login, Spring Cloud Vault generates a nonce
-that is stored in the auth backend aside the instance Id.
-Re-authentication requires the same nonce to be sent. Any other
-party does not have the nonce and can raise an alert in Vault for
-further investigation.
+During the first login, Spring Cloud Vault generates a nonce that is stored in the auth backend aside the instance Id.
+Re-authentication requires the same nonce to be sent.
+Any other party does not have the nonce and can raise an alert in Vault for further investigation.
 
 The nonce is kept in memory and is lost during application restart.
 You can configure a static nonce with `spring.cloud.vault.aws-ec2.nonce`.
@@ -330,37 +314,28 @@ spring.cloud.vault:
 ----
 ====
 
-* `authentication` setting this value to `AWS_EC2` selects the AWS EC2
-authentication method
+* `authentication` setting this value to `AWS_EC2` selects the AWS EC2 authentication method
 * `role` sets the name of the role against which the login is being attempted.
 * `aws-ec2-path` sets the path of the AWS EC2 mount to use
 * `identity-document` sets URL of the PKCS#7 AWS EC2 identity document
-* `nonce` used for AWS-EC2 authentication. An empty nonce defaults to nonce generation
+* `nonce` used for AWS-EC2 authentication.
+An empty nonce defaults to nonce generation
 
 See also: https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Using the aws auth backend]
 
 [[vault.config.authentication.awsiam]]
 === AWS-IAM authentication
 
-The https://www.vaultproject.io/docs/auth/aws-ec2.html[aws] backend provides a secure
-authentication mechanism for AWS IAM roles, allowing the automatic authentication with
-vault based on the current IAM role of the running application.
- Unlike most Vault authentication backends, this backend
-does not require first-deploying, or provisioning security-sensitive
-credentials (tokens, username/password, client certificates, etc.).
-Instead, it treats AWS as a Trusted Third Party and uses the
-4 pieces of information signed by the caller with their IAM credentials
- to verify that the caller is indeed using that IAM role.
+The https://www.vaultproject.io/docs/auth/aws-ec2.html[aws] backend provides a secure authentication mechanism for AWS IAM roles, allowing the automatic authentication with vault based on the current IAM role of the running application.
+Unlike most Vault authentication backends, this backend does not require first-deploying, or provisioning security-sensitive credentials (tokens, username/password, client certificates, etc.).
+Instead, it treats AWS as a Trusted Third Party and uses the 4 pieces of information signed by the caller with their IAM credentials to verify that the caller is indeed using that IAM role.
 
 The current IAM role the application is running in is automatically calculated.
-If you are running your application on AWS ECS then the application
-will use the IAM role assigned to the ECS task of the running container.
-If you are running your application naked on top of an EC2 instance then
-the IAM role used will be the one assigned to the EC2 instance.
+If you are running your application on AWS ECS then the application will use the IAM role assigned to the ECS task of the running container.
+If you are running your application naked on top of an EC2 instance then the IAM role used will be the one assigned to the EC2 instance.
 
-When using the AWS-IAM authentication you must create a role in Vault
-and assign it to your IAM role. An empty `role` defaults to
-the friendly name the current IAM role.
+When using the AWS-IAM authentication you must create a role in Vault and assign it to your IAM role.
+An empty `role` defaults to the friendly name the current IAM role.
 
 .bootstrap.yml with required AWS-IAM Authentication properties
 ====
@@ -385,13 +360,14 @@ spring.cloud.vault:
 ----
 ====
 
-* `role` sets the name of the role against which the login is being attempted. This should be bound to your IAM role. If one is not supplied then the friendly name of the current IAM user will be used as the vault role.
+* `role` sets the name of the role against which the login is being attempted.
+This should be bound to your IAM role.
+If one is not supplied then the friendly name of the current IAM user will be used as the vault role.
 * `aws-path` sets the path of the AWS mount to use
 * `server-id` sets the value to use for the `X-Vault-AWS-IAM-Server-ID` header preventing certain types of replay attacks.
 * `endpoint-uri` sets the value to use for the AWS STS API used for the `iam_request_url` parameter.
 
-AWS-IAM requires the AWS Java SDK dependency (`com.amazonaws:aws-java-sdk-core`)
-as the authentication implementation uses AWS SDK types for credentials and request signing.
+AWS-IAM requires the AWS Java SDK dependency (`com.amazonaws:aws-java-sdk-core`) as the authentication implementation uses AWS SDK types for credentials and request signing.
 
 See also: https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Using the aws auth backend]
 
@@ -399,14 +375,9 @@ See also: https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Us
 === Azure MSI authentication
 
 The https://www.vaultproject.io/docs/auth/azure.html[azure]
-auth backend provides a secure introduction mechanism
-for Azure VM instances, allowing automated retrieval of a Vault
-token. Unlike most Vault authentication backends, this backend
-does not require first-deploying, or provisioning security-sensitive
-credentials (tokens, username/password, client certificates, etc.).
-Instead, it treats Azure as a Trusted Third Party and uses the
-managed service identity and instance metadata information that can be
-bound to a VM instance.
+auth backend provides a secure introduction mechanism for Azure VM instances, allowing automated retrieval of a Vault token.
+Unlike most Vault authentication backends, this backend does not require first-deploying, or provisioning security-sensitive credentials (tokens, username/password, client certificates, etc.).
+Instead, it treats Azure as a Trusted Third Party and uses the managed service identity and instance metadata information that can be bound to a VM instance.
 
 .bootstrap.yml with required Azure Authentication properties
 ====
@@ -434,22 +405,19 @@ spring.cloud.vault:
 * `role` sets the name of the role against which the login is being attempted.
 * `azure-path` sets the path of the Azure mount to use
 
-Azure MSI authentication fetches environmental details about the virtual machine
-(subscription Id, resource group, VM name) from the instance metadata service.
+Azure MSI authentication fetches environmental details about the virtual machine (subscription Id, resource group, VM name) from the instance metadata service.
 
 See also: https://www.vaultproject.io/docs/auth/azure.html[Vault Documentation: Using the azure auth backend]
 
 [[vault.config.authentication.clientcert]]
 === TLS certificate authentication
 
-The `cert` auth backend allows authentication using SSL/TLS client
-certificates that are either signed by a CA or self-signed.
+The `cert` auth backend allows authentication using SSL/TLS client certificates that are either signed by a CA or self-signed.
 
 To enable `cert` authentication you need to:
 
 1. Use SSL, see <<vault.config.ssl>>
-2. Configure a Java `Keystore` that contains the client
-certificate and the private key
+2. Configure a Java `Keystore` that contains the client certificate and the private key
 3. Set the `spring.cloud.vault.authentication` to `CERT`
 
 .bootstrap.yml
@@ -470,12 +438,11 @@ See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: U
 [[vault.config.authentication.cubbyhole]]
 === Cubbyhole authentication
 
-Cubbyhole authentication uses Vault primitives to provide a secured authentication
-workflow. Cubbyhole authentication uses tokens as primary login method.
-An ephemeral token is used to obtain a second, login VaultToken from Vault's
-Cubbyhole secret backend. The login token is usually longer-lived and used to
-interact with Vault. The login token will be retrieved from a wrapped
-response stored at `/cubbyhole/response`.
+Cubbyhole authentication uses Vault primitives to provide a secured authentication workflow.
+Cubbyhole authentication uses tokens as primary login method.
+An ephemeral token is used to obtain a second, login VaultToken from Vault's Cubbyhole secret backend.
+The login token is usually longer-lived and used to interact with Vault.
+The login token will be retrieved from a wrapped response stored at `/cubbyhole/response`.
 
 *Creating a wrapped token*
 
@@ -517,17 +484,12 @@ See also:
 The https://www.vaultproject.io/docs/auth/gcp.html[gcp]
 auth backend allows Vault login by using existing GCP (Google Cloud Platform) IAM and GCE credentials.
 
-GCP GCE (Google Compute Engine) authentication creates a signature in the form of a
-JSON Web Token (JWT) for a service account. A JWT for a Compute Engine instance
-is obtained from the GCE  metadata service using https://cloud.google.com/compute/docs/instances/verifying-instance-identity[Instance identification].
+GCP GCE (Google Compute Engine) authentication creates a signature in the form of a JSON Web Token (JWT) for a service account.
+A JWT for a Compute Engine instance is obtained from the GCE metadata service using https://cloud.google.com/compute/docs/instances/verifying-instance-identity[Instance identification].
 This API creates a JSON Web Token that can be used to confirm the instance identity.
 
-Unlike most Vault authentication backends, this backend
-does not require first-deploying, or provisioning security-sensitive
-credentials (tokens, username/password, client certificates, etc.).
-Instead, it treats GCP as a Trusted Third Party and uses the
-cryptographically signed dynamic metadata information that uniquely
-represents each GCP service account.
+Unlike most Vault authentication backends, this backend does not require first-deploying, or provisioning security-sensitive credentials (tokens, username/password, client certificates, etc.).
+Instead, it treats GCP as a Trusted Third Party and uses the cryptographically signed dynamic metadata information that uniquely represents each GCP service account.
 
 .bootstrap.yml with required GCP-GCE Authentication properties
 ====
@@ -555,7 +517,8 @@ spring.cloud.vault:
 
 * `role` sets the name of the role against which the login is being attempted.
 * `gcp-path` sets the path of the GCP mount to use
-* `service-account` allows overriding the service account Id to a specific value. Defaults to the `default` service account.
+* `service-account` allows overriding the service account Id to a specific value.
+Defaults to the `default` service account.
 
 See also:
 
@@ -568,17 +531,13 @@ See also:
 The https://www.vaultproject.io/docs/auth/gcp.html[gcp]
 auth backend allows Vault login by using existing GCP (Google Cloud Platform) IAM and GCE credentials.
 
-GCP IAM authentication creates a signature in the form of a JSON Web Token (JWT)
-for a service account. A JWT for a service account is obtained by
-calling GCP IAM's https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt[`projects.serviceAccounts.signJwt`] API. The caller authenticates against GCP IAM
-and proves thereby its identity. This Vault backend treats GCP as a Trusted Third Party.
+GCP IAM authentication creates a signature in the form of a JSON Web Token (JWT) for a service account.
+A JWT for a service account is obtained by calling GCP IAM's https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt[`projects.serviceAccounts.signJwt`] API. The caller authenticates against GCP IAM and proves thereby its identity.
+This Vault backend treats GCP as a Trusted Third Party.
 
-IAM credentials can be obtained from either the runtime environment
-, specifically the https://cloud.google.com/docs/authentication/production[`GOOGLE_APPLICATION_CREDENTIALS`]
-environment variable, the Google Compute metadata service,
-or supplied externally as e.g. JSON or base64 encoded.
-JSON is the preferred form as it carries the project id and
-service account identifier required for calling ``projects.serviceAccounts.signJwt``.
+IAM credentials can be obtained from either the runtime environment , specifically the https://cloud.google.com/docs/authentication/production[`GOOGLE_APPLICATION_CREDENTIALS`]
+environment variable, the Google Compute metadata service, or supplied externally as e.g. JSON or base64 encoded.
+JSON is the preferred form as it carries the project id and service account identifier required for calling ``projects.serviceAccounts.signJwt``.
 
 .bootstrap.yml with required GCP-IAM Authentication properties
 ====
@@ -613,17 +572,17 @@ spring.cloud.vault:
 * `credentials.location` path to the credentials resource that contains Google credentials in JSON format.
 * `credentials.encoded-key` the base64 encoded contents of an OAuth2 account private key in the JSON format.
 * `gcp-path` sets the path of the GCP mount to use
-* `jwt-validity` configures the JWT token validity. Defaults to 15 minutes.
-* `project-id` allows overriding the project Id to a specific value. Defaults to the project Id from the obtained credential.
-* `service-account` allows overriding the service account Id to a specific value. Defaults to the service account from the obtained credential.
+* `jwt-validity` configures the JWT token validity.
+Defaults to 15 minutes.
+* `project-id` allows overriding the project Id to a specific value.
+Defaults to the project Id from the obtained credential.
+* `service-account` allows overriding the service account Id to a specific value.
+Defaults to the service account from the obtained credential.
 
-GCP IAM authentication requires the Google Cloud Java SDK dependency
-(`com.google.apis:google-api-services-iam` and `com.google.auth:google-auth-library-oauth2-http`)
-as the authentication implementation uses Google APIs for credentials and JWT signing.
+GCP IAM authentication requires the Google Cloud Java SDK dependency (`com.google.apis:google-api-services-iam` and `com.google.auth:google-auth-library-oauth2-http`) as the authentication implementation uses Google APIs for credentials and JWT signing.
 
-NOTE: Google credentials require an OAuth 2 token maintaining the token lifecycle. All API
-is synchronous therefore, `GcpIamAuthentication` does not support `AuthenticationSteps` which is
-required for reactive usage.
+NOTE: Google credentials require an OAuth 2 token maintaining the token lifecycle.
+All API is synchronous therefore, `GcpIamAuthentication` does not support `AuthenticationSteps` which is required for reactive usage.
 
 See also:
 
@@ -653,7 +612,8 @@ spring.cloud.vault:
 
 * `role` sets the Role.
 * `kubernetes-path` sets the path of the Kubernetes mount to use.
-* `service-account-token-file` sets the location of the file containing the Kubernetes Service Account Token. Defaults to `/var/run/secrets/kubernetes.io/serviceaccount/token`.
+* `service-account-token-file` sets the location of the file containing the Kubernetes Service Account Token.
+Defaults to `/var/run/secrets/kubernetes.io/serviceaccount/token`.
 
 See also:
 
@@ -711,31 +671,29 @@ See also: https://www.vaultproject.io/docs/auth/pcf.html[Vault Documentation: Us
 [[vault.config.backends.generic]]
 === Generic Backend
 
-NOTE: This backend is deprecated in favor of the Key-Value backend and will be removed
-with the next major version.
+NOTE: This backend is deprecated in favor of the Key-Value backend and will be removed with the next major version.
 
-Spring Cloud Vault supports at the basic level the key-value secret
-backend. The key-value secret backend allows storage of arbitrary
-values as key-value store. A single context can store one or many
-key-value tuples. Contexts can be organized hierarchically.
-Spring Cloud Vault allows using the Application name
-and a default context name (`application`) in combination with active
-profiles.
+Spring Cloud Vault supports at the basic level the key-value secret backend.
+The key-value secret backend allows storage of arbitrary values as key-value store.
+A single context can store one or many key-value tuples.
+Contexts can be organized hierarchically.
+Spring Cloud Vault allows using the Application name and a default context name (`application`) in combination with active profiles.
+
 ----
 /secret/{application}/{profile}
 /secret/{application}
 /secret/{default-context}/{profile}
 /secret/{default-context}
 ----
+
 The application name is determined by the properties:
 
 * `spring.cloud.vault.generic.application-name`
 * `spring.cloud.vault.application-name`
 * `spring.application.name`
 
-Secrets can be obtained from other contexts within the key-value backend by adding their
-paths to the application name, separated by commas. For example, given the application
-name `usefulapp,mysql1,projectx/aws`, each of these folders will be used:
+Secrets can be obtained from other contexts within the key-value backend by adding their paths to the application name, separated by commas.
+For example, given the application name `usefulapp,mysql1,projectx/aws`, each of these folders will be used:
 
 * `/secret/usefulapp`
 * `/secret/mysql1`
@@ -759,42 +717,39 @@ spring.cloud.vault:
 ----
 ====
 
-* `enabled` setting this value to `false` disables the secret backend
-config usage
+* `enabled` setting this value to `false` disables the secret backend config usage
 * `backend` sets the path of the secret mount to use
 * `default-context` sets the context name used by all applications
 * `application-name` overrides the application name for use in the key-value backend
-* `profile-separator` separates the profile name from the context in
-property sources with profiles
+* `profile-separator` separates the profile name from the context in property sources with profiles
 
 See also: https://www.vaultproject.io/docs/secrets/kv/kv-v1.html[Vault Documentation: Using the KV Secrets Engine - Version 1 (generic secret backend)]
 
 [[vault.config.backends.kv.versioned]]
 === Key-Value Backend
 
-Spring Cloud Vault supports the Key-Value secret
-backend. The key-value backend allows storage of arbitrary
-values as key-value store. A single context can store one or many
-key-value tuples. Contexts can be organized hierarchically. Spring Cloud Vault
-determines itself whether a secret is using versioning.
-Spring Cloud Vault allows using the Application name
-and a default context name (`application`) in combination with active
-profiles.
+Spring Cloud Vault supports the Key-Value secret backend.
+The key-value backend allows storage of arbitrary values as key-value store.
+A single context can store one or many key-value tuples.
+Contexts can be organized hierarchically.
+Spring Cloud Vault determines itself whether a secret is using versioning.
+Spring Cloud Vault allows using the Application name and a default context name (`application`) in combination with active profiles.
+
 ----
 /secret/{application}/{profile}
 /secret/{application}
 /secret/{default-context}/{profile}
 /secret/{default-context}
 ----
+
 The application name is determined by the properties:
 
 * `spring.cloud.vault.kv.application-name`
 * `spring.cloud.vault.application-name`
 * `spring.application.name`
 
-Secrets can be obtained from other contexts within the key-value backend by adding their
-paths to the application name, separated by commas. For example, given the application
-name `usefulapp,mysql1,projectx/aws`, each of these folders will be used:
+Secrets can be obtained from other contexts within the key-value backend by adding their paths to the application name, separated by commas.
+For example, given the application name `usefulapp,mysql1,projectx/aws`, each of these folders will be used:
 
 * `/secret/usefulapp`
 * `/secret/mysql1`
@@ -820,13 +775,11 @@ spring.cloud.vault:
 ----
 ====
 
-* `enabled` setting this value to `false` disables the secret backend
-config usage
+* `enabled` setting this value to `false` disables the secret backend config usage
 * `backend` sets the path of the secret mount to use
 * `default-context` sets the context name used by all applications
 * `application-name` overrides the application name for use in the key-value backend
-* `profile-separator` separates the profile name from the context in
-property sources with profiles
+* `profile-separator` separates the profile name from the context in property sources with profiles
 
 NOTE: The key-value secret backend can be operated in versioned (v2) and non-versioned (v1) modes.
 
@@ -857,13 +810,11 @@ dependency.
 ====
 
 The integration can be enabled by setting
-`spring.cloud.vault.consul.enabled=true` (default `false`) and
-providing the role name with `spring.cloud.vault.consul.role=…`.
+`spring.cloud.vault.consul.enabled=true` (default `false`) and providing the role name with `spring.cloud.vault.consul.role=…`.
 
 The obtained token is stored in `spring.cloud.consul.token`
-so using Spring Cloud Consul can pick up the generated
-credentials without further configuration. You can configure
-the property name by setting `spring.cloud.vault.consul.token-property`.
+so using Spring Cloud Consul can pick up the generated credentials without further configuration.
+You can configure the property name by setting `spring.cloud.vault.consul.token-property`.
 
 ====
 [source,yaml]
@@ -907,13 +858,11 @@ dependency.
 ====
 
 The integration can be enabled by setting
-`spring.cloud.vault.rabbitmq.enabled=true` (default `false`)
-and providing the role name with `spring.cloud.vault.rabbitmq.role=…`.
+`spring.cloud.vault.rabbitmq.enabled=true` (default `false`) and providing the role name with `spring.cloud.vault.rabbitmq.role=…`.
 
 Username and password are stored in `spring.rabbitmq.username`
-and `spring.rabbitmq.password` so using Spring Boot will pick up the generated
-credentials without further configuration. You can configure the property names
-by setting `spring.cloud.vault.rabbitmq.username-property` and
+and `spring.rabbitmq.password` so using Spring Boot will pick up the generated credentials without further configuration.
+You can configure the property names by setting `spring.cloud.vault.rabbitmq.username-property` and
 `spring.cloud.vault.rabbitmq.password-property`.
 
 ====
@@ -960,13 +909,11 @@ dependency.
 ====
 
 The integration can be enabled by setting
-`spring.cloud.vault.aws=true` (default `false`)
-and providing the role name with `spring.cloud.vault.aws.role=…`.
+`spring.cloud.vault.aws=true` (default `false`) and providing the role name with `spring.cloud.vault.aws.role=…`.
 
 The access key and secret key are stored in `cloud.aws.credentials.accessKey`
-and `cloud.aws.credentials.secretKey` so using Spring Cloud AWS will pick up the generated
-credentials without further configuration. You can configure the property names
-by setting `spring.cloud.vault.aws.access-key-property` and
+and `cloud.aws.credentials.secretKey` so using Spring Cloud AWS will pick up the generated credentials without further configuration.
+You can configure the property names by setting `spring.cloud.vault.aws.access-key-property` and
 `spring.cloud.vault.aws.secret-key-property`.
 
 ====
@@ -993,11 +940,8 @@ See also: https://www.vaultproject.io/docs/secrets/aws/index.html[Vault Document
 [[vault.config.backends.database-backends]]
 == Database backends
 
-Vault supports several database secret backends to generate database
-credentials dynamically based on configured roles. This means
-services that need to access a database no longer need to configure
-credentials: they can request them from Vault, and use Vault's leasing
-mechanism to more easily roll keys.
+Vault supports several database secret backends to generate database credentials dynamically based on configured roles.
+This means services that need to access a database no longer need to configure credentials: they can request them from Vault, and use Vault's leasing mechanism to more easily roll keys.
 
 Spring Cloud Vault integrates with these backends:
 
@@ -1007,14 +951,12 @@ Spring Cloud Vault integrates with these backends:
 * <<vault.config.backends.mysql>>
 * <<vault.config.backends.postgresql>>
 
-Using a database secret backend requires to enable the
-backend in the configuration and the `spring-cloud-vault-config-databases`
+Using a database secret backend requires to enable the backend in the configuration and the `spring-cloud-vault-config-databases`
 dependency.
 
-Vault ships since 0.7.1 with a dedicated `database` secret backend that allows
-database integration via plugins. You can use that specific backend by using the
-generic database backend. Make sure to specify the appropriate
-backend path, e.g. `spring.cloud.vault.mysql.role.backend=database`.
+Vault ships since 0.7.1 with a dedicated `database` secret backend that allows database integration via plugins.
+You can use that specific backend by using the generic database backend.
+Make sure to specify the appropriate backend path, e.g. `spring.cloud.vault.mysql.role.backend=database`.
 
 .pom.xml
 ====
@@ -1030,9 +972,7 @@ backend path, e.g. `spring.cloud.vault.mysql.role.backend=database`.
 ----
 ====
 
-NOTE: Enabling multiple JDBC-compliant databases will generate credentials
-and store them by default in the same property keys hence property names for
-JDBC secrets need to be configured separately.
+NOTE: Enabling multiple JDBC-compliant databases will generate credentials and store them by default in the same property keys hence property names for JDBC secrets need to be configured separately.
 
 [[vault.config.backends.database]]
 === Database
@@ -1040,14 +980,12 @@ JDBC secrets need to be configured separately.
 Spring Cloud Vault can obtain credentials for any database listed at
 https://www.vaultproject.io/api/secret/databases/index.html.
 The integration can be enabled by setting
-`spring.cloud.vault.database.enabled=true` (default `false`) and
-providing the role name with `spring.cloud.vault.database.role=…`.
+`spring.cloud.vault.database.enabled=true` (default `false`) and providing the role name with `spring.cloud.vault.database.role=…`.
 
 While the database backend is a generic one, `spring.cloud.vault.database`
-specifically targets JDBC databases. Username and password are
-stored in `spring.datasource.username` and `spring.datasource.password`
-so using Spring Boot will pick up the generated credentials
-for your `DataSource` without further configuration.
+specifically targets JDBC databases.
+Username and password are stored in `spring.datasource.username` and `spring.datasource.password`
+so using Spring Boot will pick up the generated credentials for your `DataSource` without further configuration.
 You can configure the property names by setting
 `spring.cloud.vault.database.username-property` and
 `spring.cloud.vault.database.password-property`.
@@ -1073,26 +1011,20 @@ spring.cloud.vault:
 
 See also: https://www.vaultproject.io/docs/secrets/databases/index.html[Vault Documentation: Database Secrets backend]
 
-WARNING: Spring Cloud Vault does not support getting new credentials and
-configuring your `DataSource` with them when the maximum lease time
-has been reached. That is, if `max_ttl` of the Database role in Vault
-is set to `24h` that means that 24 hours after your application has
-started it can no longer authenticate with the database.
+WARNING: Spring Cloud Vault does not support getting new credentials and configuring your `DataSource` with them when the maximum lease time has been reached.
+That is, if `max_ttl` of the Database role in Vault is set to `24h` that means that 24 hours after your application has started it can no longer authenticate with the database.
 
 [[vault.config.backends.cassandra]]
 === Apache Cassandra
 
-NOTE: The `cassandra` backend has been deprecated in Vault 0.7.1 and
-it is recommended to use the `database` backend and mount it as `cassandra`.
+NOTE: The `cassandra` backend has been deprecated in Vault 0.7.1 and it is recommended to use the `database` backend and mount it as `cassandra`.
 
 Spring Cloud Vault can obtain credentials for Apache Cassandra.
 The integration can be enabled by setting
-`spring.cloud.vault.cassandra.enabled=true` (default `false`) and
-providing the role name with `spring.cloud.vault.cassandra.role=…`.
+`spring.cloud.vault.cassandra.enabled=true` (default `false`) and providing the role name with `spring.cloud.vault.cassandra.role=…`.
 
 Username and password are stored in `spring.data.cassandra.username`
-and `spring.data.cassandra.password` so using Spring Boot will pick
-up the generated credentials without further configuration.
+and `spring.data.cassandra.password` so using Spring Boot will pick up the generated credentials without further configuration.
 You can configure the property names by setting
 `spring.cloud.vault.cassandra.username-property` and
 `spring.cloud.vault.cassandra.password-property`.
@@ -1121,17 +1053,14 @@ See also: https://www.vaultproject.io/docs/secrets/cassandra/index.html[Vault Do
 [[vault.config.backends.mongodb]]
 === MongoDB
 
-NOTE: The `mongodb` backend has been deprecated in Vault 0.7.1 and
-it is recommended to use the `database` backend and mount it as `mongodb`.
+NOTE: The `mongodb` backend has been deprecated in Vault 0.7.1 and it is recommended to use the `database` backend and mount it as `mongodb`.
 
 Spring Cloud Vault can obtain credentials for MongoDB.
 The integration can be enabled by setting
-`spring.cloud.vault.mongodb.enabled=true` (default `false`) and
-providing the role name with `spring.cloud.vault.mongodb.role=…`.
+`spring.cloud.vault.mongodb.enabled=true` (default `false`) and providing the role name with `spring.cloud.vault.mongodb.role=…`.
 
 Username and password are stored in `spring.data.mongodb.username`
-and `spring.data.mongodb.password` so using Spring Boot will
-pick up the generated credentials without further configuration.
+and `spring.data.mongodb.password` so using Spring Boot will pick up the generated credentials without further configuration.
 You can configure the property names by setting
 `spring.cloud.vault.mongodb.username-property` and
 `spring.cloud.vault.mongodb.password-property`.
@@ -1160,18 +1089,15 @@ See also: https://www.vaultproject.io/docs/secrets/mongodb/index.html[Vault Docu
 [[vault.config.backends.mysql]]
 === MySQL
 
-NOTE: The `mysql` backend has been deprecated in Vault 0.7.1 and
-it is recommended to use the `database` backend and mount it as `mysql`.
+NOTE: The `mysql` backend has been deprecated in Vault 0.7.1 and it is recommended to use the `database` backend and mount it as `mysql`.
 Configuration for `spring.cloud.vault.mysql` will be removed in a future version.
 
 Spring Cloud Vault can obtain credentials for MySQL.
 The integration can be enabled by setting
-`spring.cloud.vault.mysql.enabled=true` (default `false`) and
-providing the role name with `spring.cloud.vault.mysql.role=…`.
+`spring.cloud.vault.mysql.enabled=true` (default `false`) and providing the role name with `spring.cloud.vault.mysql.role=…`.
 
 Username and password are stored in `spring.datasource.username`
-and `spring.datasource.password` so using Spring Boot will
-pick up the generated credentials without further configuration.
+and `spring.datasource.password` so using Spring Boot will pick up the generated credentials without further configuration.
 You can configure the property names by setting
 `spring.cloud.vault.mysql.username-property` and
 `spring.cloud.vault.mysql.password-property`.
@@ -1200,18 +1126,15 @@ See also: https://www.vaultproject.io/docs/secrets/mysql/index.html[Vault Docume
 [[vault.config.backends.postgresql]]
 === PostgreSQL
 
-NOTE: The `postgresql` backend has been deprecated in Vault 0.7.1 and
-it is recommended to use the `database` backend and mount it as `postgresql`.
+NOTE: The `postgresql` backend has been deprecated in Vault 0.7.1 and it is recommended to use the `database` backend and mount it as `postgresql`.
 Configuration for `spring.cloud.vault.postgresql` will be removed in a future version.
 
 Spring Cloud Vault can obtain credentials for PostgreSQL.
 The integration can be enabled by setting
-`spring.cloud.vault.postgresql.enabled=true` (default `false`) and
-providing the role name with `spring.cloud.vault.postgresql.role=…`.
+`spring.cloud.vault.postgresql.enabled=true` (default `false`) and providing the role name with `spring.cloud.vault.postgresql.role=…`.
 
 Username and password are stored in `spring.datasource.username`
-and `spring.datasource.password` so using Spring Boot will
-pick up the generated credentials without further configuration.
+and `spring.datasource.password` so using Spring Boot will pick up the generated credentials without further configuration.
 You can configure the property names by setting
 `spring.cloud.vault.postgresql.username-property` and
 `spring.cloud.vault.postgresql.password-property`.
@@ -1240,19 +1163,16 @@ See also: https://www.vaultproject.io/docs/secrets/postgresql/index.html[Vault D
 [[vault.config.backends.configurer]]
 == Configure `PropertySourceLocator` behavior
 
-Spring Cloud Vault uses property-based configuration to create ``PropertySource``s
-for key-value and discovered secret backends.
+Spring Cloud Vault uses property-based configuration to create ``PropertySource``s for key-value and discovered secret backends.
 
-Discovered backends provide `VaultSecretBackendDescriptor` beans to describe the configuration
-state to use secret backend as `PropertySource`. A `SecretBackendMetadataFactory` is required
-to create a `SecretBackendMetadata` object which contains path, name and property transformation
-configuration.
+Discovered backends provide `VaultSecretBackendDescriptor` beans to describe the configuration state to use secret backend as `PropertySource`.
+A `SecretBackendMetadataFactory` is required to create a `SecretBackendMetadata` object which contains path, name and property transformation configuration.
 
 `SecretBackendMetadata` is used to back a particular `PropertySource`.
 
 You can register an arbitrary number of beans implementing `VaultConfigurer` for customization.
-Default key-value and discovered backend registration is disabled if Spring Cloud Vault discovers
-at least one `VaultConfigurer` bean. You can however enable default registration with
+Default key-value and discovered backend registration is disabled if Spring Cloud Vault discovers at least one `VaultConfigurer` bean.
+You can however enable default registration with
 `SecretBackendConfigurer.registerDefaultKeyValueSecretBackends()` and `SecretBackendConfigurer.registerDefaultDiscoveredSecretBackends()`.
 
 ====
@@ -1272,27 +1192,22 @@ public class CustomizationBean implements VaultConfigurer {
 ----
 ====
 
-NOTE: All customization is required to happen in the bootstrap context. Add your configuration
-classes to `META-INF/spring.factories` at `org.springframework.cloud.bootstrap.BootstrapConfiguration`
+NOTE: All customization is required to happen in the bootstrap context.
+Add your configuration classes to `META-INF/spring.factories` at `org.springframework.cloud.bootstrap.BootstrapConfiguration`
 in your application.
 
 == Service Registry Configuration
 
-You can use a `DiscoveryClient` (such as from Spring Cloud Consul) to locate
-a Vault server by setting spring.cloud.vault.discovery.enabled=true (default `false`).
-The net result of that is that your apps need a bootstrap.yml (or an environment variable)
-with the appropriate discovery configuration.
-The benefit is that the Vault can change its co-ordinates, as long as the discovery service
-is a fixed point. The default service id is `vault` but you can change that on the client with
+You can use a `DiscoveryClient` (such as from Spring Cloud Consul) to locate a Vault server by setting spring.cloud.vault.discovery.enabled=true (default `false`).
+The net result of that is that your apps need a bootstrap.yml (or an environment variable) with the appropriate discovery configuration.
+The benefit is that the Vault can change its co-ordinates, as long as the discovery service is a fixed point.
+The default service id is `vault` but you can change that on the client with
 `spring.cloud.vault.discovery.serviceId`.
 
-The discovery client implementations all support some kind of metadata map
-(e.g. for Eureka we have eureka.instance.metadataMap). Some additional properties of the service
-may need to be configured in its service registration metadata so that clients can connect
-correctly. Service registries that do not provide details about transport layer security
-need to provide a `scheme` metadata entry to be set either to `https` or `http`.
-If no scheme is configured and the service is not exposed as secure service, then
-configuration defaults to `spring.cloud.vault.scheme` which is `https` when it's not set.
+The discovery client implementations all support some kind of metadata map (e.g. for Eureka we have eureka.instance.metadataMap).
+Some additional properties of the service may need to be configured in its service registration metadata so that clients can connect correctly.
+Service registries that do not provide details about transport layer security need to provide a `scheme` metadata entry to be set either to `https` or `http`.
+If no scheme is configured and the service is not exposed as secure service, then configuration defaults to `spring.cloud.vault.scheme` which is `https` when it's not set.
 
 ====
 [source,yaml]
@@ -1306,11 +1221,9 @@ spring.cloud.vault.discovery:
 [[vault.config.fail-fast]]
 == Vault Client Fail Fast
 
-In some cases, it may be desirable to fail startup of a service if
-it cannot connect to the Vault Server.  If this is the desired
-behavior, set the bootstrap configuration property
-`spring.cloud.vault.fail-fast=true` and the client will halt with
-an Exception.
+In some cases, it may be desirable to fail startup of a service if it cannot connect to the Vault Server.
+If this is the desired behavior, set the bootstrap configuration property
+`spring.cloud.vault.fail-fast=true` and the client will halt with an Exception.
 
 ====
 [source,yaml]
@@ -1323,14 +1236,13 @@ spring.cloud.vault:
 [[vault.config.namespaces]]
 == Vault Enterprise Namespace Support
 
-Vault Enterprise allows using namespaces to isolate multiple Vaults
-on a single Vault server. Configuring a namespace by setting
+Vault Enterprise allows using namespaces to isolate multiple Vaults on a single Vault server.
+Configuring a namespace by setting
 `spring.cloud.vault.namespace=…` enables the namespace header
 `X-Vault-Namespace` on every outgoing HTTP request when using the Vault
 `RestTemplate` or `WebClient`.
 
-Please note that this feature is not supported by Vault Community edition
-and has no effect on Vault operations.
+Please note that this feature is not supported by Vault Community edition and has no effect on Vault operations.
 
 ====
 [source,yaml]
@@ -1346,8 +1258,7 @@ See also: https://www.vaultproject.io/docs/enterprise/namespaces/index.html[Vaul
 == Vault Client SSL configuration
 
 SSL can be configured declaratively by setting various properties.
-You can set either `javax.net.ssl.trustStore` to configure
-JVM-wide SSL settings or `spring.cloud.vault.ssl.trust-store`
+You can set either `javax.net.ssl.trustStore` to configure JVM-wide SSL settings or `spring.cloud.vault.ssl.trust-store`
 to set SSL settings only for Spring Cloud Vault Config.
 
 ====
@@ -1360,48 +1271,33 @@ spring.cloud.vault:
 ----
 ====
 
-* `trust-store` sets the resource for the trust-store. SSL-secured Vault
-communication will validate the Vault SSL certificate with the specified
-trust-store.
+* `trust-store` sets the resource for the trust-store.
+SSL-secured Vault communication will validate the Vault SSL certificate with the specified trust-store.
 * `trust-store-password` sets the trust-store password
 
 
-Please note that configuring `spring.cloud.vault.ssl.*` can be only
-applied when either Apache Http Components or the OkHttp client
-is on your class-path.
+Please note that configuring `spring.cloud.vault.ssl.*` can be only applied when either Apache Http Components or the OkHttp client is on your class-path.
 
 [[vault-lease-renewal]]
 == Lease lifecycle management (renewal and revocation)
 
 With every secret, Vault creates a lease:
-metadata containing information such as a time duration,
-renewability, and more.
+metadata containing information such as a time duration, renewability, and more.
 
-Vault promises that the data will be valid for the given duration,
-or Time To Live (TTL). Once the lease is expired, Vault can
-revoke the data, and the consumer of the secret can no longer
-be certain that it is valid.
+Vault promises that the data will be valid for the given duration, or Time To Live (TTL).
+Once the lease is expired, Vault can revoke the data, and the consumer of the secret can no longer be certain that it is valid.
 
-Spring Cloud Vault maintains a lease lifecycle beyond
-the creation of login tokens and secrets. That said,
-login tokens and secrets associated with a lease
-are scheduled for renewal just before the lease expires
-until terminal expiry.
-Application shutdown revokes obtained login tokens and renewable
-leases.
+Spring Cloud Vault maintains a lease lifecycle beyond the creation of login tokens and secrets.
+That said, login tokens and secrets associated with a lease are scheduled for renewal just before the lease expires until terminal expiry.
+Application shutdown revokes obtained login tokens and renewable leases.
 
-Secret service and database backends (such as MongoDB or MySQL)
-usually generate a renewable lease so generated credentials will
-be disabled on application shutdown.
+Secret service and database backends (such as MongoDB or MySQL) usually generate a renewable lease so generated credentials will be disabled on application shutdown.
 
 NOTE: Static tokens are not renewed or revoked.
 
-Lease renewal and revocation is enabled by default and can
-be disabled by setting `spring.cloud.vault.config.lifecycle.enabled`
-to `false`. This is not recommended as leases can expire and
-Spring Cloud Vault cannot longer access Vault or services
-using generated credentials and valid credentials remain active
-after application shutdown.
+Lease renewal and revocation is enabled by default and can be disabled by setting `spring.cloud.vault.config.lifecycle.enabled`
+to `false`.
+This is not recommended as leases can expire and Spring Cloud Vault cannot longer access Vault or services using generated credentials and valid credentials remain active after application shutdown.
 
 ====
 [source,yaml]
@@ -1416,9 +1312,13 @@ spring.cloud.vault:
 ----
 ====
 
-* `enabled` controls whether leases associated with secrets are considered to be renewed and expired secrets are rotated. Enabled by default.
-* `min-renewal` sets the duration that is at least required before renewing a lease. This setting prevents renewals from happening too often.
-* `expiry-threshold` sets the expiry threshold. A lease is renewed the configured period of time before it expires.
-* `lease-endpoints` sets the endpoints for renew and revoke. Legacy for vault versions before 0.8 and SysLeases for later.
+* `enabled` controls whether leases associated with secrets are considered to be renewed and expired secrets are rotated.
+Enabled by default.
+* `min-renewal` sets the duration that is at least required before renewing a lease.
+This setting prevents renewals from happening too often.
+* `expiry-threshold` sets the expiry threshold.
+A lease is renewed the configured period of time before it expires.
+* `lease-endpoints` sets the endpoints for renew and revoke.
+Legacy for vault versions before 0.8 and SysLeases for later.
 
 See also: https://www.vaultproject.io/docs/concepts/lease.html[Vault Documentation: Lease, Renew, and Revoke]
