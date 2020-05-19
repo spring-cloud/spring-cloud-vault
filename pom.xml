@@ -43,14 +43,14 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring-cloud-commons.version>3.0.0-SNAPSHOT</spring-cloud-commons.version>
-		<httpclient.version>4.5.10</httpclient.version>
-		<httpcore.version>4.4.12</httpcore.version>
-		<okhttp3.version>3.14.4</okhttp3.version>
-		<bcpkix-jdk15on.version>1.64</bcpkix-jdk15on.version>
+		<httpclient.version>4.5.12</httpclient.version>
+		<httpcore.version>4.4.13</httpcore.version>
+		<okhttp3.version>3.14.9</okhttp3.version>
+		<bcpkix-jdk15on.version>1.65</bcpkix-jdk15on.version>
 
-		<google-api-services-iam.version>v1-rev20191010-1.30.3
+		<google-api-services-iam.version>v1-rev20200221-1.30.9
 		</google-api-services-iam.version>
-		<google-auth-library-oauth2-http.version>0.18.0
+		<google-auth-library-oauth2-http.version>0.20.0
 		</google-auth-library-oauth2-http.version>
 	</properties>
 
