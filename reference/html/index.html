@@ -153,6 +153,7 @@ $(globalSwitch);
 <ul class="sectlevel2">
 <li><a href="#vault.config.backends.database">Database</a></li>
 <li><a href="#vault.config.backends.cassandra">Apache Cassandra</a></li>
+<li><a href="#vault.config.backends.elasticsearch">Elasticsearch</a></li>
 <li><a href="#vault.config.backends.mongodb">MongoDB</a></li>
 <li><a href="#vault.config.backends.mysql">MySQL</a></li>
 <li><a href="#vault.config.backends.postgresql">PostgreSQL</a></li>
@@ -2047,6 +2048,9 @@ This means services that need to access a database no longer need to configure c
 <p><a href="#vault.config.backends.cassandra">Apache Cassandra</a></p>
 </li>
 <li>
+<p><a href="#vault.config.backends.elasticsearch">Elasticsearch</a></p>
+</li>
+<li>
 <p><a href="#vault.config.backends.mongodb">MongoDB</a></p>
 </li>
 <li>
@@ -2105,7 +2109,7 @@ The integration can be enabled by setting
 <div class="paragraph">
 <p>While the database backend is a generic one, <code>spring.cloud.vault.database</code>
 specifically targets JDBC databases.
-Username and password are stored in <code>spring.datasource.username</code> and <code>spring.datasource.password</code>
+Username and password are available from <code>spring.datasource.username</code> and <code>spring.datasource.password</code> properties
 so using Spring Boot will pick up the generated credentials for your <code>DataSource</code> without further configuration.
 You can configure the property names by setting
 <code>spring.cloud.vault.database.username-property</code> and
@@ -2182,8 +2186,8 @@ The integration can be enabled by setting
 <code>spring.cloud.vault.cassandra.enabled=true</code> (default <code>false</code>) and providing the role name with <code>spring.cloud.vault.cassandra.role=…</code>.</p>
 </div>
 <div class="paragraph">
-<p>Username and password are stored in <code>spring.data.cassandra.username</code>
-and <code>spring.data.cassandra.password</code> so using Spring Boot will pick up the generated credentials without further configuration.
+<p>Username and password are available from <code>spring.data.cassandra.username</code>
+and <code>spring.data.cassandra.password</code> properties so using Spring Boot will pick up the generated credentials without further configuration.
 You can configure the property names by setting
 <code>spring.cloud.vault.cassandra.username-property</code> and
 <code>spring.cloud.vault.cassandra.password-property</code>.</p>
@@ -2224,6 +2228,58 @@ You can configure the property names by setting
 </div>
 <div class="paragraph">
 <p>See also: <a href="https://www.vaultproject.io/docs/secrets/cassandra/index.html">Vault Documentation: Setting up Apache Cassandra with Vault</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="vault.config.backends.elasticsearch"><a class="link" href="#vault.config.backends.elasticsearch">Elasticsearch</a></h3>
+<div class="paragraph">
+<p>Spring Cloud Vault can obtain since version 3.0 credentials for Elasticsearch.
+The integration can be enabled by setting
+<code>spring.cloud.vault.elasticsearch.enabled=true</code> (default <code>false</code>) and providing the role name with <code>spring.cloud.vault.elasticsearch.role=…</code>.</p>
+</div>
+<div class="paragraph">
+<p>Username and password are available from <code>spring.elasticsearch.rest.username</code>
+and <code>spring.elasticsearch.rest.password</code> properties so using Spring Boot will pick up the generated credentials without further configuration.
+You can configure the property names by setting
+<code>spring.cloud.vault.elasticsearch.username-property</code> and
+<code>spring.cloud.vault.elasticsearch.password-property</code>.</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">spring.cloud.vault:
+    elasticsearch:
+        enabled: true
+        role: readonly
+        backend: mongodb
+        username-property: spring.elasticsearch.rest.username
+        password-property: spring.elasticsearch.rest.password</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>enabled</code> setting this value to <code>true</code> enables the Elasticsearch database backend config usage</p>
+</li>
+<li>
+<p><code>role</code> sets the role name of the Elasticsearch role definition</p>
+</li>
+<li>
+<p><code>backend</code> sets the path of the Elasticsearch mount to use</p>
+</li>
+<li>
+<p><code>username-property</code> sets the property name in which the Elasticsearch username is stored</p>
+</li>
+<li>
+<p><code>password-property</code> sets the property name in which the Elasticsearch password is stored</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>See also: <a href="https://www.vaultproject.io/docs/secrets/databases/elasticdb">Vault Documentation: Setting up Elasticsearch with Vault</a></p>
 </div>
 </div>
 <div class="sect2">
@@ -2311,8 +2367,8 @@ The integration can be enabled by setting
 <code>spring.cloud.vault.mysql.enabled=true</code> (default <code>false</code>) and providing the role name with <code>spring.cloud.vault.mysql.role=…</code>.</p>
 </div>
 <div class="paragraph">
-<p>Username and password are stored in <code>spring.datasource.username</code>
-and <code>spring.datasource.password</code> so using Spring Boot will pick up the generated credentials without further configuration.
+<p>Username and password are available from <code>spring.datasource.username</code>
+and <code>spring.datasource.password</code> properties so using Spring Boot will pick up the generated credentials without further configuration.
 You can configure the property names by setting
 <code>spring.cloud.vault.mysql.username-property</code> and
 <code>spring.cloud.vault.mysql.password-property</code>.</p>
@@ -2376,8 +2432,8 @@ The integration can be enabled by setting
 <code>spring.cloud.vault.postgresql.enabled=true</code> (default <code>false</code>) and providing the role name with <code>spring.cloud.vault.postgresql.role=…</code>.</p>
 </div>
 <div class="paragraph">
-<p>Username and password are stored in <code>spring.datasource.username</code>
-and <code>spring.datasource.password</code> so using Spring Boot will pick up the generated credentials without further configuration.
+<p>Username and password are available from <code>spring.datasource.username</code>
+and <code>spring.datasource.password</code> properties so using Spring Boot will pick up the generated credentials without further configuration.
 You can configure the property names by setting
 <code>spring.cloud.vault.postgresql.username-property</code> and
 <code>spring.cloud.vault.postgresql.password-property</code>.</p>
