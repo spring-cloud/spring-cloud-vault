@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.vault.config;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -141,9 +140,8 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 					continue;
 				}
 
-				List<String> contexts = KeyValueSecretBackendMetadata.buildContexts(
-						keyValueBackend, Arrays.asList(this.applicationContext
-								.getEnvironment().getActiveProfiles()));
+				List<String> contexts = KeyValueSecretBackendMetadata
+						.buildContexts(keyValueBackend, keyValueBackend.getProfiles());
 
 				for (String context : contexts) {
 					secretBackendConfigurer.add(KeyValueSecretBackendMetadata

@@ -178,20 +178,13 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 			SecretBackendMetadata accessor);
 
 	private static class KeyValuePropertySourceLocatorConfiguration
-			implements EnvironmentAware, PropertySourceLocatorConfiguration {
+			implements PropertySourceLocatorConfiguration {
 
 		private final VaultKeyValueBackendPropertiesSupport keyValueBackendProperties;
-
-		private Environment environment;
 
 		KeyValuePropertySourceLocatorConfiguration(
 				VaultKeyValueBackendPropertiesSupport keyValueBackendProperties) {
 			this.keyValueBackendProperties = keyValueBackendProperties;
-		}
-
-		@Override
-		public void setEnvironment(Environment environment) {
-			this.environment = environment;
 		}
 
 		@Override
@@ -201,7 +194,7 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 
 				List<String> contexts = KeyValueSecretBackendMetadata.buildContexts(
 						this.keyValueBackendProperties,
-						Arrays.asList(this.environment.getActiveProfiles()));
+						this.keyValueBackendProperties.getProfiles());
 
 				List<SecretBackendMetadata> result = new ArrayList<>(contexts.size());
 
