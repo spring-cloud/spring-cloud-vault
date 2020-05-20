@@ -893,6 +893,7 @@ Spring Cloud Vault integrates with these backends:
 
 * <<vault.config.backends.database>>
 * <<vault.config.backends.cassandra>>
+* <<vault.config.backends.elasticsearch>>
 * <<vault.config.backends.mongodb>>
 * <<vault.config.backends.mysql>>
 * <<vault.config.backends.postgresql>>
@@ -995,6 +996,40 @@ spring.cloud.vault:
 * `password-property` sets the property name in which the Cassandra password is stored
 
 See also: https://www.vaultproject.io/docs/secrets/cassandra/index.html[Vault Documentation: Setting up Apache Cassandra with Vault]
+
+[[vault.config.backends.elasticsearch]]
+=== Elasticsearch
+
+Spring Cloud Vault can obtain since version 3.0 credentials for Elasticsearch.
+The integration can be enabled by setting
+`spring.cloud.vault.elasticsearch.enabled=true` (default `false`) and providing the role name with `spring.cloud.vault.elasticsearch.role=…`.
+
+Username and password are available from `spring.elasticsearch.rest.username`
+and `spring.elasticsearch.rest.password` properties so using Spring Boot will pick up the generated credentials without further configuration.
+You can configure the property names by setting
+`spring.cloud.vault.elasticsearch.username-property` and
+`spring.cloud.vault.elasticsearch.password-property`.
+
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    elasticsearch:
+        enabled: true
+        role: readonly
+        backend: mongodb
+        username-property: spring.elasticsearch.rest.username
+        password-property: spring.elasticsearch.rest.password
+----
+====
+
+* `enabled` setting this value to `true` enables the Elasticsearch database backend config usage
+* `role` sets the role name of the Elasticsearch role definition
+* `backend` sets the path of the Elasticsearch mount to use
+* `username-property` sets the property name in which the Elasticsearch username is stored
+* `password-property` sets the property name in which the Elasticsearch password is stored
+
+See also: https://www.vaultproject.io/docs/secrets/databases/elasticdb[Vault Documentation: Setting up Elasticsearch with Vault]
 
 [[vault.config.backends.mongodb]]
 === MongoDB
