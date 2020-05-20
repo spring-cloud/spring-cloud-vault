@@ -16,6 +16,11 @@
 
 package org.springframework.cloud.vault.config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import javax.validation.constraints.NotEmpty;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -64,6 +69,12 @@ public class VaultKeyValueBackendProperties
 	private String applicationName = "application";
 
 	/**
+	 * List of active profiles.
+	 * @since 3.0
+	 */
+	private List<String> profiles;
+
+	/**
 	 * Key-Value backend version. Currently supported versions are:
 	 * <ul>
 	 * <li>Version 1 (unversioned key-value backend).</li>
@@ -91,6 +102,10 @@ public class VaultKeyValueBackendProperties
 				this.applicationName = springAppName;
 			}
 		}
+
+		if (this.profiles == null) {
+			this.profiles = Arrays.asList(environment.getActiveProfiles());
+		}
 	}
 
 	public boolean isEnabled() {
@@ -111,6 +126,14 @@ public class VaultKeyValueBackendProperties
 
 	public String getApplicationName() {
 		return this.applicationName;
+	}
+
+	@Override
+	public List<String> getProfiles() {
+		if (this.profiles == null) {
+			return Collections.emptyList();
+		}
+		return Collections.unmodifiableList(new ArrayList<>(this.profiles));
 	}
 
 	@Deprecated
@@ -140,6 +163,10 @@ public class VaultKeyValueBackendProperties
 		this.applicationName = applicationName;
 	}
 
+	public void setProfiles(List<String> profiles) {
+		this.profiles = profiles;
+	}
+
 	public void setBackendVersion(int backendVersion) {
 		this.backendVersion = backendVersion;
 	}
@@ -153,6 +180,7 @@ public class VaultKeyValueBackendProperties
 		sb.append(", defaultContext='").append(this.defaultContext).append('\'');
 		sb.append(", profileSeparator='").append(this.profileSeparator).append('\'');
 		sb.append(", applicationName='").append(this.applicationName).append('\'');
+		sb.append(", profiles='").append(this.profiles).append('\'');
 		sb.append(", backendVersion=").append(this.backendVersion);
 		sb.append(']');
 		return sb.toString();

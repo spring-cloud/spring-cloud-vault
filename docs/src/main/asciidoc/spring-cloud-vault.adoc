@@ -694,6 +694,11 @@ The application name is determined by the properties:
 * `spring.cloud.vault.application-name`
 * `spring.application.name`
 
+The profiles are determined by the properties:
+
+* `spring.cloud.vault.kv.profiles`
+* `spring.profiles.active`
+
 Secrets can be obtained from other contexts within the key-value backend by adding their paths to the application name, separated by commas.
 For example, given the application name `usefulapp,mysql1,projectx/aws`, each of these folders will be used:
 
@@ -706,7 +711,7 @@ No active profiles will skip accessing contexts with a profile name.
 
 Properties are exposed like they are stored (i.e. without additional prefixes).
 
-NOTE: Spring Cloud Vault adds the `data/` context between the mount path and the actual context path.
+NOTE: Spring Cloud Vault adds the `data/` context between the mount path and the actual context path depending on whether the mount uses the versioned key-value backend.
 
 ====
 [source,yaml]
@@ -718,6 +723,7 @@ spring.cloud.vault:
         profile-separator: '/'
         default-context: application
         application-name: my-app
+        profiles: local, cloud
 ----
 ====
 
@@ -725,6 +731,7 @@ spring.cloud.vault:
 * `backend` sets the path of the secret mount to use
 * `default-context` sets the context name used by all applications
 * `application-name` overrides the application name for use in the key-value backend
+* `profiles` overrides the active profiles for use in the key-value backend
 * `profile-separator` separates the profile name from the context in property sources with profiles
 
 NOTE: The key-value secret backend can be operated in versioned (v2) and non-versioned (v1) modes.

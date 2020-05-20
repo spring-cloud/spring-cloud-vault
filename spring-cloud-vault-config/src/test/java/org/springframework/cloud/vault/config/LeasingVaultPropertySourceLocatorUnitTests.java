@@ -30,7 +30,6 @@ import org.springframework.vault.core.lease.domain.RequestedSecret;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link LeasingVaultPropertySourceLocator}.
@@ -48,12 +47,14 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 	@Mock
 	private SecretLeaseContainer secretLeaseContainer;
 
+	private VaultKeyValueBackendProperties properties = new VaultKeyValueBackendProperties();
+
 	@Before
 	public void before() {
 
 		this.propertySourceLocator = new LeasingVaultPropertySourceLocator(
-				new VaultProperties(), VaultPropertySourceLocatorSupport
-						.createConfiguration(new VaultKeyValueBackendProperties()),
+				new VaultProperties(),
+				VaultPropertySourceLocatorSupport.createConfiguration(this.properties),
 				this.secretLeaseContainer);
 	}
 
@@ -73,8 +74,6 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 
 	@Test
 	public void shouldLocatePropertySources() {
-
-		when(this.configurableEnvironment.getActiveProfiles()).thenReturn(new String[0]);
 
 		PropertySource<?> propertySource = this.propertySourceLocator
 				.locate(this.configurableEnvironment);

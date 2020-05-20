@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.vault.config;
 
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +30,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link VaultPropertySourceLocator}.
@@ -47,11 +48,13 @@ public class VaultPropertySourceLocatorUnitTests {
 	@Mock
 	private ConfigurableEnvironment configurableEnvironment;
 
+	private VaultKeyValueBackendProperties properties = new VaultKeyValueBackendProperties();
+
 	@Before
 	public void before() {
 		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
-				new VaultProperties(), VaultPropertySourceLocatorSupport
-						.createConfiguration(new VaultKeyValueBackendProperties()));
+				new VaultProperties(),
+				VaultPropertySourceLocatorSupport.createConfiguration(this.properties));
 	}
 
 	@Test
@@ -70,8 +73,6 @@ public class VaultPropertySourceLocatorUnitTests {
 	@Test
 	public void shouldLocateOnePropertySourceWithEmptyProfiles() {
 
-		when(this.configurableEnvironment.getActiveProfiles()).thenReturn(new String[0]);
-
 		PropertySource<?> propertySource = this.propertySourceLocator
 				.locate(this.configurableEnvironment);
 
@@ -84,8 +85,7 @@ public class VaultPropertySourceLocatorUnitTests {
 	@Test
 	public void shouldLocatePropertySourcesForActiveProfilesInDefaultContext() {
 
-		when(this.configurableEnvironment.getActiveProfiles())
-				.thenReturn(new String[] { "vermillion", "periwinkle" });
+		this.properties.setProfiles(Arrays.asList("vermillion", "periwinkle"));
 
 		PropertySource<?> propertySource = this.propertySourceLocator
 				.locate(this.configurableEnvironment);
@@ -102,13 +102,11 @@ public class VaultPropertySourceLocatorUnitTests {
 
 		VaultKeyValueBackendProperties backendProperties = new VaultKeyValueBackendProperties();
 		backendProperties.setApplicationName("wintermute");
+		backendProperties.setProfiles(Arrays.asList("vermillion", "periwinkle"));
 
 		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
 				new VaultProperties(),
 				VaultPropertySourceLocatorSupport.createConfiguration(backendProperties));
-
-		when(this.configurableEnvironment.getActiveProfiles())
-				.thenReturn(new String[] { "vermillion", "periwinkle" });
 
 		PropertySource<?> propertySource = this.propertySourceLocator
 				.locate(this.configurableEnvironment);
@@ -126,13 +124,11 @@ public class VaultPropertySourceLocatorUnitTests {
 
 		VaultKeyValueBackendProperties backendProperties = new VaultKeyValueBackendProperties();
 		backendProperties.setApplicationName("wintermute,straylight,icebreaker/armitage");
+		backendProperties.setProfiles(Arrays.asList("vermillion", "periwinkle"));
 
 		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
 				new VaultProperties(),
 				VaultPropertySourceLocatorSupport.createConfiguration(backendProperties));
-
-		when(this.configurableEnvironment.getActiveProfiles())
-				.thenReturn(new String[] { "vermillion", "periwinkle" });
 
 		PropertySource<?> propertySource = this.propertySourceLocator
 				.locate(this.configurableEnvironment);

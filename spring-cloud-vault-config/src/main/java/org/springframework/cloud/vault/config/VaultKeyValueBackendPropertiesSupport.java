@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.vault.config;
 
+import java.util.List;
+
 /**
  * Interface declaring Key-Value configuration properties.
  *
@@ -49,5 +51,11 @@ public interface VaultKeyValueBackendPropertiesSupport {
 	 * @return the application name to use.
 	 */
 	String getApplicationName();
+
+	/**
+	 * @return the application profiles to use.
+	 * @since 3.0
+	 */
+	List<String> getProfiles();
 
 }
