@@ -43,20 +43,6 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	private final PropertySourceLocatorConfiguration propertySourceLocatorConfiguration;
 
 	/**
-	 * Creates a new {@link VaultPropertySourceLocatorSupport}.
-	 * @param propertySourceName must not be {@literal null} or empty.
-	 * @param genericBackendProperties must not be {@literal null}.
-	 * @param backendAccessors must not be {@literal null}.
-	 */
-	public VaultPropertySourceLocatorSupport(String propertySourceName,
-			VaultGenericBackendProperties genericBackendProperties,
-			Collection<SecretBackendMetadata> backendAccessors) {
-
-		this(propertySourceName,
-				createConfiguration(genericBackendProperties, backendAccessors));
-	}
-
-	/**
 	 * Creates a new {@link VaultPropertySourceLocatorSupport} given a
 	 * {@link PropertySourceLocatorConfiguration}.
 	 * @param propertySourceName must not be {@literal null} or empty.
@@ -75,29 +61,12 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 	}
 
 	static PropertySourceLocatorConfiguration createConfiguration(
-			VaultGenericBackendProperties genericBackendProperties,
-			Collection<SecretBackendMetadata> backendAccessors) {
+			VaultKeyValueBackendProperties kvBackendProperties) {
 
-		Assert.notNull(genericBackendProperties,
-				"VaultGenericBackendProperties must not be null");
-		Assert.notNull(backendAccessors, "BackendAccessors must not be null");
+		Assert.notNull(kvBackendProperties,
+				"VaultKeyValueBackendProperties must not be null");
 
-		KeyValuePropertySourceLocatorConfiguration generic = new KeyValuePropertySourceLocatorConfiguration(
-				genericBackendProperties);
-
-		WrappedPropertySourceLocatorConfiguration backends = new WrappedPropertySourceLocatorConfiguration(
-				new ArrayList<>(backendAccessors));
-
-		return new CompositePropertySourceConfiguration(generic, backends);
-	}
-
-	static PropertySourceLocatorConfiguration createConfiguration(
-			VaultGenericBackendProperties genericBackendProperties) {
-
-		Assert.notNull(genericBackendProperties,
-				"VaultGenericBackendProperties must not be null");
-
-		return new KeyValuePropertySourceLocatorConfiguration(genericBackendProperties);
+		return new KeyValuePropertySourceLocatorConfiguration(kvBackendProperties);
 	}
 
 	@Override
@@ -230,14 +199,14 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 
 			if (this.keyValueBackendProperties.isEnabled()) {
 
-				List<String> contexts = GenericSecretBackendMetadata.buildContexts(
+				List<String> contexts = KeyValueSecretBackendMetadata.buildContexts(
 						this.keyValueBackendProperties,
 						Arrays.asList(this.environment.getActiveProfiles()));
 
 				List<SecretBackendMetadata> result = new ArrayList<>(contexts.size());
 
 				for (String context : contexts) {
-					result.add(GenericSecretBackendMetadata.create(
+					result.add(KeyValueSecretBackendMetadata.create(
 							this.keyValueBackendProperties.getBackend(), context));
 				}
 

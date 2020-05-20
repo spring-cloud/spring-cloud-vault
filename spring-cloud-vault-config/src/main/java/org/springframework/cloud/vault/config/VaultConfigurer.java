@@ -29,7 +29,6 @@ package org.springframework.cloud.vault.config;
  * Registered bean instances of {@link VaultConfigurer} disable default secret backend
  * registration for the kv and integrative (other discovered
  * {@link SecretBackendMetadata}) backends. See
- * {@link SecretBackendConfigurer#registerDefaultGenericSecretBackends(boolean)} and
  * {@link SecretBackendConfigurer#registerDefaultDiscoveredSecretBackends(boolean)} for
  * more details.
  *

@@ -50,7 +50,7 @@ public class VaultConfigTemplateIntegrationTests extends IntegrationTestSupport 
 				prepare().getVaultOperations(), vaultProperties);
 
 		Secrets secrets = template
-				.read(GenericSecretBackendMetadata.create("secret", "myapp"));
+				.read(KeyValueSecretBackendMetadata.create("secret", "myapp"));
 
 		assertThat(secrets.getData()).containsEntry("key", "value");
 	}
@@ -71,7 +71,7 @@ public class VaultConfigTemplateIntegrationTests extends IntegrationTestSupport 
 				prepare().getVaultOperations(), vaultProperties);
 
 		Secrets secrets = template
-				.read(GenericSecretBackendMetadata.create("versioned", "testVaultApp"));
+				.read(KeyValueSecretBackendMetadata.create("versioned", "testVaultApp"));
 
 		assertThat(secrets.getData()).containsEntry("key", "value");
 	}

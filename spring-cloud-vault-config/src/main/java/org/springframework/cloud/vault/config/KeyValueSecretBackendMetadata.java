@@ -74,7 +74,7 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 				"Secret backend path must not be null or empty");
 		Assert.hasText(key, "Key must not be null or empty");
 
-		return create(String.format("%s/data/%s", secretBackendPath, key),
+		return create(String.format("%s/%s", secretBackendPath, key),
 				UnwrappingPropertyTransformer.unwrap("data"));
 	}
 
@@ -217,6 +217,9 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 				if (entry.getKey().startsWith(this.prefixToStrip + ".")) {
 					target.put(entry.getKey().substring(this.prefixToStrip.length() + 1),
 							entry.getValue());
+				}
+				else {
+					target.put(entry.getKey(), entry.getValue());
 				}
 			}
 

@@ -51,7 +51,7 @@ public class VaultPropertySourceLocatorUnitTests {
 	public void before() {
 		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
 				new VaultProperties(), VaultPropertySourceLocatorSupport
-						.createConfiguration(new VaultGenericBackendProperties()));
+						.createConfiguration(new VaultKeyValueBackendProperties()));
 	}
 
 	@Test
@@ -62,7 +62,7 @@ public class VaultPropertySourceLocatorUnitTests {
 
 		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
 				vaultProperties, VaultPropertySourceLocatorSupport
-						.createConfiguration(new VaultGenericBackendProperties()));
+						.createConfiguration(new VaultKeyValueBackendProperties()));
 
 		assertThat(this.propertySourceLocator.getOrder()).isEqualTo(42);
 	}
@@ -100,7 +100,7 @@ public class VaultPropertySourceLocatorUnitTests {
 	@Test
 	public void shouldLocatePropertySourcesInVaultApplicationContext() {
 
-		VaultGenericBackendProperties backendProperties = new VaultGenericBackendProperties();
+		VaultKeyValueBackendProperties backendProperties = new VaultKeyValueBackendProperties();
 		backendProperties.setApplicationName("wintermute");
 
 		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
@@ -124,7 +124,7 @@ public class VaultPropertySourceLocatorUnitTests {
 	@Test
 	public void shouldLocatePropertySourcesInEachPathSpecifiedWhenApplicationNameContainsSeveral() {
 
-		VaultGenericBackendProperties backendProperties = new VaultGenericBackendProperties();
+		VaultKeyValueBackendProperties backendProperties = new VaultKeyValueBackendProperties();
 		backendProperties.setApplicationName("wintermute,straylight,icebreaker/armitage");
 
 		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
