@@ -931,7 +931,7 @@ The integration can be enabled by setting
 
 While the database backend is a generic one, `spring.cloud.vault.database`
 specifically targets JDBC databases.
-Username and password are stored in `spring.datasource.username` and `spring.datasource.password`
+Username and password are available from `spring.datasource.username` and `spring.datasource.password` properties
 so using Spring Boot will pick up the generated credentials for your `DataSource` without further configuration.
 You can configure the property names by setting
 `spring.cloud.vault.database.username-property` and
@@ -970,8 +970,8 @@ Spring Cloud Vault can obtain credentials for Apache Cassandra.
 The integration can be enabled by setting
 `spring.cloud.vault.cassandra.enabled=true` (default `false`) and providing the role name with `spring.cloud.vault.cassandra.role=…`.
 
-Username and password are stored in `spring.data.cassandra.username`
-and `spring.data.cassandra.password` so using Spring Boot will pick up the generated credentials without further configuration.
+Username and password are available from `spring.data.cassandra.username`
+and `spring.data.cassandra.password` properties so using Spring Boot will pick up the generated credentials without further configuration.
 You can configure the property names by setting
 `spring.cloud.vault.cassandra.username-property` and
 `spring.cloud.vault.cassandra.password-property`.
@@ -1077,8 +1077,8 @@ Spring Cloud Vault can obtain credentials for MySQL.
 The integration can be enabled by setting
 `spring.cloud.vault.mysql.enabled=true` (default `false`) and providing the role name with `spring.cloud.vault.mysql.role=…`.
 
-Username and password are stored in `spring.datasource.username`
-and `spring.datasource.password` so using Spring Boot will pick up the generated credentials without further configuration.
+Username and password are available from `spring.datasource.username`
+and `spring.datasource.password` properties so using Spring Boot will pick up the generated credentials without further configuration.
 You can configure the property names by setting
 `spring.cloud.vault.mysql.username-property` and
 `spring.cloud.vault.mysql.password-property`.
@@ -1114,8 +1114,8 @@ Spring Cloud Vault can obtain credentials for PostgreSQL.
 The integration can be enabled by setting
 `spring.cloud.vault.postgresql.enabled=true` (default `false`) and providing the role name with `spring.cloud.vault.postgresql.role=…`.
 
-Username and password are stored in `spring.datasource.username`
-and `spring.datasource.password` so using Spring Boot will pick up the generated credentials without further configuration.
+Username and password are available from `spring.datasource.username`
+and `spring.datasource.password` properties so using Spring Boot will pick up the generated credentials without further configuration.
 You can configure the property names by setting
 `spring.cloud.vault.postgresql.username-property` and
 `spring.cloud.vault.postgresql.password-property`.
