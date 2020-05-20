@@ -49,7 +49,7 @@ public class VaultMongoProperties implements DatabaseSecretProperties {
 	private boolean staticRole = false;
 
 	/**
-	 * Cassandra backend path.
+	 * MongoDB backend path.
 	 */
 	@NotEmpty
 	private String backend = "mongodb";
