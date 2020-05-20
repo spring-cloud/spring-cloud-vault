@@ -1720,6 +1720,19 @@ Spring Cloud Vault allows using the Application name and a default context name 
 </ul>
 </div>
 <div class="paragraph">
+<p>The profiles are determined by the properties:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>spring.cloud.vault.kv.profiles</code></p>
+</li>
+<li>
+<p><code>spring.profiles.active</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
 <p>Secrets can be obtained from other contexts within the key-value backend by adding their paths to the application name, separated by commas.
 For example, given the application name <code>usefulapp,mysql1,projectx/aws</code>, each of these folders will be used:</p>
 </div>
@@ -1750,7 +1763,7 @@ No active profiles will skip accessing contexts with a profile name.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Spring Cloud Vault adds the <code>data/</code> context between the mount path and the actual context path.
+Spring Cloud Vault adds the <code>data/</code> context between the mount path and the actual context path depending on whether the mount uses the versioned key-value backend.
 </td>
 </tr>
 </table>
@@ -1765,7 +1778,8 @@ Spring Cloud Vault adds the <code>data/</code> context between the mount path an
         backend: secret
         profile-separator: '/'
         default-context: application
-        application-name: my-app</code></pre>
+        application-name: my-app
+        profiles: local, cloud</code></pre>
 </div>
 </div>
 </div>
@@ -1783,6 +1797,9 @@ Spring Cloud Vault adds the <code>data/</code> context between the mount path an
 </li>
 <li>
 <p><code>application-name</code> overrides the application name for use in the key-value backend</p>
+</li>
+<li>
+<p><code>profiles</code> overrides the active profiles for use in the key-value backend</p>
 </li>
 <li>
 <p><code>profile-separator</code> separates the profile name from the context in property sources with profiles</p>
