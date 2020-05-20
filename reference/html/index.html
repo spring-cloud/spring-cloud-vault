@@ -143,7 +143,6 @@ $(globalSwitch);
 </li>
 <li><a href="#vault.config.backends">Secret Backends</a>
 <ul class="sectlevel2">
-<li><a href="#vault.config.backends.generic">Generic Backend</a></li>
 <li><a href="#vault.config.backends.kv.versioned">Key-Value Backend</a></li>
 <li><a href="#vault.config.backends.consul">Consul</a></li>
 <li><a href="#vault.config.backends.rabbitmq">RabbitMQ</a></li>
@@ -1552,7 +1551,7 @@ All API is synchronous therefore, <code>GcpIamAuthentication</code> does not sup
 <p><a href="https://www.vaultproject.io/docs/auth/gcp.html">Vault Documentation: Using the GCP auth backend</a></p>
 </li>
 <li>
-<p><a href="https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt">GCP Documentation: projects.serviceAccounts.signJwt</a><a id="vault.authentication.gcpiam"></a></p>
+<p><a href="https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt">GCP Documentation: projects.serviceAccounts.signJwt</a></p>
 </li>
 </ul>
 </div>
@@ -1686,120 +1685,13 @@ PCF authentication requires BouncyCastle (bcpkix-jdk15on) to be on the classpath
 <h2 id="vault.config.backends"><a class="link" href="#vault.config.backends">Secret Backends</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="vault.config.backends.generic"><a class="link" href="#vault.config.backends.generic">Generic Backend</a></h3>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-This backend is deprecated in favor of the Key-Value backend and will be removed with the next major version.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Spring Cloud Vault supports at the basic level the key-value secret backend.
-The key-value secret backend allows storage of arbitrary values as key-value store.
-A single context can store one or many key-value tuples.
-Contexts can be organized hierarchically.
-Spring Cloud Vault allows using the Application name and a default context name (<code>application</code>) in combination with active profiles.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>/secret/{application}/{profile}
-/secret/{application}
-/secret/{default-context}/{profile}
-/secret/{default-context}</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The application name is determined by the properties:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><code>spring.cloud.vault.generic.application-name</code></p>
-</li>
-<li>
-<p><code>spring.cloud.vault.application-name</code></p>
-</li>
-<li>
-<p><code>spring.application.name</code></p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Secrets can be obtained from other contexts within the key-value backend by adding their paths to the application name, separated by commas.
-For example, given the application name <code>usefulapp,mysql1,projectx/aws</code>, each of these folders will be used:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><code>/secret/usefulapp</code></p>
-</li>
-<li>
-<p><code>/secret/mysql1</code></p>
-</li>
-<li>
-<p><code>/secret/projectx/aws</code></p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Spring Cloud Vault adds all active profiles to the list of possible context paths.
-No active profiles will skip accessing contexts with a profile name.</p>
-</div>
-<div class="paragraph">
-<p>Properties are exposed like they are stored (i.e. without additional prefixes).</p>
-</div>
-<div class="exampleblock">
-<div class="content">
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">spring.cloud.vault:
-    generic:
-        enabled: true
-        backend: secret
-        profile-separator: '/'
-        default-context: application
-        application-name: my-app</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><code>enabled</code> setting this value to <code>false</code> disables the secret backend config usage</p>
-</li>
-<li>
-<p><code>backend</code> sets the path of the secret mount to use</p>
-</li>
-<li>
-<p><code>default-context</code> sets the context name used by all applications</p>
-</li>
-<li>
-<p><code>application-name</code> overrides the application name for use in the key-value backend</p>
-</li>
-<li>
-<p><code>profile-separator</code> separates the profile name from the context in property sources with profiles</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>See also: <a href="https://www.vaultproject.io/docs/secrets/kv/kv-v1.html">Vault Documentation: Using the KV Secrets Engine - Version 1 (generic secret backend)</a></p>
-</div>
-</div>
-<div class="sect2">
 <h3 id="vault.config.backends.kv.versioned"><a class="link" href="#vault.config.backends.kv.versioned">Key-Value Backend</a></h3>
 <div class="paragraph">
-<p>Spring Cloud Vault supports the Key-Value secret backend.
+<p>Spring Cloud Vault supports both Key-Value secret backends, the versioned (v2) and unversioned (v1).
 The key-value backend allows storage of arbitrary values as key-value store.
 A single context can store one or many key-value tuples.
 Contexts can be organized hierarchically.
-Spring Cloud Vault determines itself whether a secret is using versioning.
+Spring Cloud Vault determines itself whether a secret is using versioning and maps the path to its appropriate URL.
 Spring Cloud Vault allows using the Application name and a default context name (<code>application</code>) in combination with active profiles.</p>
 </div>
 <div class="listingblock">
