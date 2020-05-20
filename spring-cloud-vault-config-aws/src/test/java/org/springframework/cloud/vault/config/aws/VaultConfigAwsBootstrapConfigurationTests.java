@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.vault.config.GenericSecretBackendMetadata;
+import org.springframework.cloud.vault.config.KeyValueSecretBackendMetadata;
 import org.springframework.cloud.vault.config.SecretBackendMetadata;
 import org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrapConfiguration.AwsSecretBackendMetadataFactory;
 import org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrapConfigurationTests.CustomBootstrapConfiguration;
@@ -55,7 +55,7 @@ public class VaultConfigAwsBootstrapConfigurationTests extends IntegrationTestSu
 
 		SecretBackendMetadata metadata = this.factory.createMetadata(this.properties);
 
-		assertThat(metadata).isInstanceOf(GenericSecretBackendMetadata.class);
+		assertThat(metadata).isInstanceOf(KeyValueSecretBackendMetadata.class);
 		assertThat(metadata.getPath()).isEqualTo(this.properties.getRole());
 	}
 
@@ -70,7 +70,7 @@ public class VaultConfigAwsBootstrapConfigurationTests extends IntegrationTestSu
 				@Override
 				public SecretBackendMetadata createMetadata(
 						VaultAwsProperties backendDescriptor) {
-					return GenericSecretBackendMetadata
+					return KeyValueSecretBackendMetadata
 							.create(backendDescriptor.getRole());
 				}
 			};

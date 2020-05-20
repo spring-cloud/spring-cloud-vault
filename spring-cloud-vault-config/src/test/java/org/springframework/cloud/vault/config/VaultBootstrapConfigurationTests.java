@@ -39,7 +39,7 @@ public class VaultBootstrapConfigurationTests {
 	@Test
 	public void shouldConfigureWithoutAuthentication() {
 
-		this.contextRunner.withPropertyValues("spring.cloud.vault.generic.enabled=false",
+		this.contextRunner.withPropertyValues("spring.cloud.vault.kv.enabled=false",
 				"spring.cloud.vault.authentication=NONE").run(context -> {
 
 					assertThat(context).doesNotHaveBean(SessionManager.class);

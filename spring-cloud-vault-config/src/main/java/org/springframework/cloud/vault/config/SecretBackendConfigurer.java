@@ -83,19 +83,6 @@ public interface SecretBackendConfigurer {
 			PropertyTransformer propertyTransformer);
 
 	/**
-	 * Register default generic secret backend property sources.
-	 * @param registerDefault {@literal true} to enable default generic secret backend
-	 * registration.
-	 * @return {@code this} {@link SecretBackendConfigurer}.
-	 * @deprecated since 2.2.3
-	 */
-	@Deprecated
-	default SecretBackendConfigurer registerDefaultGenericSecretBackends(
-			boolean registerDefault) {
-		return registerDefaultKeyValueSecretBackends(registerDefault);
-	}
-
-	/**
 	 * Register default key-value secret backend property sources.
 	 * @param registerDefault {@literal true} to enable default kv secret backend
 	 * registration.

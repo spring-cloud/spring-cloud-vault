@@ -43,9 +43,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = VaultConfigGenericBackendDisabledTests.TestApplication.class,
-		properties = "spring.cloud.vault.generic.enabled=false")
-public class VaultConfigGenericBackendDisabledTests {
+@SpringBootTest(classes = VaultConfigKeyValueBackendDisabledTests.TestApplication.class,
+		properties = "spring.cloud.vault.kv.enabled=false")
+public class VaultConfigKeyValueBackendDisabledTests {
 
 	@Autowired
 	Environment environment;

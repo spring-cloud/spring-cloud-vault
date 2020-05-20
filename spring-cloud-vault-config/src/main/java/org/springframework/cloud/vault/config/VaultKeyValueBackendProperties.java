@@ -39,7 +39,7 @@ public class VaultKeyValueBackendProperties
 	/**
 	 * Enable the kev-value backend.
 	 */
-	private boolean enabled = false;
+	private boolean enabled = true;
 
 	/**
 	 * Name of the default backend.

@@ -26,14 +26,13 @@ import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.cloud.vault.config.GenericSecretBackendMetadata.create;
 
 /**
- * Integration tests for {@link VaultConfigTemplate} using the generic secret backend.
+ * Integration tests for {@link VaultConfigTemplate} using the key-value secret backend.
  *
  * @author Mark Paluch
  */
-public class GenericSecretIntegrationTests extends IntegrationTestSupport {
+public class KeyValueSecretIntegrationTests extends IntegrationTestSupport {
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
 
@@ -53,7 +52,8 @@ public class GenericSecretIntegrationTests extends IntegrationTestSupport {
 	public void shouldReturnSecretsCorrectly() {
 
 		Map<String, Object> secretProperties = this.configOperations
-				.read(create("secret", "app-name")).getData();
+				.read(KeyValueSecretBackendMetadata.create("secret", "app-name"))
+				.getData();
 
 		assertThat(secretProperties).containsAllEntriesOf(createExpectedMap());
 	}
@@ -61,7 +61,8 @@ public class GenericSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void shouldReturnNullIfNotFound() {
 
-		Secrets secrets = this.configOperations.read(create("secret", "missing"));
+		Secrets secrets = this.configOperations
+				.read(KeyValueSecretBackendMetadata.create("secret", "missing"));
 
 		assertThat(secrets).isNull();
 	}

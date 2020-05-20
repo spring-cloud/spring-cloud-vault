@@ -18,6 +18,7 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -49,8 +50,7 @@ import org.springframework.vault.core.lease.SecretLeaseContainer;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
-@EnableConfigurationProperties({ VaultGenericBackendProperties.class,
-		VaultKeyValueBackendProperties.class })
+@EnableConfigurationProperties(VaultKeyValueBackendProperties.class)
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
 public class VaultBootstrapPropertySourceConfiguration implements InitializingBean {
 
@@ -80,14 +80,13 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	public PropertySourceLocator vaultPropertySourceLocator(VaultOperations operations,
 			VaultProperties vaultProperties,
 			VaultKeyValueBackendProperties kvBackendProperties,
-			VaultGenericBackendProperties genericBackendProperties,
 			ObjectFactory<SecretLeaseContainer> secretLeaseContainerObjectFactory) {
 
 		VaultConfigTemplate vaultConfigTemplate = new VaultConfigTemplate(operations,
 				vaultProperties);
 
 		PropertySourceLocatorConfiguration configuration = getPropertySourceConfiguration(
-				Arrays.asList(kvBackendProperties, genericBackendProperties));
+				Collections.singletonList(kvBackendProperties));
 
 		VaultProperties.Lifecycle lifecycle = vaultProperties.getConfig().getLifecycle();
 
@@ -112,7 +111,7 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 
 	/**
 	 * Apply configuration through {@link VaultConfigurer}.
-	 * @param keyValueBackends configured backend (key-value, generic secret backend).
+	 * @param keyValueBackends configured backend.
 	 * @return the {@link PropertySourceLocatorConfiguration}.
 	 */
 	private PropertySourceLocatorConfiguration getPropertySourceConfiguration(
@@ -124,7 +123,7 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 		DefaultSecretBackendConfigurer secretBackendConfigurer = new DefaultSecretBackendConfigurer();
 
 		if (configurers.isEmpty()) {
-			secretBackendConfigurer.registerDefaultGenericSecretBackends(true)
+			secretBackendConfigurer.registerDefaultKeyValueSecretBackends(true)
 					.registerDefaultDiscoveredSecretBackends(true);
 		}
 		else {
@@ -147,7 +146,7 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 								.getEnvironment().getActiveProfiles()));
 
 				for (String context : contexts) {
-					secretBackendConfigurer.add(GenericSecretBackendMetadata
+					secretBackendConfigurer.add(KeyValueSecretBackendMetadata
 							.create(keyValueBackend.getBackend(), context));
 				}
 			}

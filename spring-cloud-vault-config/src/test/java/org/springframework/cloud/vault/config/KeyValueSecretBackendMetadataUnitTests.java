@@ -25,18 +25,18 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link GenericSecretBackendMetadata}.
+ * Unit tests for {@link KeyValueSecretBackendMetadata}.
  *
  * @author Mark Paluch
  */
-public class GenericSecretBackendMetadataUnitTests {
+public class KeyValueSecretBackendMetadataUnitTests {
 
-	VaultGenericBackendProperties properties = new VaultGenericBackendProperties();
+	VaultKeyValueBackendProperties properties = new VaultKeyValueBackendProperties();
 
 	@Test
 	public void shouldCreateDefaultContexts() {
 
-		List<String> contexts = GenericSecretBackendMetadata
+		List<String> contexts = KeyValueSecretBackendMetadata
 				.buildContexts(this.properties, Collections.emptyList());
 
 		assertThat(contexts).hasSize(1).contains("application");
@@ -47,7 +47,7 @@ public class GenericSecretBackendMetadataUnitTests {
 
 		this.properties.setApplicationName("my-app");
 
-		List<String> contexts = GenericSecretBackendMetadata
+		List<String> contexts = KeyValueSecretBackendMetadata
 				.buildContexts(this.properties, Collections.emptyList());
 
 		assertThat(contexts).hasSize(2).containsSequence("my-app", "application");
@@ -58,7 +58,7 @@ public class GenericSecretBackendMetadataUnitTests {
 
 		this.properties.setApplicationName("my-app");
 
-		List<String> contexts = GenericSecretBackendMetadata
+		List<String> contexts = KeyValueSecretBackendMetadata
 				.buildContexts(this.properties, Arrays.asList("cloud", "local"));
 
 		assertThat(contexts).hasSize(6).containsSequence("my-app/local", "my-app/cloud",
@@ -71,7 +71,7 @@ public class GenericSecretBackendMetadataUnitTests {
 		this.properties.setApplicationName("my-app");
 		this.properties.setDefaultContext("");
 
-		List<String> contexts = GenericSecretBackendMetadata
+		List<String> contexts = KeyValueSecretBackendMetadata
 				.buildContexts(this.properties, Collections.emptyList());
 
 		assertThat(contexts).hasSize(1).containsSequence("my-app");
@@ -82,7 +82,7 @@ public class GenericSecretBackendMetadataUnitTests {
 
 		this.properties.setApplicationName("foo,bar");
 
-		List<String> contexts = GenericSecretBackendMetadata
+		List<String> contexts = KeyValueSecretBackendMetadata
 				.buildContexts(this.properties, Collections.emptyList());
 
 		assertThat(contexts).hasSize(3).containsSequence("bar", "foo", "application");
@@ -93,7 +93,7 @@ public class GenericSecretBackendMetadataUnitTests {
 
 		this.properties.setApplicationName("foo,bar");
 
-		List<String> contexts = GenericSecretBackendMetadata
+		List<String> contexts = KeyValueSecretBackendMetadata
 				.buildContexts(this.properties, Arrays.asList("cloud", "local"));
 
 		assertThat(contexts).hasSize(9).containsSequence("bar/local", "bar/cloud", "bar",

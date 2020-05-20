@@ -18,8 +18,6 @@ package org.springframework.cloud.vault.config;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.commons.logging.Log;
-
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.Assert;
@@ -38,9 +36,6 @@ import org.springframework.vault.core.lease.event.LeaseErrorListener;
  */
 class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSupport
 		implements PriorityOrdered {
-
-	private static final Log log = org.apache.commons.logging.LogFactory
-			.getLog(LeasingVaultPropertySourceLocator.class);
 
 	private final SecretLeaseContainer secretLeaseContainer;
 
@@ -98,7 +93,7 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 					accessor.getPath());
 		}
 
-		if (accessor instanceof GenericSecretBackendMetadata) {
+		if (accessor instanceof KeyValueSecretBackendMetadata) {
 			return RequestedSecret.rotating(accessor.getPath());
 		}
 

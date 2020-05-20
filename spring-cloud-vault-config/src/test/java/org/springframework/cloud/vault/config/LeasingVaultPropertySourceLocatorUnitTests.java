@@ -53,7 +53,7 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 
 		this.propertySourceLocator = new LeasingVaultPropertySourceLocator(
 				new VaultProperties(), VaultPropertySourceLocatorSupport
-						.createConfiguration(new VaultGenericBackendProperties()),
+						.createConfiguration(new VaultKeyValueBackendProperties()),
 				this.secretLeaseContainer);
 	}
 
@@ -65,7 +65,7 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 
 		this.propertySourceLocator = new LeasingVaultPropertySourceLocator(
 				vaultProperties, VaultPropertySourceLocatorSupport.createConfiguration(
-						new VaultGenericBackendProperties()),
+						new VaultKeyValueBackendProperties()),
 				this.secretLeaseContainer);
 
 		assertThat(this.propertySourceLocator.getOrder()).isEqualTo(10);

@@ -51,7 +51,7 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigCubbyholeAuthenticationTests.TestApplication.class,
 		properties = { "spring.cloud.vault.authentication=cubbyhole",
-				"spring.cloud.vault.generic.applicationName=VaultConfigCubbyholeAuthenticationTests" })
+				"spring.cloud.vault.kv.applicationName=VaultConfigCubbyholeAuthenticationTests" })
 public class VaultConfigCubbyholeAuthenticationTests {
 
 	@Value("${vault.value}")

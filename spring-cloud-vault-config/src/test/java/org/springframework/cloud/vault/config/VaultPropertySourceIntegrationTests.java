@@ -48,7 +48,7 @@ public class VaultPropertySourceIntegrationTests extends IntegrationTestSupport 
 
 		VaultPropertySource propertySource = new VaultPropertySource(
 				new VaultConfigTemplate(prepare().getVaultOperations(), vaultProperties),
-				false, GenericSecretBackendMetadata.create("secret", "myapp"));
+				false, KeyValueSecretBackendMetadata.create("secret", "myapp"));
 
 		propertySource.init();
 
@@ -70,7 +70,7 @@ public class VaultPropertySourceIntegrationTests extends IntegrationTestSupport 
 
 		VaultPropertySource propertySource = new VaultPropertySource(
 				new VaultConfigTemplate(prepare().getVaultOperations(), vaultProperties),
-				false, GenericSecretBackendMetadata.create("versioned", "testVaultApp"));
+				false, KeyValueSecretBackendMetadata.create("versioned", "testVaultApp"));
 
 		propertySource.init();
 
