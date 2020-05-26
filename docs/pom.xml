@@ -11,11 +11,11 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<artifactId>spring-cloud-vault-config-docs</artifactId>
+	<artifactId>spring-cloud-vault-docs</artifactId>
 	<version>3.0.0-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
-	<name>Spring Cloud Vault Config Docs</name>
+	<name>Spring Cloud Vault Docs</name>
 	<description>Spring Cloud Docs</description>
 
 	<properties>
