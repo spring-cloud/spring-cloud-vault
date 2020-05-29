@@ -452,7 +452,7 @@ NOTE: Response Wrapping for token creation requires Vault 0.6.0 or higher.
 ====
 [source,shell]
 ----
-$ vault token-create -wrap-ttl="10m"
+$ vault token create -wrap-ttl="10m"
 Key                            Value
 ---                            -----
 wrapping_token:                397ccb93-ff6c-b17b-9389-380b01ca2645

@@ -72,7 +72,7 @@ If you want to use Vault for your application or give it a try then you need to 
 ----
 $ export VAULT_ADDR="https://localhost:8200"
 $ export VAULT_SKIP_VERIFY=true # Don't do this for production
-$ vault init
+$ vault operator init
 ----
 
 You should see something like:
@@ -102,12 +102,12 @@ environment variable.
 
 [source,bash]
 ----
-$ vault unseal (Key 1)
-$ vault unseal (Key 2)
-$ vault unseal (Key 3)
+$ vault operator unseal (Key 1)
+$ vault operator unseal (Key 2)
+$ vault operator unseal (Key 3)
 $ export VAULT_TOKEN=(Root token)
 # Required to run Spring Cloud Vault tests after manual initialization
-$ vault token-create -id="00000000-0000-0000-0000-000000000000" -policy="root"
+$ vault token create -id="00000000-0000-0000-0000-000000000000" -policy="root"
 ----
 
 Spring Cloud Vault accesses different resources.
