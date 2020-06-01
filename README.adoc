@@ -263,7 +263,7 @@ Depending on how you have set up Vault you might need additional configuration l
 {docs}#vault.config.ssl[SSL] and
 {docs}#vault.config.authentication[authentication].
 
-If the application imports the `spring-boot-starter-actuator` project, the status of the vault server will be available via the `/health` endpoint.
+If the application imports the `spring-boot-starter-actuator` project, the status of the vault server will be available via the `/actuator/health` endpoint.
 
 The vault health indicator can be enabled or disabled through the property `management.health.vault.enabled` (default to `true`).
 
