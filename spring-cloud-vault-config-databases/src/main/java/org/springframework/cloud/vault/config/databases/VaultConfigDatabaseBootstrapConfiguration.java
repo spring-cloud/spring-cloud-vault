@@ -32,16 +32,17 @@ import org.springframework.vault.core.util.PropertyTransformer;
 
 /**
  * Bootstrap configuration providing support for the Database secret backends such as
- * Database, Apache Cassandra and MongoDB.
+ * Database, Apache Cassandra, Couchbase and MongoDB.
  *
  * @author Mark Paluch
  * @author Per Abich
  * @author Sebastien Nahelou
+ * @author Francis Hitchens
  */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({ VaultMySqlProperties.class, VaultPostgreSqlProperties.class,
 		VaultCassandraProperties.class, VaultMongoProperties.class, VaultElasticsearchProperties.class,
-		VaultDatabaseProperties.class })
+		VaultDatabaseProperties.class, VaultCouchbaseProperties.class })
 public class VaultConfigDatabaseBootstrapConfiguration {
 
 	@Bean
