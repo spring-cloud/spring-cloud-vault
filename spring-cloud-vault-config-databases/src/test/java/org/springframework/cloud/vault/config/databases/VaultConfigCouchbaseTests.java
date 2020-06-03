@@ -57,7 +57,7 @@ public class VaultConfigCouchbaseTests {
 
 	private static final int COUCHBASE_PORT = 9042;
 
-	private static final String COCHBASE_USERNAME = "springvault";
+	private static final String COUCHBASE_USERNAME = "springvault";
 
 	private static final String COUCHBASE_PASSWORD = "springvault";
 

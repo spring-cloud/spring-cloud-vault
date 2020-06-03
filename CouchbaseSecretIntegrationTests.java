@@ -40,13 +40,13 @@ import static org.springframework.cloud.vault.config.databases.VaultConfigDataba
  * This test requires a running Couchbase instance, see {@link #COUCHBASE_HOST} and other
  * {@code COUCHBASE_*} properties.
  *
- * @author Mark Paluch
+ * @author Francis J. Hitchens
  */
 public class CouchbaseSecretIntegrationTests extends IntegrationTestSupport {
 
 	private static final String COUCHBASE_HOST = "localhost";
 
-	private static final int COUCHBASE_PORT = 9042;
+	private static final int COUCHBASE_PORT = 11210;
 
 	private static final String COUCHBASE_USERNAME = "springvault";
 
