@@ -4,6 +4,7 @@ Manual changes to this file will be lost when it is generated again.
 Edit the files in the src/main/asciidoc/ directory instead.
 ////
 
+
 :docs: https://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html
 
 Spring Cloud Vault Config provides client-side support for externalized configuration in a distributed system.
