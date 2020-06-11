@@ -55,7 +55,7 @@ public class VaultConfigCouchbaseTests {
 
 	private static final String COUCHBASE_HOST = "localhost";
 
-	private static final int COUCHBASE_PORT = 9042;
+	private static final int COUCHBASE_PORT = 65535;
 
 	private static final String COUCHBASE_USERNAME = "springvault";
 
