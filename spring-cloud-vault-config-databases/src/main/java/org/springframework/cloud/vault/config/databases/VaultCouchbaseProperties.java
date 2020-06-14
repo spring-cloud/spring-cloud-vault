@@ -52,7 +52,7 @@ public class VaultCouchbaseProperties implements DatabaseSecretProperties {
 	 * Couchbase backend path.
 	 */
 	@NotEmpty
-	private String backend = "couchbase";
+	private String backend = "database";
 
 	/**
 	 * Target property for the obtained username.

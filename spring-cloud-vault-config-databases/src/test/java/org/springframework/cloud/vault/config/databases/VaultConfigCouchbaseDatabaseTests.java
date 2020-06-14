@@ -22,13 +22,13 @@ import com.couchbase.client.java.*;
 import com.couchbase.client.java.kv.*;
 import com.couchbase.client.java.json.*;
 import com.couchbase.client.java.query.*;
+import com.couchbase.client.core.error.*;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.sql.DataSource;
+import java.time.Duration;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -57,9 +57,10 @@ import static org.junit.Assume.assumeTrue;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigCouchbaseDatabaseTests.TestApplication.class,
-		properties = { "spring.cloud.vault.database.enabled=true",
-				"spring.cloud.vault.database.role=readonly",
-				"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=UTC",
+		properties = { "spring.cloud.vault.couchbase.enabled=true",
+				"spring.cloud.vault.couchbase.role=readonly",
+				"spring.data.couchbase.username=foo",
+				"spring.data.couchbase.password=bar",
 				"spring.main.allow-bean-definition-overriding=true" })
 public class VaultConfigCouchbaseDatabaseTests {
 
@@ -67,14 +68,14 @@ public class VaultConfigCouchbaseDatabaseTests {
 
 	private static final String COUCHBASE_HOST = "localhost";
 
-	@Value("${spring.datasource.username}")
+	@Value("${spring.data.couchbase.username}")
 	String username;
 
-	@Value("${spring.datasource.password}")
+	@Value("${spring.data.couchbase.password}")
 	String password;
 
-	@Autowired
-	DataSource dataSource;
+	// @Autowired
+	Cluster cluster;
 
 	/**
 	 * Initialize the couchbase secret backend.
@@ -112,15 +113,19 @@ public class VaultConfigCouchbaseDatabaseTests {
 	}
 
 	@Test
-	public void shouldConnectUsingDataSource() throws SQLException {
+	public void shouldConnectConnection() throws UnambiguousTimeoutException {
 
-		this.dataSource.getConnection().close();
+		this.cluster = Cluster.connect("127.0.0.1", this.username, this.password);
+		this.cluster.waitUntilReady(Duration.ofSeconds(5));
+		this.cluster.disconnect();
 	}
 
-	@Test
-	public void shouldConnectUsingJdbcUrlConnection() throws SQLException {
+	@Test(expected = UnambiguousTimeoutException.class)
+	public void shouldFailConnectConnection() throws UnambiguousTimeoutException {
 
-		Cluster cluster = Cluster.connect("localhost", this.username, this.password);
+		this.cluster = Cluster.connect("127.0.0.1", this.username, "fake.pwd");
+		this.cluster.waitUntilReady(Duration.ofSeconds(5));
+		this.cluster.disconnect();
 	}
 
 	@SpringBootApplication
