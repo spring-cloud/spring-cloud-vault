@@ -900,6 +900,7 @@ Spring Cloud Vault integrates with these backends:
 
 * <<vault.config.backends.database>>
 * <<vault.config.backends.cassandra>>
+* <<vault.config.backends.couchbase>>
 * <<vault.config.backends.elasticsearch>>
 * <<vault.config.backends.mongodb>>
 * <<vault.config.backends.mysql>>
@@ -1003,6 +1004,40 @@ spring.cloud.vault:
 * `password-property` sets the property name in which the Cassandra password is stored
 
 See also: https://www.vaultproject.io/docs/secrets/cassandra/index.html[Vault Documentation: Setting up Apache Cassandra with Vault]
+
+[[vault.config.backends.couchbase]]
+=== Couchbase Database
+
+Spring Cloud Vault can obtain credentials for Couchbase.
+The integration can be enabled by setting
+`spring.cloud.vault.couchbase.enabled=true` (default `false`) and providing the role name with `spring.cloud.vault.couchbase.role=…`.
+
+Username and password are available from `spring.data.couchbase.username`
+and `spring.data.couchbase.password` properties so using Spring Boot will pick up the generated credentials without further configuration.
+You can configure the property names by setting
+`spring.cloud.vault.couchbase.username-property` and
+`spring.cloud.vault.couchbase.password-property`.
+
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    couchbase:
+        enabled: true
+        role: readonly
+        backend: database
+        username-property: spring.data.couchbase.username
+        password-property: spring.data.couchbase.password
+----
+====
+
+* `enabled` setting this value to `true` enables the Couchbase backend config usage
+* `role` sets the role name of the Couchbase role definition
+* `backend` sets the path of the Couchbase mount to use
+* `username-property` sets the property name in which the Couchbase username is stored
+* `password-property` sets the property name in which the Couchbase password is stored
+
+See also: https://www.vaultproject.io/docs/secrets/couchbase/index.html[Vault Documentation: Setting upCouchbase with Vault]
 
 [[vault.config.backends.elasticsearch]]
 === Elasticsearch

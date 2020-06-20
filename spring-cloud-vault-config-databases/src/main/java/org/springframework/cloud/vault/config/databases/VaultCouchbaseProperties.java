@@ -24,8 +24,7 @@ import org.springframework.validation.annotation.Validated;
 /**
  * Configuration properties for Vault using the Couchbase integration.
  *
- * @author Mark Paluch
- * @author Sebastien Nahelou
+ * @author Francis Hitchens
  */
 @ConfigurationProperties("spring.cloud.vault.couchbase")
 @Validated
