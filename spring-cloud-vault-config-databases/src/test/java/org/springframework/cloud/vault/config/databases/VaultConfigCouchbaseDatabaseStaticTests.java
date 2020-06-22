@@ -53,6 +53,8 @@ import static org.junit.Assume.assumeTrue;
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
  *
+ * Needs existing Couchbase user named vault-static with at least ro_admin privs.
+ *
  * @author Francis Hitchens
  */
 @RunWith(SpringRunner.class)
