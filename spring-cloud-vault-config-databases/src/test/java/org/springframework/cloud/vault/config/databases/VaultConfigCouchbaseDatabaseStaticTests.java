@@ -56,13 +56,14 @@ import static org.junit.Assume.assumeTrue;
  * @author Francis Hitchens
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = VaultConfigCouchbaseDatabaseTests.TestApplication.class,
+@SpringBootTest(classes = VaultConfigCouchbaseDatabaseStaticTests.TestApplication.class,
 		properties = { "spring.cloud.vault.couchbase.enabled=true",
-				"spring.cloud.vault.couchbase.role=readonly",
+				"spring.cloud.vault.couchbase.role=staticreadonly",
+				"spring.cloud.vault.couchbase.staticRole=true",
 				"spring.data.couchbase.username=foo",
 				"spring.data.couchbase.password=bar",
 				"spring.main.allow-bean-definition-overriding=true" })
-public class VaultConfigCouchbaseDatabaseTests {
+public class VaultConfigCouchbaseDatabaseStaticTests {
 
 	private static final int COUCHBASE_PORT = 8091;
 
@@ -106,9 +107,11 @@ public class VaultConfigCouchbaseDatabaseTests {
 
 		Map<String, String> body = new HashMap<>();
 		body.put("db_name", "spring-cloud-vault-couchbase");
+		body.put("username", "vault-static");
+		body.put("rotation_period", "5m");
 		body.put("creation_statements", "[{\"name\":\"ro_admin\"}]");
 
-		vaultOperations.write("database/roles/readonly", body);
+		vaultOperations.write("database/static-roles/staticreadonly", body);
 	}
 
 	@Test
