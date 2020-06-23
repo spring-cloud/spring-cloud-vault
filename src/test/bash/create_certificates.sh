@@ -67,7 +67,7 @@ chmod 400 ${CA_DIR}/private/localhost.decrypted.key.pem
 
 echo "[INFO] Generating server certificate request"
 openssl req -config <(cat ${DIR}/openssl.cnf \
-        <(printf "\n[SAN]\nsubjectAltName=DNS:localhost,IP:127.0.0.1,DNS:chanchan2")) \
+        <(printf "\n[SAN]\nsubjectAltName=DNS:localhost,IP:127.0.0.1")) \
       -reqexts SAN \
       -key ${CA_DIR}/private/localhost.key.pem \
       -passin pass:changeit \

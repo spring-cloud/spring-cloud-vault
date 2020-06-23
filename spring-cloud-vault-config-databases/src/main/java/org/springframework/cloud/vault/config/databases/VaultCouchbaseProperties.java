@@ -43,7 +43,6 @@ public class VaultCouchbaseProperties implements DatabaseSecretProperties {
 	/**
 	 * Enable static role usage.
 	 *
-	 * @since 2.2
 	 */
 	private boolean staticRole = false;
 
