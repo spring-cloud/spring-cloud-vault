@@ -106,7 +106,7 @@ public class VaultConfigCouchbaseDatabaseTests {
 
 		Map<String, String> body = new HashMap<>();
 		body.put("db_name", "spring-cloud-vault-couchbase");
-		body.put("creation_statements", "[{\"name\":\"ro_admin\"}]");
+		body.put("creation_statements", "{\"roles\":[{\"role\":\"ro_admin\"}]}");
 
 		vaultOperations.write("database/roles/readonly", body);
 	}

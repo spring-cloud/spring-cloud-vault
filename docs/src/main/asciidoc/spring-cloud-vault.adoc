@@ -1037,7 +1037,7 @@ spring.cloud.vault:
 * `username-property` sets the property name in which the Couchbase username is stored
 * `password-property` sets the property name in which the Couchbase password is stored
 
-See also: https://www.vaultproject.io/docs/secrets/couchbase/index.html[Vault Documentation: Setting upCouchbase with Vault]
+See also: https://www.vaultproject.io/docs/secrets/couchbase/index.html[Vault Documentation: Setting up Couchbase with Vault]
 
 [[vault.config.backends.elasticsearch]]
 === Elasticsearch
