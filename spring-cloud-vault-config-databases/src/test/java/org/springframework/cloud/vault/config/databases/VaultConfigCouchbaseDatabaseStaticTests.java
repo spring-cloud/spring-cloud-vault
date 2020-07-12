@@ -18,14 +18,9 @@ package org.springframework.cloud.vault.config.databases;
 
 import java.net.InetSocketAddress;
 
-import com.couchbase.client.java.*;
-import com.couchbase.client.java.kv.*;
-import com.couchbase.client.java.json.*;
-import com.couchbase.client.java.query.*;
-import com.couchbase.client.core.error.*;
+import com.couchbase.client.java.Cluster;
+import com.couchbase.client.core.error.UnambiguousTimeoutException;
 
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.time.Duration;
@@ -34,7 +29,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
