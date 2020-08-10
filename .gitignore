@@ -24,4 +24,5 @@ pom.xml.releaseBackup
 .flattened-pom.xml
 release.properties
 .vscode/
+.sdkmanrc
 
