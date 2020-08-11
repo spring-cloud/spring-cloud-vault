@@ -87,7 +87,8 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 		PropertySourceLocatorConfiguration configuration = getPropertySourceConfiguration(
 				Collections.singletonList(kvBackendProperties));
 
-		VaultProperties.Lifecycle lifecycle = vaultProperties.getConfig().getLifecycle();
+		VaultProperties.ConfigLifecycle lifecycle = vaultProperties.getConfig()
+				.getLifecycle();
 
 		if (lifecycle.isEnabled()) {
 
@@ -182,7 +183,8 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	public SecretLeaseContainer secretLeaseContainer(VaultProperties vaultProperties,
 			VaultOperations vaultOperations, TaskSchedulerWrapper taskSchedulerWrapper) {
 
-		VaultProperties.Lifecycle lifecycle = vaultProperties.getConfig().getLifecycle();
+		VaultProperties.ConfigLifecycle lifecycle = vaultProperties.getConfig()
+				.getLifecycle();
 
 		SecretLeaseContainer container = new SecretLeaseContainer(vaultOperations,
 				taskSchedulerWrapper.getTaskScheduler());
@@ -192,7 +194,7 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 		return container;
 	}
 
-	static void customizeContainer(VaultProperties.Lifecycle lifecycle,
+	static void customizeContainer(VaultProperties.ConfigLifecycle lifecycle,
 			SecretLeaseContainer container) {
 
 		if (lifecycle.isEnabled()) {

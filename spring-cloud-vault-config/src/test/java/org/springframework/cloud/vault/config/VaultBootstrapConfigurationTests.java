@@ -16,12 +16,16 @@
 
 package org.springframework.cloud.vault.config;
 
+import java.time.Duration;
+
 import org.junit.Test;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.SessionManager;
+import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.core.VaultTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,6 +49,41 @@ public class VaultBootstrapConfigurationTests {
 					assertThat(context).doesNotHaveBean(SessionManager.class);
 					assertThat(context).doesNotHaveBean(ClientAuthentication.class);
 					assertThat(context).hasSingleBean(VaultTemplate.class);
+				});
+	}
+
+	@Test
+	public void shouldDisableSessionManagement() {
+
+		this.contextRunner
+				.withPropertyValues("spring.cloud.vault.kv.enabled=false",
+						"spring.cloud.vault.token=foo",
+						"spring.cloud.vault.session.lifecycle.enabled=false")
+				.run(context -> {
+
+					SessionManager bean = context.getBean(SessionManager.class);
+					assertThat(bean).isExactlyInstanceOf(SimpleSessionManager.class);
+				});
+	}
+
+	@Test
+	public void shouldConfigureSessionManagement() {
+
+		this.contextRunner
+				.withPropertyValues("spring.cloud.vault.kv.enabled=false",
+						"spring.cloud.vault.token=foo",
+						"spring.cloud.vault.session.lifecycle.refresh-before-expiry=11s",
+						"spring.cloud.vault.session.lifecycle.expiry-threshold=12s")
+				.run(context -> {
+
+					SessionManager bean = context.getBean(SessionManager.class);
+
+					Object refreshTrigger = ReflectionTestUtils.getField(bean,
+							"refreshTrigger");
+
+					assertThat(refreshTrigger).hasFieldOrPropertyWithValue("duration",
+							Duration.ofSeconds(11)).hasFieldOrPropertyWithValue(
+									"validTtlThreshold", Duration.ofSeconds(12));
 				});
 	}
 
