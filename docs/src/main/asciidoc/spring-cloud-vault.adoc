@@ -355,7 +355,7 @@ spring.cloud.vault:
     aws-iam:
         role: my-dev-role
         aws-path: aws
-        server-id: some.server.name
+        server-name: some.server.name
         endpoint-uri: https://sts.eu-central-1.amazonaws.com
 ----
 ====
@@ -364,7 +364,7 @@ spring.cloud.vault:
 This should be bound to your IAM role.
 If one is not supplied then the friendly name of the current IAM user will be used as the vault role.
 * `aws-path` sets the path of the AWS mount to use
-* `server-id` sets the value to use for the `X-Vault-AWS-IAM-Server-ID` header preventing certain types of replay attacks.
+* `server-name` sets the value to use for the `X-Vault-AWS-IAM-Server-ID` header preventing certain types of replay attacks.
 * `endpoint-uri` sets the value to use for the AWS STS API used for the `iam_request_url` parameter.
 
 AWS-IAM requires the AWS Java SDK dependency (`com.amazonaws:aws-java-sdk-core`) as the authentication implementation uses AWS SDK types for credentials and request signing.
