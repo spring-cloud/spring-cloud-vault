@@ -356,13 +356,13 @@ spring.cloud.vault:
     aws-iam:
         role: my-dev-role
         aws-path: aws
-        server-id: some.server.name
+        server-name: some.server.name
 ----
 ====
 
 * `role` sets the name of the role against which the login is being attempted. This should be bound to your IAM role. If one is not supplied then the friendly name of the current IAM user will be used as the vault role.
 * `aws-path` sets the path of the AWS mount to use
-* `server-id` sets the value to use for the `X-Vault-AWS-IAM-Server-ID` header preventing certain types of replay attacks.
+* `server-name` sets the value to use for the `X-Vault-AWS-IAM-Server-ID` header preventing certain types of replay attacks.
 
 AWS-IAM requires the AWS Java SDK dependency (`com.amazonaws:aws-java-sdk-core`)
 as the authentication implementation uses AWS SDK types for credentials and request signing.
@@ -408,7 +408,7 @@ spring.cloud.vault:
 * `role` sets the name of the role against which the login is being attempted.
 * `azure-path` sets the path of the Azure mount to use
 
-Azure MSI authentication fetches environmental details about the virtual machine 
+Azure MSI authentication fetches environmental details about the virtual machine
 (subscription Id, resource group, VM name) from the instance metadata service.
 
 See also: https://www.vaultproject.io/docs/auth/azure.html[Vault Documentation: Using the azure auth backend]
@@ -549,9 +549,9 @@ and proves thereby its identity. This Vault backend treats GCP as a Trusted Thir
 
 IAM credentials can be obtained from either the runtime environment
 , specifically the https://cloud.google.com/docs/authentication/production[`GOOGLE_APPLICATION_CREDENTIALS`]
-environment variable, the Google Compute metadata service, 
-or supplied externally as e.g. JSON or base64 encoded. 
-JSON is the preferred form as it carries the project id and 
+environment variable, the Google Compute metadata service,
+or supplied externally as e.g. JSON or base64 encoded.
+JSON is the preferred form as it carries the project id and
 service account identifier required for calling ``projects.serviceAccounts.signJwt``.
 
 .bootstrap.yml with required GCP-IAM Authentication properties
