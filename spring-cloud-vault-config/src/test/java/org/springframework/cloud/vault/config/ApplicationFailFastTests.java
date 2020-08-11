@@ -54,6 +54,7 @@ public class ApplicationFailFastTests {
 			new SpringApplicationBuilder().sources(ApplicationFailFastTests.class).run(
 					"--server.port=0", "--spring.cloud.vault.failFast=true",
 					"--spring.cloud.vault.config.lifecycle.enabled=false",
+					"--spring.cloud.vault.session.lifecycle.enabled=false",
 					"--spring.cloud.vault.port=9999");
 			fail("failFast option did not produce an exception");
 		}

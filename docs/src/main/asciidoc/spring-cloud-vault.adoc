@@ -1310,3 +1310,44 @@ A lease is renewed the configured period of time before it expires.
 Legacy for vault versions before 0.8 and SysLeases for later.
 
 See also: https://www.vaultproject.io/docs/concepts/lease.html[Vault Documentation: Lease, Renew, and Revoke]
+
+[[vault-session-lifecycle]]
+== Session token lifecycle management (renewal, re-login and revocation)
+
+A Vault session token (also referred to as `LoginToken`) is quite similar to a lease as it has a TTL, max TTL, and may expire.
+Once a login token expires, it cannot be used anymore to interact with Vault.
+Therefore, Spring Vault ships with a `SessionManager` API for imperative and reactive use.
+
+Spring Cloud Vault maintains the session token lifecycle by default.
+Session tokens are obtained lazily so the actual login is deferred until the first session-bound use of Vault.
+Once Spring Cloud Vault obtains a session token, it retains it until expiry.
+The next time a session-bound activity is used, Spring Cloud Vault re-logins into Vault and obtains a new session token.
+On application shut down, Spring Cloud Vault revokes the token if it was still active to terminate the session.
+
+Session lifecycle is enabled by default and can be disabled by setting `spring.cloud.vault.session.lifecycle.enabled`
+to `false`.
+Disabling is not recommended as session tokens can expire and Spring Cloud Vault cannot longer access Vault.
+
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    session.lifecycle:
+        enabled: true
+        refresh-before-expiry: 10s
+        expiry-threshold: 20s
+----
+====
+
+* `enabled` controls whether session lifecycle management is enabled to renew session tokens.
+Enabled by default.
+* `refresh-before-expiry` controls the point in time when the session token gets renewed.
+The refresh time is calculated by subtracting `refresh-before-expiry` from the token expiry time.
+Defaults to `5 seconds`.
+* `expiry-threshold` sets the expiry threshold.
+The threshold represents a minimum TTL duration to consider a session token as valid.
+Tokens with a shorter TTL are considered expired and are not used anymore.
+Should be greater than  `refresh-before-expiry` to prevent token expiry.
+Defaults to `7 seconds`.
+
+See also: https://www.vaultproject.io/api-docs/auth/token#renew-a-token-self[Vault Documentation: Token Renewal]

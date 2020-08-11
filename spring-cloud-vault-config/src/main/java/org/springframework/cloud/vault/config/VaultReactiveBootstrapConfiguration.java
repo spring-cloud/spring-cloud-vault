@@ -179,11 +179,15 @@ public class VaultReactiveBootstrapConfiguration {
 		VaultTokenSupplier vaultTokenSupplier = beanFactory.getBean("vaultTokenSupplier",
 				VaultTokenSupplier.class);
 
-		if (this.vaultProperties.getConfig().getLifecycle().isEnabled()) {
-
+		VaultProperties.SessionLifecycle lifecycle = this.vaultProperties.getSession()
+				.getLifecycle();
+		if (lifecycle.isEnabled()) {
 			WebClient webClient = this.webClientBuilder.build();
+			ReactiveLifecycleAwareSessionManager.RefreshTrigger trigger = new ReactiveLifecycleAwareSessionManager.FixedTimeoutRefreshTrigger(
+					lifecycle.getRefreshBeforeExpiry(), lifecycle.getExpiryThreshold());
 			return new ReactiveLifecycleAwareSessionManager(vaultTokenSupplier,
-					asyncTaskExecutorFactory.getObject().getTaskScheduler(), webClient);
+					asyncTaskExecutorFactory.getObject().getTaskScheduler(), webClient,
+					trigger);
 		}
 
 		return CachingVaultTokenSupplier.of(vaultTokenSupplier);

@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.vault.config;
 
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
@@ -26,8 +27,11 @@ import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.vault.authentication.AuthenticationSteps;
 import org.springframework.vault.authentication.AuthenticationStepsFactory;
+import org.springframework.vault.authentication.CachingVaultTokenSupplier;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.ReactiveSessionManager;
 import org.springframework.vault.authentication.SessionManager;
@@ -55,7 +59,7 @@ public class VaultReactiveBootstrapConfigurationTests {
 	public void shouldConfigureTemplate() {
 
 		this.contextRunner.withUserConfiguration(AuthenticationFactoryConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.config.lifecycle.enabled=false")
+				.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false")
 				.run(context -> {
 
 					assertThat(context.getBean(ReactiveVaultOperations.class))
@@ -86,7 +90,7 @@ public class VaultReactiveBootstrapConfigurationTests {
 	public void shouldConfigureTemplateWithTokenSupplier() {
 
 		this.contextRunner.withUserConfiguration(TokenSupplierConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.config.lifecycle.enabled=false")
+				.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false")
 				.run(context -> {
 
 					assertThat(context.getBean(ReactiveVaultOperations.class))
@@ -115,6 +119,7 @@ public class VaultReactiveBootstrapConfigurationTests {
 
 	@Test
 	public void sessionManagerBridgeShouldNotCacheTokens() {
+
 		this.contextRunner.withUserConfiguration(TokenSupplierConfiguration.class,
 				CustomSessionManager.class).run(context -> {
 
@@ -124,6 +129,55 @@ public class VaultReactiveBootstrapConfigurationTests {
 							.isEqualTo("token-1");
 					assertThat(sessionManager.getSessionToken().getToken())
 							.isEqualTo("token-2");
+				});
+	}
+
+	@Test
+	public void shouldDisableSessionManagement() {
+
+		this.contextRunner
+				.withPropertyValues("spring.cloud.vault.kv.enabled=false",
+						"spring.cloud.vault.token=foo",
+						"spring.cloud.vault.session.lifecycle.enabled=false")
+				.withBean("vaultTokenSupplier", VaultTokenSupplier.class,
+						() -> Mono::empty)
+				.withBean("taskSchedulerWrapper",
+						VaultBootstrapConfiguration.TaskSchedulerWrapper.class,
+						() -> new VaultBootstrapConfiguration.TaskSchedulerWrapper(
+								new ThreadPoolTaskScheduler()))
+				.run(context -> {
+
+					ReactiveSessionManager bean = context
+							.getBean(ReactiveSessionManager.class);
+					assertThat(bean).isExactlyInstanceOf(CachingVaultTokenSupplier.class);
+				});
+	}
+
+	@Test
+	public void shouldConfigureSessionManagement() {
+
+		this.contextRunner
+				.withPropertyValues("spring.cloud.vault.kv.enabled=false",
+						"spring.cloud.vault.token=foo",
+						"spring.cloud.vault.session.lifecycle.refresh-before-expiry=11s",
+						"spring.cloud.vault.session.lifecycle.expiry-threshold=12s")
+				.withBean("vaultTokenSupplier", VaultTokenSupplier.class,
+						() -> Mono::empty)
+				.withBean("taskSchedulerWrapper",
+						VaultBootstrapConfiguration.TaskSchedulerWrapper.class,
+						() -> new VaultBootstrapConfiguration.TaskSchedulerWrapper(
+								new ThreadPoolTaskScheduler()))
+				.run(context -> {
+
+					ReactiveSessionManager bean = context
+							.getBean(ReactiveSessionManager.class);
+
+					Object refreshTrigger = ReflectionTestUtils.getField(bean,
+							"refreshTrigger");
+
+					assertThat(refreshTrigger).hasFieldOrPropertyWithValue("duration",
+							Duration.ofSeconds(11)).hasFieldOrPropertyWithValue(
+									"validTtlThreshold", Duration.ofSeconds(12));
 				});
 	}
 

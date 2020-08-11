@@ -43,6 +43,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
+import org.springframework.vault.authentication.LifecycleAwareSessionManagerSupport;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
@@ -220,11 +221,16 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	public SessionManager vaultSessionManager(ClientAuthentication clientAuthentication,
 			ObjectFactory<TaskSchedulerWrapper> asyncTaskExecutorFactory) {
 
-		if (this.vaultProperties.getConfig().getLifecycle().isEnabled()) {
+		VaultProperties.SessionLifecycle lifecycle = this.vaultProperties.getSession()
+				.getLifecycle();
+
+		if (lifecycle.isEnabled()) {
 			RestTemplate restTemplate = this.restTemplateBuilder.build();
+			LifecycleAwareSessionManagerSupport.RefreshTrigger trigger = new LifecycleAwareSessionManagerSupport.FixedTimeoutRefreshTrigger(
+					lifecycle.getRefreshBeforeExpiry(), lifecycle.getExpiryThreshold());
 			return new LifecycleAwareSessionManager(clientAuthentication,
-					asyncTaskExecutorFactory.getObject().getTaskScheduler(),
-					restTemplate);
+					asyncTaskExecutorFactory.getObject().getTaskScheduler(), restTemplate,
+					trigger);
 		}
 
 		return new SimpleSessionManager(clientAuthentication);

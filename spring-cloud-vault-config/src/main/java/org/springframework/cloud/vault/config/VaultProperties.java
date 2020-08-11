@@ -27,6 +27,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.vault.authentication.LoginToken;
 import org.springframework.vault.core.lease.LeaseEndpoints;
 
 /**
@@ -121,6 +122,8 @@ public class VaultProperties implements EnvironmentAware {
 	private Ssl ssl = new Ssl();
 
 	private Config config = new Config();
+
+	private Session session = new Session();
 
 	/**
 	 * Application name for AppId authentication.
@@ -227,6 +230,10 @@ public class VaultProperties implements EnvironmentAware {
 		return this.config;
 	}
 
+	public Session getSession() {
+		return this.session;
+	}
+
 	public String getApplicationName() {
 		return this.applicationName;
 	}
@@ -321,6 +328,10 @@ public class VaultProperties implements EnvironmentAware {
 
 	public void setConfig(Config config) {
 		this.config = config;
+	}
+
+	public void setSession(Session session) {
+		this.session = session;
 	}
 
 	public void setApplicationName(String applicationName) {
@@ -1025,13 +1036,13 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private int order = 0;
 
-		private Lifecycle lifecycle = new Lifecycle();
+		private ConfigLifecycle lifecycle = new ConfigLifecycle();
 
 		public int getOrder() {
 			return this.order;
 		}
 
-		public Lifecycle getLifecycle() {
+		public ConfigLifecycle getLifecycle() {
 			return this.lifecycle;
 		}
 
@@ -1039,7 +1050,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.order = order;
 		}
 
-		public void setLifecycle(Lifecycle lifecycle) {
+		public void setLifecycle(ConfigLifecycle lifecycle) {
 			this.lifecycle = lifecycle;
 		}
 
@@ -1049,7 +1060,7 @@ public class VaultProperties implements EnvironmentAware {
 	 * Configuration to Vault lifecycle management (renewal, revocation of tokens and
 	 * secrets).
 	 */
-	public static class Lifecycle {
+	public static class ConfigLifecycle {
 
 		/**
 		 * Enable lifecycle management.
@@ -1113,6 +1124,77 @@ public class VaultProperties implements EnvironmentAware {
 
 		public void setLeaseEndpoints(LeaseEndpoints leaseEndpoints) {
 			this.leaseEndpoints = leaseEndpoints;
+		}
+
+	}
+
+	/**
+	 * Session management configuration properties.
+	 *
+	 * @since 3.0
+	 */
+	public static class Session {
+
+		private SessionLifecycle lifecycle = new SessionLifecycle();
+
+		public SessionLifecycle getLifecycle() {
+			return this.lifecycle;
+		}
+
+		public void setLifecycle(SessionLifecycle lifecycle) {
+			this.lifecycle = lifecycle;
+		}
+
+	}
+
+	/**
+	 * Configuration to Vault Session lifecycle management.
+	 *
+	 * @since 3.0
+	 */
+	public static class SessionLifecycle {
+
+		/**
+		 * Enable session lifecycle management.
+		 */
+		private boolean enabled = true;
+
+		/**
+		 * The time period that is at least required before renewing the
+		 * {@link LoginToken}.
+		 */
+		private Duration refreshBeforeExpiry = Duration.ofSeconds(5);
+
+		/**
+		 * The expiry threshold for a {@link LoginToken}. The threshold represents a
+		 * minimum TTL duration to consider a login token as valid. Tokens with a shorter
+		 * TTL are considered expired and are not used anymore. Should be greater than
+		 * {@code refreshBeforeExpiry} to prevent token expiry.
+		 */
+		private Duration expiryThreshold = Duration.ofSeconds(7);
+
+		public boolean isEnabled() {
+			return this.enabled;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+
+		public Duration getRefreshBeforeExpiry() {
+			return this.refreshBeforeExpiry;
+		}
+
+		public void setRefreshBeforeExpiry(Duration refreshBeforeExpiry) {
+			this.refreshBeforeExpiry = refreshBeforeExpiry;
+		}
+
+		public Duration getExpiryThreshold() {
+			return this.expiryThreshold;
+		}
+
+		public void setExpiryThreshold(Duration expiryThreshold) {
+			this.expiryThreshold = expiryThreshold;
 		}
 
 	}
