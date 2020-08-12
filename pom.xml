@@ -50,8 +50,7 @@
 
 		<google-api-services-iam.version>v1-rev20200221-1.30.9
 		</google-api-services-iam.version>
-		<google-auth-library-oauth2-http.version>0.20.0
-		</google-auth-library-oauth2-http.version>
+		<google-auth-library-oauth2-http.version>0.21.1</google-auth-library-oauth2-http.version>
 	</properties>
 
 	<dependencyManagement>
