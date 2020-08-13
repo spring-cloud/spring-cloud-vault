@@ -93,7 +93,7 @@ public class VaultConfigCouchbaseDatabaseTests {
 		config.put("plugin_name", "couchbase-database-plugin");
 		config.put("hosts", "couchbase://localhost");
 		config.put("username", "Administrator");
-		config.put("password", "Admin123");
+		config.put("password", "password");
 		config.put("allowed_roles", "*");
 
 		vaultOperations.write("database/config/spring-cloud-vault-couchbase", config);
