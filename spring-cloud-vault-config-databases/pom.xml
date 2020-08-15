@@ -96,8 +96,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		  <groupId>org.springframework.data</groupId>
-		  <artifactId>spring-data-couchbase</artifactId>
+		        <groupId>org.springframework.data</groupId>
+		        <artifactId>spring-data-couchbase</artifactId>
+                        <scope>test</scope>
 		</dependency>
 	</dependencies>
 

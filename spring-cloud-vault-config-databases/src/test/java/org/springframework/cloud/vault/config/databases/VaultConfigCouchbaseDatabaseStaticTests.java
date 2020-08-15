@@ -47,7 +47,8 @@ import static org.junit.Assume.assumeTrue;
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
  *
- * Needs existing Couchbase user named vault-static with at least ro_admin privs.
+ * Uses the existing admin user that comes with the couchbase/sandbox-server docker image
+ * provided by Couchbase. The test will fail if this user does not exits.
  *
  * @author Francis Hitchens
  */
@@ -103,7 +104,7 @@ public class VaultConfigCouchbaseDatabaseStaticTests {
 
 		Map<String, String> body = new HashMap<>();
 		body.put("db_name", "spring-cloud-vault-couchbase");
-		body.put("username", "vault-static");
+		body.put("username", "admin");
 		body.put("rotation_period", "5m");
 		body.put("creation_statements", "[{\"name\":\"ro_admin\"}]");
 
