@@ -22,6 +22,7 @@ import java.util.List;
  * Interface declaring Key-Value configuration properties.
  *
  * @author Mark Paluch
+ * @author Luram Archanjo
  * @since 2.0
  */
 public interface VaultKeyValueBackendPropertiesSupport {
@@ -41,6 +42,11 @@ public interface VaultKeyValueBackendPropertiesSupport {
 	 * @return default context path. Can be empty.
 	 */
 	String getDefaultContext();
+
+	/**
+	 * @return {@literal true} if this default context configuration is enabled; {@literal false} otherwise.
+	 */
+	boolean isDefaultContextEnabled();
 
 	/**
 	 * @return profile separator character.

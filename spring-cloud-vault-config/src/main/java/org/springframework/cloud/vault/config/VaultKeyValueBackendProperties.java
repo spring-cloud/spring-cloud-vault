@@ -34,6 +34,7 @@ import org.springframework.validation.annotation.Validated;
  * Configuration properties for Vault using the key-value backend.
  *
  * @author Mark Paluch
+ * @author Luram Archanjo
  * @since 2.0
  */
 @ConfigurationProperties("spring.cloud.vault.kv")
@@ -56,6 +57,11 @@ public class VaultKeyValueBackendProperties
 	 * Name of the default context.
 	 */
 	private String defaultContext = "application";
+
+	/**
+	 * Enable the default context.
+	 */
+	private boolean defaultContextEnabled = true;
 
 	/**
 	 * Profile-separator to combine application name and profile.
@@ -120,6 +126,11 @@ public class VaultKeyValueBackendProperties
 		return this.defaultContext;
 	}
 
+	@Override
+	public boolean isDefaultContextEnabled() {
+		return this.defaultContextEnabled;
+	}
+
 	public String getProfileSeparator() {
 		return this.profileSeparator;
 	}
@@ -155,6 +166,10 @@ public class VaultKeyValueBackendProperties
 		this.defaultContext = defaultContext;
 	}
 
+	public void setDefaultContextEnabled(boolean defaultContextEnabled) {
+		this.defaultContextEnabled = defaultContextEnabled;
+	}
+
 	public void setProfileSeparator(String profileSeparator) {
 		this.profileSeparator = profileSeparator;
 	}
@@ -178,6 +193,7 @@ public class VaultKeyValueBackendProperties
 		sb.append(" [enabled=").append(this.enabled);
 		sb.append(", backend='").append(this.backend).append('\'');
 		sb.append(", defaultContext='").append(this.defaultContext).append('\'');
+		sb.append(", defaultContextEnabled='").append(this.defaultContextEnabled).append('\'');
 		sb.append(", profileSeparator='").append(this.profileSeparator).append('\'');
 		sb.append(", applicationName='").append(this.applicationName).append('\'');
 		sb.append(", profiles='").append(this.profiles).append('\'');

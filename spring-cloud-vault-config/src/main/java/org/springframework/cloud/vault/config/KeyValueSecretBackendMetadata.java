@@ -34,6 +34,7 @@ import org.springframework.vault.core.util.PropertyTransformers;
  * {@link SecretBackendMetadata} for the {@code kv} (key-value) secret backend.
  *
  * @author Mark Paluch
+ * @author Luram Archanjo
  * @since 2.0
  */
 public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
@@ -115,9 +116,11 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 		String appName = properties.getApplicationName();
 		Set<String> contexts = new LinkedHashSet<>();
 
-		String defaultContext = properties.getDefaultContext();
-		contexts.addAll(buildContexts(defaultContext, profiles,
-				properties.getProfileSeparator()));
+		if (properties.isDefaultContextEnabled()) {
+			String defaultContext = properties.getDefaultContext();
+			contexts.addAll(buildContexts(defaultContext, profiles,
+					properties.getProfileSeparator()));
+		}
 
 		for (String applicationName : StringUtils.commaDelimitedListToSet(appName)) {
 			contexts.addAll(buildContexts(applicationName, profiles,
@@ -135,23 +138,23 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 	 * Create a list of context names from a combination of application name and
 	 * application name with profile name. Using an empty application name will return an
 	 * empty list.
-	 * @param applicationName the application name. May be empty.
+	 * @param context can be the application name or default context. May be empty.
 	 * @param profiles active application profiles.
 	 * @param profileSeparator profile separator character between application name and
 	 * profile name.
 	 * @return list of context names.
 	 */
-	public static List<String> buildContexts(String applicationName,
-			List<String> profiles, String profileSeparator) {
+	public static List<String> buildContexts(String context, List<String> profiles,
+			String profileSeparator) {
 
 		List<String> contexts = new ArrayList<>();
 
-		if (!StringUtils.hasText(applicationName)) {
+		if (!StringUtils.hasText(context)) {
 			return contexts;
 		}
 
-		if (!contexts.contains(applicationName)) {
-			contexts.add(applicationName);
+		if (!contexts.contains(context)) {
+			contexts.add(context);
 		}
 
 		for (String profile : profiles) {
@@ -160,7 +163,7 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 				continue;
 			}
 
-			String contextName = applicationName + profileSeparator + profile.trim();
+			String contextName = context + profileSeparator + profile.trim();
 
 			if (!contexts.contains(contextName)) {
 				contexts.add(contextName);

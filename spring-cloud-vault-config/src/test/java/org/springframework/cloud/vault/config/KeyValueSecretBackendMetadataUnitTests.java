@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link KeyValueSecretBackendMetadata}.
  *
  * @author Mark Paluch
+ * @author Luram Archanjo
  */
 public class KeyValueSecretBackendMetadataUnitTests {
 
@@ -69,7 +70,7 @@ public class KeyValueSecretBackendMetadataUnitTests {
 	public void shouldCreateAppNameContextIfDefaultIsDisabled() {
 
 		this.properties.setApplicationName("my-app");
-		this.properties.setDefaultContext("");
+		this.properties.setDefaultContextEnabled(Boolean.FALSE);
 
 		List<String> contexts = KeyValueSecretBackendMetadata
 				.buildContexts(this.properties, Collections.emptyList());
