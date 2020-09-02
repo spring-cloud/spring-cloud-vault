@@ -108,7 +108,7 @@
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-core</artifactId>
 			<optional>true</optional>
-			<version>1.11.838</version>
+			<version>1.11.853</version>
 			<exclusions>
 				<exclusion>
 					<groupId>software.amazon.ion</groupId>
