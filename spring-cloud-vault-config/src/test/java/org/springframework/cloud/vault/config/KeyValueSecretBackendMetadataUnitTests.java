@@ -67,6 +67,18 @@ public class KeyValueSecretBackendMetadataUnitTests {
 	}
 
 	@Test
+	public void shouldCreateAppNameContextIfDefaultIsEmpty() {
+
+		this.properties.setApplicationName("my-app");
+		this.properties.setDefaultContext("");
+
+		List<String> contexts = KeyValueSecretBackendMetadata
+				.buildContexts(this.properties, Collections.emptyList());
+
+		assertThat(contexts).hasSize(1).containsSequence("my-app");
+	}
+
+	@Test
 	public void shouldCreateAppNameContextIfDefaultIsDisabled() {
 
 		this.properties.setApplicationName("my-app");
