@@ -1,3 +1,9 @@
 # Bootstrap Configuration
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
 org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration
+
+org.springframework.cloud.vault.config.SecretBackendMetadataFactory=\
+org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration.RabbitMqSecretBackendMetadataFactory
+
+org.springframework.cloud.vault.config.VaultSecretBackendDescriptor=\
+org.springframework.cloud.vault.config.rabbitmq.VaultRabbitMqProperties

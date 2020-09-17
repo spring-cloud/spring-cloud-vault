@@ -40,9 +40,14 @@ import org.springframework.vault.core.lease.LeaseEndpoints;
  * @author Grenville Wilson
  * @author Mårten Svantesson
  */
-@ConfigurationProperties("spring.cloud.vault")
+@ConfigurationProperties(VaultProperties.PREFIX)
 @Validated
 public class VaultProperties implements EnvironmentAware {
+
+	/**
+	 * Configuration prefix for config properties.
+	 */
+	public static final String PREFIX = "spring.cloud.vault";
 
 	/**
 	 * Enable Vault config server.
