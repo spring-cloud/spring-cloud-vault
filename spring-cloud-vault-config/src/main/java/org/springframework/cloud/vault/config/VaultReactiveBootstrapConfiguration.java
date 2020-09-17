@@ -36,9 +36,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.vault.config.VaultBootstrapConfiguration.TaskSchedulerWrapper;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
@@ -69,6 +67,8 @@ import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static org.springframework.cloud.vault.config.VaultAutoConfiguration.TaskSchedulerWrapper;
+
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for reactive Spring Vault support.
  * <p>
@@ -79,7 +79,6 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author Mark Paluch
  * @since 2.0.0
  */
-@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @ConditionalOnExpression("${spring.cloud.vault.reactive.enabled:true}")
 @ConditionalOnClass({ Flux.class, WebClient.class, ReactiveVaultOperations.class, HttpClient.class })
@@ -87,6 +86,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
 public class VaultReactiveBootstrapConfiguration implements InitializingBean {
 
+	// TODO: Expose as AutoConfiguration
 	private final VaultProperties vaultProperties;
 
 	private final VaultEndpointProvider endpointProvider;
