@@ -52,10 +52,8 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 	@Before
 	public void before() {
 
-		this.propertySourceLocator = new LeasingVaultPropertySourceLocator(
-				new VaultProperties(),
-				VaultPropertySourceLocatorSupport.createConfiguration(this.properties),
-				this.secretLeaseContainer);
+		this.propertySourceLocator = new LeasingVaultPropertySourceLocator(new VaultProperties(),
+				VaultPropertySourceLocatorSupport.createConfiguration(this.properties), this.secretLeaseContainer);
 	}
 
 	@Test
@@ -64,9 +62,8 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 		VaultProperties vaultProperties = new VaultProperties();
 		vaultProperties.getConfig().setOrder(10);
 
-		this.propertySourceLocator = new LeasingVaultPropertySourceLocator(
-				vaultProperties, VaultPropertySourceLocatorSupport.createConfiguration(
-						new VaultKeyValueBackendProperties()),
+		this.propertySourceLocator = new LeasingVaultPropertySourceLocator(vaultProperties,
+				VaultPropertySourceLocatorSupport.createConfiguration(new VaultKeyValueBackendProperties()),
 				this.secretLeaseContainer);
 
 		assertThat(this.propertySourceLocator.getOrder()).isEqualTo(10);
@@ -75,15 +72,13 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 	@Test
 	public void shouldLocatePropertySources() {
 
-		PropertySource<?> propertySource = this.propertySourceLocator
-				.locate(this.configurableEnvironment);
+		PropertySource<?> propertySource = this.propertySourceLocator.locate(this.configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
 		CompositePropertySource composite = (CompositePropertySource) propertySource;
 		assertThat(composite.getPropertySources()).hasSize(1);
-		verify(this.secretLeaseContainer)
-				.addRequestedSecret(RequestedSecret.rotating("secret/application"));
+		verify(this.secretLeaseContainer).addRequestedSecret(RequestedSecret.rotating("secret/application"));
 	}
 
 	@Test
@@ -94,17 +89,16 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 		configurer.add(rotating);
 		configurer.add("database/mysql/creds/readonly");
 
-		this.propertySourceLocator = new LeasingVaultPropertySourceLocator(
-				new VaultProperties(), configurer, this.secretLeaseContainer);
+		this.propertySourceLocator = new LeasingVaultPropertySourceLocator(new VaultProperties(), configurer,
+				this.secretLeaseContainer);
 
-		PropertySource<?> propertySource = this.propertySourceLocator
-				.locate(this.configurableEnvironment);
+		PropertySource<?> propertySource = this.propertySourceLocator.locate(this.configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
 		verify(this.secretLeaseContainer).addRequestedSecret(rotating);
-		verify(this.secretLeaseContainer).addRequestedSecret(
-				RequestedSecret.renewable("database/mysql/creds/readonly"));
+		verify(this.secretLeaseContainer)
+				.addRequestedSecret(RequestedSecret.renewable("database/mysql/creds/readonly"));
 	}
 
 }

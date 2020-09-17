@@ -48,9 +48,8 @@ import static org.junit.Assume.assumeTrue;
  * @author Mark Paluch
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = VaultConfigAppRoleTests.TestApplication.class,
-		properties = { "spring.cloud.vault.authentication=approle",
-				"spring.cloud.vault.application-name=VaultConfigAppRoleTests" })
+@SpringBootTest(classes = VaultConfigAppRoleTests.TestApplication.class, properties = {
+		"spring.cloud.vault.authentication=approle", "spring.cloud.vault.application-name=VaultConfigAppRoleTests" })
 // see
 // https://github.com/spring-cloud/spring-cloud-commons/issues/214
 public class VaultConfigAppRoleTests {
@@ -64,8 +63,7 @@ public class VaultConfigAppRoleTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		assumeTrue(vaultRule.prepare().getVersion()
-				.isGreaterThanOrEqualTo(Version.parse("0.6.1")));
+		assumeTrue(vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.1")));
 
 		VaultProperties vaultProperties = Settings.createVaultProperties();
 
@@ -81,8 +79,7 @@ public class VaultConfigAppRoleTests {
 				+ "  }\n" //
 				+ "}";
 
-		vaultOperations.write("sys/policy/testpolicy",
-				Collections.singletonMap("rules", rules));
+		vaultOperations.write("sys/policy/testpolicy", Collections.singletonMap("rules", rules));
 
 		String appId = VaultConfigAppRoleTests.class.getSimpleName();
 
@@ -96,13 +93,11 @@ public class VaultConfigAppRoleTests {
 
 		vaultOperations.write("auth/approle/role/with-secret-id", withSecretId);
 
-		String roleId = (String) vaultOperations
-				.read("auth/approle/role/with-secret-id/role-id").getData()
+		String roleId = (String) vaultOperations.read("auth/approle/role/with-secret-id/role-id").getData()
 				.get("role_id");
 		String secretId = (String) vaultOperations
-				.write(String.format("auth/approle/role/with-secret-id/secret-id",
-						"with-secret-id"), null)
-				.getData().get("secret_id");
+				.write(String.format("auth/approle/role/with-secret-id/secret-id", "with-secret-id"), null).getData()
+				.get("secret_id");
 
 		System.setProperty("spring.cloud.vault.app-role.role-id", roleId);
 		System.setProperty("spring.cloud.vault.app-role.secret-id", secretId);

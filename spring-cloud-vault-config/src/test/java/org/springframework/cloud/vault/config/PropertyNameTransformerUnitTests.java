@@ -40,8 +40,8 @@ public class PropertyNameTransformerUnitTests {
 		map.put("old-key", "value");
 		map.put("other-key", "other-value");
 
-		assertThat(transformer.transformProperties(map)).containsEntry("new-key", "value")
-				.containsEntry("other-key", "other-value");
+		assertThat(transformer.transformProperties(map)).containsEntry("new-key", "value").containsEntry("other-key",
+				"other-value");
 	}
 
 	@Test

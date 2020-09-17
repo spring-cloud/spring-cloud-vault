@@ -47,13 +47,11 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 		this.vaultOperations = vaultOperations;
 	}
 
-	private static Mono<? extends VaultHealthImpl> deserializeError(
-			WebClientResponseException e) {
+	private static Mono<? extends VaultHealthImpl> deserializeError(WebClientResponseException e) {
 
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			return Mono.just(mapper.readValue(e.getResponseBodyAsByteArray(),
-					VaultHealthImpl.class));
+			return Mono.just(mapper.readValue(e.getResponseBodyAsByteArray(), VaultHealthImpl.class));
 		}
 		catch (Exception jsonError) {
 			UndeclaredThrowableException t = new UndeclaredThrowableException(jsonError);
@@ -62,8 +60,7 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 		}
 	}
 
-	private static Health getHealth(Builder builder,
-			VaultHealthImpl vaultHealthResponse) {
+	private static Health getHealth(Builder builder, VaultHealthImpl vaultHealthResponse) {
 
 		HealthBuilderDelegate.contributeToHealth(vaultHealthResponse, builder);
 		return builder.build();
@@ -73,11 +70,10 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 	protected Mono<Health> doHealthCheck(Builder builder) {
 
 		return this.vaultOperations
-				.doWithSession((it) -> it.get().uri("sys/health")
-						.header(VaultHttpHeaders.VAULT_NAMESPACE, "").exchange())
+				.doWithSession(
+						(it) -> it.get().uri("sys/health").header(VaultHttpHeaders.VAULT_NAMESPACE, "").exchange())
 				.flatMap((it) -> it.bodyToMono(VaultHealthImpl.class))
-				.onErrorResume(WebClientResponseException.class,
-						VaultReactiveHealthIndicator::deserializeError)
+				.onErrorResume(WebClientResponseException.class, VaultReactiveHealthIndicator::deserializeError)
 				.map((vaultHealthResponse) -> getHealth(builder, vaultHealthResponse));
 	}
 
@@ -99,13 +95,11 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 		@Nullable
 		private final String version;
 
-		VaultHealthImpl(@JsonProperty("initialized") boolean initialized,
-				@JsonProperty("sealed") boolean sealed,
+		VaultHealthImpl(@JsonProperty("initialized") boolean initialized, @JsonProperty("sealed") boolean sealed,
 				@JsonProperty("standby") boolean standby,
 				@JsonProperty("performance_standby") boolean performanceStandby,
 				@Nullable @JsonProperty("replication_dr_mode") String replicationRecoverySecondary,
-				@JsonProperty("server_time_utc") int serverTimeUtc,
-				@Nullable @JsonProperty("version") String version) {
+				@JsonProperty("server_time_utc") int serverTimeUtc, @Nullable @JsonProperty("version") String version) {
 
 			this.initialized = initialized;
 			this.sealed = sealed;
@@ -155,19 +149,16 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 				return false;
 			}
 			VaultHealthImpl that = (VaultHealthImpl) o;
-			return this.initialized == that.initialized && this.sealed == that.sealed
-					&& this.standby == that.standby
+			return this.initialized == that.initialized && this.sealed == that.sealed && this.standby == that.standby
 					&& this.performanceStandby == that.performanceStandby
 					&& this.replicationRecoverySecondary == that.replicationRecoverySecondary
-					&& this.serverTimeUtc == that.serverTimeUtc
-					&& Objects.equals(this.version, that.version);
+					&& this.serverTimeUtc == that.serverTimeUtc && Objects.equals(this.version, that.version);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(this.initialized, this.sealed, this.standby,
-					this.performanceStandby, this.replicationRecoverySecondary,
-					this.serverTimeUtc, this.version);
+			return Objects.hash(this.initialized, this.sealed, this.standby, this.performanceStandby,
+					this.replicationRecoverySecondary, this.serverTimeUtc, this.version);
 		}
 
 	}

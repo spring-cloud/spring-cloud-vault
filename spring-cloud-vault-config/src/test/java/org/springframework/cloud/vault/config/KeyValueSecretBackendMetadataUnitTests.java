@@ -36,8 +36,7 @@ public class KeyValueSecretBackendMetadataUnitTests {
 	@Test
 	public void shouldCreateDefaultContexts() {
 
-		List<String> contexts = KeyValueSecretBackendMetadata
-				.buildContexts(this.properties, Collections.emptyList());
+		List<String> contexts = KeyValueSecretBackendMetadata.buildContexts(this.properties, Collections.emptyList());
 
 		assertThat(contexts).hasSize(1).contains("application");
 	}
@@ -47,8 +46,7 @@ public class KeyValueSecretBackendMetadataUnitTests {
 
 		this.properties.setApplicationName("my-app");
 
-		List<String> contexts = KeyValueSecretBackendMetadata
-				.buildContexts(this.properties, Collections.emptyList());
+		List<String> contexts = KeyValueSecretBackendMetadata.buildContexts(this.properties, Collections.emptyList());
 
 		assertThat(contexts).hasSize(2).containsSequence("my-app", "application");
 	}
@@ -58,11 +56,11 @@ public class KeyValueSecretBackendMetadataUnitTests {
 
 		this.properties.setApplicationName("my-app");
 
-		List<String> contexts = KeyValueSecretBackendMetadata
-				.buildContexts(this.properties, Arrays.asList("cloud", "local"));
+		List<String> contexts = KeyValueSecretBackendMetadata.buildContexts(this.properties,
+				Arrays.asList("cloud", "local"));
 
-		assertThat(contexts).hasSize(6).containsSequence("my-app/local", "my-app/cloud",
-				"my-app", "application/local", "application/cloud", "application");
+		assertThat(contexts).hasSize(6).containsSequence("my-app/local", "my-app/cloud", "my-app", "application/local",
+				"application/cloud", "application");
 	}
 
 	@Test
@@ -71,8 +69,7 @@ public class KeyValueSecretBackendMetadataUnitTests {
 		this.properties.setApplicationName("my-app");
 		this.properties.setDefaultContext("");
 
-		List<String> contexts = KeyValueSecretBackendMetadata
-				.buildContexts(this.properties, Collections.emptyList());
+		List<String> contexts = KeyValueSecretBackendMetadata.buildContexts(this.properties, Collections.emptyList());
 
 		assertThat(contexts).hasSize(1).containsSequence("my-app");
 	}
@@ -82,8 +79,7 @@ public class KeyValueSecretBackendMetadataUnitTests {
 
 		this.properties.setApplicationName("foo,bar");
 
-		List<String> contexts = KeyValueSecretBackendMetadata
-				.buildContexts(this.properties, Collections.emptyList());
+		List<String> contexts = KeyValueSecretBackendMetadata.buildContexts(this.properties, Collections.emptyList());
 
 		assertThat(contexts).hasSize(3).containsSequence("bar", "foo", "application");
 	}
@@ -93,12 +89,11 @@ public class KeyValueSecretBackendMetadataUnitTests {
 
 		this.properties.setApplicationName("foo,bar");
 
-		List<String> contexts = KeyValueSecretBackendMetadata
-				.buildContexts(this.properties, Arrays.asList("cloud", "local"));
+		List<String> contexts = KeyValueSecretBackendMetadata.buildContexts(this.properties,
+				Arrays.asList("cloud", "local"));
 
-		assertThat(contexts).hasSize(9).containsSequence("bar/local", "bar/cloud", "bar",
-				"foo/local", "foo/cloud", "foo", "application/local", "application/cloud",
-				"application");
+		assertThat(contexts).hasSize(9).containsSequence("bar/local", "bar/cloud", "bar", "foo/local", "foo/cloud",
+				"foo", "application/local", "application/cloud", "application");
 	}
 
 }

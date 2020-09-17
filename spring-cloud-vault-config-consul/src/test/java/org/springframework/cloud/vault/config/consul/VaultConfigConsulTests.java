@@ -61,8 +61,7 @@ import static org.junit.Assume.assumeTrue;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigConsulTests.TestApplication.class,
-		properties = { "spring.cloud.vault.consul.enabled=true",
-				"spring.cloud.vault.consul.role=readonly",
+		properties = { "spring.cloud.vault.consul.enabled=true", "spring.cloud.vault.consul.role=readonly",
 				"spring.cloud.consul.discovery.catalog-services-watch.enabled=false" })
 public class VaultConfigConsulTests {
 
@@ -70,8 +69,7 @@ public class VaultConfigConsulTests {
 
 	private static final int CONSUL_PORT = 8500;
 
-	private static final String CONNECTION_URL = String.format("%s:%d", CONSUL_HOST,
-			CONSUL_PORT);
+	private static final String CONNECTION_URL = String.format("%s:%d", CONSUL_HOST, CONSUL_PORT);
 
 	private static final String POLICY = "key \"\" { policy = \"read\" }";
 
@@ -115,13 +113,13 @@ public class VaultConfigConsulTests {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("X-Consul-Token", CONSUL_ACL_MASTER_TOKEN);
-		HttpEntity<String> requestEntity = new HttpEntity<>(
-				"{\"Name\": \"sample\", \"Type\": \"management\"}", headers);
+		HttpEntity<String> requestEntity = new HttpEntity<>("{\"Name\": \"sample\", \"Type\": \"management\"}",
+				headers);
 
 		try {
 			ResponseEntity<Map<String, String>> tokenResponse = restTemplate.exchange(
-					"http://{host}:{port}/v1/acl/create", HttpMethod.PUT, requestEntity,
-					STRING_MAP, CONSUL_HOST, CONSUL_PORT);
+					"http://{host}:{port}/v1/acl/create", HttpMethod.PUT, requestEntity, STRING_MAP, CONSUL_HOST,
+					CONSUL_PORT);
 
 			Map<String, String> consulAccess = new HashMap<>();
 			consulAccess.put("address", CONNECTION_URL);
@@ -154,10 +152,8 @@ public class VaultConfigConsulTests {
 
 		Thread.sleep(8_000L);
 
-		assertThat(this.configProperties.getAclToken()).isNotEmpty()
-				.isNotEqualTo(configToken);
-		assertThat(this.discoveryProperties.getAclToken()).isNotEmpty()
-				.isNotEqualTo(discoveryToken);
+		assertThat(this.configProperties.getAclToken()).isNotEmpty().isNotEqualTo(configToken);
+		assertThat(this.discoveryProperties.getAclToken()).isNotEmpty().isNotEqualTo(discoveryToken);
 	}
 
 	@SpringBootApplication

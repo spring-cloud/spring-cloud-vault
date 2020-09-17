@@ -62,11 +62,9 @@ public class VaultConfigWithContextTests {
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
-		vaultOperations.write("secret/testVaultApp/my-profile",
-				Collections.singletonMap("vault.value", "hello"));
+		vaultOperations.write("secret/testVaultApp/my-profile", Collections.singletonMap("vault.value", "hello"));
 
-		vaultOperations.write("secret/testVaultApp",
-				Collections.singletonMap("vault.value", "world"));
+		vaultOperations.write("secret/testVaultApp", Collections.singletonMap("vault.value", "world"));
 	}
 
 	@Test

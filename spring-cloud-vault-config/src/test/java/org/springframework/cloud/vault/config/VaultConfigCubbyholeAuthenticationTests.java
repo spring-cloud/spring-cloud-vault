@@ -63,23 +63,19 @@ public class VaultConfigCubbyholeAuthenticationTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		assumeTrue(vaultRule.prepare().getVersion()
-				.isGreaterThanOrEqualTo(Version.parse("0.6.1")));
+		assumeTrue(vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.1")));
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
-		vaultOperations.write(
-				"secret/" + VaultConfigCubbyholeAuthenticationTests.class.getSimpleName(),
-				Collections.singletonMap("vault.value",
-						VaultConfigCubbyholeAuthenticationTests.class.getSimpleName()));
+		vaultOperations.write("secret/" + VaultConfigCubbyholeAuthenticationTests.class.getSimpleName(),
+				Collections.singletonMap("vault.value", VaultConfigCubbyholeAuthenticationTests.class.getSimpleName()));
 
 		VaultResponse vaultResponse = vaultOperations.doWithSession(restOperations -> {
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("X-Vault-Wrap-TTL", "1h");
 
-			return restOperations.postForObject("/auth/token/create",
-					new HttpEntity<>(headers), VaultResponse.class);
+			return restOperations.postForObject("/auth/token/create", new HttpEntity<>(headers), VaultResponse.class);
 		});
 
 		String initialToken = vaultResponse.getWrapInfo().get("token");

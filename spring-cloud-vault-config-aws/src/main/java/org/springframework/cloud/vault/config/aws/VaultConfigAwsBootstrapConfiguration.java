@@ -49,8 +49,7 @@ public class VaultConfigAwsBootstrapConfiguration {
 	 * {@link SecretBackendMetadataFactory} for AWS integration using
 	 * {@link VaultAwsProperties}.
 	 */
-	public static class AwsSecretBackendMetadataFactory
-			implements SecretBackendMetadataFactory<VaultAwsProperties> {
+	public static class AwsSecretBackendMetadataFactory implements SecretBackendMetadataFactory<VaultAwsProperties> {
 
 		/**
 		 * Creates {@link SecretBackendMetadata} for a secret backend using
@@ -66,23 +65,19 @@ public class VaultConfigAwsBootstrapConfiguration {
 			Assert.notNull(properties, "VaultAwsProperties must not be null");
 
 			PropertyNameTransformer transformer = new PropertyNameTransformer();
-			transformer.addKeyTransformation("access_key",
-					properties.getAccessKeyProperty());
-			transformer.addKeyTransformation("secret_key",
-					properties.getSecretKeyProperty());
+			transformer.addKeyTransformation("access_key", properties.getAccessKeyProperty());
+			transformer.addKeyTransformation("secret_key", properties.getSecretKeyProperty());
 
 			return new SecretBackendMetadata() {
 
 				@Override
 				public String getName() {
-					return String.format("%s with Role %s", properties.getBackend(),
-							properties.getRole());
+					return String.format("%s with Role %s", properties.getBackend(), properties.getRole());
 				}
 
 				@Override
 				public String getPath() {
-					return String.format("%s/creds/%s", properties.getBackend(),
-							properties.getRole());
+					return String.format("%s/creds/%s", properties.getBackend(), properties.getRole());
 				}
 
 				@Override
@@ -104,8 +99,7 @@ public class VaultConfigAwsBootstrapConfiguration {
 		}
 
 		@Override
-		public SecretBackendMetadata createMetadata(
-				VaultAwsProperties backendDescriptor) {
+		public SecretBackendMetadata createMetadata(VaultAwsProperties backendDescriptor) {
 			return forAws(backendDescriptor);
 		}
 

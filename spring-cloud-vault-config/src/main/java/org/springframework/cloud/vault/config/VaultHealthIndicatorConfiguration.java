@@ -35,8 +35,8 @@ import org.springframework.vault.core.VaultOperations;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnBean(VaultOperations.class)
-class VaultHealthIndicatorConfiguration extends
-		CompositeHealthContributorConfiguration<VaultHealthIndicator, VaultOperations> {
+class VaultHealthIndicatorConfiguration
+		extends CompositeHealthContributorConfiguration<VaultHealthIndicator, VaultOperations> {
 
 	private final Map<String, VaultOperations> vaultTemplates;
 

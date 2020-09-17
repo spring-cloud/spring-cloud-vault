@@ -58,16 +58,14 @@ public class DiscoveryClientVaultBootstrapConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
-	public VaultServiceInstanceProvider vaultServerInstanceProvider(
-			DiscoveryClient discoveryClient) {
+	public VaultServiceInstanceProvider vaultServerInstanceProvider(DiscoveryClient discoveryClient) {
 		return new DiscoveryClientVaultServiceInstanceProvider(discoveryClient);
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
-	public VaultEndpointProvider vaultEndpointProvider(
-			VaultServiceInstanceProvider instanceProvider) {
+	public VaultEndpointProvider vaultEndpointProvider(VaultServiceInstanceProvider instanceProvider) {
 
 		String serviceId = this.vaultProperties.getDiscovery().getServiceId();
 		String fallbackScheme;
@@ -81,8 +79,7 @@ public class DiscoveryClientVaultBootstrapConfiguration {
 
 		ServiceInstance server = instanceProvider.getVaultServerInstance(serviceId);
 
-		VaultEndpoint vaultEndpoint = VaultEndpoint.create(server.getHost(),
-				server.getPort());
+		VaultEndpoint vaultEndpoint = VaultEndpoint.create(server.getHost(), server.getPort());
 
 		if (server.getMetadata().containsKey("scheme")) {
 			vaultEndpoint.setScheme(server.getMetadata().get("scheme"));

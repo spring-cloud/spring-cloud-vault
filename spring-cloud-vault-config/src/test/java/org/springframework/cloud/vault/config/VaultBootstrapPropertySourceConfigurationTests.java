@@ -42,22 +42,19 @@ import static org.mockito.Mockito.verify;
 public class VaultBootstrapPropertySourceConfigurationTests {
 
 	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations
-					.of(VaultBootstrapPropertySourceConfiguration.class));
+			.withConfiguration(AutoConfigurations.of(VaultBootstrapPropertySourceConfiguration.class));
 
 	@Test
 	public void shouldConfigureExpiryTimeouts() {
 
-		this.contextRunner.withUserConfiguration(MockConfiguration.class)
-				.withAllowBeanDefinitionOverriding(true)
+		this.contextRunner.withUserConfiguration(MockConfiguration.class).withAllowBeanDefinitionOverriding(true)
 				.withPropertyValues("spring.cloud.vault.kv.enabled=false",
 						"spring.cloud.vault.config.lifecycle.expiry-threshold=5m",
 						"spring.cloud.vault.config.lifecycle.min-renewal=6m",
 						"spring.cloud.vault.config.lifecycle.lease-endpoints=SysLeases")
 				.run(context -> {
 
-					SecretLeaseContainer container = context
-							.getBean(SecretLeaseContainer.class);
+					SecretLeaseContainer container = context.getBean(SecretLeaseContainer.class);
 					verify(container).setExpiryThreshold(Duration.ofMinutes(5));
 					verify(container).setMinRenewal(Duration.ofMinutes(6));
 					verify(container).setLeaseEndpoints(LeaseEndpoints.SysLeases);
@@ -75,8 +72,7 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 
 		@Bean
 		VaultBootstrapConfiguration.TaskSchedulerWrapper taskSchedulerWrapper() {
-			return new VaultBootstrapConfiguration.TaskSchedulerWrapper(
-					mock(ThreadPoolTaskScheduler.class));
+			return new VaultBootstrapConfiguration.TaskSchedulerWrapper(mock(ThreadPoolTaskScheduler.class));
 		}
 
 		@Bean
@@ -84,8 +80,7 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 
 			SecretLeaseContainer mock = mock(SecretLeaseContainer.class);
 
-			VaultBootstrapPropertySourceConfiguration
-					.customizeContainer(properties.getConfig().getLifecycle(), mock);
+			VaultBootstrapPropertySourceConfiguration.customizeContainer(properties.getConfig().getLifecycle(), mock);
 
 			return mock;
 		}

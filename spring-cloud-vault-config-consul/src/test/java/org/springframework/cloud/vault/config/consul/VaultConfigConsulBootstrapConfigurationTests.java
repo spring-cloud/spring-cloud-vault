@@ -42,8 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = CustomBootstrapConfiguration.class,
 		properties = { "VaultConfigConsulBootstrapConfigurationTests.custom.config=true",
-				"spring.cloud.vault.consul.role=foo",
-				"spring.cloud.vault.consul.enabled=true",
+				"spring.cloud.vault.consul.role=foo", "spring.cloud.vault.consul.enabled=true",
 				"spring.cloud.consul.config.enabled=false" })
 public class VaultConfigConsulBootstrapConfigurationTests extends IntegrationTestSupport {
 
@@ -67,15 +66,12 @@ public class VaultConfigConsulBootstrapConfigurationTests extends IntegrationTes
 
 		@Bean
 		@ConditionalOnProperty("VaultConfigConsulBootstrapConfigurationTests.custom.config")
-		ConsulSecretBackendMetadataFactory customFactory(
-				ConfigurationPropertiesRebinder rebinder) {
+		ConsulSecretBackendMetadataFactory customFactory(ConfigurationPropertiesRebinder rebinder) {
 
 			return new ConsulSecretBackendMetadataFactory(null) {
 				@Override
-				public SecretBackendMetadata createMetadata(
-						VaultConsulProperties backendDescriptor) {
-					return KeyValueSecretBackendMetadata
-							.create(backendDescriptor.getRole());
+				public SecretBackendMetadata createMetadata(VaultConsulProperties backendDescriptor) {
+					return KeyValueSecretBackendMetadata.create(backendDescriptor.getRole());
 				}
 			};
 		}

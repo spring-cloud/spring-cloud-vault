@@ -52,8 +52,7 @@ final class VaultConfigurationUtil {
 
 		if (ssl.getKeyStore() != null) {
 			if (StringUtils.hasText(ssl.getKeyStorePassword())) {
-				keyStore = KeyStoreConfiguration.of(ssl.getKeyStore(),
-						ssl.getKeyStorePassword().toCharArray());
+				keyStore = KeyStoreConfiguration.of(ssl.getKeyStore(), ssl.getKeyStorePassword().toCharArray());
 			}
 			else {
 				keyStore = KeyStoreConfiguration.of(ssl.getKeyStore());
@@ -63,8 +62,7 @@ final class VaultConfigurationUtil {
 		if (ssl.getTrustStore() != null) {
 
 			if (StringUtils.hasText(ssl.getTrustStorePassword())) {
-				trustStore = KeyStoreConfiguration.of(ssl.getTrustStore(),
-						ssl.getTrustStorePassword().toCharArray());
+				trustStore = KeyStoreConfiguration.of(ssl.getTrustStore(), ssl.getTrustStorePassword().toCharArray());
 			}
 			else {
 				trustStore = KeyStoreConfiguration.of(ssl.getTrustStore());

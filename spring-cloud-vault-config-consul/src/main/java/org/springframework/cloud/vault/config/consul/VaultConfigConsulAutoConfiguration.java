@@ -38,8 +38,7 @@ public class VaultConfigConsulAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public ConsulSecretRebindListener consulSecretRebindListener(
-			ConfigurationPropertiesRebinder rebinder,
+	public ConsulSecretRebindListener consulSecretRebindListener(ConfigurationPropertiesRebinder rebinder,
 			ConfigurableApplicationContext context) {
 		// TODO: some other way? Maybe a BootstrapApplicationContextHolder bean
 		// provided by spring cloud commons
@@ -81,8 +80,8 @@ public class VaultConfigConsulAutoConfiguration {
 			boolean success = this.rebinder.rebind(bean);
 			if (this.log.isInfoEnabled()) {
 				this.log.info(String.format(
-						"Attempted to rebind Consul bean '%s' with updated ACL token from vault, success: %s",
-						bean, success));
+						"Attempted to rebind Consul bean '%s' with updated ACL token from vault, success: %s", bean,
+						success));
 			}
 		}
 

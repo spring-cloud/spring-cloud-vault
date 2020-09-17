@@ -47,8 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ReactiveVaultOperationsTests.TestApplication.class,
-		properties = { "spring.cloud.vault.host=foo",
-				"spring.cloud.vault.uri=https://localhost:8200" })
+		properties = { "spring.cloud.vault.host=foo", "spring.cloud.vault.uri=https://localhost:8200" })
 public class ReactiveVaultOperationsTests {
 
 	@Autowired
@@ -70,10 +69,9 @@ public class ReactiveVaultOperationsTests {
 	@Test
 	public void shouldAccessVault() {
 
-		StepVerifier.create(this.reactiveOperations.read("secret/testVaultApp"))
-				.consumeNextWith(actual -> {
-					assertThat(actual.getData()).containsEntry("vault.value", "foo");
-				}).verifyComplete();
+		StepVerifier.create(this.reactiveOperations.read("secret/testVaultApp")).consumeNextWith(actual -> {
+			assertThat(actual.getData()).containsEntry("vault.value", "foo");
+		}).verifyComplete();
 	}
 
 	@SpringBootApplication

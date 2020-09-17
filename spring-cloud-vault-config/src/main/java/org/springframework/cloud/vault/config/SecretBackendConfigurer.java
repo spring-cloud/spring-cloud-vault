@@ -79,8 +79,7 @@ public interface SecretBackendConfigurer {
 	 * @param propertyTransformer must not be {@literal null}.
 	 * @return {@code this} {@link SecretBackendConfigurer}.
 	 */
-	SecretBackendConfigurer add(RequestedSecret requestedSecret,
-			PropertyTransformer propertyTransformer);
+	SecretBackendConfigurer add(RequestedSecret requestedSecret, PropertyTransformer propertyTransformer);
 
 	/**
 	 * Register default key-value secret backend property sources.
@@ -89,8 +88,7 @@ public interface SecretBackendConfigurer {
 	 * @return {@code this} {@link SecretBackendConfigurer}.
 	 * @since 2.3.3
 	 */
-	SecretBackendConfigurer registerDefaultKeyValueSecretBackends(
-			boolean registerDefault);
+	SecretBackendConfigurer registerDefaultKeyValueSecretBackends(boolean registerDefault);
 
 	/**
 	 * Register default discovered secret backend property sources from
@@ -99,7 +97,6 @@ public interface SecretBackendConfigurer {
 	 * registration via {@link VaultSecretBackendDescriptor} beans.
 	 * @return {@code this} {@link SecretBackendConfigurer}.
 	 */
-	SecretBackendConfigurer registerDefaultDiscoveredSecretBackends(
-			boolean registerDefault);
+	SecretBackendConfigurer registerDefaultDiscoveredSecretBackends(boolean registerDefault);
 
 }

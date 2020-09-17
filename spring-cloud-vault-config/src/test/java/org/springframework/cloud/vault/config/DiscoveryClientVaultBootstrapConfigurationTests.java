@@ -44,25 +44,20 @@ import static org.mockito.Mockito.when;
  */
 public class DiscoveryClientVaultBootstrapConfigurationTests {
 
-	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations.of(
-					DiscoveryClientVaultBootstrapConfiguration.class,
-					VaultBootstrapConfiguration.class));
+	private ApplicationContextRunner contextRunner = new ApplicationContextRunner().withConfiguration(
+			AutoConfigurations.of(DiscoveryClientVaultBootstrapConfiguration.class, VaultBootstrapConfiguration.class));
 
 	@Test
 	public void shouldRegisterDefaultBeans() {
 
 		this.contextRunner.withUserConfiguration(DiscoveryConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.token=foo",
-						"spring.cloud.vault.discovery.enabled=true")
+				.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.discovery.enabled=true")
 				.run(context -> {
 
 					assertThat(context.getBean(VaultServiceInstanceProvider.class))
-							.isInstanceOf(
-									DiscoveryClientVaultServiceInstanceProvider.class);
+							.isInstanceOf(DiscoveryClientVaultServiceInstanceProvider.class);
 
-					VaultEndpointProvider endpointProvider = context
-							.getBean(VaultEndpointProvider.class);
+					VaultEndpointProvider endpointProvider = context.getBean(VaultEndpointProvider.class);
 					VaultEndpoint vaultEndpoint = endpointProvider.getVaultEndpoint();
 					assertThat(vaultEndpoint.getPort()).isEqualTo(1234);
 				});
@@ -72,13 +67,10 @@ public class DiscoveryClientVaultBootstrapConfigurationTests {
 	public void shouldNotRegisterBeansIfDiscoveryDisabled() {
 
 		this.contextRunner.withUserConfiguration(DiscoveryConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.token=foo",
-						"spring.cloud.vault.discovery.enabled=false")
+				.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.discovery.enabled=false")
 				.run(context -> {
 
-					assertThat(context
-							.getBeanNamesForType(VaultServiceInstanceProvider.class))
-									.isEmpty();
+					assertThat(context.getBeanNamesForType(VaultServiceInstanceProvider.class)).isEmpty();
 				});
 	}
 
@@ -86,13 +78,9 @@ public class DiscoveryClientVaultBootstrapConfigurationTests {
 	public void shouldNotRegisterBeansIfVaultDisabled() {
 
 		this.contextRunner.withUserConfiguration(DiscoveryConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.token=foo",
-						"spring.cloud.vault.enabled=false")
-				.run(context -> {
+				.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.enabled=false").run(context -> {
 
-					assertThat(context
-							.getBeanNamesForType(VaultServiceInstanceProvider.class))
-									.isEmpty();
+					assertThat(context.getBeanNamesForType(VaultServiceInstanceProvider.class)).isEmpty();
 				});
 
 	}
@@ -104,8 +92,8 @@ public class DiscoveryClientVaultBootstrapConfigurationTests {
 		DiscoveryClient discoveryClient() {
 
 			DiscoveryClient mock = Mockito.mock(DiscoveryClient.class);
-			when(mock.getInstances(anyString())).thenReturn(Collections.singletonList(
-					new SimpleServiceInstance(URI.create("https://foo:1234"))));
+			when(mock.getInstances(anyString()))
+					.thenReturn(Collections.singletonList(new SimpleServiceInstance(URI.create("https://foo:1234"))));
 
 			return mock;
 		}

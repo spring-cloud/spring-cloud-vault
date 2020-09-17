@@ -57,8 +57,7 @@ public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 
 	private static final int CONSUL_PORT = 8500;
 
-	private static final String CONNECTION_URL = String.format("%s:%d", CONSUL_HOST,
-			CONSUL_PORT);
+	private static final String CONNECTION_URL = String.format("%s:%d", CONSUL_HOST, CONSUL_PORT);
 
 	private static final String POLICY = "key \"\" { policy = \"read\" }";
 
@@ -94,21 +93,19 @@ public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("X-Consul-Token", CONSUL_ACL_MASTER_TOKEN);
-		HttpEntity<String> requestEntity = new HttpEntity<>(
-				"{\"Name\": \"sample\", \"Type\": \"management\"}", headers);
+		HttpEntity<String> requestEntity = new HttpEntity<>("{\"Name\": \"sample\", \"Type\": \"management\"}",
+				headers);
 
 		try {
-			ResponseEntity<Map<String, String>> tokenResponse = this.restTemplate
-					.exchange("http://{host}:{port}/v1/acl/create", HttpMethod.PUT,
-							requestEntity, STRING_MAP, CONSUL_HOST, CONSUL_PORT);
+			ResponseEntity<Map<String, String>> tokenResponse = this.restTemplate.exchange(
+					"http://{host}:{port}/v1/acl/create", HttpMethod.PUT, requestEntity, STRING_MAP, CONSUL_HOST,
+					CONSUL_PORT);
 
 			Map<String, String> consulAccess = new HashMap<>();
 			consulAccess.put("address", CONNECTION_URL);
 			consulAccess.put("token", tokenResponse.getBody().get("ID"));
 
-			vaultOperations.write(
-					String.format("%s/config/access", this.consul.getBackend()),
-					consulAccess);
+			vaultOperations.write(String.format("%s/config/access", this.consul.getBackend()), consulAccess);
 		}
 		catch (HttpStatusCodeException e) {
 
@@ -118,23 +115,17 @@ public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 			throw e;
 		}
 
-		vaultOperations.write(
-				String.format("%s/roles/%s", this.consul.getBackend(),
-						this.consul.getRole()),
-				Collections.singletonMap("policy",
-						Base64Utils.encodeToString(POLICY.getBytes())));
+		vaultOperations.write(String.format("%s/roles/%s", this.consul.getBackend(), this.consul.getRole()),
+				Collections.singletonMap("policy", Base64Utils.encodeToString(POLICY.getBytes())));
 
-		this.configOperations = new VaultConfigTemplate(vaultOperations,
-				this.vaultProperties);
+		this.configOperations = new VaultConfigTemplate(vaultOperations, this.vaultProperties);
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
-		ConsulSecretBackendMetadataFactory factory = new ConsulSecretBackendMetadataFactory(
-				null);
-		Map<String, Object> secretProperties = this.configOperations
-				.read(factory.forConsul(this.consul)).getData();
+		ConsulSecretBackendMetadataFactory factory = new ConsulSecretBackendMetadataFactory(null);
+		Map<String, Object> secretProperties = this.configOperations.read(factory.forConsul(this.consul)).getData();
 
 		assertThat(secretProperties).containsKeys("spring.cloud.consul.config.acl-token",
 				"spring.cloud.consul.discovery.acl-token");

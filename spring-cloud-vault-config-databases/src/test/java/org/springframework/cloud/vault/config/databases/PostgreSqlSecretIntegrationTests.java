@@ -50,8 +50,7 @@ public class PostgreSqlSecretIntegrationTests extends IntegrationTestSupport {
 	private static final int POSTGRES_PORT = 5432;
 
 	private static final String CONNECTION_URL = String.format(
-			"postgresql://springvault:springvault@%s:%d/postgres?sslmode=disable",
-			POSTGRES_HOST, POSTGRES_PORT);
+			"postgresql://springvault:springvault@%s:%d/postgres?sslmode=disable", POSTGRES_HOST, POSTGRES_PORT);
 
 	private static final String CREATE_USER_AND_GRANT_SQL = "CREATE ROLE \"{{name}}\" WITH "
 			+ "LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';\n"
@@ -81,28 +80,22 @@ public class PostgreSqlSecretIntegrationTests extends IntegrationTestSupport {
 
 		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();
 
-		vaultOperations.write(
-				String.format("%s/config/connection", this.postgreSql.getBackend()),
+		vaultOperations.write(String.format("%s/config/connection", this.postgreSql.getBackend()),
 				Collections.singletonMap("connection_url", CONNECTION_URL));
 
-		vaultOperations.write(
-				String.format("%s/roles/%s", this.postgreSql.getBackend(),
-						this.postgreSql.getRole()),
+		vaultOperations.write(String.format("%s/roles/%s", this.postgreSql.getBackend(), this.postgreSql.getRole()),
 				Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
 
-		this.configOperations = new VaultConfigTemplate(vaultOperations,
-				this.vaultProperties);
+		this.configOperations = new VaultConfigTemplate(vaultOperations, this.vaultProperties);
 
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, Object> secretProperties = this.configOperations
-				.read(forDatabase(this.postgreSql)).getData();
+		Map<String, Object> secretProperties = this.configOperations.read(forDatabase(this.postgreSql)).getData();
 
-		assertThat(secretProperties).containsKeys("spring.datasource.username",
-				"spring.datasource.password");
+		assertThat(secretProperties).containsKeys("spring.datasource.username", "spring.datasource.password");
 	}
 
 }

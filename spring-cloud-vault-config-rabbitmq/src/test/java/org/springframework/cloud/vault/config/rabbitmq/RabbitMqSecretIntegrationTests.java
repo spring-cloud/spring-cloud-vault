@@ -52,8 +52,8 @@ public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 
 	private static final String RABBITMQ_PASSWORD = "guest";
 
-	private static final String RABBITMQ_URI = String.format("http://%s:%d",
-			RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT);
+	private static final String RABBITMQ_URI = String.format("http://%s:%d", RABBITMQ_HOST,
+			RABBITMQ_HTTP_MANAGEMENT_PORT);
 
 	private static final String VHOSTS_ROLE = "{\"/\":{\"write\": \".*\", \"read\": \".*\"}}";
 
@@ -69,8 +69,7 @@ public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 	@Before
 	public void setUp() {
 
-		assumeTrue(CanConnect
-				.to(new InetSocketAddress(RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT)));
+		assumeTrue(CanConnect.to(new InetSocketAddress(RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT)));
 		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.2")));
 
 		this.rabbitmq.setEnabled(true);
@@ -87,27 +86,20 @@ public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 
 		VaultOperations vaultOperations = prepare().getVaultOperations();
 
-		vaultOperations.write(
-				String.format("%s/config/connection", this.rabbitmq.getBackend()),
-				connection);
+		vaultOperations.write(String.format("%s/config/connection", this.rabbitmq.getBackend()), connection);
 
-		vaultOperations.write(
-				String.format("%s/roles/%s", this.rabbitmq.getBackend(),
-						this.rabbitmq.getRole()),
+		vaultOperations.write(String.format("%s/roles/%s", this.rabbitmq.getBackend(), this.rabbitmq.getRole()),
 				Collections.singletonMap("vhosts", VHOSTS_ROLE));
 
-		this.configOperations = new VaultConfigTemplate(vaultOperations,
-				this.vaultProperties);
+		this.configOperations = new VaultConfigTemplate(vaultOperations, this.vaultProperties);
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, Object> secretProperties = this.configOperations
-				.read(forRabbitMq(this.rabbitmq)).getData();
+		Map<String, Object> secretProperties = this.configOperations.read(forRabbitMq(this.rabbitmq)).getData();
 
-		assertThat(secretProperties).containsKeys("spring.rabbitmq.username",
-				"spring.rabbitmq.password");
+		assertThat(secretProperties).containsKeys("spring.rabbitmq.username", "spring.rabbitmq.password");
 	}
 
 }

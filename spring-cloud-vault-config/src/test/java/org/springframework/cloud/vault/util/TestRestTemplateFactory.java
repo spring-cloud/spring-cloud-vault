@@ -79,8 +79,7 @@ public class TestRestTemplateFactory {
 		return VaultClients.createRestTemplate(TEST_VAULT_ENDPOINT, requestFactory);
 	}
 
-	private static void initializeClientHttpRequestFactory(
-			SslConfiguration sslConfiguration) throws Exception {
+	private static void initializeClientHttpRequestFactory(SslConfiguration sslConfiguration) throws Exception {
 
 		if (factoryCache.get() != null) {
 			return;
@@ -97,19 +96,18 @@ public class TestRestTemplateFactory {
 
 			if (clientHttpRequestFactory instanceof DisposableBean) {
 
-				Runtime.getRuntime().addShutdownHook(
-						new Thread("ClientHttpRequestFactory Shutdown Hook") {
+				Runtime.getRuntime().addShutdownHook(new Thread("ClientHttpRequestFactory Shutdown Hook") {
 
-							@Override
-							public void run() {
-								try {
-									((DisposableBean) clientHttpRequestFactory).destroy();
-								}
-								catch (Exception e) {
-									e.printStackTrace();
-								}
-							}
-						});
+					@Override
+					public void run() {
+						try {
+							((DisposableBean) clientHttpRequestFactory).destroy();
+						}
+						catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
 			}
 		}
 	}

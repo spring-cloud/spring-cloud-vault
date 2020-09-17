@@ -62,8 +62,7 @@ public class PrepareVault {
 
 		for (int i = 0; i < requiredKeys; i++) {
 
-			VaultUnsealStatus unsealStatus = this.vaultOperations.opsForSys()
-					.unseal(initialized.getKeys().get(i));
+			VaultUnsealStatus unsealStatus = this.vaultOperations.opsForSys().unseal(initialized.getKeys().get(i));
 
 			if (!unsealStatus.isSealed()) {
 				break;
@@ -87,8 +86,7 @@ public class PrepareVault {
 			builder.withPolicy(policy);
 		}
 
-		VaultTokenResponse vaultTokenResponse = this.vaultOperations.opsForToken()
-				.create(builder.build());
+		VaultTokenResponse vaultTokenResponse = this.vaultOperations.opsForToken().create(builder.build());
 		return vaultTokenResponse.getToken();
 	}
 
@@ -97,8 +95,7 @@ public class PrepareVault {
 	 * @return whether Vault is available.
 	 */
 	public boolean isAvailable() {
-		return this.adminOperations.isInitialized()
-				&& !this.adminOperations.health().isSealed();
+		return this.adminOperations.isInitialized() && !this.adminOperations.health().isSealed();
 	}
 
 	/**
@@ -138,15 +135,13 @@ public class PrepareVault {
 	 * @param path must not be {@literal null} or empty.
 	 * @param config must not be {@literal null}.
 	 */
-	public void mountSecret(String secretBackend, String path,
-			Map<String, Object> config) {
+	public void mountSecret(String secretBackend, String path, Map<String, Object> config) {
 
 		Assert.hasText(secretBackend, "SecretBackend must not be empty");
 		Assert.hasText(path, "Mount path must not be empty");
 		Assert.notNull(config, "Configuration must not be null");
 
-		VaultMount mount = VaultMount.builder().type(secretBackend).config(config)
-				.build();
+		VaultMount mount = VaultMount.builder().type(secretBackend).config(config).build();
 		this.adminOperations.mount(path, mount);
 	}
 
@@ -159,8 +154,7 @@ public class PrepareVault {
 
 		Assert.hasText(secretBackend, "SecretBackend must not be empty");
 		Map<String, VaultMount> mounts = this.adminOperations.getMounts();
-		return mounts.containsKey(secretBackend)
-				|| mounts.containsKey(secretBackend + "/");
+		return mounts.containsKey(secretBackend) || mounts.containsKey(secretBackend + "/");
 	}
 
 	public VaultOperations getVaultOperations() {
@@ -197,16 +191,15 @@ public class PrepareVault {
 
 		this.vaultOperations.opsForSys().unmount("secret");
 
-		VaultMount kv = VaultMount.builder().type("kv")
-				.config(Collections.singletonMap("versioned", false)).build();
+		VaultMount kv = VaultMount.builder().type("kv").config(Collections.singletonMap("versioned", false)).build();
 		this.vaultOperations.opsForSys().mount("secret", kv);
 	}
 
 	public void mountVersionedKvBackend() {
 
 		mountSecret("kv", "versioned", Collections.emptyMap());
-		this.vaultOperations.write("sys/mounts/versioned/tune", Collections
-				.singletonMap("options", Collections.singletonMap("version", "2")));
+		this.vaultOperations.write("sys/mounts/versioned/tune",
+				Collections.singletonMap("options", Collections.singletonMap("version", "2")));
 	}
 
 }

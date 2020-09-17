@@ -38,8 +38,7 @@ import org.springframework.validation.annotation.Validated;
  */
 @ConfigurationProperties("spring.cloud.vault.kv")
 @Validated
-public class VaultKeyValueBackendProperties
-		implements EnvironmentAware, VaultKeyValueBackendPropertiesSupport {
+public class VaultKeyValueBackendProperties implements EnvironmentAware, VaultKeyValueBackendPropertiesSupport {
 
 	/**
 	 * Enable the kev-value backend.
@@ -89,8 +88,7 @@ public class VaultKeyValueBackendProperties
 	@Override
 	public void setEnvironment(Environment environment) {
 
-		String springCloudVaultAppName = environment
-				.getProperty("spring.cloud.vault.application-name");
+		String springCloudVaultAppName = environment.getProperty("spring.cloud.vault.application-name");
 
 		if (StringUtils.hasText(springCloudVaultAppName)) {
 			this.applicationName = springCloudVaultAppName;

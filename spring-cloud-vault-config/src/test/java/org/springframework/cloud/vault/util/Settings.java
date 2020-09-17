@@ -39,8 +39,7 @@ public class Settings {
 
 		VaultProperties vaultProperties = new VaultProperties();
 		vaultProperties.getSsl().setTrustStorePassword("changeit");
-		vaultProperties.getSsl()
-				.setTrustStore(new FileSystemResource(new File(workDir, "keystore.jks")));
+		vaultProperties.getSsl().setTrustStore(new FileSystemResource(new File(workDir, "keystore.jks")));
 		vaultProperties.setToken(token().getToken());
 
 		return vaultProperties;
@@ -53,8 +52,7 @@ public class Settings {
 
 		File workDir = findWorkDir();
 
-		return SslConfiguration.forTrustStore(
-				new FileSystemResource(new File(workDir, "keystore.jks")),
+		return SslConfiguration.forTrustStore(new FileSystemResource(new File(workDir, "keystore.jks")),
 				"changeit".toCharArray());
 	}
 
@@ -77,8 +75,7 @@ public class Settings {
 	public static File findWorkDir(File directory) {
 
 		File searchLevel = directory;
-		while (searchLevel.getParentFile() != null
-				&& searchLevel.getParentFile() != searchLevel) {
+		while (searchLevel.getParentFile() != null && searchLevel.getParentFile() != searchLevel) {
 
 			File work = new File(searchLevel, "work");
 			if (work.isDirectory() && work.exists()) {
@@ -88,8 +85,7 @@ public class Settings {
 			searchLevel = searchLevel.getParentFile();
 		}
 
-		throw new IllegalStateException(String.format(
-				"Cannot find work directory in %s or any parent directories",
+		throw new IllegalStateException(String.format("Cannot find work directory in %s or any parent directories",
 				directory.getAbsoluteFile()));
 	}
 
@@ -97,8 +93,7 @@ public class Settings {
 	 * @return the token to use during tests.
 	 */
 	public static VaultToken token() {
-		return VaultToken.of(System.getProperty("vault.token",
-				"00000000-0000-0000-0000-000000000000"));
+		return VaultToken.of(System.getProperty("vault.token", "00000000-0000-0000-0000-000000000000"));
 	}
 
 }

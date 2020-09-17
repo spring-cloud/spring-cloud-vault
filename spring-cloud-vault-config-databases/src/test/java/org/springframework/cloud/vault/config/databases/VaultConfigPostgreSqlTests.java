@@ -50,11 +50,10 @@ import static org.junit.Assume.assumeTrue;
  * @author Mark Paluch
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = VaultConfigPostgreSqlTests.TestApplication.class, properties = {
-		"spring.cloud.vault.postgresql.enabled=true",
-		"spring.cloud.vault.postgresql.role=readonly",
-		"spring.datasource.url=jdbc:postgresql://localhost:5432/postgres?ssl=false",
-		"spring.main.allow-bean-definition-overriding=true" })
+@SpringBootTest(classes = VaultConfigPostgreSqlTests.TestApplication.class,
+		properties = { "spring.cloud.vault.postgresql.enabled=true", "spring.cloud.vault.postgresql.role=readonly",
+				"spring.datasource.url=jdbc:postgresql://localhost:5432/postgres?ssl=false",
+				"spring.main.allow-bean-definition-overriding=true" })
 public class VaultConfigPostgreSqlTests {
 
 	private static final String POSTGRES_HOST = "localhost";
@@ -62,8 +61,7 @@ public class VaultConfigPostgreSqlTests {
 	private static final int POSTGRES_PORT = 5432;
 
 	private static final String CONNECTION_URL = String.format(
-			"postgresql://springvault:springvault@%s:%d/postgres?sslmode=disable",
-			POSTGRES_HOST, POSTGRES_PORT);
+			"postgresql://springvault:springvault@%s:%d/postgres?sslmode=disable", POSTGRES_HOST, POSTGRES_PORT);
 
 	private static final String CREATE_USER_AND_GRANT_SQL = "CREATE ROLE \"{{name}}\" WITH "
 			+ "LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';\n"
@@ -98,8 +96,7 @@ public class VaultConfigPostgreSqlTests {
 		vaultOperations.write("postgresql/config/connection",
 				Collections.singletonMap("connection_url", CONNECTION_URL));
 
-		vaultOperations.write("postgresql/roles/readonly",
-				Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
+		vaultOperations.write("postgresql/roles/readonly", Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
 	}
 
 	@Test
@@ -114,8 +111,7 @@ public class VaultConfigPostgreSqlTests {
 	@Test
 	public void shouldConnectUsingJdbcUrlConnection() throws SQLException {
 
-		String url = String.format("jdbc:postgresql://%s:%d/postgres?ssl=false",
-				POSTGRES_HOST, POSTGRES_PORT);
+		String url = String.format("jdbc:postgresql://%s:%d/postgres?ssl=false", POSTGRES_HOST, POSTGRES_PORT);
 		DriverManager.getConnection(url, this.username, this.password).close();
 	}
 

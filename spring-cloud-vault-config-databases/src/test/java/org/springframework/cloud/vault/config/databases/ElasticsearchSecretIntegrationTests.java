@@ -63,8 +63,7 @@ public class ElasticsearchSecretIntegrationTests extends IntegrationTestSupport 
 	@Before
 	public void setUp() {
 
-		assumeTrue(CanConnect
-				.to(new InetSocketAddress(ELASTICSEARCH_HOST, ELASTICSEARCH_PORT)));
+		assumeTrue(CanConnect.to(new InetSocketAddress(ELASTICSEARCH_HOST, ELASTICSEARCH_PORT)));
 		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("1.3.0")));
 
 		this.elasticsearch.setEnabled(true);
@@ -82,16 +81,13 @@ public class ElasticsearchSecretIntegrationTests extends IntegrationTestSupport 
 		config.put("allowed_roles", "readonly");
 		config.put("username", "elastic");
 		config.put("password", "elastic");
-		config.put("url",
-				String.format("http://%s:%d", ELASTICSEARCH_HOST, ELASTICSEARCH_PORT));
+		config.put("url", String.format("http://%s:%d", ELASTICSEARCH_HOST, ELASTICSEARCH_PORT));
 
 		config.put("ca_cert", String.format("%s/elastic-stack-ca.crt", ES_HOME));
 		config.put("client_cert", String.format("%s/elastic-certificates.crt", ES_HOME));
 		config.put("client_key", String.format("%s/elastic-certificates.key", ES_HOME));
 
-		vaultOperations.write(
-				String.format("%s/config/%s", this.elasticsearch.getBackend(), database),
-				config);
+		vaultOperations.write(String.format("%s/config/%s", this.elasticsearch.getBackend(), database), config);
 
 		Map<String, Object> role = new LinkedHashMap<>();
 		role.put("db_name", database);
@@ -99,18 +95,15 @@ public class ElasticsearchSecretIntegrationTests extends IntegrationTestSupport 
 				"{\"elasticsearch_role_definition\": {\"indices\": [{\"names\":[\"*\"], \"privileges\":[\"read\"]}]}}");
 		role.put("default_ttl", "1h");
 
-		vaultOperations.write(this.elasticsearch.getBackend() + "/roles/"
-				+ this.elasticsearch.getRole(), role);
+		vaultOperations.write(this.elasticsearch.getBackend() + "/roles/" + this.elasticsearch.getRole(), role);
 
-		this.configOperations = new VaultConfigTemplate(vaultOperations,
-				this.vaultProperties);
+		this.configOperations = new VaultConfigTemplate(vaultOperations, this.vaultProperties);
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, Object> secretProperties = this.configOperations
-				.read(forDatabase(this.elasticsearch)).getData();
+		Map<String, Object> secretProperties = this.configOperations.read(forDatabase(this.elasticsearch)).getData();
 
 		assertThat(secretProperties).containsKeys("spring.elasticsearch.rest.username",
 				"spring.elasticsearch.rest.password");

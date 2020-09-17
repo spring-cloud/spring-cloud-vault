@@ -63,16 +63,14 @@ public class VaultNamespaceTests {
 	@ClassRule
 	public static VaultRule vaultRule = new VaultRule();
 
-	static final Policy POLICY = Policy.of(Policy.Rule.builder().path("/*")
-			.capabilities(Policy.BuiltinCapabilities.READ,
-					Policy.BuiltinCapabilities.CREATE, Policy.BuiltinCapabilities.UPDATE)
-			.build());
+	static final Policy POLICY = Policy
+			.of(Policy.Rule.builder().path("/*").capabilities(Policy.BuiltinCapabilities.READ,
+					Policy.BuiltinCapabilities.CREATE, Policy.BuiltinCapabilities.UPDATE).build());
 
 	RestTemplateBuilder maketingRestTemplate;
 
 	WebClientBuilder marketingWebClientBuilder = WebClientBuilder.builder()
-			.httpConnector(ClientHttpConnectorFactory.create(new ClientOptions(),
-					Settings.createSslConfiguration()))
+			.httpConnector(ClientHttpConnectorFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
 			.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
 			.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
 
@@ -84,18 +82,16 @@ public class VaultNamespaceTests {
 				this.vaultRule.prepare().getVersion().isEnterprise());
 
 		List<String> namespaces = new ArrayList<>(Arrays.asList("dev/", "marketing/"));
-		List<String> list = this.vaultRule.prepare().getVaultOperations()
-				.list("sys/namespaces");
+		List<String> list = this.vaultRule.prepare().getVaultOperations().list("sys/namespaces");
 		namespaces.removeAll(list);
 
 		for (String namespace : namespaces) {
-			this.vaultRule.prepare().getVaultOperations()
-					.write("sys/namespaces/" + namespace.replaceAll("/", ""));
+			this.vaultRule.prepare().getVaultOperations().write("sys/namespaces/" + namespace.replaceAll("/", ""));
 		}
 
 		this.maketingRestTemplate = RestTemplateBuilder.builder()
-				.requestFactory(ClientHttpRequestFactoryFactory
-						.create(new ClientOptions(), Settings.createSslConfiguration()))
+				.requestFactory(
+						ClientHttpRequestFactoryFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
 				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
 				.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
 
@@ -104,8 +100,7 @@ public class VaultNamespaceTests {
 
 		mountKv(marketing, "marketing-secrets");
 		marketing.opsForSys().createOrUpdatePolicy("relaxed", POLICY);
-		this.marketingToken = marketing.opsForToken()
-				.create(VaultTokenRequest.builder().withPolicy("relaxed").build())
+		this.marketingToken = marketing.opsForToken().create(VaultTokenRequest.builder().withPolicy("relaxed").build())
 				.getToken().getToken();
 	}
 
@@ -116,8 +111,8 @@ public class VaultNamespaceTests {
 		Map<String, VaultMount> mounts = vaultSysOperations.getMounts();
 
 		if (!mounts.containsKey(path + "/")) {
-			vaultSysOperations.mount(path, VaultMount.builder().type("kv")
-					.options(Collections.singletonMap("version", "1")).build());
+			vaultSysOperations.mount(path,
+					VaultMount.builder().type("kv").options(Collections.singletonMap("version", "1")).build());
 		}
 	}
 
@@ -136,16 +131,13 @@ public class VaultNamespaceTests {
 	@Test
 	public void shouldReportReactiveHealth() {
 
-		ReactiveVaultTemplate reactiveMarketing = new ReactiveVaultTemplate(
-				this.marketingWebClientBuilder,
+		ReactiveVaultTemplate reactiveMarketing = new ReactiveVaultTemplate(this.marketingWebClientBuilder,
 				() -> Mono.just(VaultToken.of(this.marketingToken)));
 
 		Health.Builder builder = Health.unknown();
 
-		new VaultReactiveHealthIndicator(reactiveMarketing).doHealthCheck(builder)
-				.as(StepVerifier::create)
-				.assertNext(actual -> assertThat(actual.getStatus()).isEqualTo(Status.UP))
-				.verifyComplete();
+		new VaultReactiveHealthIndicator(reactiveMarketing).doHealthCheck(builder).as(StepVerifier::create)
+				.assertNext(actual -> assertThat(actual.getStatus()).isEqualTo(Status.UP)).verifyComplete();
 	}
 
 }

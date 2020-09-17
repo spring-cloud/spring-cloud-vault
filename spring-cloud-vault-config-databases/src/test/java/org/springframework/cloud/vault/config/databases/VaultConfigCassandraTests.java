@@ -48,8 +48,7 @@ import static org.junit.Assume.assumeTrue;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigCassandraTests.TestApplication.class,
-		properties = { "spring.cloud.vault.cassandra.enabled=true",
-				"spring.cloud.vault.cassandra.role=readonly",
+		properties = { "spring.cloud.vault.cassandra.enabled=true", "spring.cloud.vault.cassandra.role=readonly",
 				"spring.data.cassandra.jmx-enabled=false" })
 public class VaultConfigCassandraTests {
 
@@ -96,8 +95,7 @@ public class VaultConfigCassandraTests {
 		connection.put("password", CASSANDRA_PASSWORD);
 		connection.put("protocol_version", 3);
 
-		vaultOperations.write(String.format("%s/config/connection", "cassandra"),
-				connection);
+		vaultOperations.write(String.format("%s/config/connection", "cassandra"), connection);
 
 		Map<String, String> role = new HashMap<>();
 

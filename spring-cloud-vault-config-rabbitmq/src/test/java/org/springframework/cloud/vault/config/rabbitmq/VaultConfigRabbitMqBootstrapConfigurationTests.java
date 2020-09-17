@@ -39,12 +39,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = CustomBootstrapConfiguration.class,
-		properties = {
-				"VaultConfigRabbitMqBootstrapConfigurationTests.custom.config=true",
-				"spring.cloud.vault.rabbitmq.role=foo" })
-public class VaultConfigRabbitMqBootstrapConfigurationTests
-		extends IntegrationTestSupport {
+@SpringBootTest(classes = CustomBootstrapConfiguration.class, properties = {
+		"VaultConfigRabbitMqBootstrapConfigurationTests.custom.config=true", "spring.cloud.vault.rabbitmq.role=foo" })
+public class VaultConfigRabbitMqBootstrapConfigurationTests extends IntegrationTestSupport {
 
 	@Autowired
 	RabbitMqSecretBackendMetadataFactory factory;
@@ -70,10 +67,8 @@ public class VaultConfigRabbitMqBootstrapConfigurationTests
 
 			return new RabbitMqSecretBackendMetadataFactory() {
 				@Override
-				public SecretBackendMetadata createMetadata(
-						VaultRabbitMqProperties backendDescriptor) {
-					return KeyValueSecretBackendMetadata
-							.create(backendDescriptor.getRole());
+				public SecretBackendMetadata createMetadata(VaultRabbitMqProperties backendDescriptor) {
+					return KeyValueSecretBackendMetadata.create(backendDescriptor.getRole());
 				}
 			};
 		}

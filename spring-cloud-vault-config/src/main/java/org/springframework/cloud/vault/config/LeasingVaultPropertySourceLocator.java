@@ -34,8 +34,7 @@ import org.springframework.vault.core.lease.event.LeaseErrorListener;
  * @author Mark Paluch
  * @see LeaseAwareVaultPropertySource
  */
-class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSupport
-		implements PriorityOrdered {
+class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSupport implements PriorityOrdered {
 
 	private final SecretLeaseContainer secretLeaseContainer;
 
@@ -72,8 +71,7 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 	 * @param accessor the {@link SecretBackendMetadata}.
 	 * @return the {@link VaultPropertySource} to use.
 	 */
-	protected PropertySource<?> createVaultPropertySource(
-			SecretBackendMetadata accessor) {
+	protected PropertySource<?> createVaultPropertySource(SecretBackendMetadata accessor) {
 
 		RequestedSecret secret = getRequestedSecret(accessor);
 
@@ -89,8 +87,7 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 		if (accessor instanceof LeasingSecretBackendMetadata) {
 
 			LeasingSecretBackendMetadata leasingBackend = (LeasingSecretBackendMetadata) accessor;
-			return RequestedSecret.from(leasingBackend.getLeaseMode(),
-					accessor.getPath());
+			return RequestedSecret.from(leasingBackend.getLeaseMode(), accessor.getPath());
 		}
 
 		if (accessor instanceof KeyValueSecretBackendMetadata) {
@@ -132,28 +129,23 @@ class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSuppor
 					throw (VaultException) exception;
 				}
 				throw new VaultException(
-						String.format("Cannot initialize PropertySource for secret at %s",
-								secret.getPath()),
+						String.format("Cannot initialize PropertySource for secret at %s", secret.getPath()),
 						exception);
 			}
 		}
 	}
 
-	private PropertySource<?> createVaultPropertySource(RequestedSecret secret,
-			SecretBackendMetadata accessor) {
+	private PropertySource<?> createVaultPropertySource(RequestedSecret secret, SecretBackendMetadata accessor) {
 
 		if (accessor instanceof LeasingSecretBackendMetadata) {
-			((LeasingSecretBackendMetadata) accessor).beforeRegistration(secret,
-					this.secretLeaseContainer);
+			((LeasingSecretBackendMetadata) accessor).beforeRegistration(secret, this.secretLeaseContainer);
 		}
 
-		LeaseAwareVaultPropertySource propertySource = new LeaseAwareVaultPropertySource(
-				accessor.getName(), this.secretLeaseContainer, secret,
-				accessor.getPropertyTransformer());
+		LeaseAwareVaultPropertySource propertySource = new LeaseAwareVaultPropertySource(accessor.getName(),
+				this.secretLeaseContainer, secret, accessor.getPropertyTransformer());
 
 		if (accessor instanceof LeasingSecretBackendMetadata) {
-			((LeasingSecretBackendMetadata) accessor).afterRegistration(secret,
-					this.secretLeaseContainer);
+			((LeasingSecretBackendMetadata) accessor).afterRegistration(secret, this.secretLeaseContainer);
 		}
 
 		return propertySource;

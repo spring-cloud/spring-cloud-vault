@@ -43,8 +43,8 @@ class ConsulBackendMetadata implements LeasingSecretBackendMetadata {
 
 	private final ApplicationEventPublisher eventPublisher;
 
-	ConsulBackendMetadata(VaultConsulProperties properties,
-			PropertyTransformer transformer, ApplicationEventPublisher eventPublisher) {
+	ConsulBackendMetadata(VaultConsulProperties properties, PropertyTransformer transformer,
+			ApplicationEventPublisher eventPublisher) {
 		this.properties = properties;
 		this.transformer = transformer;
 		this.eventPublisher = eventPublisher;
@@ -52,14 +52,12 @@ class ConsulBackendMetadata implements LeasingSecretBackendMetadata {
 
 	@Override
 	public String getName() {
-		return String.format("%s with Role %s", this.properties.getBackend(),
-				this.properties.getRole());
+		return String.format("%s with Role %s", this.properties.getBackend(), this.properties.getRole());
 	}
 
 	@Override
 	public String getPath() {
-		return String.format("%s/creds/%s", this.properties.getBackend(),
-				this.properties.getRole());
+		return String.format("%s/creds/%s", this.properties.getBackend(), this.properties.getRole());
 	}
 
 	@Override
@@ -84,12 +82,10 @@ class ConsulBackendMetadata implements LeasingSecretBackendMetadata {
 	}
 
 	@Override
-	public void afterRegistration(RequestedSecret secret,
-			SecretLeaseContainer container) {
+	public void afterRegistration(RequestedSecret secret, SecretLeaseContainer container) {
 		container.addLeaseListener(leaseEvent -> {
 
-			if (leaseEvent.getSource() == secret
-					&& leaseEvent instanceof SecretLeaseCreatedEvent) {
+			if (leaseEvent.getSource() == secret && leaseEvent instanceof SecretLeaseCreatedEvent) {
 				if (this.log.isDebugEnabled()) {
 					this.log.debug("Publishing a RebindConsulEvent");
 				}

@@ -38,13 +38,12 @@ import org.springframework.vault.core.ReactiveVaultOperations;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(Flux.class)
 @ConditionalOnBean(ReactiveVaultOperations.class)
-class VaultReactiveHealthIndicatorConfiguration extends
-		CompositeReactiveHealthContributorConfiguration<VaultReactiveHealthIndicator, ReactiveVaultOperations> {
+class VaultReactiveHealthIndicatorConfiguration
+		extends CompositeReactiveHealthContributorConfiguration<VaultReactiveHealthIndicator, ReactiveVaultOperations> {
 
 	private final Map<String, ReactiveVaultOperations> reactiveVaultTemplates;
 
-	VaultReactiveHealthIndicatorConfiguration(
-			Map<String, ReactiveVaultOperations> reactiveVaultTemplates) {
+	VaultReactiveHealthIndicatorConfiguration(Map<String, ReactiveVaultOperations> reactiveVaultTemplates) {
 		this.reactiveVaultTemplates = reactiveVaultTemplates;
 	}
 

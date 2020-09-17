@@ -41,19 +41,15 @@ public class VaultReactiveHealthIndicatorIntegrationTests extends IntegrationTes
 	@Test
 	public void shouldReturnHealthState() {
 
-		ReactiveVaultTemplate vaultTemplate = new ReactiveVaultTemplate(
-				TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
-				ClientHttpConnectorFactory.create(new ClientOptions(),
-						Settings.createSslConfiguration()),
+		ReactiveVaultTemplate vaultTemplate = new ReactiveVaultTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
+				ClientHttpConnectorFactory.create(new ClientOptions(), Settings.createSslConfiguration()),
 				() -> Mono.just(Settings.token()));
 
-		VaultReactiveHealthIndicator healthIndicator = new VaultReactiveHealthIndicator(
-				vaultTemplate);
+		VaultReactiveHealthIndicator healthIndicator = new VaultReactiveHealthIndicator(vaultTemplate);
 
-		healthIndicator.doHealthCheck(Health.up()).as(StepVerifier::create)
-				.consumeNextWith(actual -> {
-					assertThat(actual.getStatus()).isEqualTo(Status.UP);
-				}).verifyComplete();
+		healthIndicator.doHealthCheck(Health.up()).as(StepVerifier::create).consumeNextWith(actual -> {
+			assertThat(actual.getStatus()).isEqualTo(Status.UP);
+		}).verifyComplete();
 	}
 
 }

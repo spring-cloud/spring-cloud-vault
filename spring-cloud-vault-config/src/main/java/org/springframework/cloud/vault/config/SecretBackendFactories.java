@@ -49,12 +49,10 @@ final class SecretBackendFactories {
 				continue;
 			}
 
-			SecretBackendMetadata metadata = createSecretBackendMetadata(factories,
-					vaultSecretBackendDescriptor);
+			SecretBackendMetadata metadata = createSecretBackendMetadata(factories, vaultSecretBackendDescriptor);
 
 			if (metadata == null) {
-				log.warn(String.format("Cannot create SecretBackendMetadata for %s",
-						vaultSecretBackendDescriptor));
+				log.warn(String.format("Cannot create SecretBackendMetadata for %s", vaultSecretBackendDescriptor));
 				continue;
 			}
 

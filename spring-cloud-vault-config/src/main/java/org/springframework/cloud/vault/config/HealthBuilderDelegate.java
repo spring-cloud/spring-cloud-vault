@@ -47,8 +47,7 @@ final class HealthBuilderDelegate {
 			builder.up().withDetail("state", "Vault in performance standby");
 		}
 		else if (healthResponse.isRecoveryReplicationSecondary()) {
-			builder.up().withDetail("state",
-					"Vault in recovery replication secondary mode");
+			builder.up().withDetail("state", "Vault in recovery replication secondary mode");
 		}
 		else {
 			builder.up();
