@@ -52,7 +52,8 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigAwsTests.TestApplication.class,
 		properties = { "spring.cloud.vault.aws.enabled=true", "spring.cloud.vault.aws.role=readonly",
-				"cloud.aws.region.auto=false", "cloud.aws.region.static=eu-west-1" })
+				"cloud.aws.region.auto=false", "cloud.aws.region.static=eu-west-1",
+				"spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigAwsTests {
 
 	private static final String AWS_REGION = "eu-west-1";

@@ -49,7 +49,7 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigCassandraTests.TestApplication.class,
 		properties = { "spring.cloud.vault.cassandra.enabled=true", "spring.cloud.vault.cassandra.role=readonly",
-				"spring.data.cassandra.jmx-enabled=false" })
+				"spring.data.cassandra.jmx-enabled=false", "spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigCassandraTests {
 
 	private static final String CASSANDRA_HOST = "localhost";

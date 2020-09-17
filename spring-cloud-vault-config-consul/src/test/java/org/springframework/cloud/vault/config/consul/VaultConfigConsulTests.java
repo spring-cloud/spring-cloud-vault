@@ -62,7 +62,8 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigConsulTests.TestApplication.class,
 		properties = { "spring.cloud.vault.consul.enabled=true", "spring.cloud.vault.consul.role=readonly",
-				"spring.cloud.consul.discovery.catalog-services-watch.enabled=false" })
+				"spring.cloud.consul.discovery.catalog-services-watch.enabled=false",
+				"spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigConsulTests {
 
 	private static final String CONSUL_HOST = "localhost";

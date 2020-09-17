@@ -50,8 +50,9 @@ public class DiscoveryClientVaultBootstrapConfigurationTests {
 	@Test
 	public void shouldRegisterDefaultBeans() {
 
-		this.contextRunner.withUserConfiguration(DiscoveryConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.discovery.enabled=true")
+		this.contextRunner
+				.withUserConfiguration(DiscoveryConfiguration.class).withPropertyValues("spring.cloud.vault.token=foo",
+						"spring.cloud.vault.discovery.enabled=true", "spring.cloud.bootstrap.enabled=true")
 				.run(context -> {
 
 					assertThat(context.getBean(VaultServiceInstanceProvider.class))
@@ -66,8 +67,9 @@ public class DiscoveryClientVaultBootstrapConfigurationTests {
 	@Test
 	public void shouldNotRegisterBeansIfDiscoveryDisabled() {
 
-		this.contextRunner.withUserConfiguration(DiscoveryConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.discovery.enabled=false")
+		this.contextRunner
+				.withUserConfiguration(DiscoveryConfiguration.class).withPropertyValues("spring.cloud.vault.token=foo",
+						"spring.cloud.vault.discovery.enabled=false", "spring.cloud.bootstrap.enabled=true")
 				.run(context -> {
 
 					assertThat(context.getBeanNamesForType(VaultServiceInstanceProvider.class)).isEmpty();
@@ -78,7 +80,9 @@ public class DiscoveryClientVaultBootstrapConfigurationTests {
 	public void shouldNotRegisterBeansIfVaultDisabled() {
 
 		this.contextRunner.withUserConfiguration(DiscoveryConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.enabled=false").run(context -> {
+				.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.enabled=false",
+						"spring.cloud.bootstrap.enabled=true")
+				.run(context -> {
 
 					assertThat(context.getBeanNamesForType(VaultServiceInstanceProvider.class)).isEmpty();
 				});
