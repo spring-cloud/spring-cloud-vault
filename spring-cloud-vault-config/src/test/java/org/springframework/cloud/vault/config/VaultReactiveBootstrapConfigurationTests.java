@@ -37,6 +37,7 @@ import org.springframework.vault.authentication.ReactiveSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.authentication.VaultTokenSupplier;
+import org.springframework.vault.client.WebClientFactory;
 import org.springframework.vault.core.ReactiveVaultOperations;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -66,6 +67,7 @@ public class VaultReactiveBootstrapConfigurationTests {
 							.isNotInstanceOf(LifecycleAwareSessionManager.class)
 							.isNotInstanceOf(SimpleSessionManager.class);
 					assertThat(context.getBeanNamesForType(WebClient.class)).isEmpty();
+					assertThat(context).hasSingleBean(WebClientFactory.class);
 				});
 	}
 
