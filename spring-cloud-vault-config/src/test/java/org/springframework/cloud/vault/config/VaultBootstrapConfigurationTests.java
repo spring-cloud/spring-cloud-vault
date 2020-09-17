@@ -44,9 +44,8 @@ public class VaultBootstrapConfigurationTests {
 	@Test
 	public void shouldConfigureWithoutAuthentication() {
 
-		this.contextRunner
-				.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.authentication=NONE")
-				.run(context -> {
+		this.contextRunner.withPropertyValues("spring.cloud.vault.kv.enabled=false",
+				"spring.cloud.vault.authentication=NONE", "spring.cloud.bootstrap.enabled=true").run(context -> {
 
 					assertThat(context).doesNotHaveBean(SessionManager.class);
 					assertThat(context).doesNotHaveBean(ClientAuthentication.class);
@@ -58,8 +57,10 @@ public class VaultBootstrapConfigurationTests {
 	@Test
 	public void shouldDisableSessionManagement() {
 
-		this.contextRunner.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
-				"spring.cloud.vault.session.lifecycle.enabled=false").run(context -> {
+		this.contextRunner
+				.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
+						"spring.cloud.vault.session.lifecycle.enabled=false", "spring.cloud.bootstrap.enabled=true")
+				.run(context -> {
 
 					SessionManager bean = context.getBean(SessionManager.class);
 					assertThat(bean).isExactlyInstanceOf(SimpleSessionManager.class);
@@ -71,7 +72,8 @@ public class VaultBootstrapConfigurationTests {
 
 		this.contextRunner.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
 				"spring.cloud.vault.session.lifecycle.refresh-before-expiry=11s",
-				"spring.cloud.vault.session.lifecycle.expiry-threshold=12s").run(context -> {
+				"spring.cloud.vault.session.lifecycle.expiry-threshold=12s", "spring.cloud.bootstrap.enabled=true")
+				.run(context -> {
 
 					SessionManager bean = context.getBean(SessionManager.class);
 

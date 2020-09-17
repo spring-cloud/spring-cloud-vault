@@ -41,7 +41,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = CustomBootstrapConfiguration.class,
 		properties = { "VaultConfigDatabaseBootstrapConfigurationTests.custom.config=true",
-				"spring.cloud.vault.mysql.role=foo", "spring.cloud.vault.mysql.enabled=true" })
+				"spring.cloud.vault.mysql.role=foo", "spring.cloud.vault.mysql.enabled=true",
+				"spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigDatabaseBootstrapConfigurationTests extends IntegrationTestSupport {
 
 	@Autowired

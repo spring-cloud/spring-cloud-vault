@@ -51,7 +51,7 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigRabbitMqTests.TestApplication.class,
 		properties = { "spring.cloud.vault.rabbitmq.enabled=true", "spring.cloud.vault.rabbitmq.role=readonly",
-				"spring.rabbitmq.address=localhost" })
+				"spring.rabbitmq.address=localhost", "spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigRabbitMqTests {
 
 	private static final int RABBITMQ_HTTP_MANAGEMENT_PORT = 15672;

@@ -49,9 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigAppIdTests.TestApplication.class,
 		properties = { "spring.cloud.vault.authentication=appid", "spring.cloud.vault.app-id.user-id=IP_ADDRESS",
-				"spring.cloud.vault.application-name=VaultConfigAppIdTests" })
-// see
-// https://github.com/spring-cloud/spring-cloud-commons/issues/214
+				"spring.cloud.vault.application-name=VaultConfigAppIdTests", "spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigAppIdTests {
 
 	@Value("${vault.value}")

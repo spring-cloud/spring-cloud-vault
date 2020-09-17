@@ -52,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		properties = { "spring.cloud.vault.authentication=appid",
 				"VaultConfigAppIdCustomMechanismTests.custom.config=true",
 				"spring.cloud.vault.applicationName=VaultConfigAppIdCustomMechanismTests",
-				"spring.main.allow-bean-definition-overriding=true" })
+				"spring.main.allow-bean-definition-overriding=true", "spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigAppIdCustomMechanismTests {
 
 	@Value("${vault.value}")
