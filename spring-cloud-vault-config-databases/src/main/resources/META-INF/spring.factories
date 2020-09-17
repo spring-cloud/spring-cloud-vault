@@ -1,3 +1,14 @@
 # Bootstrap Configuration
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
 org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration
+
+org.springframework.cloud.vault.config.SecretBackendMetadataFactory=\
+org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory
+
+org.springframework.cloud.vault.config.VaultSecretBackendDescriptor=\
+org.springframework.cloud.vault.config.databases.VaultMySqlProperties,\
+org.springframework.cloud.vault.config.databases.VaultPostgreSqlProperties,\
+org.springframework.cloud.vault.config.databases.VaultCassandraProperties,\
+org.springframework.cloud.vault.config.databases.VaultMongoProperties,\
+org.springframework.cloud.vault.config.databases.VaultElasticsearchProperties,\
+org.springframework.cloud.vault.config.databases.VaultDatabaseProperties

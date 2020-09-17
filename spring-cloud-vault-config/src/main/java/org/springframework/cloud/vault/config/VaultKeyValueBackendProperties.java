@@ -36,9 +36,14 @@ import org.springframework.validation.annotation.Validated;
  * @author Mark Paluch
  * @since 2.0
  */
-@ConfigurationProperties("spring.cloud.vault.kv")
+@ConfigurationProperties(VaultKeyValueBackendProperties.PREFIX)
 @Validated
 public class VaultKeyValueBackendProperties implements EnvironmentAware, VaultKeyValueBackendPropertiesSupport {
+
+	/**
+	 * Configuration prefix for config properties.
+	 */
+	public static final String PREFIX = "spring.cloud.vault.kv";
 
 	/**
 	 * Enable the kev-value backend.

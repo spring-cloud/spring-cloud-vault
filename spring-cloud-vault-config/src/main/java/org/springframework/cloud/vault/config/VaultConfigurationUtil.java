@@ -17,10 +17,14 @@
 package org.springframework.cloud.vault.config;
 
 import java.net.URI;
+import java.time.Duration;
 
 import org.springframework.cloud.vault.config.VaultProperties.Ssl;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.StringUtils;
+import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.client.VaultEndpoint;
+import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 
@@ -34,6 +38,16 @@ final class VaultConfigurationUtil {
 
 	private VaultConfigurationUtil() {
 
+	}
+
+	static ClientHttpRequestFactory createClientHttpRequestFactory(VaultProperties vaultProperties) {
+
+		ClientOptions clientOptions = new ClientOptions(Duration.ofMillis(vaultProperties.getConnectionTimeout()),
+				Duration.ofMillis(vaultProperties.getReadTimeout()));
+
+		SslConfiguration sslConfiguration = VaultConfigurationUtil.createSslConfiguration(vaultProperties.getSsl());
+
+		return ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration);
 	}
 
 	/**
