@@ -51,8 +51,7 @@ import static org.junit.Assume.assumeTrue;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigMySqlDatabaseTests.TestApplication.class,
-		properties = { "spring.cloud.vault.database.enabled=true",
-				"spring.cloud.vault.database.role=readonly",
+		properties = { "spring.cloud.vault.database.enabled=true", "spring.cloud.vault.database.role=readonly",
 				"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=UTC",
 				"spring.main.allow-bean-definition-overriding=true" })
 public class VaultConfigMySqlDatabaseTests {
@@ -61,8 +60,8 @@ public class VaultConfigMySqlDatabaseTests {
 
 	private static final String MYSQL_HOST = "localhost";
 
-	private static final String ROOT_CREDENTIALS = String
-			.format("springvault:springvault@tcp(%s:%d)/", MYSQL_HOST, MYSQL_PORT);
+	private static final String ROOT_CREDENTIALS = String.format("springvault:springvault@tcp(%s:%d)/", MYSQL_HOST,
+			MYSQL_PORT);
 
 	private static final String CREATE_USER_AND_GRANT_SQL = "CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';"
 			+ "GRANT SELECT ON *.* TO '{{name}}'@'%';";
@@ -86,8 +85,7 @@ public class VaultConfigMySqlDatabaseTests {
 		vaultRule.before();
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(MYSQL_HOST, MYSQL_PORT)));
-		assumeTrue(vaultRule.prepare().getVersion()
-				.isGreaterThanOrEqualTo(Version.parse("0.7.1")));
+		assumeTrue(vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.7.1")));
 
 		if (!vaultRule.prepare().hasSecretBackend("database")) {
 			vaultRule.prepare().mountSecret("database");
@@ -118,8 +116,7 @@ public class VaultConfigMySqlDatabaseTests {
 	@Test
 	public void shouldConnectUsingJdbcUrlConnection() throws SQLException {
 
-		String url = String.format("jdbc:mysql://%s?useSSL=false&serverTimezone=UTC",
-				MYSQL_HOST);
+		String url = String.format("jdbc:mysql://%s?useSSL=false&serverTimezone=UTC", MYSQL_HOST);
 		DriverManager.getConnection(url, this.username, this.password).close();
 	}
 

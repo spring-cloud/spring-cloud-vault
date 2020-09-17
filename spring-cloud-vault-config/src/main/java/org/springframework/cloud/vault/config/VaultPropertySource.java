@@ -75,8 +75,7 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations
 		}
 		catch (RuntimeException e) {
 
-			String message = String.format(
-					"Unable to read properties from Vault using %s for %s ", getName(),
+			String message = String.format("Unable to read properties from Vault using %s for %s ", getName(),
 					this.secretBackendMetadata.getVariables());
 
 			if (this.failFast) {

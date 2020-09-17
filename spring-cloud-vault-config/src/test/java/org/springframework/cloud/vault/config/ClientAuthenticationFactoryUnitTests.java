@@ -44,12 +44,10 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.getAppRole().setRoleId("foo");
 		properties.getAppRole().setSecretId("bar");
 
-		AppRoleAuthenticationOptions options = ClientAuthenticationFactory
-				.getAppRoleAuthenticationOptions(properties);
+		AppRoleAuthenticationOptions options = ClientAuthenticationFactory.getAppRoleAuthenticationOptions(properties);
 
 		assertThat(options.getRoleId()).isInstanceOf(RoleId.provided("foo").getClass());
-		assertThat(options.getSecretId())
-				.isInstanceOf(SecretId.provided("bar").getClass());
+		assertThat(options.getSecretId()).isInstanceOf(SecretId.provided("bar").getClass());
 	}
 
 	@Test
@@ -58,8 +56,7 @@ public class ClientAuthenticationFactoryUnitTests {
 		VaultProperties properties = new VaultProperties();
 		properties.getAppRole().setRoleId("foo");
 
-		AppRoleAuthenticationOptions options = ClientAuthenticationFactory
-				.getAppRoleAuthenticationOptions(properties);
+		AppRoleAuthenticationOptions options = ClientAuthenticationFactory.getAppRoleAuthenticationOptions(properties);
 
 		assertThat(options.getRoleId()).isInstanceOf(RoleId.provided("foo").getClass());
 		assertThat(options.getSecretId()).isInstanceOf(SecretId.absent().getClass());
@@ -73,13 +70,11 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.getAppRole().setRoleId("foo");
 		properties.getAppRole().setRole("my-role");
 
-		AppRoleAuthenticationOptions options = ClientAuthenticationFactory
-				.getAppRoleAuthenticationOptions(properties);
+		AppRoleAuthenticationOptions options = ClientAuthenticationFactory.getAppRoleAuthenticationOptions(properties);
 
 		assertThat(options.getAppRole()).isEqualTo("my-role");
 		assertThat(options.getRoleId()).isInstanceOf(RoleId.provided("foo").getClass());
-		assertThat(options.getSecretId())
-				.isInstanceOf(SecretId.pull(VaultToken.of("token")).getClass());
+		assertThat(options.getSecretId()).isInstanceOf(SecretId.pull(VaultToken.of("token")).getClass());
 	}
 
 	@Test
@@ -89,14 +84,11 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.setToken("token");
 		properties.getAppRole().setRole("my-role");
 
-		AppRoleAuthenticationOptions options = ClientAuthenticationFactory
-				.getAppRoleAuthenticationOptions(properties);
+		AppRoleAuthenticationOptions options = ClientAuthenticationFactory.getAppRoleAuthenticationOptions(properties);
 
 		assertThat(options.getAppRole()).isEqualTo("my-role");
-		assertThat(options.getRoleId())
-				.isInstanceOf(RoleId.pull(VaultToken.of("token")).getClass());
-		assertThat(options.getSecretId())
-				.isInstanceOf(SecretId.pull(VaultToken.of("token")).getClass());
+		assertThat(options.getRoleId()).isInstanceOf(RoleId.pull(VaultToken.of("token")).getClass());
+		assertThat(options.getSecretId()).isInstanceOf(SecretId.pull(VaultToken.of("token")).getClass());
 	}
 
 	@Test
@@ -105,13 +97,10 @@ public class ClientAuthenticationFactoryUnitTests {
 		VaultProperties properties = new VaultProperties();
 		properties.setToken("token");
 
-		AppRoleAuthenticationOptions options = ClientAuthenticationFactory
-				.getAppRoleAuthenticationOptions(properties);
+		AppRoleAuthenticationOptions options = ClientAuthenticationFactory.getAppRoleAuthenticationOptions(properties);
 
-		assertThat(options.getRoleId())
-				.isInstanceOf(RoleId.wrapped(VaultToken.of("token")).getClass());
-		assertThat(options.getSecretId())
-				.isInstanceOf(SecretId.wrapped(VaultToken.of("token")).getClass());
+		assertThat(options.getRoleId()).isInstanceOf(RoleId.wrapped(VaultToken.of("token")).getClass());
+		assertThat(options.getSecretId()).isInstanceOf(SecretId.wrapped(VaultToken.of("token")).getClass());
 	}
 
 	@Test
@@ -121,13 +110,10 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.setToken("token");
 		properties.getAppRole().setSecretId("bar");
 
-		AppRoleAuthenticationOptions options = ClientAuthenticationFactory
-				.getAppRoleAuthenticationOptions(properties);
+		AppRoleAuthenticationOptions options = ClientAuthenticationFactory.getAppRoleAuthenticationOptions(properties);
 
-		assertThat(options.getRoleId())
-				.isInstanceOf(RoleId.wrapped(VaultToken.of("token")).getClass());
-		assertThat(options.getSecretId())
-				.isInstanceOf(SecretId.provided("bar").getClass());
+		assertThat(options.getRoleId()).isInstanceOf(RoleId.wrapped(VaultToken.of("token")).getClass());
+		assertThat(options.getSecretId()).isInstanceOf(SecretId.provided("bar").getClass());
 	}
 
 	@Test
@@ -137,12 +123,10 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.setToken("token");
 		properties.getAppRole().setRoleId("foo");
 
-		AppRoleAuthenticationOptions options = ClientAuthenticationFactory
-				.getAppRoleAuthenticationOptions(properties);
+		AppRoleAuthenticationOptions options = ClientAuthenticationFactory.getAppRoleAuthenticationOptions(properties);
 
 		assertThat(options.getRoleId()).isInstanceOf(RoleId.provided("foo").getClass());
-		assertThat(options.getSecretId())
-				.isInstanceOf(SecretId.wrapped(VaultToken.of("token")).getClass());
+		assertThat(options.getSecretId()).isInstanceOf(SecretId.wrapped(VaultToken.of("token")).getClass());
 	}
 
 	@Test
@@ -150,9 +134,8 @@ public class ClientAuthenticationFactoryUnitTests {
 
 		VaultProperties properties = new VaultProperties();
 
-		assertThatThrownBy(() -> ClientAuthenticationFactory
-				.getAppRoleAuthenticationOptions(properties))
-						.isInstanceOf(IllegalArgumentException.class);
+		assertThatThrownBy(() -> ClientAuthenticationFactory.getAppRoleAuthenticationOptions(properties))
+				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -161,9 +144,8 @@ public class ClientAuthenticationFactoryUnitTests {
 		VaultProperties properties = new VaultProperties();
 		properties.getAppRole().setRole("my-role");
 
-		assertThatThrownBy(() -> ClientAuthenticationFactory
-				.getAppRoleAuthenticationOptions(properties))
-						.isInstanceOf(IllegalArgumentException.class);
+		assertThatThrownBy(() -> ClientAuthenticationFactory.getAppRoleAuthenticationOptions(properties))
+				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -173,12 +155,10 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.setAuthentication(VaultProperties.AuthenticationMethod.PCF);
 		properties.getPcf().setRole("my-role");
 		properties.getPcf().setInstanceKey(new ClassPathResource("bootstrap.yml"));
-		properties.getPcf()
-				.setInstanceCertificate(new ClassPathResource("bootstrap.yml"));
+		properties.getPcf().setInstanceCertificate(new ClassPathResource("bootstrap.yml"));
 
-		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(
-				properties, new RestTemplate(), new RestTemplate())
-						.createClientAuthentication();
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate()).createClientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(PcfAuthentication.class);
 	}

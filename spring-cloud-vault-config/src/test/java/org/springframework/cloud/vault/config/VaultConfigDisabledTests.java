@@ -77,8 +77,7 @@ public class VaultConfigDisabledTests {
 		ApplicationContext parent = this.applicationContext.getParent();
 
 		assertThat(parent.getBeanNamesForType(VaultTemplate.class)).isEmpty();
-		assertThat(parent.getBeanNamesForType(VaultPropertySourceLocator.class))
-				.isEmpty();
+		assertThat(parent.getBeanNamesForType(VaultPropertySourceLocator.class)).isEmpty();
 	}
 
 	@SpringBootApplication

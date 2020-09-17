@@ -50,8 +50,7 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param properties must not be {@literal null}.
 	 */
-	public VaultConfigTemplate(VaultOperations vaultOperations,
-			VaultProperties properties) {
+	public VaultConfigTemplate(VaultOperations vaultOperations, VaultProperties properties) {
 
 		Assert.notNull(vaultOperations, "VaultOperations must not be null!");
 		Assert.notNull(properties, "VaultProperties must not be null!");
@@ -66,32 +65,27 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 
 		Assert.notNull(secretBackendMetadata, "SecureBackendAccessor must not be null!");
 
-		log.info(String.format("Fetching config from Vault at: %s",
-				secretBackendMetadata.getPath()));
+		log.info(String.format("Fetching config from Vault at: %s", secretBackendMetadata.getPath()));
 
 		try {
 
 			VaultResponse vaultResponse;
 
 			if (this.keyValueDelegate.isVersioned(secretBackendMetadata.getPath())) {
-				vaultResponse = this.keyValueDelegate
-						.getSecret(secretBackendMetadata.getPath());
+				vaultResponse = this.keyValueDelegate.getSecret(secretBackendMetadata.getPath());
 			}
 			else {
-				vaultResponse = this.vaultOperations
-						.read(secretBackendMetadata.getPath());
+				vaultResponse = this.vaultOperations.read(secretBackendMetadata.getPath());
 			}
 
 			if (vaultResponse == null) {
 
-				log.info(String.format("Could not locate PropertySource: %s",
-						"key not found"));
+				log.info(String.format("Could not locate PropertySource: %s", "key not found"));
 				return null;
 			}
 
 			Map<String, Object> data = JsonMapFlattener.flatten(vaultResponse.getData());
-			PropertyTransformer propertyTransformer = secretBackendMetadata
-					.getPropertyTransformer();
+			PropertyTransformer propertyTransformer = secretBackendMetadata.getPropertyTransformer();
 
 			if (propertyTransformer != null) {
 				data = propertyTransformer.transformProperties(data);
@@ -103,12 +97,10 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 
 			if (this.properties.isFailFast()) {
 				throw new IllegalStateException(
-						"Could not locate PropertySource and the fail fast property is set, failing.",
-						e);
+						"Could not locate PropertySource and the fail fast property is set, failing.", e);
 			}
 			else {
-				log.warn(String.format("Could not locate PropertySource: %s",
-						e.getMessage()));
+				log.warn(String.format("Could not locate PropertySource: %s", e.getMessage()));
 			}
 		}
 

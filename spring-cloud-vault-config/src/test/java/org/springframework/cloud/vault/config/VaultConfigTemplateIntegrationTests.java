@@ -37,8 +37,7 @@ public class VaultConfigTemplateIntegrationTests extends IntegrationTestSupport 
 
 	@Before
 	public void before() {
-		prepare().getVaultOperations().write("secret/myapp",
-				Collections.singletonMap("key", "value"));
+		prepare().getVaultOperations().write("secret/myapp", Collections.singletonMap("key", "value"));
 	}
 
 	@Test
@@ -46,11 +45,9 @@ public class VaultConfigTemplateIntegrationTests extends IntegrationTestSupport 
 
 		VaultProperties vaultProperties = Settings.createVaultProperties();
 
-		VaultConfigTemplate template = new VaultConfigTemplate(
-				prepare().getVaultOperations(), vaultProperties);
+		VaultConfigTemplate template = new VaultConfigTemplate(prepare().getVaultOperations(), vaultProperties);
 
-		Secrets secrets = template
-				.read(KeyValueSecretBackendMetadata.create("secret", "myapp"));
+		Secrets secrets = template.read(KeyValueSecretBackendMetadata.create("secret", "myapp"));
 
 		assertThat(secrets.getData()).containsEntry("key", "value");
 	}
@@ -58,20 +55,16 @@ public class VaultConfigTemplateIntegrationTests extends IntegrationTestSupport 
 	@Test
 	public void shouldReadVersionedValue() {
 
-		assumeTrue(this.vaultRule.prepare().getVersion()
-				.isGreaterThanOrEqualTo(Version.parse("0.10.0")));
+		assumeTrue(this.vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.10.0")));
 
 		this.vaultRule.prepare().getVaultOperations().write("versioned/data/testVaultApp",
-				Collections.singletonMap("data",
-						Collections.singletonMap("key", "value")));
+				Collections.singletonMap("data", Collections.singletonMap("key", "value")));
 
 		VaultProperties vaultProperties = Settings.createVaultProperties();
 
-		VaultConfigTemplate template = new VaultConfigTemplate(
-				prepare().getVaultOperations(), vaultProperties);
+		VaultConfigTemplate template = new VaultConfigTemplate(prepare().getVaultOperations(), vaultProperties);
 
-		Secrets secrets = template
-				.read(KeyValueSecretBackendMetadata.create("versioned", "testVaultApp"));
+		Secrets secrets = template.read(KeyValueSecretBackendMetadata.create("versioned", "testVaultApp"));
 
 		assertThat(secrets.getData()).containsEntry("key", "value");
 	}

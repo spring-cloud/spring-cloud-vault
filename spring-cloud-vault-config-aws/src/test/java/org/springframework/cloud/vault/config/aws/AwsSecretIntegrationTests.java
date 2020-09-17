@@ -64,8 +64,7 @@ public class AwsSecretIntegrationTests extends IntegrationTestSupport {
 	@Before
 	public void setUp() {
 
-		assumeTrue(StringUtils.hasText(AWS_ACCESS_KEY)
-				&& StringUtils.hasText(AWS_SECRET_KEY));
+		assumeTrue(StringUtils.hasText(AWS_ACCESS_KEY) && StringUtils.hasText(AWS_SECRET_KEY));
 
 		this.aws.setEnabled(true);
 		this.aws.setRole("readonly");
@@ -81,25 +80,20 @@ public class AwsSecretIntegrationTests extends IntegrationTestSupport {
 		connection.put("access_key", AWS_ACCESS_KEY);
 		connection.put("secret_key", AWS_SECRET_KEY);
 
-		vaultOperations.write(String.format("%s/config/root", this.aws.getBackend()),
-				connection);
+		vaultOperations.write(String.format("%s/config/root", this.aws.getBackend()), connection);
 
-		vaultOperations.write(
-				String.format("%s/roles/%s", this.aws.getBackend(), this.aws.getRole()),
+		vaultOperations.write(String.format("%s/roles/%s", this.aws.getBackend(), this.aws.getRole()),
 				Collections.singletonMap("arn", ARN));
 
-		this.configOperations = new VaultConfigTemplate(vaultOperations,
-				this.vaultProperties);
+		this.configOperations = new VaultConfigTemplate(vaultOperations, this.vaultProperties);
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, Object> secretProperties = this.configOperations
-				.read(forAws(this.aws)).getData();
+		Map<String, Object> secretProperties = this.configOperations.read(forAws(this.aws)).getData();
 
-		assertThat(secretProperties).containsKeys("cloud.aws.credentials.accessKey",
-				"cloud.aws.credentials.secretKey");
+		assertThat(secretProperties).containsKeys("cloud.aws.credentials.accessKey", "cloud.aws.credentials.secretKey");
 	}
 
 }

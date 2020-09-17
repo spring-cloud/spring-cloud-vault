@@ -39,9 +39,8 @@ import org.springframework.vault.core.util.PropertyTransformer;
  * @author Sebastien Nahelou
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties({ VaultMySqlProperties.class,
-		VaultPostgreSqlProperties.class, VaultCassandraProperties.class,
-		VaultMongoProperties.class, VaultElasticsearchProperties.class,
+@EnableConfigurationProperties({ VaultMySqlProperties.class, VaultPostgreSqlProperties.class,
+		VaultCassandraProperties.class, VaultMongoProperties.class, VaultElasticsearchProperties.class,
 		VaultDatabaseProperties.class })
 public class VaultConfigDatabaseBootstrapConfiguration {
 
@@ -67,32 +66,26 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 		 * @param properties must not be {@literal null}.
 		 * @return the {@link SecretBackendMetadata}
 		 */
-		static SecretBackendMetadata forDatabase(
-				final DatabaseSecretProperties properties) {
+		static SecretBackendMetadata forDatabase(final DatabaseSecretProperties properties) {
 
 			Assert.notNull(properties, "DatabaseSecretProperties must not be null");
 
 			PropertyNameTransformer transformer = new PropertyNameTransformer();
-			transformer.addKeyTransformation("username",
-					properties.getUsernameProperty());
-			transformer.addKeyTransformation("password",
-					properties.getPasswordProperty());
+			transformer.addKeyTransformation("username", properties.getUsernameProperty());
+			transformer.addKeyTransformation("password", properties.getPasswordProperty());
 
 			return new SecretBackendMetadata() {
 
-				private final String credPath = properties.isStaticRole() ? "static-creds"
-						: "creds";
+				private final String credPath = properties.isStaticRole() ? "static-creds" : "creds";
 
 				@Override
 				public String getName() {
-					return String.format("%s with Role %s", properties.getBackend(),
-							properties.getRole());
+					return String.format("%s with Role %s", properties.getBackend(), properties.getRole());
 				}
 
 				@Override
 				public String getPath() {
-					return String.format("%s/%s/%s", properties.getBackend(),
-							this.credPath, properties.getRole());
+					return String.format("%s/%s/%s", properties.getBackend(), this.credPath, properties.getRole());
 				}
 
 				@Override
@@ -105,16 +98,14 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 
 					Map<String, String> variables = new HashMap<>();
 					variables.put("backend", properties.getBackend());
-					variables.put("key",
-							String.format("%s/%s", this.credPath, properties.getRole()));
+					variables.put("key", String.format("%s/%s", this.credPath, properties.getRole()));
 					return variables;
 				}
 			};
 		}
 
 		@Override
-		public SecretBackendMetadata createMetadata(
-				DatabaseSecretProperties backendDescriptor) {
+		public SecretBackendMetadata createMetadata(DatabaseSecretProperties backendDescriptor) {
 			return forDatabase(backendDescriptor);
 		}
 

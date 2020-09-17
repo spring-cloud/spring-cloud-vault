@@ -50,8 +50,7 @@ import static org.junit.Assume.assumeTrue;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigRabbitMqTests.TestApplication.class,
-		properties = { "spring.cloud.vault.rabbitmq.enabled=true",
-				"spring.cloud.vault.rabbitmq.role=readonly",
+		properties = { "spring.cloud.vault.rabbitmq.enabled=true", "spring.cloud.vault.rabbitmq.role=readonly",
 				"spring.rabbitmq.address=localhost" })
 public class VaultConfigRabbitMqTests {
 
@@ -65,8 +64,8 @@ public class VaultConfigRabbitMqTests {
 
 	private static final String RABBITMQ_PASSWORD = "guest";
 
-	private static final String RABBITMQ_URI = String.format("http://%s:%d",
-			RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT);
+	private static final String RABBITMQ_URI = String.format("http://%s:%d", RABBITMQ_HOST,
+			RABBITMQ_HTTP_MANAGEMENT_PORT);
 
 	private static final String VHOSTS_ROLE = "{\"/\":{\"write\": \".*\", \"read\": \".*\"}}";
 
@@ -85,14 +84,12 @@ public class VaultConfigRabbitMqTests {
 	@BeforeClass
 	public static void beforeClass() {
 
-		assumeTrue(CanConnect
-				.to(new InetSocketAddress(RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT)));
+		assumeTrue(CanConnect.to(new InetSocketAddress(RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT)));
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		assumeTrue(vaultRule.prepare().getVersion()
-				.isGreaterThanOrEqualTo(Version.parse("0.6.2")));
+		assumeTrue(vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.2")));
 
 		if (!vaultRule.prepare().hasSecretBackend("rabbitmq")) {
 			vaultRule.prepare().mountSecret("rabbitmq");

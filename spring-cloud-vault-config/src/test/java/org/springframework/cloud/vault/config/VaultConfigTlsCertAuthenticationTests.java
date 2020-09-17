@@ -79,17 +79,14 @@ public class VaultConfigTlsCertAuthenticationTests {
 				+ "  }\n" //
 				+ "}";
 
-		vaultOperations.write("sys/policy/testpolicy",
-				Collections.singletonMap("rules", rules));
+		vaultOperations.write("sys/policy/testpolicy", Collections.singletonMap("rules", rules));
 
-		vaultOperations.write(
-				"secret/" + VaultConfigTlsCertAuthenticationTests.class.getSimpleName(),
+		vaultOperations.write("secret/" + VaultConfigTlsCertAuthenticationTests.class.getSimpleName(),
 				Collections.singletonMap("vault.value", "foo"));
 
 		File workDir = findWorkDir();
 
-		String certificate = Files.contentOf(
-				new File(workDir, "ca/certs/client.cert.pem"), StandardCharsets.US_ASCII);
+		String certificate = Files.contentOf(new File(workDir, "ca/certs/client.cert.pem"), StandardCharsets.US_ASCII);
 
 		Map<String, String> role = new HashMap<>();
 		role.put("certificate", certificate);

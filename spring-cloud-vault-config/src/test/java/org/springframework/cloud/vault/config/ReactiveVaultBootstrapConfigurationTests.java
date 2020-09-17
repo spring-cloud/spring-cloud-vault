@@ -35,15 +35,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ReactiveVaultBootstrapConfigurationTests {
 
-	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations.of(VaultBootstrapConfiguration.class,
-					VaultReactiveBootstrapConfiguration.class));
+	private ApplicationContextRunner contextRunner = new ApplicationContextRunner().withConfiguration(
+			AutoConfigurations.of(VaultBootstrapConfiguration.class, VaultReactiveBootstrapConfiguration.class));
 
 	@Test
 	public void shouldConfigureWithoutAuthentication() {
 
-		this.contextRunner.withPropertyValues("spring.cloud.vault.kv.enabled=false",
-				"spring.cloud.vault.authentication=NONE").run(context -> {
+		this.contextRunner
+				.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.authentication=NONE")
+				.run(context -> {
 
 					assertThat(context).doesNotHaveBean(SessionManager.class);
 					assertThat(context).doesNotHaveBean(ClientAuthentication.class);

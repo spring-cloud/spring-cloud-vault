@@ -37,8 +37,7 @@ public class VaultPropertySourceIntegrationTests extends IntegrationTestSupport 
 
 	@Before
 	public void before() {
-		prepare().getVaultOperations().write("secret/myapp",
-				Collections.singletonMap("key", "value"));
+		prepare().getVaultOperations().write("secret/myapp", Collections.singletonMap("key", "value"));
 	}
 
 	@Test
@@ -47,8 +46,8 @@ public class VaultPropertySourceIntegrationTests extends IntegrationTestSupport 
 		VaultProperties vaultProperties = Settings.createVaultProperties();
 
 		VaultPropertySource propertySource = new VaultPropertySource(
-				new VaultConfigTemplate(prepare().getVaultOperations(), vaultProperties),
-				false, KeyValueSecretBackendMetadata.create("secret", "myapp"));
+				new VaultConfigTemplate(prepare().getVaultOperations(), vaultProperties), false,
+				KeyValueSecretBackendMetadata.create("secret", "myapp"));
 
 		propertySource.init();
 
@@ -59,18 +58,16 @@ public class VaultPropertySourceIntegrationTests extends IntegrationTestSupport 
 	@Test
 	public void shouldReadVersionedValue() {
 
-		assumeTrue(this.vaultRule.prepare().getVersion()
-				.isGreaterThanOrEqualTo(Version.parse("0.10.0")));
+		assumeTrue(this.vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.10.0")));
 
 		this.vaultRule.prepare().getVaultOperations().write("versioned/data/testVaultApp",
-				Collections.singletonMap("data",
-						Collections.singletonMap("key", "value")));
+				Collections.singletonMap("data", Collections.singletonMap("key", "value")));
 
 		VaultProperties vaultProperties = Settings.createVaultProperties();
 
 		VaultPropertySource propertySource = new VaultPropertySource(
-				new VaultConfigTemplate(prepare().getVaultOperations(), vaultProperties),
-				false, KeyValueSecretBackendMetadata.create("versioned", "testVaultApp"));
+				new VaultConfigTemplate(prepare().getVaultOperations(), vaultProperties), false,
+				KeyValueSecretBackendMetadata.create("versioned", "testVaultApp"));
 
 		propertySource.init();
 

@@ -54,10 +54,8 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultVersionedKvBackendConfigTests.TestApplication.class,
 		properties = { "spring.cloud.vault.host=foo", "spring.cloud.vault.port=80",
-				"spring.cloud.vault.uri=https://localhost:8200",
-				"spring.cloud.vault.kv.enabled=true",
-				"spring.cloud.vault.kv.backend=versioned",
-				"spring.cloud.vault.application-name=testVaultApp" })
+				"spring.cloud.vault.uri=https://localhost:8200", "spring.cloud.vault.kv.enabled=true",
+				"spring.cloud.vault.kv.backend=versioned", "spring.cloud.vault.application-name=testVaultApp" })
 public class VaultVersionedKvBackendConfigTests {
 
 	@Value("${vault.value}")
@@ -75,8 +73,7 @@ public class VaultVersionedKvBackendConfigTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		assumeTrue(vaultRule.prepare().getVersion()
-				.isGreaterThanOrEqualTo(Version.parse("0.10.0")));
+		assumeTrue(vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.10.0")));
 
 		Map<String, Object> object = new HashMap<>();
 		object.put("vault.value", "foo");
@@ -108,8 +105,7 @@ public class VaultVersionedKvBackendConfigTests {
 		ApplicationContext parent = this.applicationContext.getParent();
 
 		assertThat(parent.getBeanNamesForType(VaultTemplate.class)).isNotEmpty();
-		assertThat(parent.getBeanNamesForType(LeasingVaultPropertySourceLocator.class))
-				.isNotEmpty();
+		assertThat(parent.getBeanNamesForType(LeasingVaultPropertySourceLocator.class)).isNotEmpty();
 	}
 
 	@Test

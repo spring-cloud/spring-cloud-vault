@@ -50,11 +50,10 @@ import static org.springframework.cloud.vault.util.Settings.findWorkDir;
  * @author Michal Budzyn
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = VaultConfigKubernetesTests.TestApplication.class, properties = {
-		"spring.cloud.vault.authentication=kubernetes",
-		"spring.cloud.vault.kubernetes.role=my-role",
-		"spring.cloud.vault.kubernetes.service-account-token-file=../work/minikube/hello-minikube-token",
-		"spring.cloud.vault.application-name=VaultConfigKubernetesTests" })
+@SpringBootTest(classes = VaultConfigKubernetesTests.TestApplication.class,
+		properties = { "spring.cloud.vault.authentication=kubernetes", "spring.cloud.vault.kubernetes.role=my-role",
+				"spring.cloud.vault.kubernetes.service-account-token-file=../work/minikube/hello-minikube-token",
+				"spring.cloud.vault.application-name=VaultConfigKubernetesTests" })
 public class VaultConfigKubernetesTests {
 
 	@Value("${vault.value}")
@@ -67,8 +66,8 @@ public class VaultConfigKubernetesTests {
 		vaultRule.before();
 
 		String minikubeIp = System.getProperty("MINIKUBE_IP");
-		assumeTrue(StringUtils.hasText(minikubeIp) && vaultRule.prepare().getVersion()
-				.isGreaterThanOrEqualTo(Version.parse("0.8.3")));
+		assumeTrue(StringUtils.hasText(minikubeIp)
+				&& vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.8.3")));
 
 		if (!vaultRule.prepare().hasAuth("kubernetes")) {
 			vaultRule.prepare().mountAuth("kubernetes");
@@ -76,18 +75,15 @@ public class VaultConfigKubernetesTests {
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
-		Policy policy = Policy.of(
-				Rule.builder().path("*").capabilities(BuiltinCapabilities.READ).build());
+		Policy policy = Policy.of(Rule.builder().path("*").capabilities(BuiltinCapabilities.READ).build());
 
 		vaultOperations.opsForSys().createOrUpdatePolicy("testpolicy", policy);
 
-		vaultOperations.write(
-				"secret/" + VaultConfigKubernetesTests.class.getSimpleName(),
+		vaultOperations.write("secret/" + VaultConfigKubernetesTests.class.getSimpleName(),
 				Collections.singletonMap("vault.value", "foo"));
 
 		File workDir = findWorkDir();
-		String certificate = Files.contentOf(new File(workDir, "minikube/ca.crt"),
-				StandardCharsets.US_ASCII);
+		String certificate = Files.contentOf(new File(workDir, "minikube/ca.crt"), StandardCharsets.US_ASCII);
 
 		String host = String.format("https://%s:8443", minikubeIp);
 		Map<String, String> kubeConfig = new HashMap<>();

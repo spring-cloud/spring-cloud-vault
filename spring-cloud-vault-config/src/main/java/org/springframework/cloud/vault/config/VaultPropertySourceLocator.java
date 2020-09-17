@@ -30,8 +30,7 @@ import org.springframework.util.Assert;
  * @author Jean-Philippe Bélanger
  * @author Ryan Hoegg
  */
-class VaultPropertySourceLocator extends VaultPropertySourceLocatorSupport
-		implements PriorityOrdered {
+class VaultPropertySourceLocator extends VaultPropertySourceLocatorSupport implements PriorityOrdered {
 
 	private final VaultConfigOperations operations;
 
@@ -44,8 +43,7 @@ class VaultPropertySourceLocator extends VaultPropertySourceLocatorSupport
 	 * @param propertySourceLocatorConfiguration must not be {@literal null}.
 	 * @since 1.1
 	 */
-	VaultPropertySourceLocator(VaultConfigOperations operations,
-			VaultProperties properties,
+	VaultPropertySourceLocator(VaultConfigOperations operations, VaultProperties properties,
 			PropertySourceLocatorConfiguration propertySourceLocatorConfiguration) {
 
 		super("vault", propertySourceLocatorConfiguration);
@@ -80,10 +78,8 @@ class VaultPropertySourceLocator extends VaultPropertySourceLocatorSupport
 	 * @param accessor the {@link SecretBackendMetadata}.
 	 * @return the {@link VaultPropertySource} to use.
 	 */
-	protected PropertySource<?> createVaultPropertySource(
-			SecretBackendMetadata accessor) {
-		return new VaultPropertySource(this.operations, this.properties.isFailFast(),
-				accessor);
+	protected PropertySource<?> createVaultPropertySource(SecretBackendMetadata accessor) {
+		return new VaultPropertySource(this.operations, this.properties.isFailFast(), accessor);
 	}
 
 }

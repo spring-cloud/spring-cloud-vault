@@ -44,16 +44,14 @@ public class KeyValueSecretIntegrationTests extends IntegrationTestSupport {
 		this.vaultProperties.setFailFast(false);
 		prepare().getVaultOperations().write("secret/app-name", createData());
 
-		this.configOperations = new VaultConfigTemplate(prepare().getVaultOperations(),
-				this.vaultProperties);
+		this.configOperations = new VaultConfigTemplate(prepare().getVaultOperations(), this.vaultProperties);
 	}
 
 	@Test
 	public void shouldReturnSecretsCorrectly() {
 
 		Map<String, Object> secretProperties = this.configOperations
-				.read(KeyValueSecretBackendMetadata.create("secret", "app-name"))
-				.getData();
+				.read(KeyValueSecretBackendMetadata.create("secret", "app-name")).getData();
 
 		assertThat(secretProperties).containsAllEntriesOf(createExpectedMap());
 	}
@@ -61,8 +59,7 @@ public class KeyValueSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void shouldReturnNullIfNotFound() {
 
-		Secrets secrets = this.configOperations
-				.read(KeyValueSecretBackendMetadata.create("secret", "missing"));
+		Secrets secrets = this.configOperations.read(KeyValueSecretBackendMetadata.create("secret", "missing"));
 
 		assertThat(secrets).isNull();
 	}

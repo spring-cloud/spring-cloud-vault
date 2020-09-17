@@ -47,8 +47,7 @@ public interface LeasingSecretBackendMetadata extends SecretBackendMetadata {
 	 * @param container the lease container that was used to request the secret.
 	 * @since 3.0
 	 */
-	default void beforeRegistration(RequestedSecret secret,
-			SecretLeaseContainer container) {
+	default void beforeRegistration(RequestedSecret secret, SecretLeaseContainer container) {
 	}
 
 	/**
@@ -61,8 +60,7 @@ public interface LeasingSecretBackendMetadata extends SecretBackendMetadata {
 	 * @param container the lease container that was used to request the secret.
 	 * @since 3.0
 	 */
-	default void afterRegistration(RequestedSecret secret,
-			SecretLeaseContainer container) {
+	default void afterRegistration(RequestedSecret secret, SecretLeaseContainer container) {
 	}
 
 }

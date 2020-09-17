@@ -49,9 +49,8 @@ public class MongoSecretIntegrationTests extends IntegrationTestSupport {
 
 	private static final String MONGODB_HOST = "localhost";
 
-	private static final String ROOT_CREDENTIALS = String.format(
-			"mongodb://springvault:springvault@%s:%d/admin?ssl=false", MONGODB_HOST,
-			MONGODB_PORT);
+	private static final String ROOT_CREDENTIALS = String
+			.format("mongodb://springvault:springvault@%s:%d/admin?ssl=false", MONGODB_HOST, MONGODB_PORT);
 
 	private static final String ROLES = "[ \"readWrite\", { \"role\": \"read\", \"db\": \"admin\" } ]";
 
@@ -79,29 +78,24 @@ public class MongoSecretIntegrationTests extends IntegrationTestSupport {
 
 		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();
 
-		vaultOperations.write(
-				String.format("%s/config/connection", this.mongodb.getBackend()),
+		vaultOperations.write(String.format("%s/config/connection", this.mongodb.getBackend()),
 				Collections.singletonMap("uri", ROOT_CREDENTIALS));
 
 		Map<String, String> role = new HashMap<>();
 		role.put("db", "admin");
 		role.put("roles", ROLES);
 
-		vaultOperations.write(String.format("%s/roles/%s", this.mongodb.getBackend(),
-				this.mongodb.getRole()), role);
+		vaultOperations.write(String.format("%s/roles/%s", this.mongodb.getBackend(), this.mongodb.getRole()), role);
 
-		this.configOperations = new VaultConfigTemplate(vaultOperations,
-				this.vaultProperties);
+		this.configOperations = new VaultConfigTemplate(vaultOperations, this.vaultProperties);
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, Object> secretProperties = this.configOperations
-				.read(forDatabase(this.mongodb)).getData();
+		Map<String, Object> secretProperties = this.configOperations.read(forDatabase(this.mongodb)).getData();
 
-		assertThat(secretProperties).containsKeys("spring.data.mongodb.username",
-				"spring.data.mongodb.password");
+		assertThat(secretProperties).containsKeys("spring.data.mongodb.username", "spring.data.mongodb.password");
 	}
 
 }

@@ -41,8 +41,7 @@ public class VaultConfigConsulBootstrapConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public ConsulSecretBackendMetadataFactory consulSecretBackendMetadataFactory(
-			ApplicationContext context) {
+	public ConsulSecretBackendMetadataFactory consulSecretBackendMetadataFactory(ApplicationContext context) {
 		return new ConsulSecretBackendMetadataFactory(context);
 	}
 
@@ -85,10 +84,8 @@ public class VaultConfigConsulBootstrapConfiguration {
 			PropertyTransformer transformer = input -> {
 
 				Map<String, Object> transformed = new LinkedHashMap<>();
-				transformed.put("spring.cloud.consul.config.acl-token",
-						input.get("token"));
-				transformed.put("spring.cloud.consul.discovery.acl-token",
-						input.get("token"));
+				transformed.put("spring.cloud.consul.config.acl-token", input.get("token"));
+				transformed.put("spring.cloud.consul.discovery.acl-token", input.get("token"));
 
 				return transformed;
 			};
@@ -97,8 +94,7 @@ public class VaultConfigConsulBootstrapConfiguration {
 		}
 
 		@Override
-		public SecretBackendMetadata createMetadata(
-				VaultConsulProperties backendDescriptor) {
+		public SecretBackendMetadata createMetadata(VaultConsulProperties backendDescriptor) {
 			return forConsul(backendDescriptor);
 		}
 

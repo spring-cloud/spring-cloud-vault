@@ -52,8 +52,7 @@ public class VaultPropertySourceLocatorUnitTests {
 
 	@Before
 	public void before() {
-		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
-				new VaultProperties(),
+		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations, new VaultProperties(),
 				VaultPropertySourceLocatorSupport.createConfiguration(this.properties));
 	}
 
@@ -63,9 +62,8 @@ public class VaultPropertySourceLocatorUnitTests {
 		VaultProperties vaultProperties = new VaultProperties();
 		vaultProperties.getConfig().setOrder(42);
 
-		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
-				vaultProperties, VaultPropertySourceLocatorSupport
-						.createConfiguration(new VaultKeyValueBackendProperties()));
+		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations, vaultProperties,
+				VaultPropertySourceLocatorSupport.createConfiguration(new VaultKeyValueBackendProperties()));
 
 		assertThat(this.propertySourceLocator.getOrder()).isEqualTo(42);
 	}
@@ -73,8 +71,7 @@ public class VaultPropertySourceLocatorUnitTests {
 	@Test
 	public void shouldLocateOnePropertySourceWithEmptyProfiles() {
 
-		PropertySource<?> propertySource = this.propertySourceLocator
-				.locate(this.configurableEnvironment);
+		PropertySource<?> propertySource = this.propertySourceLocator.locate(this.configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
@@ -87,14 +84,13 @@ public class VaultPropertySourceLocatorUnitTests {
 
 		this.properties.setProfiles(Arrays.asList("vermillion", "periwinkle"));
 
-		PropertySource<?> propertySource = this.propertySourceLocator
-				.locate(this.configurableEnvironment);
+		PropertySource<?> propertySource = this.propertySourceLocator.locate(this.configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
 		CompositePropertySource composite = (CompositePropertySource) propertySource;
-		assertThat(composite.getPropertySources()).extracting("name").containsSequence(
-				"secret/application/periwinkle", "secret/application/vermillion");
+		assertThat(composite.getPropertySources()).extracting("name").containsSequence("secret/application/periwinkle",
+				"secret/application/vermillion");
 	}
 
 	@Test
@@ -104,19 +100,16 @@ public class VaultPropertySourceLocatorUnitTests {
 		backendProperties.setApplicationName("wintermute");
 		backendProperties.setProfiles(Arrays.asList("vermillion", "periwinkle"));
 
-		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
-				new VaultProperties(),
+		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations, new VaultProperties(),
 				VaultPropertySourceLocatorSupport.createConfiguration(backendProperties));
 
-		PropertySource<?> propertySource = this.propertySourceLocator
-				.locate(this.configurableEnvironment);
+		PropertySource<?> propertySource = this.propertySourceLocator.locate(this.configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
 		CompositePropertySource composite = (CompositePropertySource) propertySource;
-		assertThat(composite.getPropertySources()).extracting("name").containsSequence(
-				"secret/wintermute/periwinkle", "secret/wintermute/vermillion",
-				"secret/wintermute");
+		assertThat(composite.getPropertySources()).extracting("name").containsSequence("secret/wintermute/periwinkle",
+				"secret/wintermute/vermillion", "secret/wintermute");
 	}
 
 	@Test
@@ -126,21 +119,17 @@ public class VaultPropertySourceLocatorUnitTests {
 		backendProperties.setApplicationName("wintermute,straylight,icebreaker/armitage");
 		backendProperties.setProfiles(Arrays.asList("vermillion", "periwinkle"));
 
-		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
-				new VaultProperties(),
+		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations, new VaultProperties(),
 				VaultPropertySourceLocatorSupport.createConfiguration(backendProperties));
 
-		PropertySource<?> propertySource = this.propertySourceLocator
-				.locate(this.configurableEnvironment);
+		PropertySource<?> propertySource = this.propertySourceLocator.locate(this.configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
 		CompositePropertySource composite = (CompositePropertySource) propertySource;
-		assertThat(composite.getPropertySources()).extracting("name").contains(
-				"secret/wintermute", "secret/straylight", "secret/icebreaker/armitage",
-				"secret/wintermute/vermillion", "secret/wintermute/periwinkle",
-				"secret/straylight/vermillion", "secret/straylight/periwinkle",
-				"secret/icebreaker/armitage/vermillion",
+		assertThat(composite.getPropertySources()).extracting("name").contains("secret/wintermute", "secret/straylight",
+				"secret/icebreaker/armitage", "secret/wintermute/vermillion", "secret/wintermute/periwinkle",
+				"secret/straylight/vermillion", "secret/straylight/periwinkle", "secret/icebreaker/armitage/vermillion",
 				"secret/icebreaker/armitage/periwinkle");
 	}
 
@@ -151,17 +140,14 @@ public class VaultPropertySourceLocatorUnitTests {
 		configurer.add(new MySecondSecretBackendMetadata());
 		configurer.add(new MyFirstSecretBackendMetadata());
 
-		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations,
-				new VaultProperties(), configurer);
+		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations, new VaultProperties(), configurer);
 
-		PropertySource<?> propertySource = this.propertySourceLocator
-				.locate(this.configurableEnvironment);
+		PropertySource<?> propertySource = this.propertySourceLocator.locate(this.configurableEnvironment);
 
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
 		CompositePropertySource composite = (CompositePropertySource) propertySource;
-		assertThat(composite.getPropertySources()).extracting("name")
-				.containsSequence("foo", "bar");
+		assertThat(composite.getPropertySources()).extracting("name").containsSequence("foo", "bar");
 	}
 
 	@Order(1)

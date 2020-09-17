@@ -36,8 +36,7 @@ import org.springframework.vault.core.util.PropertyTransformers;
  * @author Mark Paluch
  * @since 2.0
  */
-public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
-		implements SecretBackendMetadata {
+public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport implements SecretBackendMetadata {
 
 	private final String path;
 
@@ -47,8 +46,7 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 		this(path, PropertyTransformers.noop());
 	}
 
-	private KeyValueSecretBackendMetadata(String path,
-			PropertyTransformer propertyTransformer) {
+	private KeyValueSecretBackendMetadata(String path, PropertyTransformer propertyTransformer) {
 
 		Assert.hasText(path, "Secret backend path must not be empty");
 		Assert.notNull(propertyTransformer, "PropertyTransformer must not be null");
@@ -70,12 +68,10 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 	 */
 	public static SecretBackendMetadata create(String secretBackendPath, String key) {
 
-		Assert.hasText(secretBackendPath,
-				"Secret backend path must not be null or empty");
+		Assert.hasText(secretBackendPath, "Secret backend path must not be null or empty");
 		Assert.hasText(key, "Key must not be null or empty");
 
-		return create(String.format("%s/%s", secretBackendPath, key),
-				UnwrappingPropertyTransformer.unwrap("data"));
+		return create(String.format("%s/%s", secretBackendPath, key), UnwrappingPropertyTransformer.unwrap("data"));
 	}
 
 	/**
@@ -97,8 +93,7 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 	 * @param propertyTransformer property transformer.
 	 * @return the {@link SecretBackendMetadata}
 	 */
-	public static SecretBackendMetadata create(String path,
-			PropertyTransformer propertyTransformer) {
+	public static SecretBackendMetadata create(String path, PropertyTransformer propertyTransformer) {
 		return new KeyValueSecretBackendMetadata(path, propertyTransformer);
 	}
 
@@ -109,19 +104,16 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 	 * @param profiles active application profiles.
 	 * @return list of context paths.
 	 */
-	public static List<String> buildContexts(
-			VaultKeyValueBackendPropertiesSupport properties, List<String> profiles) {
+	public static List<String> buildContexts(VaultKeyValueBackendPropertiesSupport properties, List<String> profiles) {
 
 		String appName = properties.getApplicationName();
 		Set<String> contexts = new LinkedHashSet<>();
 
 		String defaultContext = properties.getDefaultContext();
-		contexts.addAll(buildContexts(defaultContext, profiles,
-				properties.getProfileSeparator()));
+		contexts.addAll(buildContexts(defaultContext, profiles, properties.getProfileSeparator()));
 
 		for (String applicationName : StringUtils.commaDelimitedListToSet(appName)) {
-			contexts.addAll(buildContexts(applicationName, profiles,
-					properties.getProfileSeparator()));
+			contexts.addAll(buildContexts(applicationName, profiles, properties.getProfileSeparator()));
 		}
 
 		List<String> result = new ArrayList<>(contexts);
@@ -141,8 +133,7 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 	 * profile name.
 	 * @return list of context names.
 	 */
-	public static List<String> buildContexts(String applicationName,
-			List<String> profiles, String profileSeparator) {
+	public static List<String> buildContexts(String applicationName, List<String> profiles, String profileSeparator) {
 
 		List<String> contexts = new ArrayList<>();
 
@@ -207,16 +198,14 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport
 		}
 
 		@Override
-		public Map<String, Object> transformProperties(
-				Map<String, ? extends Object> input) {
+		public Map<String, Object> transformProperties(Map<String, ? extends Object> input) {
 
 			Map<String, Object> target = new LinkedHashMap<>(input.size(), 1);
 
 			for (Entry<String, ? extends Object> entry : input.entrySet()) {
 
 				if (entry.getKey().startsWith(this.prefixToStrip + ".")) {
-					target.put(entry.getKey().substring(this.prefixToStrip.length() + 1),
-							entry.getValue());
+					target.put(entry.getKey().substring(this.prefixToStrip.length() + 1), entry.getValue());
 				}
 				else {
 					target.put(entry.getKey(), entry.getValue());

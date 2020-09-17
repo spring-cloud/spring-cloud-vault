@@ -39,8 +39,7 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnClass(HealthIndicator.class)
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @AutoConfigureBefore(HealthContributorAutoConfiguration.class)
-@Import({ VaultHealthIndicatorConfiguration.class,
-		VaultReactiveHealthIndicatorConfiguration.class })
+@Import({ VaultHealthIndicatorConfiguration.class, VaultReactiveHealthIndicatorConfiguration.class })
 public class VaultHealthIndicatorAutoConfiguration {
 
 }

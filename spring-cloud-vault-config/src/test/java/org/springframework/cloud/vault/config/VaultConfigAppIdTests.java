@@ -48,8 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigAppIdTests.TestApplication.class,
-		properties = { "spring.cloud.vault.authentication=appid",
-				"spring.cloud.vault.app-id.user-id=IP_ADDRESS",
+		properties = { "spring.cloud.vault.authentication=appid", "spring.cloud.vault.app-id.user-id=IP_ADDRESS",
 				"spring.cloud.vault.application-name=VaultConfigAppIdTests" })
 // see
 // https://github.com/spring-cloud/spring-cloud-commons/issues/214
@@ -80,8 +79,7 @@ public class VaultConfigAppIdTests {
 				+ "  }\n" //
 				+ "}";
 
-		vaultOperations.write("sys/policy/testpolicy",
-				Collections.singletonMap("rules", rules));
+		vaultOperations.write("sys/policy/testpolicy", Collections.singletonMap("rules", rules));
 
 		String appId = VaultConfigAppIdTests.class.getSimpleName();
 
@@ -92,8 +90,7 @@ public class VaultConfigAppIdTests {
 		appIdData.put("value", "testpolicy"); // policy
 		appIdData.put("display_name", "this is my test application");
 
-		vaultOperations.write(String.format("auth/app-id/map/app-id/%s", appId),
-				appIdData);
+		vaultOperations.write(String.format("auth/app-id/map/app-id/%s", appId), appIdData);
 
 		Map<String, String> userIdData = new HashMap<>();
 		userIdData.put("value", appId); // name of the app-id
@@ -101,8 +98,7 @@ public class VaultConfigAppIdTests {
 
 		String userId = new IpAddressUserId().createUserId();
 
-		vaultOperations.write(String.format("auth/app-id/map/user-id/%s", userId),
-				userIdData);
+		vaultOperations.write(String.format("auth/app-id/map/user-id/%s", userId), userIdData);
 	}
 
 	@Test

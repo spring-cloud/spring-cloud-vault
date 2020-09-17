@@ -92,8 +92,8 @@ class ClientAuthenticationFactory {
 
 	private final RestOperations externalRestOperations;
 
-	ClientAuthenticationFactory(VaultProperties vaultProperties,
-			RestOperations restOperations, RestOperations externalRestOperations) {
+	ClientAuthenticationFactory(VaultProperties vaultProperties, RestOperations restOperations,
+			RestOperations externalRestOperations) {
 		this.vaultProperties = vaultProperties;
 		this.restOperations = restOperations;
 		this.externalRestOperations = externalRestOperations;
@@ -140,32 +140,28 @@ class ClientAuthenticationFactory {
 			return pcfAuthentication(this.vaultProperties);
 
 		case TOKEN:
-			Assert.hasText(this.vaultProperties.getToken(),
-					"Token (spring.cloud.vault.token) must not be empty");
+			Assert.hasText(this.vaultProperties.getToken(), "Token (spring.cloud.vault.token) must not be empty");
 			return new TokenAuthentication(this.vaultProperties.getToken());
 		}
 
 		throw new UnsupportedOperationException(
-				String.format("Client authentication %s not supported",
-						this.vaultProperties.getAuthentication()));
+				String.format("Client authentication %s not supported", this.vaultProperties.getAuthentication()));
 	}
 
 	private ClientAuthentication appIdAuthentication(VaultProperties vaultProperties) {
 
 		VaultProperties.AppIdProperties appId = vaultProperties.getAppId();
-		Assert.hasText(appId.getUserId(),
-				"UserId (spring.cloud.vault.app-id.user-id) must not be empty");
+		Assert.hasText(appId.getUserId(), "UserId (spring.cloud.vault.app-id.user-id) must not be empty");
 
-		AppIdAuthenticationOptions authenticationOptions = AppIdAuthenticationOptions
-				.builder().appId(vaultProperties.getApplicationName()) //
+		AppIdAuthenticationOptions authenticationOptions = AppIdAuthenticationOptions.builder()
+				.appId(vaultProperties.getApplicationName()) //
 				.path(appId.getAppIdPath()) //
 				.userIdMechanism(getAppIdMechanism(appId)).build();
 
 		return new AppIdAuthentication(authenticationOptions, this.restOperations);
 	}
 
-	private AppIdUserIdMechanism getAppIdMechanism(
-			VaultProperties.AppIdProperties appId) {
+	private AppIdUserIdMechanism getAppIdMechanism(VaultProperties.AppIdProperties appId) {
 
 		try {
 			Class<?> userIdClass = ClassUtils.forName(appId.getUserId(), null);
@@ -182,8 +178,7 @@ class ClientAuthenticationFactory {
 
 				if (StringUtils.hasText(appId.getNetworkInterface())) {
 					try {
-						return new MacAddressUserId(
-								Integer.parseInt(appId.getNetworkInterface()));
+						return new MacAddressUserId(Integer.parseInt(appId.getNetworkInterface()));
 					}
 					catch (NumberFormatException e) {
 						return new MacAddressUserId(appId.getNetworkInterface());
@@ -199,19 +194,17 @@ class ClientAuthenticationFactory {
 
 	private ClientAuthentication appRoleAuthentication(VaultProperties vaultProperties) {
 
-		AppRoleAuthenticationOptions options = getAppRoleAuthenticationOptions(
-				vaultProperties);
+		AppRoleAuthenticationOptions options = getAppRoleAuthenticationOptions(vaultProperties);
 
 		return new AppRoleAuthentication(options, this.restOperations);
 	}
 
-	static AppRoleAuthenticationOptions getAppRoleAuthenticationOptions(
-			VaultProperties vaultProperties) {
+	static AppRoleAuthenticationOptions getAppRoleAuthenticationOptions(VaultProperties vaultProperties) {
 
 		AppRoleProperties appRole = vaultProperties.getAppRole();
 
-		AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions
-				.builder().path(appRole.getAppRolePath());
+		AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions.builder()
+				.path(appRole.getAppRolePath());
 
 		if (StringUtils.hasText(appRole.getRole())) {
 			builder.appRole(appRole.getRole());
@@ -225,15 +218,13 @@ class ClientAuthenticationFactory {
 		return builder.build();
 	}
 
-	private static RoleId getRoleId(VaultProperties vaultProperties,
-			AppRoleProperties appRole) {
+	private static RoleId getRoleId(VaultProperties vaultProperties, AppRoleProperties appRole) {
 
 		if (StringUtils.hasText(appRole.getRoleId())) {
 			return RoleId.provided(appRole.getRoleId());
 		}
 
-		if (StringUtils.hasText(vaultProperties.getToken())
-				&& StringUtils.hasText(appRole.getRole())) {
+		if (StringUtils.hasText(vaultProperties.getToken()) && StringUtils.hasText(appRole.getRole())) {
 			return RoleId.pull(VaultToken.of(vaultProperties.getToken()));
 		}
 
@@ -245,15 +236,13 @@ class ClientAuthenticationFactory {
 				"Cannot configure RoleId. Any of role-id, initial token, or initial toke and role name must be configured.");
 	}
 
-	private static SecretId getSecretId(VaultProperties vaultProperties,
-			AppRoleProperties appRole) {
+	private static SecretId getSecretId(VaultProperties vaultProperties, AppRoleProperties appRole) {
 
 		if (StringUtils.hasText(appRole.getSecretId())) {
 			return SecretId.provided(appRole.getSecretId());
 		}
 
-		if (StringUtils.hasText(vaultProperties.getToken())
-				&& StringUtils.hasText(appRole.getRole())) {
+		if (StringUtils.hasText(vaultProperties.getToken()) && StringUtils.hasText(appRole.getRole())) {
 			return SecretId.pull(VaultToken.of(vaultProperties.getToken()));
 		}
 
@@ -268,29 +257,25 @@ class ClientAuthenticationFactory {
 
 		VaultProperties.AwsEc2Properties awsEc2 = vaultProperties.getAwsEc2();
 
-		Nonce nonce = StringUtils.hasText(awsEc2.getNonce())
-				? Nonce.provided(awsEc2.getNonce().toCharArray()) : Nonce.generated();
+		Nonce nonce = StringUtils.hasText(awsEc2.getNonce()) ? Nonce.provided(awsEc2.getNonce().toCharArray())
+				: Nonce.generated();
 
-		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions
-				.builder().role(awsEc2.getRole()) //
+		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions.builder().role(awsEc2.getRole()) //
 				.path(awsEc2.getAwsEc2Path()) //
 				.nonce(nonce) //
 				.identityDocumentUri(URI.create(awsEc2.getIdentityDocument())) //
 				.build();
 
-		return new AwsEc2Authentication(authenticationOptions, this.restOperations,
-				this.externalRestOperations);
+		return new AwsEc2Authentication(authenticationOptions, this.restOperations, this.externalRestOperations);
 	}
 
 	private ClientAuthentication awsIamAuthentication(VaultProperties vaultProperties) {
 
 		AwsIamProperties awsIam = vaultProperties.getAwsIam();
 
-		AWSCredentialsProvider credentialsProvider = AwsCredentialProvider
-				.getAwsCredentialsProvider();
+		AWSCredentialsProvider credentialsProvider = AwsCredentialProvider.getAwsCredentialsProvider();
 
-		AwsIamAuthenticationOptionsBuilder builder = AwsIamAuthenticationOptions
-				.builder();
+		AwsIamAuthenticationOptionsBuilder builder = AwsIamAuthenticationOptions.builder();
 
 		if (StringUtils.hasText(awsIam.getRole())) {
 			builder.role(awsIam.getRole());
@@ -307,8 +292,7 @@ class ClientAuthenticationFactory {
 		builder.path(awsIam.getAwsPath()) //
 				.credentialsProvider(credentialsProvider);
 
-		AwsIamAuthenticationOptions options = builder
-				.credentialsProvider(credentialsProvider).build();
+		AwsIamAuthenticationOptions options = builder.credentialsProvider(credentialsProvider).build();
 
 		return new AwsIamAuthentication(options, this.restOperations);
 	}
@@ -317,14 +301,12 @@ class ClientAuthenticationFactory {
 
 		AzureMsiProperties azureMsi = vaultProperties.getAzureMsi();
 
-		Assert.hasText(azureMsi.getRole(),
-				"Azure role (spring.cloud.vault.azure-msi.role) must not be empty");
+		Assert.hasText(azureMsi.getRole(), "Azure role (spring.cloud.vault.azure-msi.role) must not be empty");
 
-		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder()
-				.role(azureMsi.getRole()).build();
+		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder().role(azureMsi.getRole())
+				.build();
 
-		return new AzureMsiAuthentication(options, this.restOperations,
-				this.externalRestOperations);
+		return new AzureMsiAuthentication(options, this.restOperations, this.externalRestOperations);
 	}
 
 	private ClientAuthentication cubbyholeAuthentication() {
@@ -344,30 +326,26 @@ class ClientAuthenticationFactory {
 
 		VaultProperties.GcpGceProperties gcp = vaultProperties.getGcpGce();
 
-		Assert.hasText(gcp.getRole(),
-				"Role (spring.cloud.vault.gcp-gce.role) must not be empty");
+		Assert.hasText(gcp.getRole(), "Role (spring.cloud.vault.gcp-gce.role) must not be empty");
 
-		GcpComputeAuthenticationOptionsBuilder builder = GcpComputeAuthenticationOptions
-				.builder().path(gcp.getGcpPath()).role(gcp.getRole());
+		GcpComputeAuthenticationOptionsBuilder builder = GcpComputeAuthenticationOptions.builder()
+				.path(gcp.getGcpPath()).role(gcp.getRole());
 
 		if (StringUtils.hasText(gcp.getServiceAccount())) {
 			builder.serviceAccount(gcp.getServiceAccount());
 		}
 
-		return new GcpComputeAuthentication(builder.build(), this.restOperations,
-				this.externalRestOperations);
+		return new GcpComputeAuthentication(builder.build(), this.restOperations, this.externalRestOperations);
 	}
 
 	private ClientAuthentication gcpIamAuthentication(VaultProperties vaultProperties) {
 
 		VaultProperties.GcpIamProperties gcp = vaultProperties.getGcpIam();
 
-		Assert.hasText(gcp.getRole(),
-				"Role (spring.cloud.vault.gcp-iam.role) must not be empty");
+		Assert.hasText(gcp.getRole(), "Role (spring.cloud.vault.gcp-iam.role) must not be empty");
 
-		GcpIamAuthenticationOptionsBuilder builder = GcpIamAuthenticationOptions.builder()
-				.path(gcp.getGcpPath()).role(gcp.getRole())
-				.jwtValidity(gcp.getJwtValidity());
+		GcpIamAuthenticationOptionsBuilder builder = GcpIamAuthenticationOptions.builder().path(gcp.getGcpPath())
+				.role(gcp.getRole()).jwtValidity(gcp.getJwtValidity());
 
 		if (StringUtils.hasText(gcp.getProjectId())) {
 			builder.projectId(gcp.getProjectId());
@@ -385,38 +363,32 @@ class ClientAuthenticationFactory {
 		return new GcpIamAuthentication(options, this.restOperations);
 	}
 
-	private GoogleCredential getGoogleCredential(GcpIamProperties gcp)
-			throws IOException {
+	private GoogleCredential getGoogleCredential(GcpIamProperties gcp) throws IOException {
 
 		GcpCredentials credentialProperties = gcp.getCredentials();
 		if (credentialProperties.getLocation() != null) {
-			return GoogleCredential
-					.fromStream(credentialProperties.getLocation().getInputStream());
+			return GoogleCredential.fromStream(credentialProperties.getLocation().getInputStream());
 		}
 
 		if (StringUtils.hasText(credentialProperties.getEncodedKey())) {
-			return GoogleCredential.fromStream(new ByteArrayInputStream(
-					Base64.getDecoder().decode(credentialProperties.getEncodedKey())));
+			return GoogleCredential.fromStream(
+					new ByteArrayInputStream(Base64.getDecoder().decode(credentialProperties.getEncodedKey())));
 		}
 
 		return GoogleCredential.getApplicationDefault();
 	}
 
-	private ClientAuthentication kubernetesAuthentication(
-			VaultProperties vaultProperties) {
+	private ClientAuthentication kubernetesAuthentication(VaultProperties vaultProperties) {
 
 		VaultProperties.KubernetesProperties kubernetes = vaultProperties.getKubernetes();
 
-		Assert.hasText(kubernetes.getRole(),
-				"Role (spring.cloud.vault.kubernetes.role) must not be empty");
+		Assert.hasText(kubernetes.getRole(), "Role (spring.cloud.vault.kubernetes.role) must not be empty");
 		Assert.hasText(kubernetes.getServiceAccountTokenFile(),
 				"Service account token file (spring.cloud.vault.kubernetes.service-account-token-file) must not be empty");
 
-		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
-				.builder().path(kubernetes.getKubernetesPath()).role(kubernetes.getRole())
-				.jwtSupplier(new KubernetesServiceAccountTokenFile(
-						kubernetes.getServiceAccountTokenFile()))
-				.build();
+		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
+				.path(kubernetes.getKubernetesPath()).role(kubernetes.getRole())
+				.jwtSupplier(new KubernetesServiceAccountTokenFile(kubernetes.getServiceAccountTokenFile())).build();
 
 		return new KubernetesAuthentication(options, this.restOperations);
 	}
@@ -425,24 +397,19 @@ class ClientAuthenticationFactory {
 
 		VaultProperties.PcfProperties pcfProperties = vaultProperties.getPcf();
 
-		Assert.isTrue(
-				ClassUtils.isPresent("org.bouncycastle.crypto.signers.PSSSigner",
-						getClass().getClassLoader()),
+		Assert.isTrue(ClassUtils.isPresent("org.bouncycastle.crypto.signers.PSSSigner", getClass().getClassLoader()),
 				"BouncyCastle (bcpkix-jdk15on) must be on the classpath");
-		Assert.hasText(pcfProperties.getRole(),
-				"Role (spring.cloud.vault.pcf.role) must not be empty");
+		Assert.hasText(pcfProperties.getRole(), "Role (spring.cloud.vault.pcf.role) must not be empty");
 
-		PcfAuthenticationOptions.PcfAuthenticationOptionsBuilder builder = PcfAuthenticationOptions
-				.builder().role(pcfProperties.getRole()).path(pcfProperties.getPcfPath());
+		PcfAuthenticationOptions.PcfAuthenticationOptionsBuilder builder = PcfAuthenticationOptions.builder()
+				.role(pcfProperties.getRole()).path(pcfProperties.getPcfPath());
 
 		if (pcfProperties.getInstanceCertificate() != null) {
-			builder.instanceCertificate(new ResourceCredentialSupplier(
-					pcfProperties.getInstanceCertificate()));
+			builder.instanceCertificate(new ResourceCredentialSupplier(pcfProperties.getInstanceCertificate()));
 		}
 
 		if (pcfProperties.getInstanceKey() != null) {
-			builder.instanceKey(
-					new ResourceCredentialSupplier(pcfProperties.getInstanceKey()));
+			builder.instanceKey(new ResourceCredentialSupplier(pcfProperties.getInstanceKey()));
 		}
 
 		return new PcfAuthentication(builder.build(), this.restOperations);

@@ -53,19 +53,16 @@ import static org.junit.Assume.assumeTrue;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigMongoTests.TestApplication.class,
-		properties = { "spring.cloud.vault.mongodb.enabled=true",
-				"spring.cloud.vault.mongodb.role=readonly",
-				"spring.data.mongodb.url=mongodb://localhost",
-				"spring.data.mongodb.database=admin" })
+		properties = { "spring.cloud.vault.mongodb.enabled=true", "spring.cloud.vault.mongodb.role=readonly",
+				"spring.data.mongodb.url=mongodb://localhost", "spring.data.mongodb.database=admin" })
 public class VaultConfigMongoTests {
 
 	private static final int MONGODB_PORT = 27017;
 
 	private static final String MONGODB_HOST = "localhost";
 
-	private static final String ROOT_CREDENTIALS = String.format(
-			"mongodb://springvault:springvault@%s:%d/admin?ssl=false", MONGODB_HOST,
-			MONGODB_PORT);
+	private static final String ROOT_CREDENTIALS = String
+			.format("mongodb://springvault:springvault@%s:%d/admin?ssl=false", MONGODB_HOST, MONGODB_PORT);
 
 	private static final String ROLES = "[ \"readWrite\", { \"role\": \"read\", \"db\": \"admin\" } ]";
 
@@ -89,8 +86,7 @@ public class VaultConfigMongoTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		assumeTrue(vaultRule.prepare().getVersion()
-				.isGreaterThanOrEqualTo(Version.parse("0.6.2")));
+		assumeTrue(vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.2")));
 
 		if (!vaultRule.prepare().hasSecretBackend("mongodb")) {
 			vaultRule.prepare().mountSecret("mongodb");
@@ -98,8 +94,7 @@ public class VaultConfigMongoTests {
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
-		vaultOperations.write("mongodb/config/connection",
-				Collections.singletonMap("uri", ROOT_CREDENTIALS));
+		vaultOperations.write("mongodb/config/connection", Collections.singletonMap("uri", ROOT_CREDENTIALS));
 
 		Map<String, String> role = new HashMap<>();
 		role.put("db", "admin");
@@ -113,8 +108,7 @@ public class VaultConfigMongoTests {
 
 		MongoDatabase mongoDatabase = this.mongoClient.getDatabase("admin");
 
-		List<Document> collections = mongoDatabase.listCollections()
-				.into(new ArrayList<>());
+		List<Document> collections = mongoDatabase.listCollections().into(new ArrayList<>());
 
 		for (Document collection : collections) {
 			if (collection.getString("name").equals("hello")) {

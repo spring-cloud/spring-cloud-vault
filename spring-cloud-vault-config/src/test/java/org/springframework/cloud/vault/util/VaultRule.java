@@ -52,8 +52,7 @@ public class VaultRule extends ExternalResource {
 	 * @see VaultEndpoint
 	 */
 	public VaultRule() {
-		this(Settings.createSslConfiguration(),
-				TestRestTemplateFactory.TEST_VAULT_ENDPOINT);
+		this(Settings.createSslConfiguration(), TestRestTemplateFactory.TEST_VAULT_ENDPOINT);
 	}
 
 	/**
@@ -67,11 +66,9 @@ public class VaultRule extends ExternalResource {
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
 		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
 
-		ClientHttpRequestFactory requestFactory = TestRestTemplateFactory
-				.create(sslConfiguration).getRequestFactory();
+		ClientHttpRequestFactory requestFactory = TestRestTemplateFactory.create(sslConfiguration).getRequestFactory();
 
-		VaultTemplate vaultTemplate = new VaultTemplate(vaultEndpoint, requestFactory,
-				new PreparingSessionManager());
+		VaultTemplate vaultTemplate = new VaultTemplate(vaultEndpoint, requestFactory, new PreparingSessionManager());
 
 		this.token = Settings.token();
 		this.prepareVault = new PrepareVault(vaultTemplate);
@@ -83,13 +80,12 @@ public class VaultRule extends ExternalResource {
 
 		try (Socket socket = new Socket()) {
 
-			socket.connect(new InetSocketAddress(InetAddress.getByName("localhost"),
-					this.vaultEndpoint.getPort()));
+			socket.connect(new InetSocketAddress(InetAddress.getByName("localhost"), this.vaultEndpoint.getPort()));
 		}
 		catch (Exception ex) {
-			throw new IllegalStateException(String.format(
-					"Vault is not running on localhost:%d which is required to run a test using @Rule %s",
-					this.vaultEndpoint.getPort(), getClass().getSimpleName()));
+			throw new IllegalStateException(
+					String.format("Vault is not running on localhost:%d which is required to run a test using @Rule %s",
+							this.vaultEndpoint.getPort(), getClass().getSimpleName()));
 		}
 
 		if (!this.prepareVault.isAvailable()) {
@@ -97,8 +93,7 @@ public class VaultRule extends ExternalResource {
 			this.token = this.prepareVault.initializeVault();
 			this.prepareVault.createToken(Settings.token().getToken(), "root");
 
-			if (this.prepareVault.getVersion()
-					.isGreaterThanOrEqualTo(VERSIONING_INTRODUCED_WITH)) {
+			if (this.prepareVault.getVersion().isGreaterThanOrEqualTo(VERSIONING_INTRODUCED_WITH)) {
 				this.prepareVault.disableGenericVersioning();
 				this.prepareVault.mountVersionedKvBackend();
 			}

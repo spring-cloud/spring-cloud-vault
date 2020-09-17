@@ -48,18 +48,18 @@ import static org.junit.Assume.assumeTrue;
  * @author Mark Paluch
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = VaultConfigMySqlTests.TestApplication.class, properties = {
-		"spring.cloud.vault.mysql.enabled=true", "spring.cloud.vault.mysql.role=readonly",
-		"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=UTC",
-		"spring.main.allow-bean-definition-overriding=true" })
+@SpringBootTest(classes = VaultConfigMySqlTests.TestApplication.class,
+		properties = { "spring.cloud.vault.mysql.enabled=true", "spring.cloud.vault.mysql.role=readonly",
+				"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=UTC",
+				"spring.main.allow-bean-definition-overriding=true" })
 public class VaultConfigMySqlTests {
 
 	private static final int MYSQL_PORT = 3306;
 
 	private static final String MYSQL_HOST = "localhost";
 
-	private static final String ROOT_CREDENTIALS = String
-			.format("springvault:springvault@tcp(%s:%d)/", MYSQL_HOST, MYSQL_PORT);
+	private static final String ROOT_CREDENTIALS = String.format("springvault:springvault@tcp(%s:%d)/", MYSQL_HOST,
+			MYSQL_PORT);
 
 	private static final String CREATE_USER_AND_GRANT_SQL = "CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';"
 			+ "GRANT SELECT ON *.* TO '{{name}}'@'%';";
@@ -90,11 +90,9 @@ public class VaultConfigMySqlTests {
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
-		vaultOperations.write("mysql/config/connection",
-				Collections.singletonMap("connection_url", ROOT_CREDENTIALS));
+		vaultOperations.write("mysql/config/connection", Collections.singletonMap("connection_url", ROOT_CREDENTIALS));
 
-		vaultOperations.write("mysql/roles/readonly",
-				Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
+		vaultOperations.write("mysql/roles/readonly", Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
 	}
 
 	@Test
@@ -106,8 +104,7 @@ public class VaultConfigMySqlTests {
 	@Test
 	public void shouldConnectUsingJdbcUrlConnection() throws SQLException {
 
-		String url = String.format("jdbc:mysql://%s?useSSL=false&serverTimezone=UTC",
-				MYSQL_HOST);
+		String url = String.format("jdbc:mysql://%s?useSSL=false&serverTimezone=UTC", MYSQL_HOST);
 		DriverManager.getConnection(url, this.username, this.password).close();
 	}
 

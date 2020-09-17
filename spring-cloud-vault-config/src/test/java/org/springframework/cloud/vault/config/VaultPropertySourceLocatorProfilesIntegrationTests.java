@@ -40,14 +40,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(
-		classes = VaultPropertySourceLocatorProfilesIntegrationTests.TestApplication.class,
-		properties = { "spring.application.name=my-profiles-app",
-				"spring.cloud.vault.kv.profiles=hello, world",
+@SpringBootTest(classes = VaultPropertySourceLocatorProfilesIntegrationTests.TestApplication.class,
+		properties = { "spring.application.name=my-profiles-app", "spring.cloud.vault.kv.profiles=hello, world",
 				"spring.cloud.vault.kv.default-context=" })
 @ActiveProfiles({ "other" })
-public class VaultPropertySourceLocatorProfilesIntegrationTests
-		extends IntegrationTestSupport {
+public class VaultPropertySourceLocatorProfilesIntegrationTests extends IntegrationTestSupport {
 
 	@Autowired
 	Environment environment;

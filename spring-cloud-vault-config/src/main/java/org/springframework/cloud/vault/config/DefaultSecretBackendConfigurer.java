@@ -34,8 +34,7 @@ import org.springframework.vault.core.util.PropertyTransformers;
  *
  * @author Mark Paluch
  */
-class DefaultSecretBackendConfigurer
-		implements SecretBackendConfigurer, PropertySourceLocatorConfiguration {
+class DefaultSecretBackendConfigurer implements SecretBackendConfigurer, PropertySourceLocatorConfiguration {
 
 	private final Map<String, SecretBackendMetadata> secretBackends = new LinkedHashMap<>();
 
@@ -52,8 +51,7 @@ class DefaultSecretBackendConfigurer
 	}
 
 	@Override
-	public SecretBackendConfigurer add(String path,
-			PropertyTransformer propertyTransformer) {
+	public SecretBackendConfigurer add(String path, PropertyTransformer propertyTransformer) {
 
 		Assert.hasLength(path, "Path must not be empty");
 		Assert.notNull(propertyTransformer, "PropertyTransformer must not be null");
@@ -61,8 +59,7 @@ class DefaultSecretBackendConfigurer
 		return add(createMetadata(path, propertyTransformer));
 	}
 
-	private SimpleSecretBackendMetadata createMetadata(String path,
-			PropertyTransformer propertyTransformer) {
+	private SimpleSecretBackendMetadata createMetadata(String path, PropertyTransformer propertyTransformer) {
 		return new SimpleSecretBackendMetadata(path, propertyTransformer);
 	}
 
@@ -85,32 +82,27 @@ class DefaultSecretBackendConfigurer
 	}
 
 	@Override
-	public SecretBackendConfigurer add(RequestedSecret requestedSecret,
-			PropertyTransformer propertyTransformer) {
+	public SecretBackendConfigurer add(RequestedSecret requestedSecret, PropertyTransformer propertyTransformer) {
 
 		Assert.notNull(requestedSecret, "RequestedSecret must not be null");
 		Assert.notNull(propertyTransformer, "PropertyTransformer must not be null");
 
-		this.secretBackends.put(requestedSecret.getPath(),
-				new SimpleLeasingSecretBackendMetadata(
-						createMetadata(requestedSecret.getPath(), propertyTransformer),
-						requestedSecret.getMode()));
+		this.secretBackends.put(requestedSecret.getPath(), new SimpleLeasingSecretBackendMetadata(
+				createMetadata(requestedSecret.getPath(), propertyTransformer), requestedSecret.getMode()));
 
 		return this;
 	}
 
 	@Override
 
-	public SecretBackendConfigurer registerDefaultKeyValueSecretBackends(
-			boolean registerDefault) {
+	public SecretBackendConfigurer registerDefaultKeyValueSecretBackends(boolean registerDefault) {
 		this.registerDefaultKeyValueSecretBackends = registerDefault;
 
 		return this;
 	}
 
 	@Override
-	public SecretBackendConfigurer registerDefaultDiscoveredSecretBackends(
-			boolean registerDefault) {
+	public SecretBackendConfigurer registerDefaultDiscoveredSecretBackends(boolean registerDefault) {
 
 		this.registerDefaultDiscoveredSecretBackends = registerDefault;
 
@@ -136,8 +128,7 @@ class DefaultSecretBackendConfigurer
 
 		private final PropertyTransformer propertyTransformer;
 
-		SimpleSecretBackendMetadata(String path,
-				PropertyTransformer propertyTransformer) {
+		SimpleSecretBackendMetadata(String path, PropertyTransformer propertyTransformer) {
 			this.path = path;
 			this.propertyTransformer = propertyTransformer;
 		}
@@ -164,8 +155,8 @@ class DefaultSecretBackendConfigurer
 
 	}
 
-	private static class SimpleLeasingSecretBackendMetadata
-			extends SecretBackendMetadataWrapper implements LeasingSecretBackendMetadata {
+	private static class SimpleLeasingSecretBackendMetadata extends SecretBackendMetadataWrapper
+			implements LeasingSecretBackendMetadata {
 
 		private final Mode mode;
 

@@ -50,8 +50,7 @@ public final class Version implements Comparable<Version> {
 	private Version(boolean enterprise, int... parts) {
 
 		Assert.notNull(parts, "Parts must not be null!");
-		Assert.isTrue(parts.length > 0 && parts.length < 5,
-				"Parts must contain 1 to 5 segments!");
+		Assert.isTrue(parts.length > 0 && parts.length < 5, "Parts must contain 1 to 5 segments!");
 
 		this.major = parts[0];
 		this.minor = parts.length > 1 ? parts[1] : 0;
@@ -80,16 +79,14 @@ public final class Version implements Comparable<Version> {
 
 		for (int i = 0; i < parts.length; i++) {
 
-			String input = i == parts.length - 1 ? parts[i].replaceAll("\\D.*", "")
-					: parts[i];
+			String input = i == parts.length - 1 ? parts[i].replaceAll("\\D.*", "") : parts[i];
 
 			if (StringUtils.hasText(input)) {
 				try {
 					intParts[i] = Integer.parseInt(input);
 				}
 				catch (IllegalArgumentException o_O) {
-					throw new IllegalArgumentException(
-							String.format(VERSION_PARSE_ERROR, input, version), o_O);
+					throw new IllegalArgumentException(String.format(VERSION_PARSE_ERROR, input, version), o_O);
 				}
 			}
 		}
@@ -198,8 +195,7 @@ public final class Version implements Comparable<Version> {
 			digits.add(this.build);
 		}
 
-		return StringUtils.collectionToDelimitedString(digits, ".")
-				+ (isEnterprise() ? "+ent" : "");
+		return StringUtils.collectionToDelimitedString(digits, ".") + (isEnterprise() ? "+ent" : "");
 	}
 
 	@Override
@@ -211,15 +207,13 @@ public final class Version implements Comparable<Version> {
 			return false;
 		}
 		Version version = (Version) o;
-		return this.major == version.major && this.minor == version.minor
-				&& this.bugfix == version.bugfix && this.build == version.build
-				&& this.enterprise == version.enterprise;
+		return this.major == version.major && this.minor == version.minor && this.bugfix == version.bugfix
+				&& this.build == version.build && this.enterprise == version.enterprise;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.major, this.minor, this.bugfix, this.build,
-				this.enterprise);
+		return Objects.hash(this.major, this.minor, this.bugfix, this.build, this.enterprise);
 	}
 
 }

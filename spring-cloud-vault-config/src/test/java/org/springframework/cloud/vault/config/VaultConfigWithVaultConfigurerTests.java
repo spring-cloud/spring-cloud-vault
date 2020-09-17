@@ -63,8 +63,7 @@ public class VaultConfigWithVaultConfigurerTests {
 		vaultOperations.write("secret/VaultConfigWithVaultConfigurerTests",
 				Collections.singletonMap("vault.value", "hello"));
 
-		vaultOperations.write("secret/testVaultApp",
-				Collections.singletonMap("vault.value", "world"));
+		vaultOperations.write("secret/testVaultApp", Collections.singletonMap("vault.value", "world"));
 	}
 
 	@Test
@@ -86,8 +85,7 @@ public class VaultConfigWithVaultConfigurerTests {
 		@ConditionalOnProperty("VaultConfigWithVaultConfigurerTests.custom.config")
 		@Bean
 		VaultConfigurer vaultConfigurer() {
-			return configurer -> configurer
-					.add("secret/VaultConfigWithVaultConfigurerTests");
+			return configurer -> configurer.add("secret/VaultConfigWithVaultConfigurerTests");
 		}
 
 	}

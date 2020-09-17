@@ -59,8 +59,7 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 
 	private Collection<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> factories;
 
-	public VaultBootstrapPropertySourceConfiguration(
-			ConfigurableApplicationContext applicationContext) {
+	public VaultBootstrapPropertySourceConfiguration(ConfigurableApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
@@ -68,27 +67,24 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() {
 
-		this.vaultSecretBackendDescriptors = this.applicationContext
-				.getBeansOfType(VaultSecretBackendDescriptor.class).values();
+		this.vaultSecretBackendDescriptors = this.applicationContext.getBeansOfType(VaultSecretBackendDescriptor.class)
+				.values();
 
-		this.factories = (Collection) this.applicationContext
-				.getBeansOfType(SecretBackendMetadataFactory.class).values();
+		this.factories = (Collection) this.applicationContext.getBeansOfType(SecretBackendMetadataFactory.class)
+				.values();
 	}
 
 	@Bean
-	public PropertySourceLocator vaultPropertySourceLocator(VaultOperations operations,
-			VaultProperties vaultProperties,
+	public PropertySourceLocator vaultPropertySourceLocator(VaultOperations operations, VaultProperties vaultProperties,
 			VaultKeyValueBackendProperties kvBackendProperties,
 			ObjectFactory<SecretLeaseContainer> secretLeaseContainerObjectFactory) {
 
-		VaultConfigTemplate vaultConfigTemplate = new VaultConfigTemplate(operations,
-				vaultProperties);
+		VaultConfigTemplate vaultConfigTemplate = new VaultConfigTemplate(operations, vaultProperties);
 
 		PropertySourceLocatorConfiguration configuration = getPropertySourceConfiguration(
 				Collections.singletonList(kvBackendProperties));
 
-		VaultProperties.ConfigLifecycle lifecycle = vaultProperties.getConfig()
-				.getLifecycle();
+		VaultProperties.ConfigLifecycle lifecycle = vaultProperties.getConfig().getLifecycle();
 
 		if (lifecycle.isEnabled()) {
 
@@ -96,17 +92,14 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 			// otherwise, the bootstrap context is not shut down cleanly
 			this.applicationContext.registerShutdownHook();
 
-			SecretLeaseContainer secretLeaseContainer = secretLeaseContainerObjectFactory
-					.getObject();
+			SecretLeaseContainer secretLeaseContainer = secretLeaseContainerObjectFactory.getObject();
 
 			secretLeaseContainer.start();
 
-			return new LeasingVaultPropertySourceLocator(vaultProperties, configuration,
-					secretLeaseContainer);
+			return new LeasingVaultPropertySourceLocator(vaultProperties, configuration, secretLeaseContainer);
 		}
 
-		return new VaultPropertySourceLocator(vaultConfigTemplate, vaultProperties,
-				configuration);
+		return new VaultPropertySourceLocator(vaultConfigTemplate, vaultProperties, configuration);
 	}
 
 	/**
@@ -117,8 +110,8 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	private PropertySourceLocatorConfiguration getPropertySourceConfiguration(
 			List<VaultKeyValueBackendPropertiesSupport> keyValueBackends) {
 
-		Collection<VaultConfigurer> configurers = this.applicationContext
-				.getBeansOfType(VaultConfigurer.class).values();
+		Collection<VaultConfigurer> configurers = this.applicationContext.getBeansOfType(VaultConfigurer.class)
+				.values();
 
 		DefaultSecretBackendConfigurer secretBackendConfigurer = new DefaultSecretBackendConfigurer();
 
@@ -141,18 +134,17 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 					continue;
 				}
 
-				List<String> contexts = KeyValueSecretBackendMetadata
-						.buildContexts(keyValueBackend, keyValueBackend.getProfiles());
+				List<String> contexts = KeyValueSecretBackendMetadata.buildContexts(keyValueBackend,
+						keyValueBackend.getProfiles());
 
 				for (String context : contexts) {
-					secretBackendConfigurer.add(KeyValueSecretBackendMetadata
-							.create(keyValueBackend.getBackend(), context));
+					secretBackendConfigurer
+							.add(KeyValueSecretBackendMetadata.create(keyValueBackend.getBackend(), context));
 				}
 			}
 
 			Collection<SecretBackendMetadata> backendAccessors = SecretBackendFactories
-					.createSecretBackendMetadata(this.vaultSecretBackendDescriptors,
-							this.factories);
+					.createSecretBackendMetadata(this.vaultSecretBackendDescriptors, this.factories);
 
 			backendAccessors.forEach(secretBackendConfigurer::add);
 		}
@@ -160,8 +152,7 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 		if (secretBackendConfigurer.isRegisterDefaultDiscoveredSecretBackends()) {
 
 			Collection<SecretBackendMetadata> backendAccessors = SecretBackendFactories
-					.createSecretBackendMetadata(this.vaultSecretBackendDescriptors,
-							this.factories);
+					.createSecretBackendMetadata(this.vaultSecretBackendDescriptors, this.factories);
 
 			backendAccessors.forEach(secretBackendConfigurer::add);
 		}
@@ -180,11 +171,10 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	@Bean
 	@Lazy
 	@ConditionalOnMissingBean
-	public SecretLeaseContainer secretLeaseContainer(VaultProperties vaultProperties,
-			VaultOperations vaultOperations, TaskSchedulerWrapper taskSchedulerWrapper) {
+	public SecretLeaseContainer secretLeaseContainer(VaultProperties vaultProperties, VaultOperations vaultOperations,
+			TaskSchedulerWrapper taskSchedulerWrapper) {
 
-		VaultProperties.ConfigLifecycle lifecycle = vaultProperties.getConfig()
-				.getLifecycle();
+		VaultProperties.ConfigLifecycle lifecycle = vaultProperties.getConfig().getLifecycle();
 
 		SecretLeaseContainer container = new SecretLeaseContainer(vaultOperations,
 				taskSchedulerWrapper.getTaskScheduler());
@@ -194,8 +184,7 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 		return container;
 	}
 
-	static void customizeContainer(VaultProperties.ConfigLifecycle lifecycle,
-			SecretLeaseContainer container) {
+	static void customizeContainer(VaultProperties.ConfigLifecycle lifecycle, SecretLeaseContainer container) {
 
 		if (lifecycle.isEnabled()) {
 

@@ -30,11 +30,9 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
  * @author Mark Paluch
  * @since 1.1
  */
-public class DiscoveryClientVaultServiceInstanceProvider
-		implements VaultServiceInstanceProvider {
+public class DiscoveryClientVaultServiceInstanceProvider implements VaultServiceInstanceProvider {
 
-	private static final Log log = LogFactory
-			.getLog(DiscoveryClientVaultServiceInstanceProvider.class);
+	private static final Log log = LogFactory.getLog(DiscoveryClientVaultServiceInstanceProvider.class);
 
 	private final DiscoveryClient client;
 
@@ -50,8 +48,7 @@ public class DiscoveryClientVaultServiceInstanceProvider
 		List<ServiceInstance> instances = this.client.getInstances(serviceId);
 
 		if (instances.isEmpty()) {
-			throw new IllegalStateException(
-					"No instances found of Vault server (" + serviceId + ")");
+			throw new IllegalStateException("No instances found of Vault server (" + serviceId + ")");
 		}
 
 		ServiceInstance instance = instances.get(0);

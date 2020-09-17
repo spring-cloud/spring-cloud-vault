@@ -31,8 +31,7 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties("spring.cloud.vault.mysql")
 @Validated
 @Deprecated
-public class VaultMySqlProperties
-		implements DatabaseSecretProperties, VaultSecretBackendDescriptor {
+public class VaultMySqlProperties implements DatabaseSecretProperties, VaultSecretBackendDescriptor {
 
 	/**
 	 * Enable mysql backend usage.

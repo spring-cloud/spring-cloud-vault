@@ -94,8 +94,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	private RestOperations externalRestOperations;
 
 	public VaultBootstrapConfiguration(ConfigurableApplicationContext applicationContext,
-			VaultProperties vaultProperties,
-			ObjectProvider<VaultEndpointProvider> endpointProvider,
+			VaultProperties vaultProperties, ObjectProvider<VaultEndpointProvider> endpointProvider,
 			ObjectProvider<List<RestTemplateCustomizer>> customizers,
 			ObjectProvider<List<RestTemplateRequestCustomizer<?>>> requestCustomizers) {
 
@@ -105,17 +104,14 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		VaultEndpointProvider provider = endpointProvider.getIfAvailable();
 
 		if (provider == null) {
-			provider = SimpleVaultEndpointProvider
-					.of(VaultConfigurationUtil.createVaultEndpoint(vaultProperties));
+			provider = SimpleVaultEndpointProvider.of(VaultConfigurationUtil.createVaultEndpoint(vaultProperties));
 		}
 
 		this.endpointProvider = provider;
-		this.customizers = new ArrayList<>(
-				customizers.getIfAvailable(Collections::emptyList));
+		this.customizers = new ArrayList<>(customizers.getIfAvailable(Collections::emptyList));
 		AnnotationAwareOrderComparator.sort(this.customizers);
 
-		this.requestCustomizers = new ArrayList<>(
-				requestCustomizers.getIfAvailable(Collections::emptyList));
+		this.requestCustomizers = new ArrayList<>(requestCustomizers.getIfAvailable(Collections::emptyList));
 		AnnotationAwareOrderComparator.sort(this.requestCustomizers);
 	}
 
@@ -125,8 +121,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		ClientHttpRequestFactory clientHttpRequestFactory = clientHttpRequestFactoryWrapper()
 				.getClientHttpRequestFactory();
 
-		this.restTemplateBuilder = RestTemplateBuilder.builder()
-				.requestFactory(clientHttpRequestFactory)
+		this.restTemplateBuilder = RestTemplateBuilder.builder().requestFactory(clientHttpRequestFactory)
 				.endpointProvider(this.endpointProvider);
 
 		this.customizers.forEach(this.restTemplateBuilder::customizers);
@@ -153,15 +148,13 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@ConditionalOnMissingBean
 	public ClientFactoryWrapper clientHttpRequestFactoryWrapper() {
 
-		ClientOptions clientOptions = new ClientOptions(
-				Duration.ofMillis(this.vaultProperties.getConnectionTimeout()),
+		ClientOptions clientOptions = new ClientOptions(Duration.ofMillis(this.vaultProperties.getConnectionTimeout()),
 				Duration.ofMillis(this.vaultProperties.getReadTimeout()));
 
 		SslConfiguration sslConfiguration = VaultConfigurationUtil
 				.createSslConfiguration(this.vaultProperties.getSsl());
 
-		return new ClientFactoryWrapper(
-				ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration));
+		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration));
 	}
 
 	/**
@@ -173,15 +166,13 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@ConditionalOnMissingBean(VaultOperations.class)
 	public VaultTemplate vaultTemplate() {
 
-		VaultProperties.AuthenticationMethod authentication = this.vaultProperties
-				.getAuthentication();
+		VaultProperties.AuthenticationMethod authentication = this.vaultProperties.getAuthentication();
 
 		if (authentication == VaultProperties.AuthenticationMethod.NONE) {
 			return new VaultTemplate(this.restTemplateBuilder);
 		}
 
-		return new VaultTemplate(this.restTemplateBuilder,
-				this.applicationContext.getBean(SessionManager.class));
+		return new VaultTemplate(this.restTemplateBuilder, this.applicationContext.getBean(SessionManager.class));
 	}
 
 	/**
@@ -221,16 +212,14 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	public SessionManager vaultSessionManager(ClientAuthentication clientAuthentication,
 			ObjectFactory<TaskSchedulerWrapper> asyncTaskExecutorFactory) {
 
-		VaultProperties.SessionLifecycle lifecycle = this.vaultProperties.getSession()
-				.getLifecycle();
+		VaultProperties.SessionLifecycle lifecycle = this.vaultProperties.getSession().getLifecycle();
 
 		if (lifecycle.isEnabled()) {
 			RestTemplate restTemplate = this.restTemplateBuilder.build();
 			LifecycleAwareSessionManagerSupport.RefreshTrigger trigger = new LifecycleAwareSessionManagerSupport.FixedTimeoutRefreshTrigger(
 					lifecycle.getRefreshBeforeExpiry(), lifecycle.getExpiryThreshold());
 			return new LifecycleAwareSessionManager(clientAuthentication,
-					asyncTaskExecutorFactory.getObject().getTaskScheduler(), restTemplate,
-					trigger);
+					asyncTaskExecutorFactory.getObject().getTaskScheduler(), restTemplate, trigger);
 		}
 
 		return new SimpleSessionManager(clientAuthentication);
@@ -248,8 +237,8 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	public ClientAuthentication clientAuthentication() {
 
 		RestTemplate restTemplate = this.restTemplateBuilder.build();
-		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(
-				this.vaultProperties, restTemplate, this.externalRestOperations);
+		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(this.vaultProperties, restTemplate,
+				this.externalRestOperations);
 
 		return factory.createClientAuthentication();
 	}

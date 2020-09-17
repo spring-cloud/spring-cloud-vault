@@ -84,30 +84,25 @@ public class CassandraSecretIntegrationTests extends IntegrationTestSupport {
 		connection.put("password", CASSANDRA_PASSWORD);
 		connection.put("protocol_version", 3);
 
-		vaultOperations.write(
-				String.format("%s/config/connection", this.cassandra.getBackend()),
-				connection);
+		vaultOperations.write(String.format("%s/config/connection", this.cassandra.getBackend()), connection);
 
 		Map<String, String> role = new HashMap<>();
 
 		role.put("creation_cql", CREATE_USER_AND_GRANT_CQL);
 		role.put("consistency", "All");
 
-		vaultOperations.write(String.format("%s/roles/%s", this.cassandra.getBackend(),
-				this.cassandra.getRole()), role);
+		vaultOperations.write(String.format("%s/roles/%s", this.cassandra.getBackend(), this.cassandra.getRole()),
+				role);
 
-		this.configOperations = new VaultConfigTemplate(vaultOperations,
-				this.vaultProperties);
+		this.configOperations = new VaultConfigTemplate(vaultOperations, this.vaultProperties);
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, Object> secretProperties = this.configOperations
-				.read(forDatabase(this.cassandra)).getData();
+		Map<String, Object> secretProperties = this.configOperations.read(forDatabase(this.cassandra)).getData();
 
-		assertThat(secretProperties).containsKeys("spring.data.cassandra.username",
-				"spring.data.cassandra.password");
+		assertThat(secretProperties).containsKeys("spring.data.cassandra.username", "spring.data.cassandra.password");
 	}
 
 }

@@ -64,8 +64,7 @@ public class DiscoveryBootstrapConfigurationTests extends IntegrationTestSupport
 
 		ConsulClient client = new ConsulClient();
 
-		Response<List<CatalogService>> response = client.getCatalogService("vault",
-				QueryParams.DEFAULT);
+		Response<List<CatalogService>> response = client.getCatalogService("vault", QueryParams.DEFAULT);
 
 		if (response.getValue().isEmpty()) {
 

@@ -124,8 +124,7 @@ public class VaultHealthIndicatorUnitTests {
 		Health health = this.healthIndicator.health();
 
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
-		assertThat(health.getDetails()).containsEntry("state",
-				"Vault in performance standby");
+		assertThat(health.getDetails()).containsEntry("state", "Vault in performance standby");
 	}
 
 	@Test
@@ -137,8 +136,7 @@ public class VaultHealthIndicatorUnitTests {
 		Health health = this.healthIndicator.health();
 
 		assertThat(health.getStatus()).isEqualTo(Status.UP);
-		assertThat(health.getDetails()).containsEntry("state",
-				"Vault in recovery replication secondary mode");
+		assertThat(health.getDetails()).containsEntry("state", "Vault in recovery replication secondary mode");
 	}
 
 }

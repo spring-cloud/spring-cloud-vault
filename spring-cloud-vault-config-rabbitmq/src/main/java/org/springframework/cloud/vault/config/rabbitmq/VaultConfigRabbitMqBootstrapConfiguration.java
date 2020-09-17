@@ -66,29 +66,24 @@ public class VaultConfigRabbitMqBootstrapConfiguration {
 		 * @param properties must not be {@literal null}.
 		 * @return the {@link SecretBackendMetadata}
 		 */
-		static SecretBackendMetadata forRabbitMq(
-				final VaultRabbitMqProperties properties) {
+		static SecretBackendMetadata forRabbitMq(final VaultRabbitMqProperties properties) {
 
 			Assert.notNull(properties, "VaultRabbitMqProperties must not be null");
 
 			PropertyNameTransformer transformer = new PropertyNameTransformer();
-			transformer.addKeyTransformation("username",
-					properties.getUsernameProperty());
-			transformer.addKeyTransformation("password",
-					properties.getPasswordProperty());
+			transformer.addKeyTransformation("username", properties.getUsernameProperty());
+			transformer.addKeyTransformation("password", properties.getPasswordProperty());
 
 			return new SecretBackendMetadata() {
 
 				@Override
 				public String getName() {
-					return String.format("%s with Role %s", properties.getBackend(),
-							properties.getRole());
+					return String.format("%s with Role %s", properties.getBackend(), properties.getRole());
 				}
 
 				@Override
 				public String getPath() {
-					return String.format("%s/creds/%s", properties.getBackend(),
-							properties.getRole());
+					return String.format("%s/creds/%s", properties.getBackend(), properties.getRole());
 				}
 
 				@Override
@@ -110,8 +105,7 @@ public class VaultConfigRabbitMqBootstrapConfiguration {
 		}
 
 		@Override
-		public SecretBackendMetadata createMetadata(
-				VaultRabbitMqProperties backendDescriptor) {
+		public SecretBackendMetadata createMetadata(VaultRabbitMqProperties backendDescriptor) {
 			return forRabbitMq(backendDescriptor);
 		}
 

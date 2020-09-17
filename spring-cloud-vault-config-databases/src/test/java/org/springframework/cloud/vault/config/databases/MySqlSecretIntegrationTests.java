@@ -47,8 +47,8 @@ public class MySqlSecretIntegrationTests extends IntegrationTestSupport {
 
 	private static final String MYSQL_HOST = "localhost";
 
-	private static final String ROOT_CREDENTIALS = String
-			.format("springvault:springvault@tcp(%s:%d)/", MYSQL_HOST, MYSQL_PORT);
+	private static final String ROOT_CREDENTIALS = String.format("springvault:springvault@tcp(%s:%d)/", MYSQL_HOST,
+			MYSQL_PORT);
 
 	private static final String CREATE_USER_AND_GRANT_SQL = "CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';"
 			+ "GRANT SELECT ON *.* TO '{{name}}'@'%';";
@@ -77,27 +77,21 @@ public class MySqlSecretIntegrationTests extends IntegrationTestSupport {
 
 		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();
 
-		vaultOperations.write(
-				String.format("%s/config/connection", this.mySql.getBackend()),
+		vaultOperations.write(String.format("%s/config/connection", this.mySql.getBackend()),
 				Collections.singletonMap("connection_url", ROOT_CREDENTIALS));
 
-		vaultOperations.write(
-				String.format("%s/roles/%s", this.mySql.getBackend(),
-						this.mySql.getRole()),
+		vaultOperations.write(String.format("%s/roles/%s", this.mySql.getBackend(), this.mySql.getRole()),
 				Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
 
-		this.configOperations = new VaultConfigTemplate(vaultOperations,
-				this.vaultProperties);
+		this.configOperations = new VaultConfigTemplate(vaultOperations, this.vaultProperties);
 	}
 
 	@Test
 	public void shouldCreateCredentialsCorrectly() {
 
-		Map<String, Object> secretProperties = this.configOperations
-				.read(forDatabase(this.mySql)).getData();
+		Map<String, Object> secretProperties = this.configOperations.read(forDatabase(this.mySql)).getData();
 
-		assertThat(secretProperties).containsKeys("spring.datasource.username",
-				"spring.datasource.password");
+		assertThat(secretProperties).containsKeys("spring.datasource.username", "spring.datasource.password");
 	}
 
 }
