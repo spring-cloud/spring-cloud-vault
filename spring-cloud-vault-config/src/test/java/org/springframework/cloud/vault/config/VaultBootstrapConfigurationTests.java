@@ -43,8 +43,9 @@ public class VaultBootstrapConfigurationTests {
 	@Test
 	public void shouldConfigureWithoutAuthentication() {
 
-		this.contextRunner.withPropertyValues("spring.cloud.vault.kv.enabled=false",
-				"spring.cloud.vault.authentication=NONE").run(context -> {
+		this.contextRunner
+				.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.authentication=NONE")
+				.run(context -> {
 
 					assertThat(context).doesNotHaveBean(SessionManager.class);
 					assertThat(context).doesNotHaveBean(ClientAuthentication.class);
@@ -55,11 +56,8 @@ public class VaultBootstrapConfigurationTests {
 	@Test
 	public void shouldDisableSessionManagement() {
 
-		this.contextRunner
-				.withPropertyValues("spring.cloud.vault.kv.enabled=false",
-						"spring.cloud.vault.token=foo",
-						"spring.cloud.vault.session.lifecycle.enabled=false")
-				.run(context -> {
+		this.contextRunner.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
+				"spring.cloud.vault.session.lifecycle.enabled=false").run(context -> {
 
 					SessionManager bean = context.getBean(SessionManager.class);
 					assertThat(bean).isExactlyInstanceOf(SimpleSessionManager.class);
@@ -69,21 +67,16 @@ public class VaultBootstrapConfigurationTests {
 	@Test
 	public void shouldConfigureSessionManagement() {
 
-		this.contextRunner
-				.withPropertyValues("spring.cloud.vault.kv.enabled=false",
-						"spring.cloud.vault.token=foo",
-						"spring.cloud.vault.session.lifecycle.refresh-before-expiry=11s",
-						"spring.cloud.vault.session.lifecycle.expiry-threshold=12s")
-				.run(context -> {
+		this.contextRunner.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
+				"spring.cloud.vault.session.lifecycle.refresh-before-expiry=11s",
+				"spring.cloud.vault.session.lifecycle.expiry-threshold=12s").run(context -> {
 
 					SessionManager bean = context.getBean(SessionManager.class);
 
-					Object refreshTrigger = ReflectionTestUtils.getField(bean,
-							"refreshTrigger");
+					Object refreshTrigger = ReflectionTestUtils.getField(bean, "refreshTrigger");
 
-					assertThat(refreshTrigger).hasFieldOrPropertyWithValue("duration",
-							Duration.ofSeconds(11)).hasFieldOrPropertyWithValue(
-									"validTtlThreshold", Duration.ofSeconds(12));
+					assertThat(refreshTrigger).hasFieldOrPropertyWithValue("duration", Duration.ofSeconds(11))
+							.hasFieldOrPropertyWithValue("expiryThreshold", Duration.ofSeconds(12));
 				});
 	}
 
