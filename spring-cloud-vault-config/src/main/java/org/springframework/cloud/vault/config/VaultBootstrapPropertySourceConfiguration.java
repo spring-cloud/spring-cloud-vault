@@ -18,7 +18,6 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectFactory;
@@ -26,10 +25,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
-import org.springframework.cloud.vault.config.VaultBootstrapConfiguration.TaskSchedulerWrapper;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -37,6 +34,8 @@ import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
+
+import static org.springframework.cloud.vault.config.VaultAutoConfiguration.TaskSchedulerWrapper;
 
 /**
  * {@link org.springframework.cloud.bootstrap.BootstrapConfiguration Auto-configuration}
@@ -47,7 +46,6 @@ import org.springframework.vault.core.lease.SecretLeaseContainer;
  * @author Mårten Svantesson
  * @since 1.1
  */
-@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(VaultKeyValueBackendProperties.class)
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
@@ -81,8 +79,13 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 
 		VaultConfigTemplate vaultConfigTemplate = new VaultConfigTemplate(operations, vaultProperties);
 
-		PropertySourceLocatorConfiguration configuration = getPropertySourceConfiguration(
-				Collections.singletonList(kvBackendProperties));
+		Collection<VaultConfigurer> vaultConfigurers = this.applicationContext.getBeansOfType(VaultConfigurer.class)
+				.values();
+		PropertySourceLocatorConfigurationFactory factory = new PropertySourceLocatorConfigurationFactory(
+				vaultConfigurers, this.vaultSecretBackendDescriptors, this.factories);
+
+		PropertySourceLocatorConfiguration configuration = factory
+				.getPropertySourceConfiguration(Collections.singletonList(kvBackendProperties));
 
 		VaultProperties.ConfigLifecycle lifecycle = vaultProperties.getConfig().getLifecycle();
 
@@ -100,64 +103,6 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 		}
 
 		return new VaultPropertySourceLocator(vaultConfigTemplate, vaultProperties, configuration);
-	}
-
-	/**
-	 * Apply configuration through {@link VaultConfigurer}.
-	 * @param keyValueBackends configured backend.
-	 * @return the {@link PropertySourceLocatorConfiguration}.
-	 */
-	private PropertySourceLocatorConfiguration getPropertySourceConfiguration(
-			List<VaultKeyValueBackendPropertiesSupport> keyValueBackends) {
-
-		Collection<VaultConfigurer> configurers = this.applicationContext.getBeansOfType(VaultConfigurer.class)
-				.values();
-
-		DefaultSecretBackendConfigurer secretBackendConfigurer = new DefaultSecretBackendConfigurer();
-
-		if (configurers.isEmpty()) {
-			secretBackendConfigurer.registerDefaultKeyValueSecretBackends(true)
-					.registerDefaultDiscoveredSecretBackends(true);
-		}
-		else {
-
-			for (VaultConfigurer vaultConfigurer : configurers) {
-				vaultConfigurer.addSecretBackends(secretBackendConfigurer);
-			}
-		}
-
-		if (secretBackendConfigurer.isRegisterDefaultKeyValueSecretBackends()) {
-
-			for (VaultKeyValueBackendPropertiesSupport keyValueBackend : keyValueBackends) {
-
-				if (!keyValueBackend.isEnabled()) {
-					continue;
-				}
-
-				List<String> contexts = KeyValueSecretBackendMetadata.buildContexts(keyValueBackend,
-						keyValueBackend.getProfiles());
-
-				for (String context : contexts) {
-					secretBackendConfigurer
-							.add(KeyValueSecretBackendMetadata.create(keyValueBackend.getBackend(), context));
-				}
-			}
-
-			Collection<SecretBackendMetadata> backendAccessors = SecretBackendFactories
-					.createSecretBackendMetadata(this.vaultSecretBackendDescriptors, this.factories);
-
-			backendAccessors.forEach(secretBackendConfigurer::add);
-		}
-
-		if (secretBackendConfigurer.isRegisterDefaultDiscoveredSecretBackends()) {
-
-			Collection<SecretBackendMetadata> backendAccessors = SecretBackendFactories
-					.createSecretBackendMetadata(this.vaultSecretBackendDescriptors, this.factories);
-
-			backendAccessors.forEach(secretBackendConfigurer::add);
-		}
-
-		return secretBackendConfigurer;
 	}
 
 	/**

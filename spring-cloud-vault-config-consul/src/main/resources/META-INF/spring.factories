@@ -4,3 +4,6 @@ org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfigur
 
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 org.springframework.cloud.vault.config.consul.VaultConfigConsulAutoConfiguration
+
+org.springframework.cloud.vault.config.VaultSecretBackendDescriptor=\
+org.springframework.cloud.vault.config.consul.VaultConsulProperties
