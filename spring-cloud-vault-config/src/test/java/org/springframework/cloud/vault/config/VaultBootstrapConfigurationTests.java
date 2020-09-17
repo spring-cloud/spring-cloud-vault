@@ -26,6 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
+import org.springframework.vault.client.RestTemplateFactory;
 import org.springframework.vault.core.VaultTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,6 +51,7 @@ public class VaultBootstrapConfigurationTests {
 					assertThat(context).doesNotHaveBean(SessionManager.class);
 					assertThat(context).doesNotHaveBean(ClientAuthentication.class);
 					assertThat(context).hasSingleBean(VaultTemplate.class);
+					assertThat(context).hasSingleBean(RestTemplateFactory.class);
 				});
 	}
 

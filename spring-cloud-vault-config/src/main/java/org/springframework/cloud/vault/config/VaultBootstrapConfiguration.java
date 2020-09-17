@@ -49,6 +49,7 @@ import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.client.RestTemplateBuilder;
 import org.springframework.vault.client.RestTemplateCustomizer;
+import org.springframework.vault.client.RestTemplateFactory;
 import org.springframework.vault.client.RestTemplateRequestCustomizer;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpointProvider;
@@ -58,7 +59,6 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
-import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -83,15 +83,22 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 
 	private final List<RestTemplateRequestCustomizer<?>> requestCustomizers;
 
+	private ClientFactoryWrapper clientFactoryWrapper;
+
 	/**
 	 * Used for Vault communication.
 	 */
 	private RestTemplateBuilder restTemplateBuilder;
 
 	/**
+	 * Used for Vault communication.
+	 */
+	private RestTemplateFactory restTemplateFactory;
+
+	/**
 	 * Used for external (AWS, GCP) communication.
 	 */
-	private RestOperations externalRestOperations;
+	private RestTemplate externalRestOperations;
 
 	public VaultBootstrapConfiguration(ConfigurableApplicationContext applicationContext,
 			VaultProperties vaultProperties, ObjectProvider<VaultEndpointProvider> endpointProvider,
@@ -118,21 +125,39 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@Override
 	public void afterPropertiesSet() {
 
-		ClientHttpRequestFactory clientHttpRequestFactory = clientHttpRequestFactoryWrapper()
-				.getClientHttpRequestFactory();
+		this.clientFactoryWrapper = createClientFactoryWrapper();
 
-		this.restTemplateBuilder = RestTemplateBuilder.builder().requestFactory(clientHttpRequestFactory)
+		this.restTemplateBuilder = restTemplateBuilder(this.clientFactoryWrapper.getClientHttpRequestFactory());
+
+		this.externalRestOperations = new RestTemplate(this.clientFactoryWrapper.getClientHttpRequestFactory());
+
+		this.restTemplateFactory = new DefaultRestTemplateFactory(
+				this.clientFactoryWrapper.getClientHttpRequestFactory(), this::restTemplateBuilder);
+
+		this.customizers.forEach(customizer -> customizer.customize(this.externalRestOperations));
+	}
+
+	/**
+	 * Create a {@link RestTemplateBuilder} initialized with {@link VaultEndpointProvider}
+	 * and {@link ClientHttpRequestFactory}. May be overridden by subclasses.
+	 * @return the {@link RestTemplateBuilder}.
+	 * @since 2.3
+	 * @see #clientHttpRequestFactoryWrapper()
+	 */
+	protected RestTemplateBuilder restTemplateBuilder(ClientHttpRequestFactory requestFactory) {
+
+		RestTemplateBuilder builder = RestTemplateBuilder.builder().requestFactory(requestFactory)
 				.endpointProvider(this.endpointProvider);
 
-		this.customizers.forEach(this.restTemplateBuilder::customizers);
-		this.requestCustomizers.forEach(this.restTemplateBuilder::requestCustomizers);
+		this.customizers.forEach(builder::customizers);
+		this.requestCustomizers.forEach(builder::requestCustomizers);
 
 		if (StringUtils.hasText(this.vaultProperties.getNamespace())) {
 			this.restTemplateBuilder.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE,
 					this.vaultProperties.getNamespace());
 		}
 
-		this.externalRestOperations = new RestTemplate(clientHttpRequestFactory);
+		return builder;
 	}
 
 	/**
@@ -147,14 +172,19 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@Bean
 	@ConditionalOnMissingBean
 	public ClientFactoryWrapper clientHttpRequestFactoryWrapper() {
+		return this.clientFactoryWrapper;
+	}
 
-		ClientOptions clientOptions = new ClientOptions(Duration.ofMillis(this.vaultProperties.getConnectionTimeout()),
-				Duration.ofMillis(this.vaultProperties.getReadTimeout()));
-
-		SslConfiguration sslConfiguration = VaultConfigurationUtil
-				.createSslConfiguration(this.vaultProperties.getSsl());
-
-		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration));
+	/**
+	 * Create a {@link RestTemplateFactory} bean that is used to produce
+	 * {@link RestTemplate}.
+	 * @return the {@link RestTemplateFactory}.
+	 * @see #clientHttpRequestFactoryWrapper()
+	 * @since 3.0
+	 */
+	@Bean
+	public RestTemplateFactory vaulRestTemplateFactory() {
+		return this.restTemplateFactory;
 	}
 
 	/**
@@ -215,7 +245,7 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 		VaultProperties.SessionLifecycle lifecycle = this.vaultProperties.getSession().getLifecycle();
 
 		if (lifecycle.isEnabled()) {
-			RestTemplate restTemplate = this.restTemplateBuilder.build();
+			RestTemplate restTemplate = this.restTemplateFactory.create();
 			LifecycleAwareSessionManagerSupport.RefreshTrigger trigger = new LifecycleAwareSessionManagerSupport.FixedTimeoutRefreshTrigger(
 					lifecycle.getRefreshBeforeExpiry(), lifecycle.getExpiryThreshold());
 			return new LifecycleAwareSessionManager(clientAuthentication,
@@ -236,11 +266,22 @@ public class VaultBootstrapConfiguration implements InitializingBean {
 	@ConditionalOnAuthentication
 	public ClientAuthentication clientAuthentication() {
 
-		RestTemplate restTemplate = this.restTemplateBuilder.build();
+		RestTemplate restTemplate = this.restTemplateFactory.create();
 		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(this.vaultProperties, restTemplate,
 				this.externalRestOperations);
 
 		return factory.createClientAuthentication();
+	}
+
+	protected ClientFactoryWrapper createClientFactoryWrapper() {
+
+		ClientOptions clientOptions = new ClientOptions(Duration.ofMillis(this.vaultProperties.getConnectionTimeout()),
+				Duration.ofMillis(this.vaultProperties.getReadTimeout()));
+
+		SslConfiguration sslConfiguration = VaultConfigurationUtil
+				.createSslConfiguration(this.vaultProperties.getSsl());
+
+		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration));
 	}
 
 	/**
