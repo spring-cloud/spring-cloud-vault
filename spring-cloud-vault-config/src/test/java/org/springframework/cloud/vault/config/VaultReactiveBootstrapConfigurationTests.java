@@ -51,21 +51,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class VaultReactiveBootstrapConfigurationTests {
 
 	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-			.withConfiguration(
-					AutoConfigurations.of(VaultReactiveBootstrapConfiguration.class))
+			.withConfiguration(AutoConfigurations.of(VaultReactiveBootstrapConfiguration.class))
 			.withAllowBeanDefinitionOverriding(true);
 
 	@Test
 	public void shouldConfigureTemplate() {
 
 		this.contextRunner.withUserConfiguration(AuthenticationFactoryConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false")
-				.run(context -> {
+				.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false").run(context -> {
 
-					assertThat(context.getBean(ReactiveVaultOperations.class))
-							.isNotNull();
-					assertThat(context.getBean(AuthenticationStepsFactory.class))
-							.isNotNull();
+					assertThat(context.getBean(ReactiveVaultOperations.class)).isNotNull();
+					assertThat(context.getBean(AuthenticationStepsFactory.class)).isNotNull();
 					assertThat(context.getBean(SessionManager.class)).isNotNull()
 							.isNotInstanceOf(LifecycleAwareSessionManager.class)
 							.isNotInstanceOf(SimpleSessionManager.class);
@@ -77,12 +73,9 @@ public class VaultReactiveBootstrapConfigurationTests {
 	public void shouldNotConfigureIfHttpClientIsMissing() {
 
 		this.contextRunner.withUserConfiguration(AuthenticationFactoryConfiguration.class)
-				.withClassLoader(
-						new FilteredClassLoader("reactor.netty.http.client.HttpClient"))
-				.run(context -> {
+				.withClassLoader(new FilteredClassLoader("reactor.netty.http.client.HttpClient")).run(context -> {
 
-					assertThat(context.getBeanNamesForType(ReactiveVaultOperations.class))
-							.isEmpty();
+					assertThat(context.getBeanNamesForType(ReactiveVaultOperations.class)).isEmpty();
 				});
 	}
 
@@ -90,11 +83,9 @@ public class VaultReactiveBootstrapConfigurationTests {
 	public void shouldConfigureTemplateWithTokenSupplier() {
 
 		this.contextRunner.withUserConfiguration(TokenSupplierConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false")
-				.run(context -> {
+				.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false").run(context -> {
 
-					assertThat(context.getBean(ReactiveVaultOperations.class))
-							.isNotNull();
+					assertThat(context.getBean(ReactiveVaultOperations.class)).isNotNull();
 					assertThat(context.getBean(SessionManager.class)).isNotNull()
 							.isNotInstanceOf(LifecycleAwareSessionManager.class)
 							.isNotInstanceOf(SimpleSessionManager.class);
@@ -106,29 +97,24 @@ public class VaultReactiveBootstrapConfigurationTests {
 	public void shouldNotConfigureReactiveSupport() {
 
 		this.contextRunner.withUserConfiguration(VaultBootstrapConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.reactive.enabled=false",
-						"spring.cloud.vault.token=foo")
+				.withPropertyValues("spring.cloud.vault.reactive.enabled=false", "spring.cloud.vault.token=foo")
 				.run(context -> {
 
-					assertThat(context.getBeanNamesForType(ReactiveVaultOperations.class))
-							.isEmpty();
-					assertThat(context.getBean(SessionManager.class))
-							.isInstanceOf(LifecycleAwareSessionManager.class);
+					assertThat(context.getBeanNamesForType(ReactiveVaultOperations.class)).isEmpty();
+					assertThat(context.getBean(SessionManager.class)).isInstanceOf(LifecycleAwareSessionManager.class);
 				});
 	}
 
 	@Test
 	public void sessionManagerBridgeShouldNotCacheTokens() {
 
-		this.contextRunner.withUserConfiguration(TokenSupplierConfiguration.class,
-				CustomSessionManager.class).run(context -> {
+		this.contextRunner.withUserConfiguration(TokenSupplierConfiguration.class, CustomSessionManager.class)
+				.run(context -> {
 
 					SessionManager sessionManager = context.getBean(SessionManager.class);
 
-					assertThat(sessionManager.getSessionToken().getToken())
-							.isEqualTo("token-1");
-					assertThat(sessionManager.getSessionToken().getToken())
-							.isEqualTo("token-2");
+					assertThat(sessionManager.getSessionToken().getToken()).isEqualTo("token-1");
+					assertThat(sessionManager.getSessionToken().getToken()).isEqualTo("token-2");
 				});
 	}
 
@@ -136,19 +122,14 @@ public class VaultReactiveBootstrapConfigurationTests {
 	public void shouldDisableSessionManagement() {
 
 		this.contextRunner
-				.withPropertyValues("spring.cloud.vault.kv.enabled=false",
-						"spring.cloud.vault.token=foo",
+				.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
 						"spring.cloud.vault.session.lifecycle.enabled=false")
-				.withBean("vaultTokenSupplier", VaultTokenSupplier.class,
-						() -> Mono::empty)
-				.withBean("taskSchedulerWrapper",
-						VaultBootstrapConfiguration.TaskSchedulerWrapper.class,
-						() -> new VaultBootstrapConfiguration.TaskSchedulerWrapper(
-								new ThreadPoolTaskScheduler()))
+				.withBean("vaultTokenSupplier", VaultTokenSupplier.class, () -> Mono::empty)
+				.withBean("taskSchedulerWrapper", VaultBootstrapConfiguration.TaskSchedulerWrapper.class,
+						() -> new VaultBootstrapConfiguration.TaskSchedulerWrapper(new ThreadPoolTaskScheduler()))
 				.run(context -> {
 
-					ReactiveSessionManager bean = context
-							.getBean(ReactiveSessionManager.class);
+					ReactiveSessionManager bean = context.getBean(ReactiveSessionManager.class);
 					assertThat(bean).isExactlyInstanceOf(CachingVaultTokenSupplier.class);
 				});
 	}
@@ -157,27 +138,20 @@ public class VaultReactiveBootstrapConfigurationTests {
 	public void shouldConfigureSessionManagement() {
 
 		this.contextRunner
-				.withPropertyValues("spring.cloud.vault.kv.enabled=false",
-						"spring.cloud.vault.token=foo",
+				.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
 						"spring.cloud.vault.session.lifecycle.refresh-before-expiry=11s",
 						"spring.cloud.vault.session.lifecycle.expiry-threshold=12s")
-				.withBean("vaultTokenSupplier", VaultTokenSupplier.class,
-						() -> Mono::empty)
-				.withBean("taskSchedulerWrapper",
-						VaultBootstrapConfiguration.TaskSchedulerWrapper.class,
-						() -> new VaultBootstrapConfiguration.TaskSchedulerWrapper(
-								new ThreadPoolTaskScheduler()))
+				.withBean("vaultTokenSupplier", VaultTokenSupplier.class, () -> Mono::empty)
+				.withBean("taskSchedulerWrapper", VaultBootstrapConfiguration.TaskSchedulerWrapper.class,
+						() -> new VaultBootstrapConfiguration.TaskSchedulerWrapper(new ThreadPoolTaskScheduler()))
 				.run(context -> {
 
-					ReactiveSessionManager bean = context
-							.getBean(ReactiveSessionManager.class);
+					ReactiveSessionManager bean = context.getBean(ReactiveSessionManager.class);
 
-					Object refreshTrigger = ReflectionTestUtils.getField(bean,
-							"refreshTrigger");
+					Object refreshTrigger = ReflectionTestUtils.getField(bean, "refreshTrigger");
 
-					assertThat(refreshTrigger).hasFieldOrPropertyWithValue("duration",
-							Duration.ofSeconds(11)).hasFieldOrPropertyWithValue(
-									"validTtlThreshold", Duration.ofSeconds(12));
+					assertThat(refreshTrigger).hasFieldOrPropertyWithValue("duration", Duration.ofSeconds(11))
+							.hasFieldOrPropertyWithValue("expiryThreshold", Duration.ofSeconds(12));
 				});
 	}
 
@@ -206,8 +180,7 @@ public class VaultReactiveBootstrapConfigurationTests {
 	static class CustomSessionManager {
 
 		@Bean
-		ReactiveSessionManager reactiveVaultSessionManager(
-				VaultTokenSupplier tokenSupplier) {
+		ReactiveSessionManager reactiveVaultSessionManager(VaultTokenSupplier tokenSupplier) {
 			return tokenSupplier::getVaultToken;
 		}
 
