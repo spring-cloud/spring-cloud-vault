@@ -59,7 +59,9 @@ public class VaultReactiveBootstrapConfigurationTests {
 	public void shouldConfigureTemplate() {
 
 		this.contextRunner.withUserConfiguration(AuthenticationFactoryConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false").run(context -> {
+				.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false",
+						"spring.cloud.bootstrap.enabled=true")
+				.run(context -> {
 
 					assertThat(context.getBean(ReactiveVaultOperations.class)).isNotNull();
 					assertThat(context.getBean(AuthenticationStepsFactory.class)).isNotNull();
@@ -85,7 +87,9 @@ public class VaultReactiveBootstrapConfigurationTests {
 	public void shouldConfigureTemplateWithTokenSupplier() {
 
 		this.contextRunner.withUserConfiguration(TokenSupplierConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false").run(context -> {
+				.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false",
+						"spring.cloud.bootstrap.enabled=true")
+				.run(context -> {
 
 					assertThat(context.getBean(ReactiveVaultOperations.class)).isNotNull();
 					assertThat(context.getBean(SessionManager.class)).isNotNull()

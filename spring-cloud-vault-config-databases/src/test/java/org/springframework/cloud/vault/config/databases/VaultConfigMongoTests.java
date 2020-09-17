@@ -54,7 +54,8 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigMongoTests.TestApplication.class,
 		properties = { "spring.cloud.vault.mongodb.enabled=true", "spring.cloud.vault.mongodb.role=readonly",
-				"spring.data.mongodb.url=mongodb://localhost", "spring.data.mongodb.database=admin" })
+				"spring.data.mongodb.url=mongodb://localhost", "spring.data.mongodb.database=admin",
+				"spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigMongoTests {
 
 	private static final int MONGODB_PORT = 27017;

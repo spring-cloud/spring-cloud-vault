@@ -39,8 +39,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = CustomBootstrapConfiguration.class, properties = {
-		"VaultConfigAwsBootstrapConfigurationTests.custom.config=true", "spring.cloud.vault.aws.role=foo" })
+@SpringBootTest(classes = CustomBootstrapConfiguration.class,
+		properties = { "VaultConfigAwsBootstrapConfigurationTests.custom.config=true",
+				"spring.cloud.vault.aws.role=foo", "spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigAwsBootstrapConfigurationTests extends IntegrationTestSupport {
 
 	@Autowired

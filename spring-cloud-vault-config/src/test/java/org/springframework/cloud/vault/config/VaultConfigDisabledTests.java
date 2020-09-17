@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigDisabledTests.TestApplication.class,
-		properties = "spring.cloud.vault.enabled=false")
+		properties = { "spring.cloud.vault.enabled=false", "spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigDisabledTests {
 
 	@Autowired

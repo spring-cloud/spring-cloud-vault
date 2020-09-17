@@ -25,6 +25,7 @@ import org.springframework.cloud.vault.config.SecretBackendMetadata;
 import org.springframework.cloud.vault.config.SecretBackendMetadataFactory;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
@@ -52,14 +53,19 @@ public class VaultConfigConsulBootstrapConfiguration {
 	public static class ConsulSecretBackendMetadataFactory
 			implements SecretBackendMetadataFactory<VaultConsulProperties> {
 
-		private final ApplicationContext context;
+		private final ApplicationEventPublisher publisher;
 
-		public ConsulSecretBackendMetadataFactory(ApplicationContext context) {
-			this.context = context;
+		public ConsulSecretBackendMetadataFactory() {
+			this.publisher = event -> {
+			}; // NO-OP;
 		}
 
-		public ApplicationContext getContext() {
-			return this.context;
+		public ConsulSecretBackendMetadataFactory(ApplicationContext publisher) {
+			this.publisher = publisher;
+		}
+
+		public ApplicationEventPublisher getPublisher() {
+			return this.publisher;
 		}
 
 		/**
@@ -90,7 +96,7 @@ public class VaultConfigConsulBootstrapConfiguration {
 				return transformed;
 			};
 
-			return new ConsulBackendMetadata(properties, transformer, context);
+			return new ConsulBackendMetadata(properties, transformer, this.publisher);
 		}
 
 		@Override

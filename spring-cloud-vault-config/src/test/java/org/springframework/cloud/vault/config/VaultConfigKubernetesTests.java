@@ -53,7 +53,8 @@ import static org.springframework.cloud.vault.util.Settings.findWorkDir;
 @SpringBootTest(classes = VaultConfigKubernetesTests.TestApplication.class,
 		properties = { "spring.cloud.vault.authentication=kubernetes", "spring.cloud.vault.kubernetes.role=my-role",
 				"spring.cloud.vault.kubernetes.service-account-token-file=../work/minikube/hello-minikube-token",
-				"spring.cloud.vault.application-name=VaultConfigKubernetesTests" })
+				"spring.cloud.vault.application-name=VaultConfigKubernetesTests",
+				"spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigKubernetesTests {
 
 	@Value("${vault.value}")

@@ -45,9 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigWithContextTests.TestApplication.class,
-		properties = "spring.cloud.vault.application-name=testVaultApp")
-// see
-// https://github.com/spring-cloud/spring-cloud-commons/issues/214
+		properties = { "spring.cloud.vault.application-name=testVaultApp", "spring.cloud.bootstrap.enabled=true" })
 @ActiveProfiles("my-profile")
 public class VaultConfigWithContextTests {
 
