@@ -19,31 +19,41 @@ package org.springframework.cloud.vault.config;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.boot.BootstrapContext;
+import org.springframework.boot.BootstrapRegistry;
+import org.springframework.boot.Bootstrapper;
 import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.context.config.ConfigData;
 import org.springframework.boot.context.config.ConfigDataLoader;
 import org.springframework.boot.context.config.ConfigDataLoaderContext;
 import org.springframework.boot.context.config.ConfigDataLocationNotFoundException;
 import org.springframework.cloud.vault.config.VaultAutoConfiguration.TaskSchedulerWrapper;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.PropertySource;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.authentication.AuthenticationStepsFactory;
 import org.springframework.vault.authentication.ClientAuthentication;
-import org.springframework.vault.authentication.LifecycleAwareSessionManager;
-import org.springframework.vault.authentication.LifecycleAwareSessionManagerSupport;
+import org.springframework.vault.authentication.ReactiveSessionManager;
 import org.springframework.vault.authentication.SessionManager;
-import org.springframework.vault.authentication.SimpleSessionManager;
+import org.springframework.vault.authentication.VaultTokenSupplier;
 import org.springframework.vault.client.RestTemplateBuilder;
 import org.springframework.vault.client.RestTemplateFactory;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpointProvider;
-import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.WebClientBuilder;
+import org.springframework.vault.client.WebClientFactory;
+import org.springframework.vault.core.ReactiveVaultTemplate;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.core.env.LeaseAwareVaultPropertySource;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
@@ -54,12 +64,32 @@ import org.springframework.web.client.RestTemplate;
 import static org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
 
 /**
- * {@link ConfigDataLoader} for Vault for {@link VaultConfigLocation}.
+ * {@link ConfigDataLoader} for Vault for {@link VaultConfigLocation}. This class
+ * materializes {@link PropertySource property sources} by using Vault and
+ * {@link VaultConfigLocation}. This class also ensures that all necessary infrastructure
+ * beans are registered in the {@link BootstrapRegistry}. Registrations made by this
+ * config data loader are typically propagated into the {@link BeanFactory} as this
+ * configuration mirrors to some extent {@link VaultAutoConfiguration} and
+ * {@link VaultReactiveAutoConfiguration}.
+ * <p>
+ * Infrastructure beans can be customized by registering instances through
+ * {@link Bootstrapper}.
  *
  * @author Mark Paluch
  * @since 3.0
+ * @see VaultConfigLocation
+ * @see VaultAutoConfiguration
+ * @see VaultReactiveAutoConfiguration
  */
 public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocation> {
+
+	private final static boolean FLUX_AVAILABLE = ClassUtils.isPresent("reactor.core.publisher.Flux",
+			VaultConfigDataLoader.class.getClassLoader());
+
+	private final static boolean WEBCLIENT_AVAILABLE = ClassUtils.isPresent(
+			"org.springframework.web.reactive.function.client.WebClient", VaultConfigDataLoader.class.getClassLoader());
+
+	private final static boolean REGISTER_REACTIVE_INFRASTRUCTURE = FLUX_AVAILABLE && WEBCLIENT_AVAILABLE;
 
 	@Override
 	public ConfigData load(ConfigDataLoaderContext context, VaultConfigLocation location)
@@ -67,100 +97,31 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 		ConfigurableBootstrapContext bootstrap = context.getBootstrapContext();
 		VaultProperties vaultProperties = bootstrap.get(VaultProperties.class);
-		ImperativeConfiguration configuration = new ImperativeConfiguration(vaultProperties);
 
 		if (vaultProperties.getSession().getLifecycle().isEnabled()
 				|| vaultProperties.getConfig().getLifecycle().isEnabled()) {
-
-			bootstrap.registerIfAbsent(TaskSchedulerWrapper.class, ctx -> {
-
-				ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-				threadPoolTaskScheduler.setPoolSize(2);
-				threadPoolTaskScheduler.setDaemon(true);
-				threadPoolTaskScheduler.setThreadNamePrefix("Spring-Cloud-Vault-");
-
-				threadPoolTaskScheduler.afterPropertiesSet();
-
-				// TODO
-				// This is to destroy bootstrap resources
-				// otherwise, the bootstrap context is not shut down cleanly
-				// this.applicationContext.registerShutdownHook();
-
-				return new TaskSchedulerWrapper(threadPoolTaskScheduler);
-			});
+			registerVaultTaskScheduler(bootstrap);
 		}
-		bootstrap.registerIfAbsent(ClientFactoryWrapper.class, ctx -> new ClientFactoryWrapper(
-				VaultConfigurationUtil.createClientHttpRequestFactory(vaultProperties)));
-		bootstrap.registerIfAbsent(RestTemplateBuilder.class, ctx -> configuration
-				.createRestTemplateBuilder(ctx.get(ClientFactoryWrapper.class).getClientHttpRequestFactory()));
 
-		bootstrap.registerIfAbsent(RestTemplateFactory.class,
-				ctx -> new DefaultRestTemplateFactory(ctx.get(ClientFactoryWrapper.class).getClientHttpRequestFactory(),
-						configuration::createRestTemplateBuilder));
+		registerImperativeInfrastructure(bootstrap, vaultProperties);
 
-		ClientHttpRequestFactory factory = bootstrap.get(ClientFactoryWrapper.class).getClientHttpRequestFactory();
-
-		RestTemplate externalRestTemplate = new RestTemplate(factory);
-
-		ClientAuthenticationFactory authenticationFactory = new ClientAuthenticationFactory(vaultProperties,
-				bootstrap.get(RestTemplateFactory.class).create(), externalRestTemplate);
-		ClientAuthentication clientAuthentication = authenticationFactory.createClientAuthentication();
-
-		VaultProperties.AuthenticationMethod authentication = vaultProperties.getAuthentication();
-
-		if (authentication == VaultProperties.AuthenticationMethod.NONE) {
-			bootstrap.registerIfAbsent(VaultTemplate.class,
-					ctx -> new VaultTemplate(ctx.get(RestTemplateBuilder.class)));
+		if (REGISTER_REACTIVE_INFRASTRUCTURE) {
+			registerReactiveInfrastructure(bootstrap, vaultProperties);
 		}
-		else {
 
-			bootstrap.registerIfAbsent(SessionManager.class, ctx -> {
-
-				// TODO: Create blocking adapter for Reactive Session Manager, if present.
-
-				VaultProperties.SessionLifecycle lifecycle = vaultProperties.getSession().getLifecycle();
-
-				if (lifecycle.isEnabled()) {
-					RestTemplate restTemplate = bootstrap.get(RestTemplateFactory.class).create();
-					LifecycleAwareSessionManagerSupport.RefreshTrigger trigger = new LifecycleAwareSessionManagerSupport.FixedTimeoutRefreshTrigger(
-							lifecycle.getRefreshBeforeExpiry(), lifecycle.getExpiryThreshold());
-					return new LifecycleAwareSessionManager(clientAuthentication,
-							ctx.get(TaskSchedulerWrapper.class).getTaskScheduler(), restTemplate, trigger);
-				}
-
-				return new SimpleSessionManager(clientAuthentication);
-			});
-
-			bootstrap.registerIfAbsent(VaultTemplate.class,
-					ctx -> new VaultTemplate(bootstrap.get(RestTemplateBuilder.class),
-							bootstrap.get(SessionManager.class)));
-		}
+		registerVaultConfigTemplate(bootstrap, vaultProperties);
 
 		if (vaultProperties.getConfig().getLifecycle().isEnabled()) {
+			registerSecretLeaseContainer(bootstrap, new VaultConfiguration(vaultProperties));
+		}
 
-			VaultProperties.ConfigLifecycle lifecycle = vaultProperties.getConfig().getLifecycle();
+		return loadConfigData(location, bootstrap, vaultProperties);
+	}
 
-			bootstrap.registerIfAbsent(SecretLeaseContainer.class, ctx -> {
-				SecretLeaseContainer container = new SecretLeaseContainer(ctx.get(VaultTemplate.class),
-						ctx.get(TaskSchedulerWrapper.class).getTaskScheduler());
+	private ConfigData loadConfigData(VaultConfigLocation location, ConfigurableBootstrapContext bootstrap,
+			VaultProperties vaultProperties) {
 
-				customizeContainer(lifecycle, container);
-
-				// This is to destroy bootstrap resources
-				// otherwise, the bootstrap context is not shut down cleanly
-				// TODO
-				// this.applicationContext.registerShutdownHook();
-
-				try {
-					container.afterPropertiesSet();
-				}
-				catch (Exception e) {
-					ReflectionUtils.rethrowRuntimeException(e);
-				}
-				container.start();
-
-				return container;
-			});
+		if (vaultProperties.getConfig().getLifecycle().isEnabled()) {
 
 			RequestedSecret secret = getRequestedSecret(location.getSecretBackendMetadata());
 
@@ -169,14 +130,111 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 						bootstrap.get(SecretLeaseContainer.class), secret, location.getSecretBackendMetadata())));
 			}
 
-			return new ConfigData(Collections.singleton(createLeasingPropertySource(
-					bootstrap.get(SecretLeaseContainer.class), secret, location.getSecretBackendMetadata())));
+			return createConfigData(() -> createLeasingPropertySource(bootstrap.get(SecretLeaseContainer.class), secret,
+					location.getSecretBackendMetadata()));
 		}
+
+		return createConfigData(() -> {
+			VaultConfigTemplate configTemplate = bootstrap.get(VaultConfigTemplate.class);
+
+			return createVaultPropertySource(configTemplate, vaultProperties.isFailFast(),
+					location.getSecretBackendMetadata());
+		});
+	}
+
+	private void registerImperativeInfrastructure(ConfigurableBootstrapContext bootstrap,
+			VaultProperties vaultProperties) {
+
+		ImperativeInfrastructure infra = new ImperativeInfrastructure(bootstrap, vaultProperties);
+
+		infra.registerClientHttpRequestFactoryWrapper();
+		infra.registerRestTemplateBuilder();
+		infra.registerVaultRestTemplateFactory();
+
+		VaultProperties.AuthenticationMethod authentication = vaultProperties.getAuthentication();
+
+		if (authentication == VaultProperties.AuthenticationMethod.NONE) {
+			registerIfAbsent(bootstrap, "vaultTemplate", VaultTemplate.class,
+					ctx -> new VaultTemplate(ctx.get(RestTemplateBuilder.class)));
+		}
+		else {
+
+			infra.registerClientAuthentication();
+
+			if (!REGISTER_REACTIVE_INFRASTRUCTURE) {
+				infra.registerVaultSessionManager();
+			}
+
+			registerIfAbsent(bootstrap, "vaultTemplate", VaultTemplate.class,
+					ctx -> new VaultTemplate(bootstrap.get(RestTemplateBuilder.class),
+							bootstrap.get(SessionManager.class)));
+		}
+	}
+
+	private void registerReactiveInfrastructure(ConfigurableBootstrapContext bootstrap,
+			VaultProperties vaultProperties) {
+
+		ReactiveInfrastructure reactiveInfrastructure = new ReactiveInfrastructure(bootstrap, vaultProperties);
+		reactiveInfrastructure.registerClientHttpConnector();
+		reactiveInfrastructure.registerWebClientBuilder();
+		reactiveInfrastructure.registerWebClientFactory();
+
+		VaultProperties.AuthenticationMethod authentication = vaultProperties.getAuthentication();
+
+		if (authentication == VaultProperties.AuthenticationMethod.NONE) {
+			registerIfAbsent(bootstrap, "reactiveVaultTemplate", ReactiveVaultTemplate.class,
+					ctx -> new ReactiveVaultTemplate(ctx.get(WebClientBuilder.class)));
+		}
+		else {
+
+			reactiveInfrastructure.registerTokenSupplier();
+			reactiveInfrastructure.registerReactiveSessionManager();
+			reactiveInfrastructure.registerSessionManager();
+
+			registerIfAbsent(bootstrap, "reactiveVaultTemplate", ReactiveVaultTemplate.class,
+					ctx -> new ReactiveVaultTemplate(bootstrap.get(WebClientBuilder.class),
+							bootstrap.get(ReactiveSessionManager.class)));
+		}
+	}
+
+	static ConfigData createConfigData(Supplier<PropertySource<?>> propertySourceSupplier) {
+		return new ConfigData(Collections.singleton(propertySourceSupplier.get()));
+	}
+
+	private void registerVaultConfigTemplate(ConfigurableBootstrapContext bootstrap, VaultProperties vaultProperties) {
 		bootstrap.registerIfAbsent(VaultConfigTemplate.class,
 				ctx -> new VaultConfigTemplate(ctx.get(VaultTemplate.class), vaultProperties));
-		VaultConfigTemplate configTemplate = bootstrap.get(VaultConfigTemplate.class);
-		return new ConfigData(Collections.singletonList(createVaultPropertySource(configTemplate,
-				vaultProperties.isFailFast(), location.getSecretBackendMetadata())));
+	}
+
+	private void registerVaultTaskScheduler(ConfigurableBootstrapContext bootstrap) {
+		registerIfAbsent(bootstrap, "vaultTaskScheduler", TaskSchedulerWrapper.class, () -> {
+
+			ThreadPoolTaskScheduler scheduler = VaultConfiguration.createScheduler();
+
+			scheduler.afterPropertiesSet();
+
+			// avoid double-initialization
+			return new TaskSchedulerWrapper(scheduler, false);
+		}, ConfigurableApplicationContext::registerShutdownHook);
+	}
+
+	private void registerSecretLeaseContainer(ConfigurableBootstrapContext bootstrap,
+			VaultConfiguration vaultConfiguration) {
+		registerIfAbsent(bootstrap, "secretLeaseContainer", SecretLeaseContainer.class, ctx -> {
+
+			SecretLeaseContainer container = vaultConfiguration.createSecretLeaseContainer(ctx.get(VaultTemplate.class),
+					() -> ctx.get(TaskSchedulerWrapper.class).getTaskScheduler());
+
+			try {
+				container.afterPropertiesSet();
+			}
+			catch (Exception e) {
+				ReflectionUtils.rethrowRuntimeException(e);
+			}
+			container.start();
+
+			return container;
+		}, ConfigurableApplicationContext::registerShutdownHook);
 	}
 
 	private PropertySource<?> createVaultPropertySource(VaultConfigOperations configOperations, boolean failFast,
@@ -250,73 +308,203 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 		return RequestedSecret.renewable(accessor.getPath());
 	}
 
-	static void customizeContainer(VaultProperties.ConfigLifecycle lifecycle, SecretLeaseContainer container) {
-
-		if (lifecycle.isEnabled()) {
-
-			if (lifecycle.getMinRenewal() != null) {
-				container.setMinRenewal(lifecycle.getMinRenewal());
-			}
-
-			if (lifecycle.getExpiryThreshold() != null) {
-				container.setExpiryThreshold(lifecycle.getExpiryThreshold());
-			}
-
-			if (lifecycle.getLeaseEndpoints() != null) {
-				container.setLeaseEndpoints(lifecycle.getLeaseEndpoints());
-			}
-		}
+	static <T> void registerIfAbsent(ConfigurableBootstrapContext bootstrap, String beanName, Class<T> instanceType,
+			Supplier<T> instanceSupplier) {
+		registerIfAbsent(bootstrap, beanName, instanceType, ctx -> instanceSupplier.get(), ctx -> {
+		});
 	}
 
-	static class ImperativeConfiguration {
+	static <T> void registerIfAbsent(ConfigurableBootstrapContext bootstrap, String beanName, Class<T> instanceType,
+			Supplier<T> instanceSupplier, Consumer<ConfigurableApplicationContext> contextCustomizer) {
+		registerIfAbsent(bootstrap, beanName, instanceType, ctx -> instanceSupplier.get(), contextCustomizer);
+	}
+
+	static <T> void registerIfAbsent(ConfigurableBootstrapContext bootstrap, String beanName, Class<T> instanceType,
+			Function<BootstrapContext, T> instanceSupplier) {
+		registerIfAbsent(bootstrap, beanName, instanceType, instanceSupplier, ctx -> {
+		});
+	}
+
+	static <T> void registerIfAbsent(ConfigurableBootstrapContext bootstrap, String beanName, Class<T> instanceType,
+			Function<BootstrapContext, T> instanceSupplier,
+			Consumer<ConfigurableApplicationContext> contextCustomizer) {
+
+		bootstrap.registerIfAbsent(instanceType, instanceSupplier::apply);
+
+		bootstrap.addCloseListener(event -> {
+
+			GenericApplicationContext gac = (GenericApplicationContext) event.getApplicationContext();
+
+			contextCustomizer.accept(gac);
+			T instance = event.getBootstrapContext().get(instanceType);
+
+			gac.registerBean(beanName, instanceType, () -> instance);
+		});
+	}
+
+	/**
+	 * Support class to register imperative infrastructure bootstrap instances and beans.
+	 *
+	 * Mirrors {@link VaultAutoConfiguration}.
+	 */
+	static class ImperativeInfrastructure {
+
+		private final ConfigurableBootstrapContext bootstrap;
 
 		private final VaultProperties vaultProperties;
 
+		private final VaultConfiguration configuration;
+
 		private final VaultEndpointProvider endpointProvider;
 
-		ImperativeConfiguration(VaultProperties vaultProperties) {
+		ImperativeInfrastructure(ConfigurableBootstrapContext bootstrap, VaultProperties vaultProperties) {
+			this.bootstrap = bootstrap;
 			this.vaultProperties = vaultProperties;
-			this.endpointProvider = SimpleVaultEndpointProvider
-					.of(VaultConfigurationUtil.createVaultEndpoint(vaultProperties));
+			this.configuration = new VaultConfiguration(vaultProperties);
+			this.endpointProvider = SimpleVaultEndpointProvider.of(this.configuration.createVaultEndpoint());
 		}
 
-		public RestTemplateBuilder createRestTemplateBuilder(ClientHttpRequestFactory requestFactory) {
+		void registerClientHttpRequestFactoryWrapper() {
+			registerIfAbsent(this.bootstrap, "clientHttpRequestFactoryWrapper", ClientFactoryWrapper.class, () -> {
 
-			RestTemplateBuilder builder = RestTemplateBuilder.builder().requestFactory(requestFactory)
-					.endpointProvider(this.endpointProvider);
+				ClientHttpRequestFactory factory = this.configuration.createClientHttpRequestFactory();
 
-			if (StringUtils.hasText(this.vaultProperties.getNamespace())) {
-				builder.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, this.vaultProperties.getNamespace());
-			}
+				// early initialization
+				try {
+					new ClientFactoryWrapper(factory).afterPropertiesSet();
+				}
+				catch (Exception e) {
+					ReflectionUtils.rethrowRuntimeException(e);
+				}
 
-			return builder;
+				return new NonInitializingClientFactoryWrapper(factory);
+			});
+		}
+
+		void registerRestTemplateBuilder() {
+			// not a bean
+			this.bootstrap.registerIfAbsent(RestTemplateBuilder.class,
+					ctx -> this.configuration.createRestTemplateBuilder(
+							ctx.get(ClientFactoryWrapper.class).getClientHttpRequestFactory(), this.endpointProvider,
+							Collections.emptyList(), Collections.emptyList()));
+		}
+
+		void registerVaultRestTemplateFactory() {
+			registerIfAbsent(this.bootstrap, "vaultRestTemplateFactory", RestTemplateFactory.class,
+					ctx -> new DefaultRestTemplateFactory(
+							ctx.get(ClientFactoryWrapper.class).getClientHttpRequestFactory(),
+							requestFactory -> this.configuration.createRestTemplateBuilder(requestFactory,
+									this.endpointProvider, Collections.emptyList(), Collections.emptyList())));
+		}
+
+		void registerClientAuthentication() {
+			registerIfAbsent(this.bootstrap, "clientAuthentication", ClientAuthentication.class, ctx -> {
+
+				ClientHttpRequestFactory factory = this.bootstrap.get(ClientFactoryWrapper.class)
+						.getClientHttpRequestFactory();
+
+				RestTemplate externalRestTemplate = new RestTemplate(factory);
+
+				ClientAuthenticationFactory authenticationFactory = new ClientAuthenticationFactory(
+						this.vaultProperties, this.bootstrap.get(RestTemplateFactory.class).create(),
+						externalRestTemplate);
+				return authenticationFactory.createClientAuthentication();
+			});
+		}
+
+		void registerVaultSessionManager() {
+			registerIfAbsent(this.bootstrap, "vaultSessionManager", SessionManager.class,
+					ctx -> this.configuration.createSessionManager(ctx.get(ClientAuthentication.class),
+							() -> ctx.get(TaskSchedulerWrapper.class).getTaskScheduler(),
+							ctx.get(RestTemplateFactory.class)));
 		}
 
 	}
 
-	// TODO
-	static class ReactiveConfiguration {
+	/**
+	 * Support class to register reactive infrastructure bootstrap instances and beans.
+	 * Mirrors {@link VaultReactiveAutoConfiguration}.
+	 */
+	static class ReactiveInfrastructure {
 
-		private final VaultProperties vaultProperties;
+		private final ConfigurableBootstrapContext bootstrap;
+
+		private final VaultReactiveConfiguration configuration;
 
 		private final VaultEndpointProvider endpointProvider;
 
-		ReactiveConfiguration(VaultProperties vaultProperties) {
-			this.vaultProperties = vaultProperties;
+		ReactiveInfrastructure(ConfigurableBootstrapContext bootstrap, VaultProperties vaultProperties) {
+			this.bootstrap = bootstrap;
+			this.configuration = new VaultReactiveConfiguration(vaultProperties);
 			this.endpointProvider = SimpleVaultEndpointProvider
-					.of(VaultConfigurationUtil.createVaultEndpoint(vaultProperties));
+					.of(new VaultConfiguration(vaultProperties).createVaultEndpoint());
 		}
 
-		public WebClientBuilder createRestTemplateBuilder(ClientHttpConnector connector) {
+		void registerClientHttpConnector() {
+			// not a bean
+			this.bootstrap.registerIfAbsent(ClientHttpConnector.class,
+					ctx -> this.configuration.createClientHttpConnector());
+		}
 
-			WebClientBuilder builder = WebClientBuilder.builder().httpConnector(connector)
-					.endpointProvider(this.endpointProvider);
+		public void registerWebClientBuilder() {
+			// not a bean
+			this.bootstrap.registerIfAbsent(WebClientBuilder.class,
+					ctx -> this.configuration.createWebClientBuilder(ctx.get(ClientHttpConnector.class),
+							this.endpointProvider, Collections.emptyList()));
+		}
 
-			if (StringUtils.hasText(this.vaultProperties.getNamespace())) {
-				builder.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, this.vaultProperties.getNamespace());
-			}
+		void registerWebClientFactory() {
+			registerIfAbsent(this.bootstrap, "vaultWebClientFactory", WebClientFactory.class,
+					ctx -> new DefaultWebClientFactory(ctx.get(ClientHttpConnector.class),
+							connector -> this.configuration.createWebClientBuilder(connector, this.endpointProvider,
+									Collections.emptyList())));
+		}
 
-			return builder;
+		void registerTokenSupplier() {
+
+			registerIfAbsent(this.bootstrap, "vaultTokenSupplier", VaultTokenSupplier.class,
+					ctx -> this.configuration.createVaultTokenSupplier(ctx.get(WebClientFactory.class), () -> {
+						if (this.bootstrap.isRegistered(AuthenticationStepsFactory.class)) {
+							return this.bootstrap.get(AuthenticationStepsFactory.class);
+						}
+
+						return null;
+					}, () -> {
+						if (this.bootstrap.isRegistered(ClientAuthentication.class)) {
+							return this.bootstrap.get(ClientAuthentication.class);
+						}
+
+						return null;
+					}));
+		}
+
+		void registerReactiveSessionManager() {
+
+			registerIfAbsent(this.bootstrap, "reactiveVaultSessionManager", ReactiveSessionManager.class,
+					ctx -> this.configuration.createReactiveSessionManager(ctx.get(VaultTokenSupplier.class),
+							() -> ctx.get(TaskSchedulerWrapper.class).getTaskScheduler(),
+							ctx.get(WebClientFactory.class)));
+		}
+
+		void registerSessionManager() {
+			registerIfAbsent(this.bootstrap, "vaultSessionManager", SessionManager.class,
+					ctx -> this.configuration.createSessionManager(ctx.get(ReactiveSessionManager.class)));
+		}
+
+	}
+
+	/**
+	 * Wrapper for {@link ClientHttpRequestFactory} that suppresses
+	 * {@link #afterPropertiesSet()} to avoid double-initialization.
+	 */
+	private static class NonInitializingClientFactoryWrapper extends ClientFactoryWrapper {
+
+		NonInitializingClientFactoryWrapper(ClientHttpRequestFactory clientHttpRequestFactory) {
+			super(clientHttpRequestFactory);
+		}
+
+		@Override
+		public void afterPropertiesSet() {
 		}
 
 	}
