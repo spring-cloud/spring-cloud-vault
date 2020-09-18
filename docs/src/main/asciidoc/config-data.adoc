@@ -1,0 +1,62 @@
+[[vault.configdata]]
+== ConfigData API
+
+Spring Boot provides since version 2.4 a ConfigData API that allows the declaration of configuration sources and importing these as property sources.
+
+Spring Cloud Vault uses as of version 3.0 the ConfigData API to mount Vault's secret backends as property sources.
+In previous versions, the Bootstrap context was used.
+The ConfigData API is much more flexible as it allows specifying which configuration systems to import and in which order.
+
+NOTE: You can enable the deprecated bootstrap context either by setting the configuration property `spring.cloud.bootstrap.enabled=true` or by including the dependency `org.springframework.cloud:spring-cloud-starter-bootstrap`.
+
+[[vault.configdata.locations]]
+=== ConfigData Locations
+
+You can mount Vault configuration through one or more `PropertySource` that are materialized from Vault.
+Spring Cloud Vault supports two config locations:
+
+* `vault://` (default location)
+* `vault:///<context-path>` (contextual location)
+
+Using the default location mounts property sources for all enabled <<vault.config.backends>>.
+Without further configuration, Spring Cloud Vault mounts the key-value backend at `/secret/${spring.application.name}`.
+Each activated profile adds another context path following the form `/secret/${spring.application.name}/${profile}`.
+Adding further modules to the classpath, such as `spring-cloud-config-databases`, provides additional secret backend configuration options which get mounted as property sources if enabled.
+
+If you want to control which context paths are mounted from Vault as `PropertySource`, you can either use a contextual location (`vault:///my/context/path`) or configure a <<vault.config.backends.configurer,`VaultConfigurer`>>.
+
+Contextual locations are specified and mounted individually.
+Spring Cloud Vault mounts each location as a unique `PropertySource`.
+You can mix the default locations with contextual locations (or other config systems) to control the order of property sources.
+This approach is useful in particular if you want to disable the default key-value path computation and mount each key-value backend yourself instead.
+
+.application.yml
+====
+[source,yaml]
+----
+spring.config.import: vault://first/context/path, vault://other/path, vault://
+----
+====
+
+[[vault.configdata.customization]]
+=== Infrastructure Customization
+
+Spring Cloud Vault requires infrastructure classes to interact with Vault. When not using the ConfigData API (meaning that you haven't specified `spring.config.import=vault://` or a contextual Vault path), Spring Cloud Vault defines its beans through `VaultAutoConfiguration` and `VaultReactiveAutoConfiguration`.
+Spring Boot bootstraps the application before a Spring Context is available. Therefore `VaultConfigDataLoader` registers beans itself to propagate these later on into the application context.
+
+You can customize the infrastructure used by Spring Cloud Vault by registering custom instances using the `Bootstrapper` API:
+
+====
+[source,java]
+----
+InstanceSupplier<RestTemplateBuilder> builderSupplier = ctx -> RestTemplateBuilder
+      .builder()
+      .requestFactory(ctx.get(ClientFactoryWrapper.class).getClientHttpRequestFactory())
+      .defaultHeader("X-Vault-Namespace", "my-namespace");
+
+SpringApplication application = new SpringApplication(MyApplication.class);
+application.addBootstrapper(registry -> registry.register(RestTemplateBuilder.class, builderSupplier));
+----
+====
+
+See also <<vault.config.backends.configurer>> and the source of `VaultConfigDataLoader` for customization hooks.
