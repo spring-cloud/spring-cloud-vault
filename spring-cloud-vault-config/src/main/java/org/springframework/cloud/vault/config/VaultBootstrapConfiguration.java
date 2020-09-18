@@ -19,9 +19,9 @@ package org.springframework.cloud.vault.config;
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.bootstrap.BootstrapConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -30,21 +30,23 @@ import org.springframework.vault.client.RestTemplateRequestCustomizer;
 import org.springframework.vault.client.VaultEndpointProvider;
 
 /**
- * {@link EnableAutoConfiguration Auto-configuration} for Spring Vault support.
+ * {@link BootstrapConfiguration Boostrap configuration} for Spring Vault support.
  *
  * @author Spencer Gibb
  * @author Mark Paluch
+ * @deprecated since 3.0, use {@link VaultReactiveAutoConfiguration} through
+ * {@code @EnableAutoConfiguration}.
  */
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(VaultProperties.class)
 @Order(Ordered.LOWEST_PRECEDENCE - 5)
+@Deprecated
 public class VaultBootstrapConfiguration extends VaultAutoConfiguration {
 
 	public VaultBootstrapConfiguration(ConfigurableApplicationContext applicationContext,
 			VaultProperties vaultProperties, ObjectProvider<VaultEndpointProvider> endpointProvider,
 			ObjectProvider<List<RestTemplateCustomizer>> customizers,
 			ObjectProvider<List<RestTemplateRequestCustomizer<?>>> requestCustomizers) {
-
 		super(applicationContext, vaultProperties, endpointProvider, customizers, requestCustomizers);
 	}
 

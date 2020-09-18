@@ -30,6 +30,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -38,19 +39,15 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
-import org.springframework.vault.authentication.LifecycleAwareSessionManagerSupport;
 import org.springframework.vault.authentication.SessionManager;
-import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.client.RestTemplateBuilder;
 import org.springframework.vault.client.RestTemplateCustomizer;
 import org.springframework.vault.client.RestTemplateFactory;
 import org.springframework.vault.client.RestTemplateRequestCustomizer;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpointProvider;
-import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
@@ -63,38 +60,25 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Spencer Gibb
  * @author Mark Paluch
+ * @since 3.0
  */
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(VaultProperties.class)
 @Order(Ordered.LOWEST_PRECEDENCE - 5)
-public class VaultAutoConfiguration implements InitializingBean {
+public class VaultAutoConfiguration {
 
 	private final ConfigurableApplicationContext applicationContext;
 
 	private final VaultProperties vaultProperties;
+
+	private final VaultConfiguration configuration;
 
 	private final VaultEndpointProvider endpointProvider;
 
 	private final List<RestTemplateCustomizer> customizers;
 
 	private final List<RestTemplateRequestCustomizer<?>> requestCustomizers;
-
-	private ClientFactoryWrapper clientFactoryWrapper;
-
-	/**
-	 * Used for Vault communication.
-	 */
-	private RestTemplateBuilder restTemplateBuilder;
-
-	/**
-	 * Used for Vault communication.
-	 */
-	private RestTemplateFactory restTemplateFactory;
-
-	/**
-	 * Used for external (AWS, GCP) communication.
-	 */
-	private RestTemplate externalRestOperations;
 
 	public VaultAutoConfiguration(ConfigurableApplicationContext applicationContext, VaultProperties vaultProperties,
 			ObjectProvider<VaultEndpointProvider> endpointProvider,
@@ -103,11 +87,12 @@ public class VaultAutoConfiguration implements InitializingBean {
 
 		this.applicationContext = applicationContext;
 		this.vaultProperties = vaultProperties;
+		this.configuration = new VaultConfiguration(vaultProperties);
 
 		VaultEndpointProvider provider = endpointProvider.getIfAvailable();
 
 		if (provider == null) {
-			provider = SimpleVaultEndpointProvider.of(VaultConfigurationUtil.createVaultEndpoint(vaultProperties));
+			provider = SimpleVaultEndpointProvider.of(this.configuration.createVaultEndpoint());
 		}
 
 		this.endpointProvider = provider;
@@ -118,41 +103,18 @@ public class VaultAutoConfiguration implements InitializingBean {
 		AnnotationAwareOrderComparator.sort(this.requestCustomizers);
 	}
 
-	@Override
-	public void afterPropertiesSet() {
-
-		this.clientFactoryWrapper = createClientFactoryWrapper();
-
-		this.restTemplateBuilder = restTemplateBuilder(this.clientFactoryWrapper.getClientHttpRequestFactory());
-
-		this.externalRestOperations = new RestTemplate(this.clientFactoryWrapper.getClientHttpRequestFactory());
-
-		this.restTemplateFactory = new DefaultRestTemplateFactory(
-				this.clientFactoryWrapper.getClientHttpRequestFactory(), this::restTemplateBuilder);
-
-		this.customizers.forEach(customizer -> customizer.customize(this.externalRestOperations));
-	}
-
 	/**
 	 * Create a {@link RestTemplateBuilder} initialized with {@link VaultEndpointProvider}
 	 * and {@link ClientHttpRequestFactory}. May be overridden by subclasses.
+	 * @param requestFactory the {@link ClientHttpRequestFactory}.
 	 * @return the {@link RestTemplateBuilder}.
 	 * @since 2.3
 	 * @see #clientHttpRequestFactoryWrapper()
 	 */
 	protected RestTemplateBuilder restTemplateBuilder(ClientHttpRequestFactory requestFactory) {
 
-		RestTemplateBuilder builder = RestTemplateBuilder.builder().requestFactory(requestFactory)
-				.endpointProvider(this.endpointProvider);
-
-		this.customizers.forEach(builder::customizers);
-		this.requestCustomizers.forEach(builder::requestCustomizers);
-
-		if (StringUtils.hasText(this.vaultProperties.getNamespace())) {
-			builder.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, this.vaultProperties.getNamespace());
-		}
-
-		return builder;
+		return this.configuration.createRestTemplateBuilder(requestFactory, this.endpointProvider, this.customizers,
+				this.requestCustomizers);
 	}
 
 	/**
@@ -167,37 +129,43 @@ public class VaultAutoConfiguration implements InitializingBean {
 	@Bean
 	@ConditionalOnMissingBean
 	public ClientFactoryWrapper clientHttpRequestFactoryWrapper() {
-		return this.clientFactoryWrapper;
+		return new ClientFactoryWrapper(this.configuration.createClientHttpRequestFactory());
 	}
 
 	/**
 	 * Create a {@link RestTemplateFactory} bean that is used to produce
 	 * {@link RestTemplate}.
+	 * @param clientFactoryWrapper the {@link ClientFactoryWrapper}.
 	 * @return the {@link RestTemplateFactory}.
 	 * @see #clientHttpRequestFactoryWrapper()
 	 * @since 3.0
 	 */
 	@Bean
-	public RestTemplateFactory vaultRestTemplateFactory() {
-		return this.restTemplateFactory;
+	@ConditionalOnMissingBean
+	public RestTemplateFactory vaultRestTemplateFactory(ClientFactoryWrapper clientFactoryWrapper) {
+		return new DefaultRestTemplateFactory(clientFactoryWrapper.getClientHttpRequestFactory(),
+				this::restTemplateBuilder);
 	}
 
 	/**
 	 * Creates a {@link VaultTemplate}.
+	 * @param clientFactoryWrapper the {@link ClientFactoryWrapper}.
 	 * @return the {@link VaultTemplate} bean.
 	 * @see VaultAutoConfiguration#clientHttpRequestFactoryWrapper()
 	 */
 	@Bean
 	@ConditionalOnMissingBean(VaultOperations.class)
-	public VaultTemplate vaultTemplate() {
+	public VaultTemplate vaultTemplate(ClientFactoryWrapper clientFactoryWrapper) {
 
 		VaultProperties.AuthenticationMethod authentication = this.vaultProperties.getAuthentication();
+		RestTemplateBuilder restTemplateBuilder = restTemplateBuilder(
+				clientFactoryWrapper.getClientHttpRequestFactory());
 
 		if (authentication == VaultProperties.AuthenticationMethod.NONE) {
-			return new VaultTemplate(this.restTemplateBuilder);
+			return new VaultTemplate(restTemplateBuilder);
 		}
 
-		return new VaultTemplate(this.restTemplateBuilder, this.applicationContext.getBean(SessionManager.class));
+		return new VaultTemplate(restTemplateBuilder, this.applicationContext.getBean(SessionManager.class));
 	}
 
 	/**
@@ -211,10 +179,7 @@ public class VaultAutoConfiguration implements InitializingBean {
 	@ConditionalOnMissingBean(TaskSchedulerWrapper.class)
 	public TaskSchedulerWrapper vaultTaskScheduler() {
 
-		ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-		threadPoolTaskScheduler.setPoolSize(2);
-		threadPoolTaskScheduler.setDaemon(true);
-		threadPoolTaskScheduler.setThreadNamePrefix("Spring-Cloud-Vault-");
+		ThreadPoolTaskScheduler threadPoolTaskScheduler = VaultConfiguration.createScheduler();
 
 		// This is to destroy bootstrap resources
 		// otherwise, the bootstrap context is not shut down cleanly
@@ -228,6 +193,7 @@ public class VaultAutoConfiguration implements InitializingBean {
 	 * @param clientAuthentication the {@link ClientAuthentication}.
 	 * @param asyncTaskExecutorFactory the {@link ObjectFactory} for
 	 * {@link TaskSchedulerWrapper}.
+	 * @param restTemplateFactory the {@link RestTemplateFactory}.
 	 * @see SessionManager
 	 * @see LifecycleAwareSessionManager
 	 */
@@ -235,41 +201,35 @@ public class VaultAutoConfiguration implements InitializingBean {
 	@ConditionalOnMissingBean
 	@ConditionalOnAuthentication
 	public SessionManager vaultSessionManager(ClientAuthentication clientAuthentication,
-			ObjectFactory<TaskSchedulerWrapper> asyncTaskExecutorFactory) {
+			ObjectFactory<TaskSchedulerWrapper> asyncTaskExecutorFactory, RestTemplateFactory restTemplateFactory) {
 
-		VaultProperties.SessionLifecycle lifecycle = this.vaultProperties.getSession().getLifecycle();
-
-		if (lifecycle.isEnabled()) {
-			RestTemplate restTemplate = this.restTemplateFactory.create();
-			LifecycleAwareSessionManagerSupport.RefreshTrigger trigger = new LifecycleAwareSessionManagerSupport.FixedTimeoutRefreshTrigger(
-					lifecycle.getRefreshBeforeExpiry(), lifecycle.getExpiryThreshold());
-			return new LifecycleAwareSessionManager(clientAuthentication,
-					asyncTaskExecutorFactory.getObject().getTaskScheduler(), restTemplate, trigger);
-		}
-
-		return new SimpleSessionManager(clientAuthentication);
+		return this.configuration.createSessionManager(clientAuthentication,
+				() -> asyncTaskExecutorFactory.getObject().getTaskScheduler(), restTemplateFactory);
 	}
 
 	/**
 	 * @return the {@link ClientAuthentication} to obtain a
 	 * {@link org.springframework.vault.support.VaultToken}.
+	 * @param clientFactoryWrapper the {@link ClientFactoryWrapper}.
+	 * @param restTemplateFactory the {@link RestTemplateFactory}.
 	 * @see SessionManager
 	 * @see LifecycleAwareSessionManager
 	 */
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnAuthentication
-	public ClientAuthentication clientAuthentication() {
+	public ClientAuthentication clientAuthentication(ClientFactoryWrapper clientFactoryWrapper,
+			RestTemplateFactory restTemplateFactory) {
 
-		RestTemplate restTemplate = this.restTemplateFactory.create();
+		RestTemplate externalRestOperations = new RestTemplate(clientFactoryWrapper.getClientHttpRequestFactory());
+
+		this.customizers.forEach(customizer -> customizer.customize(externalRestOperations));
+
+		RestTemplate restTemplate = restTemplateFactory.create();
 		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(this.vaultProperties, restTemplate,
-				this.externalRestOperations);
+				externalRestOperations);
 
 		return factory.createClientAuthentication();
-	}
-
-	protected ClientFactoryWrapper createClientFactoryWrapper() {
-		return new ClientFactoryWrapper(VaultConfigurationUtil.createClientHttpRequestFactory(this.vaultProperties));
 	}
 
 	/**
@@ -279,8 +239,15 @@ public class VaultAutoConfiguration implements InitializingBean {
 
 		private final ThreadPoolTaskScheduler taskScheduler;
 
+		private final boolean acceptAfterPropertiesSet;
+
 		public TaskSchedulerWrapper(ThreadPoolTaskScheduler taskScheduler) {
+			this(taskScheduler, true);
+		}
+
+		TaskSchedulerWrapper(ThreadPoolTaskScheduler taskScheduler, boolean acceptAfterPropertiesSet) {
 			this.taskScheduler = taskScheduler;
+			this.acceptAfterPropertiesSet = acceptAfterPropertiesSet;
 		}
 
 		ThreadPoolTaskScheduler getTaskScheduler() {
@@ -288,13 +255,16 @@ public class VaultAutoConfiguration implements InitializingBean {
 		}
 
 		@Override
-		public void destroy() throws Exception {
+		public void destroy() {
 			this.taskScheduler.destroy();
 		}
 
 		@Override
-		public void afterPropertiesSet() throws Exception {
-			this.taskScheduler.afterPropertiesSet();
+		public void afterPropertiesSet() {
+
+			if (this.acceptAfterPropertiesSet) {
+				this.taskScheduler.afterPropertiesSet();
+			}
 		}
 
 	}
