@@ -80,8 +80,7 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 		SecretLeaseContainer secretLeaseContainer(VaultProperties properties) {
 
 			SecretLeaseContainer mock = mock(SecretLeaseContainer.class);
-
-			VaultBootstrapPropertySourceConfiguration.customizeContainer(properties.getConfig().getLifecycle(), mock);
+			VaultConfiguration.customizeContainer(properties.getConfig().getLifecycle(), mock);
 
 			return mock;
 		}

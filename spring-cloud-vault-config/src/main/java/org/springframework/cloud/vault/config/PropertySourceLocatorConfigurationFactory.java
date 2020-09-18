@@ -47,7 +47,7 @@ class PropertySourceLocatorConfigurationFactory {
 	 * @return the {@link PropertySourceLocatorConfiguration}.
 	 */
 	PropertySourceLocatorConfiguration getPropertySourceConfiguration(
-			List<VaultKeyValueBackendPropertiesSupport> keyValueBackends) {
+			VaultKeyValueBackendPropertiesSupport... keyValueBackends) {
 
 		DefaultSecretBackendConfigurer secretBackendConfigurer = new DefaultSecretBackendConfigurer();
 

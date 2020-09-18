@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.vault.config;
 
+import org.springframework.cloud.bootstrap.BootstrapConfiguration;
+import org.springframework.context.ApplicationContext;
+
 /**
  * Strategy interface to create {@link SecretBackendMetadata} from
  * {@link VaultSecretBackendDescriptor} properties. Mainly for internal use within the
@@ -31,7 +34,10 @@ package org.springframework.cloud.vault.config;
  *
  * <p>
  * Typically implemented by secret backend providers that implement access to a particular
- * backend using read operations.
+ * backend using read operations. Objects implementing this interface can be discovered
+ * either from the {@link ApplicationContext} when using {@link BootstrapConfiguration}
+ * (deprecated since 3.0) or {@code spring.factories} when using
+ * {@link ConfigDataLocationResolver}.
  *
  * @param <T> descriptor type.
  * @author Mark Paluch
