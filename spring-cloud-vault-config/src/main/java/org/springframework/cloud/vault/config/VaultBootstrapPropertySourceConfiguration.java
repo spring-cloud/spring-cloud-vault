@@ -17,7 +17,6 @@
 package org.springframework.cloud.vault.config;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectFactory;
@@ -45,11 +44,15 @@ import static org.springframework.cloud.vault.config.VaultAutoConfiguration.Task
  * @author Grenville Wilson
  * @author Mårten Svantesson
  * @since 1.1
+ * @deprecated since 3.0, use {@code spring.config.import=vault://} instead.
  */
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(VaultKeyValueBackendProperties.class)
 @Order(Ordered.LOWEST_PRECEDENCE - 10)
+@Deprecated
 public class VaultBootstrapPropertySourceConfiguration implements InitializingBean {
+
+	private final VaultConfiguration configuration;
 
 	private final ConfigurableApplicationContext applicationContext;
 
@@ -57,7 +60,9 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 
 	private Collection<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> factories;
 
-	public VaultBootstrapPropertySourceConfiguration(ConfigurableApplicationContext applicationContext) {
+	public VaultBootstrapPropertySourceConfiguration(VaultProperties vaultProperties,
+			ConfigurableApplicationContext applicationContext) {
+		this.configuration = new VaultConfiguration(vaultProperties);
 		this.applicationContext = applicationContext;
 	}
 
@@ -84,8 +89,7 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 		PropertySourceLocatorConfigurationFactory factory = new PropertySourceLocatorConfigurationFactory(
 				vaultConfigurers, this.vaultSecretBackendDescriptors, this.factories);
 
-		PropertySourceLocatorConfiguration configuration = factory
-				.getPropertySourceConfiguration(Collections.singletonList(kvBackendProperties));
+		PropertySourceLocatorConfiguration configuration = factory.getPropertySourceConfiguration(kvBackendProperties);
 
 		VaultProperties.ConfigLifecycle lifecycle = vaultProperties.getConfig().getLifecycle();
 
@@ -106,7 +110,6 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	}
 
 	/**
-	 * @param vaultProperties the {@link VaultProperties}.
 	 * @param vaultOperations the {@link VaultOperations}.
 	 * @param taskSchedulerWrapper the {@link TaskSchedulerWrapper}.
 	 * @return the {@link SessionManager} for Vault session management.
@@ -116,35 +119,9 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	@Bean
 	@Lazy
 	@ConditionalOnMissingBean
-	public SecretLeaseContainer secretLeaseContainer(VaultProperties vaultProperties, VaultOperations vaultOperations,
+	public SecretLeaseContainer secretLeaseContainer(VaultOperations vaultOperations,
 			TaskSchedulerWrapper taskSchedulerWrapper) {
-
-		VaultProperties.ConfigLifecycle lifecycle = vaultProperties.getConfig().getLifecycle();
-
-		SecretLeaseContainer container = new SecretLeaseContainer(vaultOperations,
-				taskSchedulerWrapper.getTaskScheduler());
-
-		customizeContainer(lifecycle, container);
-
-		return container;
-	}
-
-	static void customizeContainer(VaultProperties.ConfigLifecycle lifecycle, SecretLeaseContainer container) {
-
-		if (lifecycle.isEnabled()) {
-
-			if (lifecycle.getMinRenewal() != null) {
-				container.setMinRenewal(lifecycle.getMinRenewal());
-			}
-
-			if (lifecycle.getExpiryThreshold() != null) {
-				container.setExpiryThreshold(lifecycle.getExpiryThreshold());
-			}
-
-			if (lifecycle.getLeaseEndpoints() != null) {
-				container.setLeaseEndpoints(lifecycle.getLeaseEndpoints());
-			}
-		}
+		return this.configuration.createSecretLeaseContainer(vaultOperations, taskSchedulerWrapper::getTaskScheduler);
 	}
 
 }

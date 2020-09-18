@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.boot.BootstrapRegistry;
+import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.context.config.ConfigDataLocationNotFoundException;
 import org.springframework.boot.context.config.ConfigDataLocationResolver;
 import org.springframework.boot.context.config.ConfigDataLocationResolverContext;
@@ -37,8 +39,41 @@ import org.springframework.util.ReflectionUtils;
 /**
  * {@link ConfigDataLocationResolver} for Vault resolving {@link VaultConfigLocation}
  * using the {@code vault:} prefix.
+ * <p>
+ * Resolution considers contextual locations as we as default locations. Contextual
+ * locations such as {@code vault:secret/my-application} are considered to be context
+ * paths for the Key-Value secrets backend. Using a default location {@code vault:}
+ * imports all enabled {@link VaultSecretBackendDescriptor secret backends } by creating
+ * {@link SecretBackendMetadata} from {@link SecretBackendMetadataFactory}. Note that both
+ * types,{@link VaultSecretBackendDescriptor} and {@link SecretBackendMetadataFactory} are
+ * resolved through {@link SpringFactoriesLoader spring.factories} to allow optional
+ * presence/absence on the class path.
+ * <p>
+ * Mixing paths
+ * ({@code spring.config.import=vault:,vault:secret/my-application,vault:secret/other-location})
+ * is possible as each config location creates an individual {@link VaultConfigLocation}.
+ * By enabling/disabling {@link VaultSecretBackendDescriptor#isEnabled() a
+ * VaultSecretBackendDescriptor}, you can control the amount of secret backends that are
+ * imported through the default location.
+ * <p>
+ * You can customize the default location capabilities by registering
+ * {@link VaultConfigurer} in the {@link BootstrapRegistry}. For example:
+ *
+ * <pre class="code">
+ * VaultConfigurer configurer = …;
+ * SpringApplication application = …;
+ *
+ * application.addBootstrapper(registy -> register(VaultConfigurer.class, context -> configurer));
+ * </pre>
+ * <p>
+ * Registers also {@link VaultProperties} in the {@link BootstrapRegistry} that is
+ * required later on by {@link VaultConfigDataLoader}.
  *
  * @author Mark Paluch
+ * @since 3.0
+ * @see VaultConfigurer
+ * @see BootstrapRegistry
+ * @see VaultConfigDataLoader
  */
 public class VaultConfigDataLocationResolver implements ConfigDataLocationResolver<VaultConfigLocation> {
 
@@ -61,78 +96,127 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 	public List<VaultConfigLocation> resolveProfileSpecific(ConfigDataLocationResolverContext context, String location,
 			boolean optional, Profiles profiles) throws ConfigDataLocationNotFoundException {
 
-		context.getBootstrapContext().registerIfAbsent(VaultProperties.class,
-				ignore -> context.getBinder().bindOrCreate(VaultProperties.PREFIX, VaultProperties.class));
+		if (!location.startsWith(VaultConfigLocation.VAULT_PREFIX)) {
+			return Collections.emptyList();
+		}
 
-		if (location.trim().equals(VaultConfigLocation.VAULT_PREFIX)) {
+		registerVaultProperties(context);
 
-			List<VaultSecretBackendDescriptor> descriptors = findDescriptors(context);
-			List<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> factories = (List) SpringFactoriesLoader
-					.loadFactories(SecretBackendMetadataFactory.class, getClass().getClassLoader());
-
-			PropertySourceLocatorConfigurationFactory factory = new PropertySourceLocatorConfigurationFactory(
-					Collections.emptyList(), descriptors, factories);
-
-			VaultKeyValueBackendProperties kvProperties = context.getBinder()
-					.bindOrCreate(VaultKeyValueBackendProperties.PREFIX, VaultKeyValueBackendProperties.class);
-
-			kvProperties.setApplicationName(getApplicationName(context.getBinder()));
-			kvProperties.setProfiles(profiles.getActive());
-
-			PropertySourceLocatorConfiguration configuration = factory
-					.getPropertySourceConfiguration(Collections.singletonList(kvProperties));
-
-			Collection<SecretBackendMetadata> secretBackends = configuration.getSecretBackends();
-			List<SecretBackendMetadata> sorted = new ArrayList<>(secretBackends);
-			AnnotationAwareOrderComparator.sort(sorted);
-
+		if (location.equals(VaultConfigLocation.VAULT_PREFIX)
+				|| location.equals(VaultConfigLocation.VAULT_PREFIX + "//")) {
+			List<SecretBackendMetadata> sorted = getSecretBackends(context, profiles);
 			return sorted.stream().map(it -> new VaultConfigLocation(it, optional)).collect(Collectors.toList());
 		}
 
 		String contextPath = location.substring(VaultConfigLocation.VAULT_PREFIX.length());
 
+		while (contextPath.startsWith("/")) {
+			contextPath = contextPath.substring(1);
+		}
+
 		return Collections.singletonList(new VaultConfigLocation(contextPath, optional));
 	}
 
-	private static String getApplicationName(Binder binder) {
+	private static void registerVaultProperties(ConfigDataLocationResolverContext context) {
 
-		return binder.bind("spring.cloud.vault.application-name", String.class)
-				.orElseGet(() -> binder.bind("spring.application-name", String.class).orElse(""));
+		context.getBootstrapContext().registerIfAbsent(VaultProperties.class, ignore -> {
+			return context.getBinder().bindOrCreate(VaultProperties.PREFIX, VaultProperties.class);
+		});
 	}
 
-	private List<VaultSecretBackendDescriptor> findDescriptors(ConfigDataLocationResolverContext context) {
+	private List<SecretBackendMetadata> getSecretBackends(ConfigDataLocationResolverContext context,
+			Profiles profiles) {
+
+		List<VaultSecretBackendDescriptor> descriptors = findDescriptors(context.getBinder());
+		List<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> factories = getSecretBackendMetadataFactories();
+
+		Collection<VaultConfigurer> vaultConfigurers = getVaultConfigurers(context.getBootstrapContext());
+		PropertySourceLocatorConfigurationFactory factory = new PropertySourceLocatorConfigurationFactory(
+				vaultConfigurers, descriptors, factories);
+
+		VaultKeyValueBackendProperties kvProperties = getKeyValueProperties(context, profiles);
+
+		PropertySourceLocatorConfiguration configuration = factory.getPropertySourceConfiguration(kvProperties);
+
+		Collection<SecretBackendMetadata> secretBackends = configuration.getSecretBackends();
+
+		List<SecretBackendMetadata> sorted = new ArrayList<>(secretBackends);
+		AnnotationAwareOrderComparator.sort(sorted);
+
+		return sorted;
+	}
+
+	private static Collection<VaultConfigurer> getVaultConfigurers(ConfigurableBootstrapContext bootstrapContext) {
+
+		Collection<VaultConfigurer> vaultConfigurers = new ArrayList<>(1);
+
+		if (bootstrapContext.isRegistered(VaultConfigurer.class)) {
+			vaultConfigurers.add(bootstrapContext.get(VaultConfigurer.class));
+		}
+
+		return vaultConfigurers;
+	}
+
+	private static VaultKeyValueBackendProperties getKeyValueProperties(ConfigDataLocationResolverContext context,
+			Profiles profiles) {
+
+		VaultKeyValueBackendProperties kvProperties = context.getBinder()
+				.bindOrCreate(VaultKeyValueBackendProperties.PREFIX, VaultKeyValueBackendProperties.class);
+
+		Binder binder = context.getBinder();
+
+		kvProperties.setApplicationName(binder.bind("spring.cloud.vault.application-name", String.class)
+				.orElseGet(() -> binder.bind("spring.application-name", String.class).orElse("")));
+		kvProperties.setProfiles(profiles.getActive());
+
+		return kvProperties;
+	}
+
+	private static List<VaultSecretBackendDescriptor> findDescriptors(Binder binder) {
 
 		List<String> descriptorClasses = SpringFactoriesLoader.loadFactoryNames(VaultSecretBackendDescriptor.class,
-				getClass().getClassLoader());
+				VaultConfigDataLocationResolver.class.getClassLoader());
 
 		List<VaultSecretBackendDescriptor> descriptors = new ArrayList<>(descriptorClasses.size());
 
-		try {
-			for (String className : descriptorClasses) {
+		for (String className : descriptorClasses) {
 
-				Class<VaultSecretBackendDescriptor> descriptorClass = (Class<VaultSecretBackendDescriptor>) ClassUtils
-						.forName(className, getClass().getClassLoader());
+			Class<VaultSecretBackendDescriptor> descriptorClass = loadClass(className);
 
-				MergedAnnotations annotations = MergedAnnotations.from(descriptorClass);
-				if (annotations.isPresent(ConfigurationProperties.class)) {
+			MergedAnnotations annotations = MergedAnnotations.from(descriptorClass);
+			if (annotations.isPresent(ConfigurationProperties.class)) {
 
-					String prefix = annotations.get(ConfigurationProperties.class).getString("prefix");
-					VaultSecretBackendDescriptor hydratedDescriptor = context.getBinder().bindOrCreate(prefix,
-							descriptorClass);
-					descriptors.add(hydratedDescriptor);
-				}
-				else {
-					throw new IllegalStateException(String.format(
-							"VaultSecretBackendDescriptor %s is not annotated with @ConfigurationProperties",
-							className));
-				}
+				String prefix = annotations.get(ConfigurationProperties.class).getString("prefix");
+				VaultSecretBackendDescriptor hydratedDescriptor = binder.bindOrCreate(prefix, descriptorClass);
+				descriptors.add(hydratedDescriptor);
 			}
-		}
-		catch (ReflectiveOperationException e) {
-			ReflectionUtils.rethrowRuntimeException(e);
+			else {
+				throw new IllegalStateException(String.format(
+						"VaultSecretBackendDescriptor %s is not annotated with @ConfigurationProperties", className));
+			}
 		}
 
 		return descriptors;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static List<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> getSecretBackendMetadataFactories() {
+		return (List) SpringFactoriesLoader.loadFactories(SecretBackendMetadataFactory.class,
+				VaultConfigDataLocationResolver.class.getClassLoader());
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Class<VaultSecretBackendDescriptor> loadClass(String className) {
+		try {
+			return (Class<VaultSecretBackendDescriptor>) ClassUtils.forName(className,
+					VaultConfigDataLocationResolver.class.getClassLoader());
+		}
+		catch (ReflectiveOperationException e) {
+			ReflectionUtils.rethrowRuntimeException(e);
+
+			// should never happen.
+			return null;
+		}
 	}
 
 }

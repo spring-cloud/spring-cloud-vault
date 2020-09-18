@@ -17,10 +17,16 @@
 package org.springframework.cloud.vault.config;
 
 import org.springframework.boot.context.config.ConfigDataLocation;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * Vault-specific implementation for a {@link ConfigDataLocation}. Consists of a
+ * {@link SecretBackendMetadata}.
+ *
  * @author Mark Paluch
+ * @since 3.0
+ * @see SecretBackendMetadata
  */
 public class VaultConfigLocation extends ConfigDataLocation {
 
@@ -34,11 +40,17 @@ public class VaultConfigLocation extends ConfigDataLocation {
 	private final boolean optional;
 
 	public VaultConfigLocation(String contextPath, boolean optional) {
+
+		Assert.hasText(contextPath, "Context path must not be empty");
+
 		this.secretBackendMetadata = KeyValueSecretBackendMetadata.create(contextPath);
 		this.optional = optional;
 	}
 
 	public VaultConfigLocation(SecretBackendMetadata secretBackendMetadata, boolean optional) {
+
+		Assert.notNull(secretBackendMetadata, "SecretBackendMetadata must not be null");
+
 		this.secretBackendMetadata = secretBackendMetadata;
 		this.optional = optional;
 	}
@@ -80,8 +92,7 @@ public class VaultConfigLocation extends ConfigDataLocation {
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(getClass().getSimpleName());
-		sb.append(" [name='").append(this.secretBackendMetadata.getName()).append('\'');
-		sb.append(", path='").append(this.secretBackendMetadata.getPath()).append('\'');
+		sb.append(" [path='").append(this.secretBackendMetadata.getPath()).append('\'');
 		sb.append(", optional=").append(this.optional);
 		sb.append(']');
 		return sb.toString();

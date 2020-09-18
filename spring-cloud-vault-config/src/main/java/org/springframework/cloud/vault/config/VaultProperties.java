@@ -22,6 +22,7 @@ import java.time.Duration;
 import javax.validation.constraints.NotEmpty;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
@@ -1043,6 +1044,7 @@ public class VaultProperties implements EnvironmentAware {
 
 		private ConfigLifecycle lifecycle = new ConfigLifecycle();
 
+		@DeprecatedConfigurationProperty(reason = "Only required for deprecated Bootstrap Context usage")
 		public int getOrder() {
 			return this.order;
 		}

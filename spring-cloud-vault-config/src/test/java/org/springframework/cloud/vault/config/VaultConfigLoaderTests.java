@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -54,8 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigLoaderTests.TestApplication.class,
 		properties = { "spring.cloud.vault.uri=https://localhost:8200",
-				"spring.cloud.vault.application-name=config-data", "spring.config.import=vault:",
-				"spring.cloud.bootstrap.enabled=false" })
+				"spring.cloud.vault.application-name=config-data", "spring.config.import=vault:" })
 public class VaultConfigLoaderTests {
 
 	@Value("${vault.value}")
@@ -96,11 +94,15 @@ public class VaultConfigLoaderTests {
 	}
 
 	@Test
-	@Ignore
 	public void shouldContainVaultBeans() {
 
 		assertThat(this.applicationContext.getBeanNamesForType(VaultTemplate.class)).isNotEmpty();
-		assertThat(this.applicationContext.getBeanNamesForType(LeasingVaultPropertySourceLocator.class)).isNotEmpty();
+	}
+
+	@Test
+	public void shouldNotRegisterPropertySourceLocator() {
+
+		assertThat(this.applicationContext.getBeanNamesForType(LeasingVaultPropertySourceLocator.class)).isEmpty();
 	}
 
 	@Test

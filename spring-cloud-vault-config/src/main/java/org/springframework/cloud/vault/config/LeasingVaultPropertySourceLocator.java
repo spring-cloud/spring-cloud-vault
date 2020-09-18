@@ -34,6 +34,7 @@ import org.springframework.vault.core.lease.event.LeaseErrorListener;
  * @author Mark Paluch
  * @see LeaseAwareVaultPropertySource
  */
+@Deprecated
 class LeasingVaultPropertySourceLocator extends VaultPropertySourceLocatorSupport implements PriorityOrdered {
 
 	private final SecretLeaseContainer secretLeaseContainer;
