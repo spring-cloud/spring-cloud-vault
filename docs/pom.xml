@@ -21,8 +21,33 @@
 	<properties>
 		<docs.main>spring-cloud-vault</docs.main>
 		<main.basedir>${basedir}/..</main.basedir>
+		<configprops.inclusionPattern>spring.cloud.vault.*|
+		</configprops.inclusionPattern>
 		<upload-docs-zip.phase>deploy</upload-docs-zip.phase>
 	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>spring-cloud-starter-vault-config</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>spring-cloud-vault-config-aws</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>spring-cloud-vault-config-consul</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>spring-cloud-vault-config-databases</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>spring-cloud-vault-config-rabbitmq</artifactId>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<sourceDirectory>src/main/asciidoc</sourceDirectory>
@@ -61,7 +86,7 @@
 		<profile>
 			<id>docs</id>
 			<build>
-				<plugins>	
+				<plugins>
 					<plugin>
 						<groupId>pl.project13.maven</groupId>
 						<artifactId>git-commit-id-plugin</artifactId>

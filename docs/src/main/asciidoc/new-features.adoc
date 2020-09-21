@@ -1,0 +1,8 @@
+== New & Noteworthy
+
+This section briefly covers items that are new and noteworthy in the latest releases.
+
+[[new-in-3.0.0]]
+=== New in Spring Cloud Vault 3.0
+
+* Migration of `PropertySource` initialization from Spring Cloud's Bootstrap Context to Spring Boot's <<vault.configdata,ConfigData API>>.
