@@ -41,6 +41,12 @@
 |spring.cloud.vault.consul.enabled | false | Enable consul backend usage.
 |spring.cloud.vault.consul.role |  | Role name for credentials.
 |spring.cloud.vault.consul.token-property | spring.cloud.consul.token | Target property for the obtained token.
+|spring.cloud.vault.couchbase.backend | database | Couchbase backend path.
+|spring.cloud.vault.couchbase.enabled | false | Enable couchbase backend usage.
+|spring.cloud.vault.couchbase.password-property | spring.couchbase.password | Target property for the obtained password.
+|spring.cloud.vault.couchbase.role |  | Role name for credentials.
+|spring.cloud.vault.couchbase.static-role | false | Enable static role usage.
+|spring.cloud.vault.couchbase.username-property | spring.couchbase.username | Target property for the obtained username.
 |spring.cloud.vault.database.backend | database | Database backend path.
 |spring.cloud.vault.database.enabled | false | Enable database backend usage.
 |spring.cloud.vault.database.password-property | spring.datasource.password | Target property for the obtained password.
