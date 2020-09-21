@@ -12,6 +12,10 @@ NOTE: _Copies of this document may be made for your own use and for distribution
 
 include::intro.adoc[]
 
+include::_attributes.adoc[]
+
+include::new-features.adoc[]
+
 == Quick Start
 
 include::quickstart.adoc[]
@@ -23,3 +27,5 @@ include::authentication.adoc[]
 include::secret-backends.adoc[]
 
 include::other-topics.adoc[]
+
+include::appendix.adoc[]
