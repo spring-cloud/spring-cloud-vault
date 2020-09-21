@@ -51,10 +51,8 @@ import static org.junit.Assume.assumeTrue;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigCouchbaseDatabaseTests.TestApplication.class,
-		properties = { "spring.cloud.vault.couchbase.enabled=true",
-				"spring.cloud.vault.couchbase.role=readonly",
-				"spring.data.couchbase.username=foo",
-				"spring.data.couchbase.password=bar",
+		properties = { "spring.cloud.vault.couchbase.enabled=true", "spring.config.import=vault://",
+				"spring.cloud.vault.couchbase.role=couchbase-readonly",
 				"spring.main.allow-bean-definition-overriding=true" })
 public class VaultConfigCouchbaseDatabaseTests {
 
@@ -62,10 +60,10 @@ public class VaultConfigCouchbaseDatabaseTests {
 
 	private static final String COUCHBASE_HOST = "localhost";
 
-	@Value("${spring.data.couchbase.username}")
+	@Value("${spring.couchbase.username}")
 	String username;
 
-	@Value("${spring.data.couchbase.password}")
+	@Value("${spring.couchbase.password}")
 	String password;
 
 	Cluster cluster;
@@ -80,8 +78,7 @@ public class VaultConfigCouchbaseDatabaseTests {
 		vaultRule.before();
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(COUCHBASE_HOST, COUCHBASE_PORT)));
-		assumeTrue(vaultRule.prepare().getVersion()
-				.isGreaterThanOrEqualTo(Version.parse("0.7.1")));
+		assumeTrue(vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("1.3.0")));
 
 		if (!vaultRule.prepare().hasSecretBackend("database")) {
 			vaultRule.prepare().mountSecret("database");
@@ -102,7 +99,7 @@ public class VaultConfigCouchbaseDatabaseTests {
 		body.put("db_name", "spring-cloud-vault-couchbase");
 		body.put("creation_statements", "{\"roles\":[{\"role\":\"ro_admin\"}]}");
 
-		vaultOperations.write("database/roles/readonly", body);
+		vaultOperations.write("database/roles/couchbase-readonly", body);
 	}
 
 	@Test
