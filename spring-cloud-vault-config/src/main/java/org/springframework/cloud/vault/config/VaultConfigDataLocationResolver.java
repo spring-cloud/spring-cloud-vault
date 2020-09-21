@@ -63,7 +63,7 @@ import org.springframework.util.ReflectionUtils;
  * VaultConfigurer configurer = …;
  * SpringApplication application = …;
  *
- * application.addBootstrapper(registy -> register(VaultConfigurer.class, context -> configurer));
+ * application.addBootstrapper(registy -&gt; register(VaultConfigurer.class, context -&gt; configurer));
  * </pre>
  * <p>
  * Registers also {@link VaultProperties} in the {@link BootstrapRegistry} that is

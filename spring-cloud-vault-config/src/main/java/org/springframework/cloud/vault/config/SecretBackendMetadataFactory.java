@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.vault.config;
 
+import org.springframework.boot.context.config.ConfigDataLocationResolver;
 import org.springframework.cloud.bootstrap.BootstrapConfiguration;
 import org.springframework.context.ApplicationContext;
 
