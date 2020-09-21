@@ -25,4 +25,5 @@ pom.xml.releaseBackup
 release.properties
 .vscode/
 .sdkmanrc
+plugins/
 

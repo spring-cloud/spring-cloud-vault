@@ -20,7 +20,7 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.datastax.oss.driver.api.core.CqlSession;
+import com.couchbase.client.java.Cluster;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +32,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
+import org.springframework.cloud.vault.util.Version;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultOperations;
 
@@ -48,30 +49,23 @@ import static org.junit.Assume.assumeTrue;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigCouchbaseTests.TestApplication.class,
-		properties = { "spring.cloud.vault.couchbase.enabled=true",
-				"spring.cloud.vault.couchbase.role=readonly",
-				"spring.data.couchbase.jmx-enabled=false" })
+		properties = { "spring.cloud.vault.couchbase.enabled=true", "spring.config.import=vault://",
+				"spring.cloud.vault.couchbase.role=couchbase-readonly",
+				"spring.couchbase.connection-string=couchbase://localhost" })
 public class VaultConfigCouchbaseTests {
+
+	private static final int COUCHBASE_PORT = 8091;
 
 	private static final String COUCHBASE_HOST = "localhost";
 
-	private static final int COUCHBASE_PORT = 65535;
-
-	private static final String COUCHBASE_USERNAME = "springvault";
-
-	private static final String COUCHBASE_PASSWORD = "springvault";
-
-	private static final String CREATE_USER_AND_GRANT_CQL = "CREATE USER '{{username}}' WITH PASSWORD '{{password}}' NOSUPERUSER;"
-			+ "GRANT SELECT ON ALL KEYSPACES TO {{username}};";
-
-	@Value("${spring.data.couchbase.username}")
+	@Value("${spring.couchbase.username}")
 	String username;
 
-	@Value("${spring.data.couchbase.password}")
+	@Value("${spring.couchbase.password}")
 	String password;
 
 	@Autowired
-	CqlSession cqlSession;
+	Cluster cluster;
 
 	/**
 	 * Initialize the couchbase secret backend.
@@ -79,47 +73,37 @@ public class VaultConfigCouchbaseTests {
 	@BeforeClass
 	public static void beforeClass() {
 
-		assumeTrue(CanConnect.to(new InetSocketAddress(COUCHBASE_HOST, COUCHBASE_PORT)));
-
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		if (!vaultRule.prepare().hasSecretBackend("couchbase")) {
-			vaultRule.prepare().mountSecret("couchbase");
-		}
+		assumeTrue(CanConnect.to(new InetSocketAddress(COUCHBASE_HOST, COUCHBASE_PORT)));
+		assumeTrue(vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("1.3.0")));
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
-		Map<String, Object> connection = new HashMap<>();
-		connection.put("hosts", COUCHBASE_HOST);
-		connection.put("username", COUCHBASE_USERNAME);
-		connection.put("password", COUCHBASE_PASSWORD);
-		connection.put("protocol_version", 3);
+		if (!vaultRule.prepare().hasSecretBackend("database")) {
+			vaultRule.prepare().mountSecret("database");
+		}
 
-		vaultOperations.write(String.format("%s/config/connection", "couchbase"),
-				connection);
+		Map<String, String> config = new HashMap<>();
+		config.put("plugin_name", "couchbase-database-plugin");
+		config.put("hosts", "couchbase://localhost");
+		config.put("username", "Administrator");
+		config.put("password", "password");
+		config.put("allowed_roles", "*");
 
-		Map<String, String> role = new HashMap<>();
+		vaultOperations.write("database/config/spring-cloud-vault-couchbase", config);
 
-		role.put("creation_cql", CREATE_USER_AND_GRANT_CQL);
-		role.put("consistency", "All");
+		Map<String, String> body = new HashMap<>();
+		body.put("db_name", "spring-cloud-vault-couchbase");
+		body.put("creation_statements", "{\"roles\":[{\"role\":\"ro_admin\"}]}");
 
-		vaultOperations.write("couchbase/roles/readonly", role);
+		vaultOperations.write("database/roles/couchbase-readonly", body);
 	}
 
 	@Test
 	public void shouldUseAuthenticatedSession() {
-		assertThat(this.cqlSession.getMetadata().getKeyspace("system")).isNotEmpty();
-	}
-
-	@Test
-	public void shouldConnectUsingCouchbaseClient() {
-
-		try (CqlSession session = CqlSession.builder().withLocalDatacenter("dc1")
-				.addContactPoint(new InetSocketAddress(COUCHBASE_HOST, COUCHBASE_PORT))
-				.withAuthCredentials(this.username, this.password).build()) {
-			assertThat(session.getMetadata().getKeyspace("system")).isNotEmpty();
-		}
+		assertThat(this.cluster.buckets().getAllBuckets()).isNotEmpty();
 	}
 
 	@SpringBootApplication

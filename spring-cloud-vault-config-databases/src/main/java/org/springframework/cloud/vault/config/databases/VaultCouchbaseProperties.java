@@ -56,13 +56,13 @@ public class VaultCouchbaseProperties implements DatabaseSecretProperties {
 	 * Target property for the obtained username.
 	 */
 	@NotEmpty
-	private String usernameProperty = "spring.data.couchbase.username";
+	private String usernameProperty = "spring.couchbase.username";
 
 	/**
 	 * Target property for the obtained password.
 	 */
 	@NotEmpty
-	private String passwordProperty = "spring.data.couchbase.password";
+	private String passwordProperty = "spring.couchbase.password";
 
 	@Override
 	public boolean isEnabled() {
