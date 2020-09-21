@@ -242,7 +242,7 @@ class ClientAuthenticationFactory {
 		}
 
 		throw new IllegalArgumentException(
-				"Cannot configure RoleId. Any of role-id, initial token, or initial toke and role name must be configured.");
+				"Cannot configure RoleId. Any of role-id, initial token, or initial token and role name must be configured.");
 	}
 
 	private static SecretId getSecretId(VaultProperties vaultProperties,
