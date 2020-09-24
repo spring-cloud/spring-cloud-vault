@@ -411,6 +411,7 @@ spring.cloud.vault:
     ssl:
         key-store: classpath:keystore.jks
         key-store-password: changeit
+        key-store-type: JKS
         cert-auth-path: cert
 ----
 ====

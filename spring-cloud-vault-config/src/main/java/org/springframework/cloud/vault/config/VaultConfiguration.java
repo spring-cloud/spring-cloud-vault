@@ -81,6 +81,10 @@ final class VaultConfiguration {
 			else {
 				keyStore = KeyStoreConfiguration.of(ssl.getKeyStore());
 			}
+
+			if (StringUtils.hasText(ssl.getKeyStoreType())) {
+				keyStore = keyStore.withStoreType(ssl.getKeyStoreType());
+			}
 		}
 
 		if (ssl.getTrustStore() != null) {
@@ -90,6 +94,10 @@ final class VaultConfiguration {
 			}
 			else {
 				trustStore = KeyStoreConfiguration.of(ssl.getTrustStore());
+			}
+
+			if (StringUtils.hasText(ssl.getTrustStoreType())) {
+				trustStore = trustStore.withStoreType(ssl.getTrustStoreType());
 			}
 		}
 
