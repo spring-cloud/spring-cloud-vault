@@ -16,19 +16,28 @@
 
 package org.springframework.cloud.vault.config;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.commons.util.UtilAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.vault.client.ReactiveVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpointProvider;
+import org.springframework.vault.core.ReactiveVaultOperations;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * {@link org.springframework.cloud.bootstrap.BootstrapConfiguration} providing a
@@ -39,17 +48,18 @@ import org.springframework.vault.client.VaultEndpointProvider;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty("spring.cloud.vault.discovery.enabled")
+@ConditionalOnExpression("${spring.cloud.vault.reactive.enabled:true}")
+@ConditionalOnClass({ Flux.class, WebClient.class, ReactiveVaultOperations.class, ReactiveDiscoveryClient.class })
 @EnableConfigurationProperties(VaultProperties.class)
-@Order(Ordered.LOWEST_PRECEDENCE - 2)
-@EnableDiscoveryClient
+@Order(Ordered.LOWEST_PRECEDENCE - 5)
 @Import(UtilAutoConfiguration.class)
-public class DiscoveryClientVaultBootstrapConfiguration {
+public class ReactiveDiscoveryClientVaultBootstrapConfiguration {
 
 	private final VaultProperties vaultProperties;
 
 	private final VaultConfiguration configuration;
 
-	public DiscoveryClientVaultBootstrapConfiguration(VaultProperties vaultProperties) {
+	public ReactiveDiscoveryClientVaultBootstrapConfiguration(VaultProperties vaultProperties) {
 		this.vaultProperties = vaultProperties;
 		this.configuration = new VaultConfiguration(vaultProperties);
 	}
@@ -57,22 +67,27 @@ public class DiscoveryClientVaultBootstrapConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
-	public VaultServiceInstanceProvider vaultServerInstanceProvider(DiscoveryClient discoveryClient) {
-		return new DiscoveryClientVaultServiceInstanceProvider(discoveryClient);
-	}
+	public ReactiveVaultEndpointProvider reactiveVaultEndpointProvider(
+			ObjectProvider<ReactiveDiscoveryClient> reactiveDiscoveryClients,
+			ObjectProvider<VaultEndpointProvider> endpointProviders) {
 
-	@Bean
-	@ConditionalOnMissingBean
-	@ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
-	public VaultEndpointProvider vaultEndpointProvider(VaultServiceInstanceProvider instanceProvider) {
+		ReactiveDiscoveryClient reactiveDiscoveryClient = reactiveDiscoveryClients.getIfAvailable();
 
-		return () -> {
+		if (reactiveDiscoveryClient != null) {
+			ReacvtiveDiscoveryClientVaultServiceInstanceProvider instanceProvider = new ReacvtiveDiscoveryClientVaultServiceInstanceProvider(
+					reactiveDiscoveryClient);
 
-			String serviceId = this.vaultProperties.getDiscovery().getServiceId();
-			ServiceInstance server = instanceProvider.getVaultServerInstance(serviceId);
+			return () -> Mono.defer(() -> {
 
-			return this.configuration.createVaultEndpoint(server);
-		};
+				String serviceId = this.vaultProperties.getDiscovery().getServiceId();
+
+				return instanceProvider.getVaultServerInstance(serviceId).map(this.configuration::createVaultEndpoint);
+			});
+		}
+
+		VaultEndpointProvider endpointProvider = endpointProviders.getObject();
+
+		return () -> Mono.fromSupplier(endpointProvider::getVaultEndpoint).subscribeOn(Schedulers.boundedElastic());
 	}
 
 }

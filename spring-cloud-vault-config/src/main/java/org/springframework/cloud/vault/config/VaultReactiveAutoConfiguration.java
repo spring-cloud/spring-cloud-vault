@@ -47,6 +47,7 @@ import org.springframework.vault.authentication.ReactiveLifecycleAwareSessionMan
 import org.springframework.vault.authentication.ReactiveSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.VaultTokenSupplier;
+import org.springframework.vault.client.ReactiveVaultEndpointProvider;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.WebClientBuilder;
@@ -82,6 +83,10 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 
 	private final VaultReactiveConfiguration configuration;
 
+	@Nullable
+	private final ReactiveVaultEndpointProvider reactiveEndpointProvider;
+
+	@Nullable
 	private final VaultEndpointProvider endpointProvider;
 
 	private final List<WebClientCustomizer> customizers;
@@ -96,14 +101,23 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 	private WebClientBuilder webClientBuilder;
 
 	public VaultReactiveAutoConfiguration(VaultProperties vaultProperties,
+			ObjectProvider<ReactiveVaultEndpointProvider> reactiveEndpointProvider,
 			ObjectProvider<VaultEndpointProvider> endpointProvider,
 			ObjectProvider<List<WebClientCustomizer>> webClientCustomizers) {
 
 		this.vaultProperties = vaultProperties;
 		this.configuration = new VaultReactiveConfiguration(vaultProperties);
 
-		this.endpointProvider = endpointProvider.getIfAvailable(
-				() -> SimpleVaultEndpointProvider.of(new VaultConfiguration(vaultProperties).createVaultEndpoint()));
+		this.reactiveEndpointProvider = reactiveEndpointProvider.getIfAvailable();
+
+		if (this.reactiveEndpointProvider == null) {
+			this.endpointProvider = endpointProvider.getIfAvailable(() -> SimpleVaultEndpointProvider
+					.of(new VaultConfiguration(vaultProperties).createVaultEndpoint()));
+		}
+		else {
+			this.endpointProvider = null;
+		}
+
 		this.customizers = new ArrayList<>(webClientCustomizers.getIfAvailable(Collections::emptyList));
 		AnnotationAwareOrderComparator.sort(this.customizers);
 	}
@@ -117,7 +131,18 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 	}
 
 	protected WebClientBuilder webClientBuilder(ClientHttpConnector connector) {
-		return this.configuration.createWebClientBuilder(connector, this.endpointProvider, this.customizers);
+
+		if (this.reactiveEndpointProvider != null) {
+			return this.configuration.createWebClientBuilder(connector, this.reactiveEndpointProvider,
+					this.customizers);
+		}
+
+		if (this.endpointProvider != null) {
+			return this.configuration.createWebClientBuilder(connector, this.endpointProvider, this.customizers);
+		}
+
+		throw new IllegalStateException(
+				"Cannot create WebClientBuilder as neither ReactiveEndpointProvider nor EndpointProvider configured");
 	}
 
 	/**

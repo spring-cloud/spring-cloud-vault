@@ -36,6 +36,7 @@ import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.authentication.VaultTokenSupplier;
 import org.springframework.vault.client.ClientHttpConnectorFactory;
+import org.springframework.vault.client.ReactiveVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.WebClientBuilder;
@@ -70,12 +71,25 @@ final class VaultReactiveConfiguration {
 		return ClientHttpConnectorFactory.create(clientOptions, sslConfiguration);
 	}
 
+	WebClientBuilder createWebClientBuilder(ClientHttpConnector connector,
+			ReactiveVaultEndpointProvider endpointProvider, List<WebClientCustomizer> customizers) {
+
+		WebClientBuilder builder = WebClientBuilder.builder().httpConnector(connector)
+				.endpointProvider(endpointProvider);
+
+		return applyCustomizer(customizers, builder);
+	}
+
 	WebClientBuilder createWebClientBuilder(ClientHttpConnector connector, VaultEndpointProvider endpointProvider,
 			List<WebClientCustomizer> customizers) {
 
 		WebClientBuilder builder = WebClientBuilder.builder().httpConnector(connector)
 				.endpointProvider(endpointProvider);
 
+		return applyCustomizer(customizers, builder);
+	}
+
+	private WebClientBuilder applyCustomizer(List<WebClientCustomizer> customizers, WebClientBuilder builder) {
 		customizers.forEach(builder::customizers);
 
 		if (StringUtils.hasText(this.vaultProperties.getNamespace())) {
