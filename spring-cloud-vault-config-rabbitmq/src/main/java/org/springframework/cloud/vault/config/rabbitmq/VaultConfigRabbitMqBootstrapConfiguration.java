@@ -36,18 +36,13 @@ import org.springframework.vault.core.util.PropertyTransformer;
  * @author Mark Paluch
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties
+@EnableConfigurationProperties(VaultRabbitMqProperties.class)
 public class VaultConfigRabbitMqBootstrapConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
 	public RabbitMqSecretBackendMetadataFactory rabbitMqSecureBackendAccessorFactory() {
 		return new RabbitMqSecretBackendMetadataFactory();
-	}
-
-	@Bean
-	public VaultRabbitMqProperties rabbitMqProperties() {
-		return new VaultRabbitMqProperties();
 	}
 
 	/**
