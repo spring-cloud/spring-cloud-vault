@@ -18,7 +18,6 @@ package org.springframework.cloud.vault.config;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Base64;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -263,7 +262,7 @@ class ClientAuthenticationFactory {
 		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions.builder().role(awsEc2.getRole()) //
 				.path(awsEc2.getAwsEc2Path()) //
 				.nonce(nonce) //
-				.identityDocumentUri(URI.create(awsEc2.getIdentityDocument())) //
+				.identityDocumentUri(awsEc2.getIdentityDocument()) //
 				.build();
 
 		return new AwsEc2Authentication(authenticationOptions, this.restOperations, this.externalRestOperations);

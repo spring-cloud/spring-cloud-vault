@@ -532,7 +532,7 @@ public class VaultProperties implements EnvironmentAware {
 		/**
 		 * URL of the AWS-EC2 PKCS7 identity document.
 		 */
-		private String identityDocument = "http://169.254.169.254/latest/dynamic/instance-identity/pkcs7";
+		private URI identityDocument = URI.create("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7");
 
 		/**
 		 * Mount path of the AWS-EC2 authentication backend.
@@ -551,11 +551,11 @@ public class VaultProperties implements EnvironmentAware {
 		@Nullable
 		private String nonce;
 
-		public String getIdentityDocument() {
+		public URI getIdentityDocument() {
 			return this.identityDocument;
 		}
 
-		public void setIdentityDocument(String identityDocument) {
+		public void setIdentityDocument(URI identityDocument) {
 			this.identityDocument = identityDocument;
 		}
 
@@ -668,12 +668,16 @@ public class VaultProperties implements EnvironmentAware {
 		private String role = "";
 
 		/**
-		 * Instance metadata service URI
+		 * Instance metadata service URI.
+		 *
+		 * @since 3.0
 		 */
 		private URI metadataService = AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI;
 
 		/**
-		 * Identity token service URI
+		 * Identity token service URI.
+		 *
+		 * @since 3.0
 		 */
 		private URI identityTokenService = AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI;
 
@@ -681,28 +685,28 @@ public class VaultProperties implements EnvironmentAware {
 			return this.azurePath;
 		}
 
-		public String getRole() {
-			return this.role;
-		}
-
-		public URI getMetadataService() {
-			return metadataService;
-		}
-
-		public URI getIdentityTokenService() {
-			return identityTokenService;
-		}
-
 		public void setAzurePath(String azurePath) {
 			this.azurePath = azurePath;
+		}
+
+		public String getRole() {
+			return this.role;
 		}
 
 		public void setRole(String role) {
 			this.role = role;
 		}
 
+		public URI getMetadataService() {
+			return this.metadataService;
+		}
+
 		public void setMetadataService(URI metadataService) {
 			this.metadataService = metadataService;
+		}
+
+		public URI getIdentityTokenService() {
+			return this.identityTokenService;
 		}
 
 		public void setIdentityTokenService(URI identityTokenService) {
