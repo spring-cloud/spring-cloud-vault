@@ -16,11 +16,9 @@
 
 package org.springframework.cloud.vault.config.rabbitmq;
 
-import javax.validation.constraints.NotEmpty;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.lang.Nullable;
 
 /**
  * Configuration properties for Vault using the RabbitMQ integration.
@@ -28,7 +26,6 @@ import org.springframework.validation.annotation.Validated;
  * @author Mark Paluch
  */
 @ConfigurationProperties("spring.cloud.vault.rabbitmq")
-@Validated
 public class VaultRabbitMqProperties implements VaultSecretBackendDescriptor {
 
 	/**
@@ -39,60 +36,61 @@ public class VaultRabbitMqProperties implements VaultSecretBackendDescriptor {
 	/**
 	 * Role name for credentials.
 	 */
+	@Nullable
 	private String role;
 
 	/**
 	 * rabbitmq backend path.
 	 */
-	@NotEmpty
 	private String backend = "rabbitmq";
 
 	/**
 	 * Target property for the obtained username.
 	 */
-	@NotEmpty
 	private String usernameProperty = "spring.rabbitmq.username";
 
 	/**
 	 * Target property for the obtained password.
 	 */
-	@NotEmpty
 	private String passwordProperty = "spring.rabbitmq.password";
 
+	@Override
 	public boolean isEnabled() {
 		return this.enabled;
-	}
-
-	public String getRole() {
-		return this.role;
-	}
-
-	public String getBackend() {
-		return this.backend;
-	}
-
-	public String getUsernameProperty() {
-		return this.usernameProperty;
-	}
-
-	public String getPasswordProperty() {
-		return this.passwordProperty;
 	}
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
 
-	public void setRole(String role) {
+	@Nullable
+	public String getRole() {
+		return this.role;
+	}
+
+	public void setRole(@Nullable String role) {
 		this.role = role;
+	}
+
+	@Override
+	public String getBackend() {
+		return this.backend;
 	}
 
 	public void setBackend(String backend) {
 		this.backend = backend;
 	}
 
+	public String getUsernameProperty() {
+		return this.usernameProperty;
+	}
+
 	public void setUsernameProperty(String usernameProperty) {
 		this.usernameProperty = usernameProperty;
+	}
+
+	public String getPasswordProperty() {
+		return this.passwordProperty;
 	}
 
 	public void setPasswordProperty(String passwordProperty) {

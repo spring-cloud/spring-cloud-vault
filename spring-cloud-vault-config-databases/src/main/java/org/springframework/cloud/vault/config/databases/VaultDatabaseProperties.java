@@ -16,10 +16,8 @@
 
 package org.springframework.cloud.vault.config.databases;
 
-import javax.validation.constraints.NotEmpty;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.lang.Nullable;
 
 /**
  * Configuration properties for Vault using the Database integration.
@@ -29,7 +27,6 @@ import org.springframework.validation.annotation.Validated;
  * @since 2.0
  */
 @ConfigurationProperties("spring.cloud.vault.database")
-@Validated
 public class VaultDatabaseProperties implements DatabaseSecretProperties {
 
 	/**
@@ -40,6 +37,7 @@ public class VaultDatabaseProperties implements DatabaseSecretProperties {
 	/**
 	 * Role name for credentials.
 	 */
+	@Nullable
 	private String role;
 
 	/**
@@ -50,19 +48,16 @@ public class VaultDatabaseProperties implements DatabaseSecretProperties {
 	/**
 	 * Database backend path.
 	 */
-	@NotEmpty
 	private String backend = "database";
 
 	/**
 	 * Target property for the obtained username.
 	 */
-	@NotEmpty
 	private String usernameProperty = "spring.datasource.username";
 
 	/**
 	 * Target property for the obtained password.
 	 */
-	@NotEmpty
 	private String passwordProperty = "spring.datasource.password";
 
 	@Override
@@ -75,11 +70,12 @@ public class VaultDatabaseProperties implements DatabaseSecretProperties {
 	}
 
 	@Override
+	@Nullable
 	public String getRole() {
 		return this.role;
 	}
 
-	public void setRole(String role) {
+	public void setRole(@Nullable String role) {
 		this.role = role;
 	}
 

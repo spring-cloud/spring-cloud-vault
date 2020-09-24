@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -42,6 +43,7 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations
 
 	private final Map<String, Object> properties = new LinkedHashMap<>();
 
+	@Nullable
 	private Secrets secrets;
 
 	/**
@@ -70,7 +72,7 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations
 		try {
 			this.secrets = this.source.read(this.secretBackendMetadata);
 			if (this.secrets != null) {
-				this.properties.putAll(this.secrets.getData());
+				this.properties.putAll(this.secrets.getRequiredData());
 			}
 		}
 		catch (RuntimeException e) {

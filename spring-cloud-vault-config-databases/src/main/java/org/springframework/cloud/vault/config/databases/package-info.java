@@ -18,5 +18,6 @@
  * Database integration with Vault.
  * @author Mark Paluch
  */
-
+@org.springframework.lang.NonNullApi
+@org.springframework.lang.NonNullFields
 package org.springframework.cloud.vault.config.databases;

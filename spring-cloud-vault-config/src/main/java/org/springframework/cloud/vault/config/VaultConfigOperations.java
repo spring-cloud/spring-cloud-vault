@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.vault.config;
 
+import org.springframework.lang.Nullable;
 import org.springframework.vault.core.VaultOperations;
 
 /**
@@ -33,9 +34,10 @@ public interface VaultConfigOperations {
 	 * {@link SecretBackendMetadata}. Reading data using this method is suitable for
 	 * secret backends that do not require a request body.
 	 * @param secretBackendMetadata must not be {@literal null}.
-	 * @return the configuration data. May be empty but never {@literal null}.
+	 * @return the configuration data. May be {@literal null}.
 	 * @throws IllegalStateException if {@link VaultProperties#failFast} is enabled.
 	 */
+	@Nullable
 	Secrets read(SecretBackendMetadata secretBackendMetadata);
 
 	/**
