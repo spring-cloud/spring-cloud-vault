@@ -303,7 +303,10 @@ class ClientAuthenticationFactory {
 
 		Assert.hasText(azureMsi.getRole(), "Azure role (spring.cloud.vault.azure-msi.role) must not be empty");
 
-		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder().role(azureMsi.getRole())
+		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder() //
+				.role(azureMsi.getRole()).path(azureMsi.getAzurePath()) //
+				.instanceMetadataUri(azureMsi.getMetadataService()) //
+				.identityTokenServiceUri(azureMsi.getIdentityTokenService()) //
 				.build();
 
 		return new AzureMsiAuthentication(options, this.restOperations, this.externalRestOperations);
