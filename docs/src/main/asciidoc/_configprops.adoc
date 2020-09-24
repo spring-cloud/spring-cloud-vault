@@ -119,8 +119,10 @@
 |spring.cloud.vault.ssl.cert-auth-path | cert | Mount path of the TLS cert authentication backend.
 |spring.cloud.vault.ssl.key-store |  | Trust store that holds certificates and private keys.
 |spring.cloud.vault.ssl.key-store-password |  | Password used to access the key store.
+|spring.cloud.vault.ssl.key-store-type |  | Type of the key store. @since 3.0
 |spring.cloud.vault.ssl.trust-store |  | Trust store that holds SSL certificates.
 |spring.cloud.vault.ssl.trust-store-password |  | Password used to access the trust store.
+|spring.cloud.vault.ssl.trust-store-type |  | Type of the trust store. @since 3.0
 |spring.cloud.vault.token |  | Static vault token. Required if {@link #authentication} is {@code TOKEN}.
 |spring.cloud.vault.uri |  | Vault URI. Can be set with scheme, host and port.
 
