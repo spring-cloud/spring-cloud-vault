@@ -16,10 +16,8 @@
 
 package org.springframework.cloud.vault.config.databases;
 
-import javax.validation.constraints.NotEmpty;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.lang.Nullable;
 
 /**
  * Configuration properties for Vault using the Elasticsearch integration.
@@ -28,40 +26,37 @@ import org.springframework.validation.annotation.Validated;
  * @since 3.0
  */
 @ConfigurationProperties("spring.cloud.vault.elasticsearch")
-@Validated
 public class VaultElasticsearchProperties implements DatabaseSecretProperties {
 
 	/**
 	 * Enable elasticsearch backend usage.
 	 */
-	private boolean enabled = false;
+	private boolean enabled;
 
 	/**
 	 * Role name for credentials.
 	 */
+	@Nullable
 	private String role;
 
 	/**
 	 * Enable static role usage.
 	 */
-	private boolean staticRole = false;
+	private boolean staticRole;
 
 	/**
 	 * Database backend path.
 	 */
-	@NotEmpty
 	private String backend = "database";
 
 	/**
 	 * Target property for the obtained username.
 	 */
-	@NotEmpty
 	private String usernameProperty = "spring.elasticsearch.rest.username";
 
 	/**
 	 * Target property for the obtained password.
 	 */
-	@NotEmpty
 	private String passwordProperty = "spring.elasticsearch.rest.password";
 
 	@Override
@@ -74,11 +69,12 @@ public class VaultElasticsearchProperties implements DatabaseSecretProperties {
 	}
 
 	@Override
+	@Nullable
 	public String getRole() {
 		return this.role;
 	}
 
-	public void setRole(String role) {
+	public void setRole(@Nullable String role) {
 		this.role = role;
 	}
 

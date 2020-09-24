@@ -107,10 +107,10 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport 
 	public static List<String> buildContexts(VaultKeyValueBackendPropertiesSupport properties, List<String> profiles) {
 
 		String appName = properties.getApplicationName();
-		Set<String> contexts = new LinkedHashSet<>();
 
 		String defaultContext = properties.getDefaultContext();
-		contexts.addAll(buildContexts(defaultContext, profiles, properties.getProfileSeparator()));
+		Set<String> contexts = new LinkedHashSet<>(
+				buildContexts(defaultContext, profiles, properties.getProfileSeparator()));
 
 		for (String applicationName : StringUtils.commaDelimitedListToSet(appName)) {
 			contexts.addAll(buildContexts(applicationName, profiles, properties.getProfileSeparator()));
@@ -135,15 +135,12 @@ public class KeyValueSecretBackendMetadata extends SecretBackendMetadataSupport 
 	 */
 	public static List<String> buildContexts(String applicationName, List<String> profiles, String profileSeparator) {
 
-		List<String> contexts = new ArrayList<>();
-
 		if (!StringUtils.hasText(applicationName)) {
-			return contexts;
+			return Collections.emptyList();
 		}
 
-		if (!contexts.contains(applicationName)) {
-			contexts.add(applicationName);
-		}
+		List<String> contexts = new ArrayList<>(profiles.size() + 1);
+		contexts.add(applicationName);
 
 		for (String profile : profiles) {
 

@@ -16,11 +16,9 @@
 
 package org.springframework.cloud.vault.config.aws;
 
-import javax.validation.constraints.NotEmpty;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.lang.Nullable;
 
 /**
  * Configuration properties for Vault using the AWS integration.
@@ -28,71 +26,71 @@ import org.springframework.validation.annotation.Validated;
  * @author Mark Paluch
  */
 @ConfigurationProperties("spring.cloud.vault.aws")
-@Validated
 public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 
 	/**
 	 * Enable aws backend usage.
 	 */
-	private boolean enabled = false;
+	private boolean enabled;
 
 	/**
 	 * Role name for credentials.
 	 */
+	@Nullable
 	private String role;
 
 	/**
 	 * aws backend path.
 	 */
-	@NotEmpty
 	private String backend = "aws";
 
 	/**
 	 * Target property for the obtained access key.
 	 */
-	@NotEmpty
 	private String accessKeyProperty = "cloud.aws.credentials.accessKey";
 
 	/**
 	 * Target property for the obtained secret key.
 	 */
-	@NotEmpty
 	private String secretKeyProperty = "cloud.aws.credentials.secretKey";
 
+	@Override
 	public boolean isEnabled() {
 		return this.enabled;
-	}
-
-	public String getRole() {
-		return this.role;
-	}
-
-	public String getBackend() {
-		return this.backend;
-	}
-
-	public String getAccessKeyProperty() {
-		return this.accessKeyProperty;
-	}
-
-	public String getSecretKeyProperty() {
-		return this.secretKeyProperty;
 	}
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
 
-	public void setRole(String role) {
+	@Nullable
+	public String getRole() {
+		return this.role;
+	}
+
+	public void setRole(@Nullable String role) {
 		this.role = role;
+	}
+
+	@Override
+	public String getBackend() {
+		return this.backend;
 	}
 
 	public void setBackend(String backend) {
 		this.backend = backend;
 	}
 
+	public String getAccessKeyProperty() {
+		return this.accessKeyProperty;
+	}
+
 	public void setAccessKeyProperty(String accessKeyProperty) {
 		this.accessKeyProperty = accessKeyProperty;
+	}
+
+	public String getSecretKeyProperty() {
+		return this.secretKeyProperty;
 	}
 
 	public void setSecretKeyProperty(String secretKeyProperty) {

@@ -16,10 +16,8 @@
 
 package org.springframework.cloud.vault.config.databases;
 
-import javax.validation.constraints.NotEmpty;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.lang.Nullable;
 
 /**
  * Configuration properties for Vault using the PostgreSQL integration.
@@ -28,7 +26,6 @@ import org.springframework.validation.annotation.Validated;
  * @deprecated since 2.0. Use {@link VaultDatabaseProperties}.
  */
 @ConfigurationProperties("spring.cloud.vault.postgresql")
-@Validated
 @Deprecated
 public class VaultPostgreSqlProperties implements DatabaseSecretProperties {
 
@@ -41,24 +38,22 @@ public class VaultPostgreSqlProperties implements DatabaseSecretProperties {
 	/**
 	 * Role name for credentials.
 	 */
+	@Nullable
 	private String role;
 
 	/**
 	 * postgresql backend path.
 	 */
-	@NotEmpty
 	private String backend = "postgresql";
 
 	/**
 	 * Target property for the obtained username.
 	 */
-	@NotEmpty
 	private String usernameProperty = "spring.datasource.username";
 
 	/**
 	 * Target property for the obtained username.
 	 */
-	@NotEmpty
 	private String passwordProperty = "spring.datasource.password";
 
 	@Override
@@ -71,11 +66,12 @@ public class VaultPostgreSqlProperties implements DatabaseSecretProperties {
 	}
 
 	@Override
+	@Nullable
 	public String getRole() {
 		return this.role;
 	}
 
-	public void setRole(String role) {
+	public void setRole(@Nullable String role) {
 		this.role = role;
 	}
 

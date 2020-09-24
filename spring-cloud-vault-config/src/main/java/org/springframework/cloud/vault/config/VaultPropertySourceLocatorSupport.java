@@ -113,11 +113,10 @@ public abstract class VaultPropertySourceLocatorSupport implements PropertySourc
 
 		Collection<SecretBackendMetadata> secretBackends = this.propertySourceLocatorConfiguration.getSecretBackends();
 		List<SecretBackendMetadata> sorted = new ArrayList<>(secretBackends);
-		List<PropertySource<?>> propertySources = new ArrayList<>();
 
 		AnnotationAwareOrderComparator.sort(sorted);
 
-		propertySources.addAll(doCreateKeyValuePropertySources(environment));
+		List<PropertySource<?>> propertySources = new ArrayList<>(doCreateKeyValuePropertySources(environment));
 
 		for (SecretBackendMetadata backendAccessor : sorted) {
 

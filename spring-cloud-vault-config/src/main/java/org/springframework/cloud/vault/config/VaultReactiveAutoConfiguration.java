@@ -39,6 +39,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.AuthenticationStepsFactory;
 import org.springframework.vault.authentication.ClientAuthentication;
@@ -85,11 +86,13 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 
 	private final List<WebClientCustomizer> customizers;
 
+	@Nullable
 	private ClientHttpConnector clientHttpConnector;
 
 	/**
 	 * Used for Vault communication.
 	 */
+	@Nullable
 	private WebClientBuilder webClientBuilder;
 
 	public VaultReactiveAutoConfiguration(VaultProperties vaultProperties,
@@ -136,6 +139,9 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 	@Bean
 	@ConditionalOnMissingBean
 	public WebClientFactory vaultWebClientFactory() {
+
+		Assert.state(this.clientHttpConnector != null, "ClientHttpConnector must not be null");
+
 		return new DefaultWebClientFactory(this.clientHttpConnector, this::webClientBuilder);
 	}
 
@@ -148,6 +154,8 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 	@Bean
 	@ConditionalOnMissingBean(ReactiveVaultOperations.class)
 	public ReactiveVaultTemplate reactiveVaultTemplate(ObjectProvider<ReactiveSessionManager> sessionManager) {
+
+		Assert.state(this.webClientBuilder != null, "WebClientBuilder must not be null");
 
 		if (this.vaultProperties.getAuthentication() == VaultProperties.AuthenticationMethod.NONE) {
 			return new ReactiveVaultTemplate(this.webClientBuilder);

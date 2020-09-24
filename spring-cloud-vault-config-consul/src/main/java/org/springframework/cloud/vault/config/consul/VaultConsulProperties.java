@@ -16,11 +16,9 @@
 
 package org.springframework.cloud.vault.config.consul;
 
-import javax.validation.constraints.NotEmpty;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.lang.Nullable;
 
 /**
  * Configuration properties for HashiCorp Consul.
@@ -28,57 +26,58 @@ import org.springframework.validation.annotation.Validated;
  * @author Mark Paluch
  */
 @ConfigurationProperties("spring.cloud.vault.consul")
-@Validated
 public class VaultConsulProperties implements VaultSecretBackendDescriptor {
 
 	/**
 	 * Enable consul backend usage.
 	 */
-	private boolean enabled = false;
+	private boolean enabled;
 
 	/**
 	 * Role name for credentials.
 	 */
+	@Nullable
 	private String role;
 
 	/**
 	 * Consul backend path.
 	 */
-	@NotEmpty
 	private String backend = "consul";
 
 	/**
 	 * Target property for the obtained token.
 	 */
-	@NotEmpty
 	private String tokenProperty = "spring.cloud.consul.token";
 
+	@Override
 	public boolean isEnabled() {
 		return this.enabled;
-	}
-
-	public String getRole() {
-		return this.role;
-	}
-
-	public String getBackend() {
-		return this.backend;
-	}
-
-	public String getTokenProperty() {
-		return this.tokenProperty;
 	}
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
 
-	public void setRole(String role) {
+	@Nullable
+	public String getRole() {
+		return this.role;
+	}
+
+	public void setRole(@Nullable String role) {
 		this.role = role;
+	}
+
+	@Override
+	public String getBackend() {
+		return this.backend;
 	}
 
 	public void setBackend(String backend) {
 		this.backend = backend;
+	}
+
+	public String getTokenProperty() {
+		return this.tokenProperty;
 	}
 
 	public void setTokenProperty(String tokenProperty) {

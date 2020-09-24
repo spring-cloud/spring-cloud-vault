@@ -29,6 +29,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.core.VaultOperations;
@@ -56,8 +58,10 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 
 	private final ConfigurableApplicationContext applicationContext;
 
+	@Nullable
 	private Collection<VaultSecretBackendDescriptor> vaultSecretBackendDescriptors;
 
+	@Nullable
 	private Collection<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> factories;
 
 	public VaultBootstrapPropertySourceConfiguration(VaultProperties vaultProperties,
@@ -81,6 +85,9 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	public PropertySourceLocator vaultPropertySourceLocator(VaultOperations operations, VaultProperties vaultProperties,
 			VaultKeyValueBackendProperties kvBackendProperties,
 			ObjectFactory<SecretLeaseContainer> secretLeaseContainerObjectFactory) {
+
+		Assert.state(this.vaultSecretBackendDescriptors != null, "VaultSecretBackendDescriptors must not be null");
+		Assert.state(this.factories != null, "SecretBackendMetadataFactories must not be null");
 
 		VaultConfigTemplate vaultConfigTemplate = new VaultConfigTemplate(operations, vaultProperties);
 

@@ -16,10 +16,8 @@
 
 package org.springframework.cloud.vault.config.databases;
 
-import javax.validation.constraints.NotEmpty;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.lang.Nullable;
 
 /**
  * Configuration properties for Vault using the Couchbase integration.
@@ -27,7 +25,6 @@ import org.springframework.validation.annotation.Validated;
  * @author Francis Hitchens
  */
 @ConfigurationProperties("spring.cloud.vault.couchbase")
-@Validated
 public class VaultCouchbaseProperties implements DatabaseSecretProperties {
 
 	/**
@@ -38,6 +35,7 @@ public class VaultCouchbaseProperties implements DatabaseSecretProperties {
 	/**
 	 * Role name for credentials.
 	 */
+	@Nullable
 	private String role;
 
 	/**
@@ -49,19 +47,16 @@ public class VaultCouchbaseProperties implements DatabaseSecretProperties {
 	/**
 	 * Couchbase backend path.
 	 */
-	@NotEmpty
 	private String backend = "database";
 
 	/**
 	 * Target property for the obtained username.
 	 */
-	@NotEmpty
 	private String usernameProperty = "spring.couchbase.username";
 
 	/**
 	 * Target property for the obtained password.
 	 */
-	@NotEmpty
 	private String passwordProperty = "spring.couchbase.password";
 
 	@Override
@@ -74,11 +69,12 @@ public class VaultCouchbaseProperties implements DatabaseSecretProperties {
 	}
 
 	@Override
+	@Nullable
 	public String getRole() {
 		return this.role;
 	}
 
-	public void setRole(String role) {
+	public void setRole(@Nullable String role) {
 		this.role = role;
 	}
 

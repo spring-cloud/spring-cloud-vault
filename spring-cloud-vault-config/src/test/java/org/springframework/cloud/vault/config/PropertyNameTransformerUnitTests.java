@@ -44,13 +44,4 @@ public class PropertyNameTransformerUnitTests {
 				"other-value");
 	}
 
-	@Test
-	public void shouldAllowNullInput() {
-
-		PropertyNameTransformer transformer = new PropertyNameTransformer();
-		transformer.addKeyTransformation("old-key", "new-key");
-
-		assertThat(transformer.transformProperties(null)).isNull();
-	}
-
 }

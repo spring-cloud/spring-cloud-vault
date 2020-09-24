@@ -16,10 +16,8 @@
 
 package org.springframework.cloud.vault.config.databases;
 
-import javax.validation.constraints.NotEmpty;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.lang.Nullable;
 
 /**
  * Configuration properties for Vault using the MongoDB integration.
@@ -28,17 +26,17 @@ import org.springframework.validation.annotation.Validated;
  * @author Sebastien Nahelou
  */
 @ConfigurationProperties("spring.cloud.vault.mongodb")
-@Validated
 public class VaultMongoProperties implements DatabaseSecretProperties {
 
 	/**
 	 * Enable mongodb backend usage.
 	 */
-	private boolean enabled = false;
+	private boolean enabled;
 
 	/**
 	 * Role name for credentials.
 	 */
+	@Nullable
 	private String role;
 
 	/**
@@ -46,24 +44,21 @@ public class VaultMongoProperties implements DatabaseSecretProperties {
 	 *
 	 * @since 2.2
 	 */
-	private boolean staticRole = false;
+	private boolean staticRole;
 
 	/**
 	 * MongoDB backend path.
 	 */
-	@NotEmpty
 	private String backend = "mongodb";
 
 	/**
 	 * Target property for the obtained username.
 	 */
-	@NotEmpty
 	private String usernameProperty = "spring.data.mongodb.username";
 
 	/**
 	 * Target property for the obtained password.
 	 */
-	@NotEmpty
 	private String passwordProperty = "spring.data.mongodb.password";
 
 	@Override
@@ -76,11 +71,12 @@ public class VaultMongoProperties implements DatabaseSecretProperties {
 	}
 
 	@Override
+	@Nullable
 	public String getRole() {
 		return this.role;
 	}
 
-	public void setRole(String role) {
+	public void setRole(@Nullable String role) {
 		this.role = role;
 	}
 

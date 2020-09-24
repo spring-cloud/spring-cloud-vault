@@ -60,10 +60,6 @@ public class PropertyNameTransformer implements PropertyTransformer {
 	@Override
 	public Map<String, Object> transformProperties(Map<String, ? extends Object> input) {
 
-		if (input == null) {
-			return null;
-		}
-
 		Map<String, Object> transformed = new LinkedHashMap<>(input.size(), 1);
 
 		for (String key : input.keySet()) {

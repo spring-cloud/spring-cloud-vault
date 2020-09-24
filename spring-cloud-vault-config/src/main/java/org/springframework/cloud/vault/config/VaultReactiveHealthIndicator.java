@@ -47,10 +47,12 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 		this.vaultOperations = vaultOperations;
 	}
 
+	@SuppressWarnings("BlockingMethodInNonBlockingContext")
 	private static Mono<? extends VaultHealthImpl> deserializeError(WebClientResponseException e) {
 
 		try {
 			ObjectMapper mapper = new ObjectMapper();
+			// Response is already materialized so not blocking here.
 			return Mono.just(mapper.readValue(e.getResponseBodyAsByteArray(), VaultHealthImpl.class));
 		}
 		catch (Exception jsonError) {

@@ -27,6 +27,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -76,6 +77,7 @@ public class VaultKeyValueBackendProperties implements EnvironmentAware, VaultKe
 	 * List of active profiles.
 	 * @since 3.0
 	 */
+	@Nullable
 	private List<String> profiles;
 
 	/**

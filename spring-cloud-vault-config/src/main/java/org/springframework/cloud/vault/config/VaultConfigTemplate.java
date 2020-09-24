@@ -84,12 +84,10 @@ public class VaultConfigTemplate implements VaultConfigOperations {
 				return null;
 			}
 
-			Map<String, Object> data = JsonMapFlattener.flatten(vaultResponse.getData());
+			Map<String, Object> data = JsonMapFlattener.flatten(vaultResponse.getRequiredData());
 			PropertyTransformer propertyTransformer = secretBackendMetadata.getPropertyTransformer();
 
-			if (propertyTransformer != null) {
-				data = propertyTransformer.transformProperties(data);
-			}
+			data = propertyTransformer.transformProperties(data);
 
 			return createSecrets(vaultResponse, data);
 		}

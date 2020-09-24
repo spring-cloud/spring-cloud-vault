@@ -67,10 +67,6 @@ final class VaultConfiguration {
 	 */
 	static SslConfiguration createSslConfiguration(Ssl ssl) {
 
-		if (ssl == null) {
-			return SslConfiguration.unconfigured();
-		}
-
 		KeyStoreConfiguration keyStore = KeyStoreConfiguration.unconfigured();
 		KeyStoreConfiguration trustStore = KeyStoreConfiguration.unconfigured();
 
