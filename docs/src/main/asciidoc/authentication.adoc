@@ -381,15 +381,21 @@ spring.cloud.vault:
     azure-msi:
         role: my-dev-role
         azure-path: azure
+        metadata-service: http://169.254.169.254/metadata/instance...
+        identity-token-service: http://169.254.169.254/metadata/identity...
 ----
 ====
 
 * `role` sets the name of the role against which the login is being attempted.
 * `azure-path` sets the path of the Azure mount to use
+* `metadata-service` sets the URI at which to access the instance metadata service
+* `identity-token-service` sets the URI at which to access the identity token service
 
-Azure MSI authentication fetches environmental details about the virtual machine (subscription Id, resource group, VM name) from the instance metadata service.
+Azure MSI authentication fetches environmental details about the virtual machine (subscription Id, resource group, VM name) from the instance metadata service. By default, Azure assumes your Vault server has Resource ID `https://vault.hashicorp.com`. To change this, set `spring.cloud.vault.azure-msi.identity-token-service`.
 
-See also: https://www.vaultproject.io/docs/auth/azure.html[Vault Documentation: Using the azure auth backend]
+See also: 
+* https://www.vaultproject.io/docs/auth/azure.html[Vault Documentation: Using the azure auth backend]
+* https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service[Azure Documentation: Azure Instance Metadata Service]
 
 [[vault.config.authentication.clientcert]]
 === TLS certificate authentication

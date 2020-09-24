@@ -26,6 +26,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+import org.springframework.vault.authentication.AzureMsiAuthenticationOptions;
 import org.springframework.vault.authentication.LoginToken;
 import org.springframework.vault.core.lease.LeaseEndpoints;
 
@@ -666,6 +667,16 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private String role = "";
 
+		/**
+		 * Instance metadata service URI
+		 */
+		private URI metadataService = AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI;
+
+		/**
+		 * Identity token service URI
+		 */
+		private URI identityTokenService = AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI;
+
 		public String getAzurePath() {
 			return this.azurePath;
 		}
@@ -674,12 +685,28 @@ public class VaultProperties implements EnvironmentAware {
 			return this.role;
 		}
 
+		public URI getMetadataService() {
+			return metadataService;
+		}
+
+		public URI getIdentityTokenService() {
+			return identityTokenService;
+		}
+
 		public void setAzurePath(String azurePath) {
 			this.azurePath = azurePath;
 		}
 
 		public void setRole(String role) {
 			this.role = role;
+		}
+
+		public void setMetadataService(URI metadataService) {
+			this.metadataService = metadataService;
+		}
+
+		public void setIdentityTokenService(URI identityTokenService) {
+			this.identityTokenService = identityTokenService;
 		}
 
 	}
