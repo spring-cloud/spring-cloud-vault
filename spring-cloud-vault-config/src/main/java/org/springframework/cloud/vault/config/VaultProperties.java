@@ -972,6 +972,13 @@ public class VaultProperties implements EnvironmentAware {
 		private String keyStorePassword;
 
 		/**
+		 * Type of the key store.
+		 *
+		 * @since 3.0
+		 */
+		private String keyStoreType;
+
+		/**
 		 * Trust store that holds SSL certificates.
 		 */
 		private Resource trustStore;
@@ -980,6 +987,13 @@ public class VaultProperties implements EnvironmentAware {
 		 * Password used to access the trust store.
 		 */
 		private String trustStorePassword;
+
+		/**
+		 * Type of the trust store.
+		 *
+		 * @since 3.0
+		 */
+		private String trustStoreType;
 
 		/**
 		 * Mount path of the TLS cert authentication backend.
@@ -991,36 +1005,52 @@ public class VaultProperties implements EnvironmentAware {
 			return this.keyStore;
 		}
 
-		public String getKeyStorePassword() {
-			return this.keyStorePassword;
-		}
-
-		public Resource getTrustStore() {
-			return this.trustStore;
-		}
-
-		public String getTrustStorePassword() {
-			return this.trustStorePassword;
-		}
-
-		public String getCertAuthPath() {
-			return this.certAuthPath;
-		}
-
 		public void setKeyStore(Resource keyStore) {
 			this.keyStore = keyStore;
+		}
+
+		public String getKeyStorePassword() {
+			return this.keyStorePassword;
 		}
 
 		public void setKeyStorePassword(String keyStorePassword) {
 			this.keyStorePassword = keyStorePassword;
 		}
 
+		public String getKeyStoreType() {
+			return this.keyStoreType;
+		}
+
+		public void setKeyStoreType(String keyStoreType) {
+			this.keyStoreType = keyStoreType;
+		}
+
+		public Resource getTrustStore() {
+			return this.trustStore;
+		}
+
 		public void setTrustStore(Resource trustStore) {
 			this.trustStore = trustStore;
 		}
 
+		public String getTrustStorePassword() {
+			return this.trustStorePassword;
+		}
+
 		public void setTrustStorePassword(String trustStorePassword) {
 			this.trustStorePassword = trustStorePassword;
+		}
+
+		public String getTrustStoreType() {
+			return this.trustStoreType;
+		}
+
+		public void setTrustStoreType(String trustStoreType) {
+			this.trustStoreType = trustStoreType;
+		}
+
+		public String getCertAuthPath() {
+			return this.certAuthPath;
 		}
 
 		public void setCertAuthPath(String certAuthPath) {
