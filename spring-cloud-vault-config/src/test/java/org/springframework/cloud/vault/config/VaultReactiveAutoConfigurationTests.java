@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.FilteredClassLoader;
@@ -37,6 +38,8 @@ import org.springframework.vault.authentication.ReactiveSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.authentication.VaultTokenSupplier;
+import org.springframework.vault.client.ReactiveVaultEndpointProvider;
+import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.WebClientFactory;
 import org.springframework.vault.core.ReactiveVaultOperations;
 import org.springframework.vault.core.ReactiveVaultTemplate;
@@ -158,6 +161,29 @@ public class VaultReactiveAutoConfigurationTests {
 				});
 	}
 
+	@Test
+	public void shouldConfigureEndpointProvider() {
+
+		this.contextRunner
+				.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
+						"spring.cloud.vault.session.lifecycle.enabled=false")
+				.withUserConfiguration(ReactiveEndpointProviderConfiguration.class)
+				.withBean("vaultTokenSupplier", VaultTokenSupplier.class, () -> Mono::empty)
+				.withBean("taskSchedulerWrapper", VaultAutoConfiguration.TaskSchedulerWrapper.class,
+						() -> new VaultAutoConfiguration.TaskSchedulerWrapper(new ThreadPoolTaskScheduler()))
+				.run(context -> {
+
+					WebClientFactory factory = context.getBean(WebClientFactory.class);
+					WebClient webClient = factory.create();
+
+					webClient.get().uri("foo").retrieve().bodyToMono(String.class).as(StepVerifier::create)
+							.verifyErrorMatches(throwable -> throwable.getMessage().contains("foobar-1"));
+
+					webClient.get().uri("foo").retrieve().bodyToMono(String.class).as(StepVerifier::create)
+							.verifyErrorMatches(throwable -> throwable.getMessage().contains("foobar-2"));
+				});
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	static class AuthenticationFactoryConfiguration {
 
@@ -185,6 +211,25 @@ public class VaultReactiveAutoConfigurationTests {
 		@Bean
 		ReactiveSessionManager reactiveVaultSessionManager(VaultTokenSupplier tokenSupplier) {
 			return tokenSupplier::getVaultToken;
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	static class ReactiveEndpointProviderConfiguration {
+
+		@Bean
+		ReactiveVaultEndpointProvider reactiveVaultEndpointProvider() {
+
+			AtomicLong counter = new AtomicLong();
+
+			return () -> Mono.fromSupplier(() -> {
+
+				VaultEndpoint vaultEndpoint = new VaultEndpoint();
+				vaultEndpoint.setHost("foobar-" + counter.incrementAndGet());
+
+				return vaultEndpoint;
+			});
 		}
 
 	}

@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.function.Supplier;
 
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.vault.config.VaultProperties.Ssl;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.scheduling.TaskScheduler;
@@ -125,6 +126,27 @@ final class VaultConfiguration {
 		vaultEndpoint.setPort(this.vaultProperties.getPort());
 		vaultEndpoint.setScheme(this.vaultProperties.getScheme());
 
+		return vaultEndpoint;
+	}
+
+	VaultEndpoint createVaultEndpoint(ServiceInstance server) {
+		String fallbackScheme;
+
+		if (StringUtils.hasText(this.vaultProperties.getUri())) {
+			fallbackScheme = URI.create(this.vaultProperties.getUri()).getScheme();
+		}
+		else {
+			fallbackScheme = this.vaultProperties.getScheme();
+		}
+
+		VaultEndpoint vaultEndpoint = VaultEndpoint.create(server.getHost(), server.getPort());
+
+		if (server.getMetadata().containsKey("scheme")) {
+			vaultEndpoint.setScheme(server.getMetadata().get("scheme"));
+		}
+		else {
+			vaultEndpoint.setScheme(server.isSecure() ? "https" : fallbackScheme);
+		}
 		return vaultEndpoint;
 	}
 
