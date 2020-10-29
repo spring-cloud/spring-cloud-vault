@@ -17,6 +17,7 @@
 package org.springframework.cloud.vault.config;
 
 import org.springframework.boot.context.config.ConfigDataLocation;
+import org.springframework.boot.context.config.ConfigDataResource;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -28,7 +29,7 @@ import org.springframework.util.ObjectUtils;
  * @since 3.0
  * @see SecretBackendMetadata
  */
-public class VaultConfigLocation extends ConfigDataLocation {
+public class VaultConfigLocation extends ConfigDataResource {
 
 	/**
 	 * Prefix used to indicate a {@link VaultConfigLocation}.

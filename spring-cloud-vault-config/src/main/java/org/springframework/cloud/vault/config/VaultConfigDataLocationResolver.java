@@ -24,9 +24,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.ConfigurableBootstrapContext;
+import org.springframework.boot.context.config.ConfigDataLocation;
 import org.springframework.boot.context.config.ConfigDataLocationNotFoundException;
 import org.springframework.boot.context.config.ConfigDataLocationResolver;
 import org.springframework.boot.context.config.ConfigDataLocationResolverContext;
+import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.boot.context.config.Profiles;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -78,25 +80,24 @@ import org.springframework.util.ReflectionUtils;
 public class VaultConfigDataLocationResolver implements ConfigDataLocationResolver<VaultConfigLocation> {
 
 	@Override
-	public boolean isResolvable(ConfigDataLocationResolverContext context, String location) {
-
+	public boolean isResolvable(ConfigDataLocationResolverContext context, ConfigDataLocation location) {
 		boolean vaultEnabled = context.getBinder().bind(VaultProperties.PREFIX + ".enabled", Boolean.class)
 				.orElse(true);
 
-		return location.startsWith(VaultConfigLocation.VAULT_PREFIX) && vaultEnabled;
+		return location.getValue().startsWith(VaultConfigLocation.VAULT_PREFIX) && vaultEnabled;
 	}
 
 	@Override
-	public List<VaultConfigLocation> resolve(ConfigDataLocationResolverContext context, String location,
-			boolean optional) throws ConfigDataLocationNotFoundException {
+	public List<VaultConfigLocation> resolve(ConfigDataLocationResolverContext context, ConfigDataLocation location)
+			throws ConfigDataLocationNotFoundException, ConfigDataResourceNotFoundException {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public List<VaultConfigLocation> resolveProfileSpecific(ConfigDataLocationResolverContext context, String location,
-			boolean optional, Profiles profiles) throws ConfigDataLocationNotFoundException {
+	public List<VaultConfigLocation> resolveProfileSpecific(ConfigDataLocationResolverContext context,
+			ConfigDataLocation location, Profiles profiles) throws ConfigDataLocationNotFoundException {
 
-		if (!location.startsWith(VaultConfigLocation.VAULT_PREFIX)) {
+		if (!location.getValue().startsWith(VaultConfigLocation.VAULT_PREFIX)) {
 			return Collections.emptyList();
 		}
 
@@ -105,16 +106,17 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 		if (location.equals(VaultConfigLocation.VAULT_PREFIX)
 				|| location.equals(VaultConfigLocation.VAULT_PREFIX + "//")) {
 			List<SecretBackendMetadata> sorted = getSecretBackends(context, profiles);
-			return sorted.stream().map(it -> new VaultConfigLocation(it, optional)).collect(Collectors.toList());
+			return sorted.stream().map(it -> new VaultConfigLocation(it, location.isOptional()))
+					.collect(Collectors.toList());
 		}
 
-		String contextPath = location.substring(VaultConfigLocation.VAULT_PREFIX.length());
+		String contextPath = location.getValue().substring(VaultConfigLocation.VAULT_PREFIX.length());
 
 		while (contextPath.startsWith("/")) {
 			contextPath = contextPath.substring(1);
 		}
 
-		return Collections.singletonList(new VaultConfigLocation(contextPath, optional));
+		return Collections.singletonList(new VaultConfigLocation(contextPath, location.isOptional()));
 	}
 
 	private static void registerVaultProperties(ConfigDataLocationResolverContext context) {
