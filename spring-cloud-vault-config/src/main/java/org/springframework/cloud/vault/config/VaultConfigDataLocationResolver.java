@@ -103,8 +103,8 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 
 		registerVaultProperties(context);
 
-		if (location.equals(VaultConfigLocation.VAULT_PREFIX)
-				|| location.equals(VaultConfigLocation.VAULT_PREFIX + "//")) {
+		if (location.getValue().equals(VaultConfigLocation.VAULT_PREFIX)
+				|| location.getValue().equals(VaultConfigLocation.VAULT_PREFIX + "//")) {
 			List<SecretBackendMetadata> sorted = getSecretBackends(context, profiles);
 			return sorted.stream().map(it -> new VaultConfigLocation(it, location.isOptional()))
 					.collect(Collectors.toList());
