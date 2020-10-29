@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.boot.DefaultBootstrapContext;
+import org.springframework.boot.context.config.ConfigDataLocation;
 import org.springframework.boot.context.config.ConfigDataLocationResolverContext;
 import org.springframework.boot.context.config.Profiles;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -57,9 +58,13 @@ public class VaultConfigDataLocationResolverUnitTests {
 
 		when(this.profilesMock.getActive()).thenReturn(Arrays.asList("a", "b"));
 
-		assertThat(resolver.resolveProfileSpecific(this.contextMock, "vault:", false, this.profilesMock)).hasSize(3);
+		assertThat(
+				resolver.resolveProfileSpecific(this.contextMock, ConfigDataLocation.of("vault:"), this.profilesMock))
+						.hasSize(3);
 
-		assertThat(resolver.resolveProfileSpecific(this.contextMock, "vault://", false, this.profilesMock)).hasSize(3);
+		assertThat(
+				resolver.resolveProfileSpecific(this.contextMock, ConfigDataLocation.of("vault://"), this.profilesMock))
+						.hasSize(3);
 	}
 
 	@Test
@@ -68,7 +73,7 @@ public class VaultConfigDataLocationResolverUnitTests {
 		VaultConfigDataLocationResolver resolver = new VaultConfigDataLocationResolver();
 
 		List<VaultConfigLocation> locations = resolver.resolveProfileSpecific(this.contextMock,
-				"vault://my/context/path", false, this.profilesMock);
+				ConfigDataLocation.of("vault://my/context/path"), this.profilesMock);
 
 		assertThat(locations).hasSize(1);
 		assertThat(locations.get(0)).hasToString("VaultConfigLocation [path='my/context/path', optional=false]");
