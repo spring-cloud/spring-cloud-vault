@@ -122,7 +122,14 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 	private static void registerVaultProperties(ConfigDataLocationResolverContext context) {
 
 		context.getBootstrapContext().registerIfAbsent(VaultProperties.class, ignore -> {
-			return context.getBinder().bindOrCreate(VaultProperties.PREFIX, VaultProperties.class);
+
+			VaultProperties vaultProperties = context.getBinder().bindOrCreate(VaultProperties.PREFIX,
+					VaultProperties.class);
+
+			vaultProperties.setApplicationName(context.getBinder().bind("spring.application.name", String.class)
+					.orElse(vaultProperties.getApplicationName()));
+
+			return vaultProperties;
 		});
 	}
 
@@ -168,7 +175,7 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 		Binder binder = context.getBinder();
 
 		kvProperties.setApplicationName(binder.bind("spring.cloud.vault.application-name", String.class)
-				.orElseGet(() -> binder.bind("spring.application-name", String.class).orElse("")));
+				.orElseGet(() -> binder.bind("spring.application.name", String.class).orElse("")));
 		kvProperties.setProfiles(profiles.getActive());
 
 		return kvProperties;
