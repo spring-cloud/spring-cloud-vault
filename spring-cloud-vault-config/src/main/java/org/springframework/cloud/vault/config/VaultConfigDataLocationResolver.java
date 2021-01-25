@@ -151,6 +151,7 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 
 		List<SecretBackendMetadata> sorted = new ArrayList<>(secretBackends);
 		AnnotationAwareOrderComparator.sort(sorted);
+		Collections.reverse(sorted);
 
 		return sorted;
 	}
