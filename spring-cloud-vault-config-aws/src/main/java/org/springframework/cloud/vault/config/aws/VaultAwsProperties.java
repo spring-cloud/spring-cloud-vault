@@ -24,6 +24,7 @@ import org.springframework.lang.Nullable;
  * Configuration properties for Vault using the AWS integration.
  *
  * @author Mark Paluch
+ * @author Kris Iyer
  */
 @ConfigurationProperties("spring.cloud.vault.aws")
 public class VaultAwsProperties implements VaultSecretBackendDescriptor {
@@ -45,6 +46,11 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 	private String backend = "aws";
 
 	/**
+	 * aws credential type
+	 */
+	private AwsCredentialType credentialType = AwsCredentialType.IAM_USER;
+
+	/**
 	 * Target property for the obtained access key.
 	 */
 	private String accessKeyProperty = "cloud.aws.credentials.accessKey";
@@ -54,9 +60,27 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 	 */
 	private String secretKeyProperty = "cloud.aws.credentials.secretKey";
 
+	/**
+	 * Target property for the obtained secret key.
+	 */
+	private String sessionTokenKeyProperty = "cloud.aws.credentials.sessionToken";
+
+	/**
+	 *
+	 * Role arn for assumed_role in case we have multiple roles associated with the vault
+	 * role
+	 */
+	private String roleArn;
+
+	/**
+	 * TTL for sts tokens. Defaults to whatever the vault Role may have for Max. Also
+	 * limited to what AWS supports to be the max for STS.
+	 */
+	private String ttl;
+
 	@Override
 	public boolean isEnabled() {
-		return this.enabled;
+		return (this.enabled);
 	}
 
 	public void setEnabled(boolean enabled) {
@@ -95,6 +119,38 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 
 	public void setSecretKeyProperty(String secretKeyProperty) {
 		this.secretKeyProperty = secretKeyProperty;
+	}
+
+	public AwsCredentialType getCredentialType() {
+		return credentialType;
+	}
+
+	public void setCredentialType(AwsCredentialType credentialType) {
+		this.credentialType = credentialType;
+	}
+
+	public String getSessionTokenKeyProperty() {
+		return sessionTokenKeyProperty;
+	}
+
+	public void setSessionTokenKeyProperty(String sessionTokenKeyProperty) {
+		this.sessionTokenKeyProperty = sessionTokenKeyProperty;
+	}
+
+	public String getRoleArn() {
+		return roleArn;
+	}
+
+	public void setRoleArn(String roleArn) {
+		this.roleArn = roleArn;
+	}
+
+	public String getTtl() {
+		return ttl;
+	}
+
+	public void setTtl(String ttl) {
+		this.ttl = ttl;
 	}
 
 }
