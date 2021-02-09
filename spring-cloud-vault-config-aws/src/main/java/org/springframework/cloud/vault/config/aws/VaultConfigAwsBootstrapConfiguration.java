@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.vault.config.LeasingSecretBackendMetadata;
 import org.springframework.cloud.vault.config.PropertyNameTransformer;
 import org.springframework.cloud.vault.config.SecretBackendMetadata;
 import org.springframework.cloud.vault.config.SecretBackendMetadataFactory;
@@ -28,12 +29,17 @@ import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.vault.core.lease.domain.RequestedSecret;
+import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
 import org.springframework.vault.core.util.PropertyTransformer;
 
 /**
  * Bootstrap configuration providing support for the AWS secret backend.
  *
  * @author Mark Paluch
+ * @author Kris Iyer
+ *
  */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(VaultAwsProperties.class)
@@ -57,6 +63,7 @@ public class VaultConfigAwsBootstrapConfiguration {
 		 * property names to names provided with
 		 * {@link VaultAwsProperties#getAccessKeyProperty()} and
 		 * {@link VaultAwsProperties#getSecretKeyProperty()}.
+		 * {@link VaultAwsProperties#getSessionTokenKeyProperty()}.
 		 * @param properties must not be {@literal null}.
 		 * @return the {@link SecretBackendMetadata}
 		 */
@@ -68,34 +75,100 @@ public class VaultConfigAwsBootstrapConfiguration {
 			transformer.addKeyTransformation("access_key", properties.getAccessKeyProperty());
 			transformer.addKeyTransformation("secret_key", properties.getSecretKeyProperty());
 
-			return new SecretBackendMetadata() {
+			if (properties.getCredentialType() == AwsCredentialType.ASSUMED_ROLE
+					|| properties.getCredentialType() == AwsCredentialType.FEDERATION_TOKEN) {
 
-				@Override
-				public String getName() {
-					return String.format("%s with Role %s", properties.getBackend(), properties.getRole());
-				}
+				// security token transformer for STS
+				transformer.addKeyTransformation("security_token", properties.getSessionTokenKeyProperty());
 
-				@Override
-				public String getPath() {
-					return String.format("%s/creds/%s", properties.getBackend(), properties.getRole());
-				}
+				return new LeasingSecretBackendMetadata() {
 
-				@Override
-				public PropertyTransformer getPropertyTransformer() {
-					return transformer;
-				}
+					@Override
+					public String getName() {
+						return String.format("%s with Role %s", properties.getBackend(), properties.getRole());
+					}
 
-				@Override
-				public Map<String, String> getVariables() {
+					@Override
+					public String getPath() {
+						String defaultPath = "%s/sts/%s";
 
-					Map<String, String> variables = new HashMap<>();
+						// do we have any ttl or role parameters configured?
+						if (StringUtils.hasText(properties.getTtl())
+								|| (properties.getCredentialType() == AwsCredentialType.ASSUMED_ROLE
+										&& StringUtils.hasText(properties.getRoleArn()))) {
+							defaultPath += "?";
+						}
+						// ttl for assumed_role or federation_token
+						// pass through to let aws take care of min and max validations
+						// per
+						// the vault role
+						if (StringUtils.hasText(properties.getTtl())) {
+							defaultPath += "ttl=" + properties.getTtl() + "&";
+						}
 
-					variables.put("backend", properties.getBackend());
-					variables.put("key", String.format("creds/%s", properties.getRole()));
+						// role_arn for assumed_role for vault role that has multiple role
+						// associations.
+						if (properties.getCredentialType() == AwsCredentialType.ASSUMED_ROLE
+								&& StringUtils.hasText(properties.getRoleArn())) {
+							defaultPath += "role_arn=" + properties.getRoleArn();
+						}
+						return String.format(defaultPath, properties.getBackend(), properties.getRole());
+					}
 
-					return variables;
-				}
-			};
+					@Override
+					public PropertyTransformer getPropertyTransformer() {
+						return transformer;
+					}
+
+					@Override
+					public Map<String, String> getVariables() {
+
+						Map<String, String> variables = new HashMap<>();
+
+						variables.put("backend", properties.getBackend());
+						variables.put("key", String.format("sts/%s", properties.getRole()));
+
+						return variables;
+					}
+
+					@Override
+					public Mode getLeaseMode() {
+						return RequestedSecret.Mode.ROTATE;
+					}
+				};
+
+			}
+			else {
+
+				return new SecretBackendMetadata() {
+
+					@Override
+					public String getName() {
+						return String.format("%s with Role %s", properties.getBackend(), properties.getRole());
+					}
+
+					@Override
+					public String getPath() {
+						return String.format("%s/creds/%s", properties.getBackend(), properties.getRole());
+					}
+
+					@Override
+					public PropertyTransformer getPropertyTransformer() {
+						return transformer;
+					}
+
+					@Override
+					public Map<String, String> getVariables() {
+
+						Map<String, String> variables = new HashMap<>();
+
+						variables.put("backend", properties.getBackend());
+						variables.put("key", String.format("creds/%s", properties.getRole()));
+
+						return variables;
+					}
+				};
+			}
 		}
 
 		@Override
