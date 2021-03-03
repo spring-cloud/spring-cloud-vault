@@ -20,25 +20,34 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.interceptor.RetryInterceptorBuilder;
+import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.ClassUtils;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
@@ -157,15 +166,37 @@ public class VaultAutoConfiguration {
 	@ConditionalOnMissingBean(VaultOperations.class)
 	public VaultTemplate vaultTemplate(ClientFactoryWrapper clientFactoryWrapper) {
 
-		VaultProperties.AuthenticationMethod authentication = this.vaultProperties.getAuthentication();
 		RestTemplateBuilder restTemplateBuilder = restTemplateBuilder(
 				clientFactoryWrapper.getClientHttpRequestFactory());
 
+		if (ClassUtils.isPresent("org.springframework.retry.support.RetryTemplate", getClass().getClassLoader())
+				&& this.vaultProperties.isFailFast() && this.applicationContext.containsBean("vaultRetryInterceptor")) {
+			return buildRetryableVaultTemplate(restTemplateBuilder);
+		}
+		else {
+			return buildVaultTemplate(restTemplateBuilder);
+		}
+	}
+
+	private VaultTemplate buildVaultTemplate(RestTemplateBuilder restTemplateBuilder) {
+		VaultProperties.AuthenticationMethod authentication = this.vaultProperties.getAuthentication();
 		if (authentication == VaultProperties.AuthenticationMethod.NONE) {
 			return new VaultTemplate(restTemplateBuilder);
 		}
+		else {
+			return new VaultTemplate(restTemplateBuilder, this.applicationContext.getBean(SessionManager.class));
+		}
+	}
 
-		return new VaultTemplate(restTemplateBuilder, this.applicationContext.getBean(SessionManager.class));
+	private VaultTemplate buildRetryableVaultTemplate(RestTemplateBuilder restTemplateBuilder) {
+		VaultProperties.AuthenticationMethod authentication = this.vaultProperties.getAuthentication();
+		if (authentication == VaultProperties.AuthenticationMethod.NONE) {
+			return new RetryableVaultTemplate(restTemplateBuilder);
+		}
+		else {
+			return new RetryableVaultTemplate(restTemplateBuilder,
+					this.applicationContext.getBean(SessionManager.class));
+		}
 	}
 
 	/**
@@ -230,6 +261,24 @@ public class VaultAutoConfiguration {
 				externalRestOperations);
 
 		return factory.createClientAuthentication();
+	}
+
+	@ConditionalOnProperty("spring.cloud.vault.fail-fast")
+	@ConditionalOnClass({ Retryable.class, Aspect.class, AopAutoConfiguration.class })
+	@Configuration(proxyBeanMethods = false)
+	@EnableRetry(proxyTargetClass = true)
+	@Import(AopAutoConfiguration.class)
+	protected static class RetryConfiguration {
+
+		@Bean
+		@ConditionalOnMissingBean(name = "vaultRetryInterceptor")
+		public RetryOperationsInterceptor vaultRetryInterceptor(VaultProperties properties) {
+			VaultProperties.Retry retryProperties = properties.getRetry();
+			return RetryInterceptorBuilder.stateless().backOffOptions(retryProperties.getInitialInterval(),
+					retryProperties.getMultiplier(), retryProperties.getMaxInterval())
+					.maxAttempts(retryProperties.getMaxAttempts()).build();
+		}
+
 	}
 
 	/**
