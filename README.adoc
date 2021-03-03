@@ -269,7 +269,7 @@ If the application imports the `spring-boot-starter-actuator` project, the statu
 The vault health indicator can be enabled or disabled through the property `management.health.vault.enabled` (default to `true`).
 
 NOTE: With Spring Cloud Vault 3.0 and Spring Boot 2.4, the bootstrap context initialization (`bootstrap.yml`, `bootstrap.properties`) of property sources was deprecated.
-Instead, Spring Cloud Vault favors Spring Boot's Config Data API which allows importing configuration from Vault.
+Instead, Spring Cloud Vault favors Spring Boot's Config Data API which allows importing configuration from Vault. With Spring Boot Config Data approach, you need to set the `spring.config.import` property in order to bind to Vault. You can read more about it in the <<vault.configdata.locations, Config Data Locations section>>.
 You can enable the bootstrap context either by setting the configuration property `spring.cloud.bootstrap.enabled=true` or by including the dependency `org.springframework.cloud:spring-cloud-starter-bootstrap`.
 
 === Authentication
@@ -293,6 +293,8 @@ spring.config.import: vault://
 WARNING: Consider carefully your security requirements.
 Static token authentication is fine if you want quickly get started with Vault, but a static token is not protected any further.
 Any disclosure to unintended parties allows Vault use with the associated token roles.
+
+
 
 
 == Building
