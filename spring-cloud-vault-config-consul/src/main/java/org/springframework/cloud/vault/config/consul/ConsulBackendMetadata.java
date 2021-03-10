@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.cloud.vault.config.LeasingSecretBackendMetadata;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent;
@@ -33,7 +34,7 @@ import org.springframework.vault.core.util.PropertyTransformer;
 /**
  * @author Mark Paluch
  */
-class ConsulBackendMetadata implements LeasingSecretBackendMetadata {
+class ConsulBackendMetadata implements LeasingSecretBackendMetadata, ApplicationEventPublisherAware {
 
 	private final Log log = LogFactory.getLog(getClass());
 
@@ -41,13 +42,18 @@ class ConsulBackendMetadata implements LeasingSecretBackendMetadata {
 
 	private final PropertyTransformer transformer;
 
-	private final ApplicationEventPublisher eventPublisher;
+	private ApplicationEventPublisher eventPublisher;
 
 	ConsulBackendMetadata(VaultConsulProperties properties, PropertyTransformer transformer,
 			ApplicationEventPublisher eventPublisher) {
 		this.properties = properties;
 		this.transformer = transformer;
 		this.eventPublisher = eventPublisher;
+	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+		this.eventPublisher = applicationEventPublisher;
 	}
 
 	@Override
