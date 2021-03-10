@@ -16,22 +16,16 @@
 
 package org.springframework.cloud.vault.config;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Base64;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.cloud.vault.config.VaultProperties.AppRoleProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AwsIamProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AzureMsiProperties;
-import org.springframework.cloud.vault.config.VaultProperties.GcpCredentials;
-import org.springframework.cloud.vault.config.VaultProperties.GcpIamProperties;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -58,10 +52,6 @@ import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
 import org.springframework.vault.authentication.GcpComputeAuthentication;
 import org.springframework.vault.authentication.GcpComputeAuthenticationOptions;
 import org.springframework.vault.authentication.GcpComputeAuthenticationOptions.GcpComputeAuthenticationOptionsBuilder;
-import org.springframework.vault.authentication.GcpCredentialSupplier;
-import org.springframework.vault.authentication.GcpIamAuthentication;
-import org.springframework.vault.authentication.GcpIamAuthenticationOptions;
-import org.springframework.vault.authentication.GcpIamAuthenticationOptions.GcpIamAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.IpAddressUserId;
 import org.springframework.vault.authentication.KubernetesAuthentication;
 import org.springframework.vault.authentication.KubernetesAuthenticationOptions;
@@ -84,6 +74,13 @@ import org.springframework.web.client.RestOperations;
  * @since 1.1
  */
 class ClientAuthenticationFactory {
+
+	private static final boolean GOOGLE_CREDENTIAL_AVAILABLE = ClassUtils.isPresent(
+			"com.google.api.client.googleapis.auth.oauth2.GoogleCredential",
+			ClientAuthenticationFactory.class.getClassLoader());
+
+	private static final boolean GOOGLE_CREDENTIALS_AVAILABLE = ClassUtils
+			.isPresent("com.google.auth.oauth2.GoogleCredentials", ClientAuthenticationFactory.class.getClassLoader());
 
 	private final VaultProperties vaultProperties;
 
@@ -342,42 +339,16 @@ class ClientAuthenticationFactory {
 
 	private ClientAuthentication gcpIamAuthentication(VaultProperties vaultProperties) {
 
-		VaultProperties.GcpIamProperties gcp = vaultProperties.getGcpIam();
-
-		Assert.hasText(gcp.getRole(), "Role (spring.cloud.vault.gcp-iam.role) must not be empty");
-
-		GcpIamAuthenticationOptionsBuilder builder = GcpIamAuthenticationOptions.builder().path(gcp.getGcpPath())
-				.role(gcp.getRole()).jwtValidity(gcp.getJwtValidity());
-
-		if (StringUtils.hasText(gcp.getProjectId())) {
-			builder.projectId(gcp.getProjectId());
+		if (GOOGLE_CREDENTIAL_AVAILABLE) {
+			return GcpIamAuthenticationFactory.create(vaultProperties, this.restOperations);
 		}
 
-		if (StringUtils.hasText(gcp.getServiceAccountId())) {
-			builder.serviceAccountId(gcp.getServiceAccountId());
+		if (GOOGLE_CREDENTIALS_AVAILABLE) {
+			return GcpIamCredentialsAuthenticationFactory.create(vaultProperties, this.restOperations);
 		}
 
-		GcpCredentialSupplier supplier = () -> getGoogleCredential(gcp);
-		builder.credential(supplier.get());
-
-		GcpIamAuthenticationOptions options = builder.build();
-
-		return new GcpIamAuthentication(options, this.restOperations);
-	}
-
-	private GoogleCredential getGoogleCredential(GcpIamProperties gcp) throws IOException {
-
-		GcpCredentials credentialProperties = gcp.getCredentials();
-		if (credentialProperties.getLocation() != null) {
-			return GoogleCredential.fromStream(credentialProperties.getLocation().getInputStream());
-		}
-
-		if (StringUtils.hasText(credentialProperties.getEncodedKey())) {
-			return GoogleCredential.fromStream(
-					new ByteArrayInputStream(Base64.getDecoder().decode(credentialProperties.getEncodedKey())));
-		}
-
-		return GoogleCredential.getApplicationDefault();
+		throw new IllegalStateException(
+				"Cannot create authentication mechanism for GCP IAM. This method requires one of the following dependencies: google-auth-library-oauth2-http or google-api-client (deprecated).");
 	}
 
 	private ClientAuthentication kubernetesAuthentication(VaultProperties vaultProperties) {

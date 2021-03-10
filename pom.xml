@@ -49,6 +49,7 @@
 		<bcpkix-jdk15on.version>1.67</bcpkix-jdk15on.version>
 
 		<google-api-services-iam.version>v1-rev20201112-1.31.0</google-api-services-iam.version>
+		<google-cloud-iamcredentials.version>1.2.2</google-cloud-iamcredentials.version>
 		<google-auth-library-oauth2-http.version>0.22.2</google-auth-library-oauth2-http.version>
 	</properties>
 
@@ -118,6 +119,27 @@
 				<artifactId>google-api-services-iam</artifactId>
 				<version>${google-api-services-iam.version}</version>
 				<optional>true</optional>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>google-cloud-iamcredentials</artifactId>
+				<version>${google-cloud-iamcredentials.version}</version>
+				<optional>true</optional>
+				<exclusions>
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.httpcomponents</groupId>
+						<artifactId>httpclient</artifactId>
+					</exclusion>
+					<exclusion>
+						<artifactId>commons-logging</artifactId>
+						<groupId>commons-logging</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
