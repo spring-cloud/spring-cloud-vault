@@ -17,11 +17,17 @@
 package org.springframework.cloud.vault.config;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import org.apache.commons.logging.Log;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.BootstrapContext;
@@ -32,6 +38,7 @@ import org.springframework.boot.context.config.ConfigData;
 import org.springframework.boot.context.config.ConfigDataLoader;
 import org.springframework.boot.context.config.ConfigDataLoaderContext;
 import org.springframework.boot.context.config.ConfigDataLocationNotFoundException;
+import org.springframework.boot.logging.DeferredLogFactory;
 import org.springframework.cloud.vault.config.VaultAutoConfiguration.TaskSchedulerWrapper;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -39,6 +46,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.PropertySource;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -48,6 +56,7 @@ import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.ReactiveSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.VaultTokenSupplier;
+import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.client.RestTemplateBuilder;
 import org.springframework.vault.client.RestTemplateFactory;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
@@ -91,6 +100,13 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			"org.springframework.web.reactive.function.client.WebClient", VaultConfigDataLoader.class.getClassLoader());
 
 	private final static boolean REGISTER_REACTIVE_INFRASTRUCTURE = FLUX_AVAILABLE && WEBCLIENT_AVAILABLE;
+
+	private final DeferredLogFactory logFactory;
+
+	public VaultConfigDataLoader(DeferredLogFactory logFactory) {
+		this.logFactory = logFactory;
+		reconfigureLoggers(logFactory);
+	}
 
 	@Override
 	public ConfigData load(ConfigDataLoaderContext context, VaultConfigLocation location)
@@ -154,7 +170,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 	private void registerImperativeInfrastructure(ConfigurableBootstrapContext bootstrap,
 			VaultProperties vaultProperties) {
 
-		ImperativeInfrastructure infra = new ImperativeInfrastructure(bootstrap, vaultProperties);
+		ImperativeInfrastructure infra = new ImperativeInfrastructure(bootstrap, vaultProperties, logFactory);
 
 		infra.registerClientHttpRequestFactoryWrapper();
 		infra.registerRestTemplateBuilder();
@@ -183,7 +199,8 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 	private void registerReactiveInfrastructure(ConfigurableBootstrapContext bootstrap,
 			VaultProperties vaultProperties) {
 
-		ReactiveInfrastructure reactiveInfrastructure = new ReactiveInfrastructure(bootstrap, vaultProperties);
+		ReactiveInfrastructure reactiveInfrastructure = new ReactiveInfrastructure(bootstrap, vaultProperties,
+				logFactory);
 		reactiveInfrastructure.registerClientHttpConnector();
 		reactiveInfrastructure.registerWebClientBuilder();
 		reactiveInfrastructure.registerWebClientFactory();
@@ -351,6 +368,50 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 		});
 	}
 
+	static void reconfigureLoggers(DeferredLogFactory logFactory) {
+
+		List<Class<?>> loggers = Arrays.asList(ClientHttpRequestFactoryFactory.class, VaultPropertySource.class,
+				LeaseAwareVaultPropertySource.class,
+				forName("org.springframework.vault.core.lease.SecretLeaseContainer$LeaseRenewalScheduler"),
+				forName("org.springframework.vault.core.lease.SecretLeaseEventPublisher$LoggingErrorListener"));
+
+		loggers.forEach(it -> reconfigureLogger(it, logFactory));
+	}
+
+	static void reconfigureLogger(Class<?> type, DeferredLogFactory logFactory) {
+
+		ReflectionUtils.doWithFields(type, field -> {
+
+			field.setAccessible(true);
+			field.set(null, logFactory.getLog(type));
+
+		}, VaultConfigDataLoader::isUpdateableLogField);
+	}
+
+	static void reconfigureLogger(Object object, DeferredLogFactory logFactory) {
+
+		ReflectionUtils.doWithFields(object.getClass(), field -> {
+
+			field.setAccessible(true);
+			field.set(object, logFactory.getLog(object.getClass()));
+
+		}, VaultConfigDataLoader::isUpdateableLogField);
+	}
+
+	static boolean isUpdateableLogField(Field field) {
+		return !Modifier.isFinal(field.getModifiers()) && field.getType().isAssignableFrom(Log.class);
+	}
+
+	@Nullable
+	static Class<?> forName(String name) {
+		try {
+			return ClassUtils.forName(name, VaultConfigDataLocationResolver.class.getClassLoader());
+		}
+		catch (ClassNotFoundException e) {
+			return null;
+		}
+	}
+
 	/**
 	 * Support class to register imperative infrastructure bootstrap instances and beans.
 	 *
@@ -366,11 +427,15 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 		private final VaultEndpointProvider endpointProvider;
 
-		ImperativeInfrastructure(ConfigurableBootstrapContext bootstrap, VaultProperties vaultProperties) {
+		private final DeferredLogFactory logFactory;
+
+		ImperativeInfrastructure(ConfigurableBootstrapContext bootstrap, VaultProperties vaultProperties,
+				DeferredLogFactory logFactory) {
 			this.bootstrap = bootstrap;
 			this.vaultProperties = vaultProperties;
 			this.configuration = new VaultConfiguration(vaultProperties);
 			this.endpointProvider = SimpleVaultEndpointProvider.of(this.configuration.createVaultEndpoint());
+			this.logFactory = logFactory;
 		}
 
 		void registerClientHttpRequestFactoryWrapper() {
@@ -422,10 +487,14 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 		}
 
 		void registerVaultSessionManager() {
-			registerIfAbsent(this.bootstrap, "vaultSessionManager", SessionManager.class,
-					ctx -> this.configuration.createSessionManager(ctx.get(ClientAuthentication.class),
-							() -> ctx.get(TaskSchedulerWrapper.class).getTaskScheduler(),
-							ctx.get(RestTemplateFactory.class)));
+			registerIfAbsent(this.bootstrap, "vaultSessionManager", SessionManager.class, ctx -> {
+				SessionManager sessionManager = this.configuration.createSessionManager(
+						ctx.get(ClientAuthentication.class),
+						() -> ctx.get(TaskSchedulerWrapper.class).getTaskScheduler(),
+						ctx.get(RestTemplateFactory.class));
+				reconfigureLogger(sessionManager, this.logFactory);
+				return sessionManager;
+			});
 		}
 
 	}
@@ -442,11 +511,15 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 		private final VaultEndpointProvider endpointProvider;
 
-		ReactiveInfrastructure(ConfigurableBootstrapContext bootstrap, VaultProperties vaultProperties) {
+		private final DeferredLogFactory logFactory;
+
+		ReactiveInfrastructure(ConfigurableBootstrapContext bootstrap, VaultProperties vaultProperties,
+				DeferredLogFactory logFactory) {
 			this.bootstrap = bootstrap;
 			this.configuration = new VaultReactiveConfiguration(vaultProperties);
 			this.endpointProvider = SimpleVaultEndpointProvider
 					.of(new VaultConfiguration(vaultProperties).createVaultEndpoint());
+			this.logFactory = logFactory;
 		}
 
 		void registerClientHttpConnector() {
@@ -496,8 +569,12 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 		}
 
 		void registerSessionManager() {
-			registerIfAbsent(this.bootstrap, "vaultSessionManager", SessionManager.class,
-					ctx -> this.configuration.createSessionManager(ctx.get(ReactiveSessionManager.class)));
+			registerIfAbsent(this.bootstrap, "vaultSessionManager", SessionManager.class, ctx -> {
+				SessionManager sessionManager = this.configuration
+						.createSessionManager(ctx.get(ReactiveSessionManager.class));
+				reconfigureLogger(sessionManager, this.logFactory);
+				return sessionManager;
+			});
 		}
 
 	}
