@@ -80,7 +80,7 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 
 	@Override
 	public boolean isEnabled() {
-		return (this.enabled);
+		return this.enabled;
 	}
 
 	public void setEnabled(boolean enabled) {
