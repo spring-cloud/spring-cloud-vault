@@ -33,6 +33,7 @@ import org.springframework.boot.context.config.ConfigDataLoader;
 import org.springframework.boot.context.config.ConfigDataLoaderContext;
 import org.springframework.boot.context.config.ConfigDataLocationNotFoundException;
 import org.springframework.cloud.vault.config.VaultAutoConfiguration.TaskSchedulerWrapper;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.PropertySource;
@@ -120,6 +121,14 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 	private ConfigData loadConfigData(VaultConfigLocation location, ConfigurableBootstrapContext bootstrap,
 			VaultProperties vaultProperties) {
+
+		if (location.getSecretBackendMetadata() instanceof ApplicationEventPublisherAware) {
+
+			bootstrap.addCloseListener(event -> {
+				((ApplicationEventPublisherAware) location.getSecretBackendMetadata())
+						.setApplicationEventPublisher(event.getApplicationContext());
+			});
+		}
 
 		if (vaultProperties.getConfig().getLifecycle().isEnabled()) {
 
