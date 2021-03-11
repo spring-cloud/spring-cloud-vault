@@ -20,9 +20,13 @@
 |spring.cloud.vault.aws-iam.server-name |  | Name of the server used to set {@code X-Vault-AWS-IAM-Server-ID} header in the headers of login requests.
 |spring.cloud.vault.aws.access-key-property | `cloud.aws.credentials.accessKey` | Target property for the obtained access key.
 |spring.cloud.vault.aws.backend | `aws` | aws backend path.
+|spring.cloud.vault.aws.credential-type |  | aws credential type
 |spring.cloud.vault.aws.enabled | `false` | Enable aws backend usage.
 |spring.cloud.vault.aws.role |  | Role name for credentials.
+|spring.cloud.vault.aws.role-arn |  | Role arn for assumed_role in case we have multiple roles associated with the vault role. @since 3.0.2
 |spring.cloud.vault.aws.secret-key-property | `cloud.aws.credentials.secretKey` | Target property for the obtained secret key.
+|spring.cloud.vault.aws.session-token-key-property | `cloud.aws.credentials.sessionToken` | Target property for the obtained secret key.
+|spring.cloud.vault.aws.ttl | `0` | TTL for sts tokens. Defaults to whatever the vault Role may have for Max. Also limited to what AWS supports to be the max for STS. @since 3.0.2
 |spring.cloud.vault.azure-msi.azure-path | `azure` | Mount path of the Azure MSI authentication backend.
 |spring.cloud.vault.azure-msi.identity-token-service |  | Identity token service URI. @since 3.0
 |spring.cloud.vault.azure-msi.metadata-service |  | Instance metadata service URI. @since 3.0
