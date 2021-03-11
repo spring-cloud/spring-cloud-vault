@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.vault.config.aws;
 
+import java.time.Duration;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 import org.springframework.lang.Nullable;
@@ -66,17 +68,19 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 	private String sessionTokenKeyProperty = "cloud.aws.credentials.sessionToken";
 
 	/**
-	 *
 	 * Role arn for assumed_role in case we have multiple roles associated with the vault
-	 * role
+	 * role.
+	 * @since 3.0.2
 	 */
+	@Nullable
 	private String roleArn;
 
 	/**
 	 * TTL for sts tokens. Defaults to whatever the vault Role may have for Max. Also
 	 * limited to what AWS supports to be the max for STS.
+	 * @since 3.0.2
 	 */
-	private String ttl;
+	private Duration ttl = Duration.ZERO;
 
 	@Override
 	public boolean isEnabled() {
@@ -122,7 +126,7 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 	}
 
 	public AwsCredentialType getCredentialType() {
-		return credentialType;
+		return this.credentialType;
 	}
 
 	public void setCredentialType(AwsCredentialType credentialType) {
@@ -130,26 +134,27 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 	}
 
 	public String getSessionTokenKeyProperty() {
-		return sessionTokenKeyProperty;
+		return this.sessionTokenKeyProperty;
 	}
 
 	public void setSessionTokenKeyProperty(String sessionTokenKeyProperty) {
 		this.sessionTokenKeyProperty = sessionTokenKeyProperty;
 	}
 
+	@Nullable
 	public String getRoleArn() {
-		return roleArn;
+		return this.roleArn;
 	}
 
 	public void setRoleArn(String roleArn) {
 		this.roleArn = roleArn;
 	}
 
-	public String getTtl() {
-		return ttl;
+	public Duration getTtl() {
+		return this.ttl;
 	}
 
-	public void setTtl(String ttl) {
+	public void setTtl(Duration ttl) {
 		this.ttl = ttl;
 	}
 

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-/**
- * @author Kris Iyer
- *
- * Supported Aws credential types.
- */
 package org.springframework.cloud.vault.config.aws;
 
+/**
+ * Supported AWS credential types.
+ *
+ * @author Kris Iyer
+ * @since 3.0.2
+ */
 public enum AwsCredentialType {
 
 	IAM_USER, ASSUMED_ROLE, FEDERATION_TOKEN

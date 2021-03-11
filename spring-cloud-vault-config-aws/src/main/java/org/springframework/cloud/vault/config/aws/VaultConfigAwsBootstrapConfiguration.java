@@ -18,6 +18,7 @@ package org.springframework.cloud.vault.config.aws;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -30,7 +31,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
 import org.springframework.vault.core.util.PropertyTransformer;
 
@@ -39,7 +39,6 @@ import org.springframework.vault.core.util.PropertyTransformer;
  *
  * @author Mark Paluch
  * @author Kris Iyer
- *
  */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(VaultAwsProperties.class)
@@ -81,93 +80,10 @@ public class VaultConfigAwsBootstrapConfiguration {
 				// security token transformer for STS
 				transformer.addKeyTransformation("security_token", properties.getSessionTokenKeyProperty());
 
-				return new LeasingSecretBackendMetadata() {
-
-					@Override
-					public String getName() {
-						return String.format("%s with Role %s", properties.getBackend(), properties.getRole());
-					}
-
-					@Override
-					public String getPath() {
-						String defaultPath = "%s/sts/%s";
-
-						// do we have any ttl or role parameters configured?
-						if (StringUtils.hasText(properties.getTtl())
-								|| (properties.getCredentialType() == AwsCredentialType.ASSUMED_ROLE
-										&& StringUtils.hasText(properties.getRoleArn()))) {
-							defaultPath += "?";
-						}
-						// ttl for assumed_role or federation_token
-						// pass through to let aws take care of min and max validations
-						// per
-						// the vault role
-						if (StringUtils.hasText(properties.getTtl())) {
-							defaultPath += "ttl=" + properties.getTtl() + "&";
-						}
-
-						// role_arn for assumed_role for vault role that has multiple role
-						// associations.
-						if (properties.getCredentialType() == AwsCredentialType.ASSUMED_ROLE
-								&& StringUtils.hasText(properties.getRoleArn())) {
-							defaultPath += "role_arn=" + properties.getRoleArn();
-						}
-						return String.format(defaultPath, properties.getBackend(), properties.getRole());
-					}
-
-					@Override
-					public PropertyTransformer getPropertyTransformer() {
-						return transformer;
-					}
-
-					@Override
-					public Map<String, String> getVariables() {
-
-						Map<String, String> variables = new HashMap<>();
-
-						variables.put("backend", properties.getBackend());
-						variables.put("key", String.format("sts/%s", properties.getRole()));
-
-						return variables;
-					}
-
-					@Override
-					public Mode getLeaseMode() {
-						return RequestedSecret.Mode.ROTATE;
-					}
-				};
-
+				return new AwsStsLeasingSecretBackendMetadata(properties, transformer);
 			}
 			else {
-
-				return new SecretBackendMetadata() {
-
-					@Override
-					public String getName() {
-						return String.format("%s with Role %s", properties.getBackend(), properties.getRole());
-					}
-
-					@Override
-					public String getPath() {
-						return String.format("%s/creds/%s", properties.getBackend(), properties.getRole());
-					}
-
-					@Override
-					public PropertyTransformer getPropertyTransformer() {
-						return transformer;
-					}
-
-					@Override
-					public Map<String, String> getVariables() {
-
-						Map<String, String> variables = new HashMap<>();
-
-						variables.put("backend", properties.getBackend());
-						variables.put("key", String.format("creds/%s", properties.getRole()));
-
-						return variables;
-					}
-				};
+				return new AwsLeasingSecretBackendMetadata(properties, transformer);
 			}
 		}
 
@@ -179,6 +95,109 @@ public class VaultConfigAwsBootstrapConfiguration {
 		@Override
 		public boolean supports(VaultSecretBackendDescriptor backendDescriptor) {
 			return backendDescriptor instanceof VaultAwsProperties;
+		}
+
+		private static class AwsStsLeasingSecretBackendMetadata implements LeasingSecretBackendMetadata {
+
+			private final VaultAwsProperties properties;
+
+			private final PropertyNameTransformer transformer;
+
+			AwsStsLeasingSecretBackendMetadata(VaultAwsProperties properties, PropertyNameTransformer transformer) {
+				this.properties = properties;
+				this.transformer = transformer;
+			}
+
+			@Override
+			public String getName() {
+				return String.format("%s with Role %s", this.properties.getBackend(), this.properties.getRole());
+			}
+
+			@Override
+			public String getPath() {
+
+				String defaultPath = "%s/sts/%s";
+				StringJoiner joiner = new StringJoiner("&");
+
+				// ttl for assumed_role or federation_token
+				// pass through to let aws take care of min and max validations
+				// per the vault role
+				if (!this.properties.getTtl().isZero()) {
+					joiner.add("ttl=" + this.properties.getTtl().toMillis() + "ms");
+				}
+
+				// role_arn for assumed_role for vault role that has multiple role
+				// associations.
+				if (this.properties.getCredentialType() == AwsCredentialType.ASSUMED_ROLE
+						&& StringUtils.hasText(this.properties.getRoleArn())) {
+					joiner.add("role_arn=" + this.properties.getRoleArn());
+				}
+
+				String pathToUse = joiner.length() == 0 ? defaultPath : defaultPath + "?" + joiner;
+
+				return String.format(pathToUse, this.properties.getBackend(), this.properties.getRole());
+			}
+
+			@Override
+			public PropertyTransformer getPropertyTransformer() {
+				return this.transformer;
+			}
+
+			@Override
+			public Map<String, String> getVariables() {
+
+				Map<String, String> variables = new HashMap<>();
+
+				variables.put("backend", this.properties.getBackend());
+				variables.put("key", String.format("sts/%s", this.properties.getRole()));
+
+				return variables;
+			}
+
+			@Override
+			public Mode getLeaseMode() {
+				return Mode.ROTATE;
+			}
+
+		}
+
+		private static class AwsLeasingSecretBackendMetadata implements SecretBackendMetadata {
+
+			private final VaultAwsProperties properties;
+
+			private final PropertyNameTransformer transformer;
+
+			AwsLeasingSecretBackendMetadata(VaultAwsProperties properties, PropertyNameTransformer transformer) {
+				this.properties = properties;
+				this.transformer = transformer;
+			}
+
+			@Override
+			public String getName() {
+				return String.format("%s with Role %s", this.properties.getBackend(), this.properties.getRole());
+			}
+
+			@Override
+			public String getPath() {
+				return String.format("%s/creds/%s", this.properties.getBackend(), this.properties.getRole());
+			}
+
+			@Override
+			public PropertyTransformer getPropertyTransformer() {
+				return this.transformer;
+			}
+
+			@Override
+			public Map<String, String> getVariables() {
+
+				Map<String, String> variables = new HashMap<>();
+
+				variables.put("backend", this.properties.getBackend());
+				variables.put("key", String.format("creds/%s", this.properties.getRole()));
+
+				return variables;
+			}
+
 		}
 
 	}
