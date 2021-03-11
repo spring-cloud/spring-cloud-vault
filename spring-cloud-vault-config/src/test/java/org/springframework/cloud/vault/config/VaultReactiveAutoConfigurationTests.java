@@ -28,6 +28,7 @@ import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.vault.authentication.AuthenticationSteps;
@@ -45,8 +46,12 @@ import org.springframework.vault.core.ReactiveVaultOperations;
 import org.springframework.vault.core.ReactiveVaultTemplate;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link VaultReactiveAutoConfiguration}.
@@ -184,6 +189,24 @@ public class VaultReactiveAutoConfigurationTests {
 				});
 	}
 
+	@Test
+	public void shouldConsiderCustomConnector() {
+
+		this.contextRunner
+				.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
+						"spring.cloud.vault.session.lifecycle.enabled=false")
+				.withUserConfiguration(CustomConnector.class)
+				.withBean("vaultTokenSupplier", VaultTokenSupplier.class,
+						() -> () -> Mono.just(VaultToken.of("foo".toCharArray())))
+				.withBean("taskSchedulerWrapper", VaultAutoConfiguration.TaskSchedulerWrapper.class,
+						() -> new VaultAutoConfiguration.TaskSchedulerWrapper(new ThreadPoolTaskScheduler()))
+				.run(context -> {
+
+					ReactiveVaultOperations operations = context.getBean(ReactiveVaultOperations.class);
+					operations.delete("foo").as(StepVerifier::create).verifyError(WebClientRequestException.class);
+				});
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	static class AuthenticationFactoryConfiguration {
 
@@ -230,6 +253,19 @@ public class VaultReactiveAutoConfigurationTests {
 
 				return vaultEndpoint;
 			});
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	static class CustomConnector {
+
+		@Bean
+		VaultReactiveAutoConfiguration.ClientHttpConnectorWrapper myWrapper() {
+			ClientHttpConnector mock = mock(ClientHttpConnector.class);
+			when(mock.connect(any(), any(), any())).thenReturn(Mono.error(new UnsupportedOperationException()));
+
+			return new VaultReactiveAutoConfiguration.ClientHttpConnectorWrapper(mock);
 		}
 
 	}

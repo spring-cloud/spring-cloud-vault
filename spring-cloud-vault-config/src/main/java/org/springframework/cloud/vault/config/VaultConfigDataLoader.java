@@ -40,12 +40,12 @@ import org.springframework.boot.context.config.ConfigDataLoaderContext;
 import org.springframework.boot.context.config.ConfigDataLocationNotFoundException;
 import org.springframework.boot.logging.DeferredLogFactory;
 import org.springframework.cloud.vault.config.VaultAutoConfiguration.TaskSchedulerWrapper;
+import org.springframework.cloud.vault.config.VaultReactiveAutoConfiguration.ClientHttpConnectorWrapper;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.PropertySource;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.ClassUtils;
@@ -170,7 +170,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 	private void registerImperativeInfrastructure(ConfigurableBootstrapContext bootstrap,
 			VaultProperties vaultProperties) {
 
-		ImperativeInfrastructure infra = new ImperativeInfrastructure(bootstrap, vaultProperties, logFactory);
+		ImperativeInfrastructure infra = new ImperativeInfrastructure(bootstrap, vaultProperties, this.logFactory);
 
 		infra.registerClientHttpRequestFactoryWrapper();
 		infra.registerRestTemplateBuilder();
@@ -200,8 +200,8 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			VaultProperties vaultProperties) {
 
 		ReactiveInfrastructure reactiveInfrastructure = new ReactiveInfrastructure(bootstrap, vaultProperties,
-				logFactory);
-		reactiveInfrastructure.registerClientHttpConnector();
+				this.logFactory);
+		reactiveInfrastructure.registerClientHttpConnectorWrapper();
 		reactiveInfrastructure.registerWebClientBuilder();
 		reactiveInfrastructure.registerWebClientFactory();
 
@@ -522,22 +522,22 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			this.logFactory = logFactory;
 		}
 
-		void registerClientHttpConnector() {
-			// not a bean
-			this.bootstrap.registerIfAbsent(ClientHttpConnector.class,
-					ctx -> this.configuration.createClientHttpConnector());
+		void registerClientHttpConnectorWrapper() {
+			registerIfAbsent(this.bootstrap, "clientHttpConnectorWrapper", ClientHttpConnectorWrapper.class,
+					() -> new ClientHttpConnectorWrapper(this.configuration.createClientHttpConnector()));
 		}
 
 		public void registerWebClientBuilder() {
 			// not a bean
 			this.bootstrap.registerIfAbsent(WebClientBuilder.class,
-					ctx -> this.configuration.createWebClientBuilder(ctx.get(ClientHttpConnector.class),
-							this.endpointProvider, Collections.emptyList()));
+					ctx -> this.configuration.createWebClientBuilder(
+							ctx.get(ClientHttpConnectorWrapper.class).getConnector(), this.endpointProvider,
+							Collections.emptyList()));
 		}
 
 		void registerWebClientFactory() {
 			registerIfAbsent(this.bootstrap, "vaultWebClientFactory", WebClientFactory.class,
-					ctx -> new DefaultWebClientFactory(ctx.get(ClientHttpConnector.class),
+					ctx -> new DefaultWebClientFactory(ctx.get(ClientHttpConnectorWrapper.class).getConnector(),
 							connector -> this.configuration.createWebClientBuilder(connector, this.endpointProvider,
 									Collections.emptyList())));
 		}
