@@ -656,3 +656,58 @@ Defaults to `${CF_INSTANCE_KEY}` env variable.
 NOTE: PCF authentication requires BouncyCastle (bcpkix-jdk15on) to be on the classpath for RSA PSS signing.
 
 See also: https://www.vaultproject.io/docs/auth/pcf.html[Vault Documentation: Using the pcf auth backend]
+
+[[vault.config.acl]]
+== ACL Requirements
+
+This section explains which paths are accessed by Spring Vault so you can derive your policy declarations from the required capabilities.
+
+|===
+|Capability |Associated HTTP verbs
+
+|create
+|`POST`/`PUT`
+
+|read
+|`GET`
+
+|update
+|`POST`/`PUT`
+
+|delete
+|`DELETE`
+
+|list
+|`LIST` (`GET`)
+|===
+
+
+See also https://www.vaultproject.io/guides/identity/policies.
+
+=== Authentication
+
+Login: `POST auth/$authMethod/login`
+
+=== KeyValue Mount Discovery
+
+`GET sys/internal/ui/mounts/$mountPath`
+
+=== SecretLeaseContainer
+
+`SecretLeaseContainer` uses different paths depending on the configured lease endpoint.
+
+`LeaseEndpoints.Legacy`
+
+* Revocation: `PUT sys/revoke`
+* Renewal: `PUT sys/renew`
+
+`LeaseEndpoints.Leases` (`SysLeases`)
+
+* Revocation: `PUT sys/leases/revoke`
+* Renewal: `PUT sys/leases/renew`
+
+=== Session Management
+
+* Token lookup: `GET auth/token/lookup-self`
+* Renewal: `POST auth/token/renew-self`
+* Revoke: `POST auth/token/revoke-self`
