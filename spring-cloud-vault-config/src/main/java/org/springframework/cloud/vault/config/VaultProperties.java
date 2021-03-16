@@ -18,6 +18,8 @@ package org.springframework.cloud.vault.config;
 
 import java.net.URI;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
@@ -1040,6 +1042,18 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private String certAuthPath = "cert";
 
+		/**
+		 * List of enabled SSL/TLS protocol.
+		 * @since 3.0.2
+		 */
+		private List<String> enabledProtocols = new ArrayList<>();
+
+		/**
+		 * List of enabled SSL/TLS cipher suites.
+		 * @since 3.0.2
+		 */
+		private List<String> enabledCipherSuites = new ArrayList<>();
+
 		@Nullable
 		public Resource getKeyStore() {
 			return this.keyStore;
@@ -1100,6 +1114,22 @@ public class VaultProperties implements EnvironmentAware {
 
 		public void setCertAuthPath(String certAuthPath) {
 			this.certAuthPath = certAuthPath;
+		}
+
+		public List<String> getEnabledProtocols() {
+			return this.enabledProtocols;
+		}
+
+		public void setEnabledProtocols(List<String> enabledProtocols) {
+			this.enabledProtocols = enabledProtocols;
+		}
+
+		public List<String> getEnabledCipherSuites() {
+			return this.enabledCipherSuites;
+		}
+
+		public void setEnabledCipherSuites(List<String> enabledCipherSuites) {
+			this.enabledCipherSuites = enabledCipherSuites;
 		}
 
 	}

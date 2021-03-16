@@ -123,6 +123,8 @@
 |spring.cloud.vault.session.lifecycle.expiry-threshold | `7s` | The expiry threshold for a {@link LoginToken}. The threshold represents a minimum TTL duration to consider a login token as valid. Tokens with a shorter TTL are considered expired and are not used anymore. Should be greater than {@code refreshBeforeExpiry} to prevent token expiry.
 |spring.cloud.vault.session.lifecycle.refresh-before-expiry | `5s` | The time period that is at least required before renewing the {@link LoginToken}.
 |spring.cloud.vault.ssl.cert-auth-path | `cert` | Mount path of the TLS cert authentication backend.
+|spring.cloud.vault.ssl.enabled-cipher-suites |  | List of enabled SSL/TLS cipher suites. @since 3.0.2
+|spring.cloud.vault.ssl.enabled-protocols |  | List of enabled SSL/TLS protocol. @since 3.0.2
 |spring.cloud.vault.ssl.key-store |  | Trust store that holds certificates and private keys.
 |spring.cloud.vault.ssl.key-store-password |  | Password used to access the key store.
 |spring.cloud.vault.ssl.key-store-type |  | Type of the key store. @since 3.0
