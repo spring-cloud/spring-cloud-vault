@@ -98,7 +98,7 @@ final class VaultConfiguration {
 			}
 		}
 
-		return new SslConfiguration(keyStore, trustStore);
+		return new SslConfiguration(keyStore, trustStore, ssl.getEnabledProtocols(), ssl.getEnabledCipherSuites());
 	}
 
 	ClientHttpRequestFactory createClientHttpRequestFactory() {
