@@ -38,6 +38,19 @@ spring.config.import: vault://first/context/path, vault://other/path, vault://
 ----
 ====
 
+If you have the same secret names in different paths, you can distinguish them by using a prefix on the path.
+
+.application.yml
+====
+[source,yaml]
+----
+spring.config.import: vault://my/prefixed/path?prefix=prefix1, vault://my/other/path?prefix=prefix2
+secret: ${prefix1.secret}
+other.secret: ${prefix2.secret}
+----
+
+====
+
 [[vault.configdata.customization]]
 === Infrastructure Customization
 
