@@ -71,6 +71,8 @@ spring.cloud.vault:
         trust-store: classpath:keystore.jks
         trust-store-password: changeit
         trust-store-type: JKS
+        enabled-protocols: TLSv1.2,TLSv1.3
+        enabled-cipher-suites: TLS_AES_128_GCM_SHA256
 ----
 ====
 
@@ -78,6 +80,8 @@ spring.cloud.vault:
 SSL-secured Vault communication will validate the Vault SSL certificate with the specified trust-store.
 * `trust-store-password` sets the trust-store password
 * `trust-store-type` sets the trust-store type. Supported values are all supported `KeyStore` types including `PEM`.
+* `enabled-protocols` sets the list of enabled SSL/TLS protocols (since 3.0.2).
+* `enabled-cipher-suites` sets the list of enabled SSL/TLS cipher suites (since 3.0.2).
 
 Please note that configuring `spring.cloud.vault.ssl.*` can be only applied when either Apache Http Components or the OkHttp client is on your class-path.
 

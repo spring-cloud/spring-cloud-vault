@@ -20,9 +20,13 @@
 |spring.cloud.vault.aws-iam.server-name |  | Name of the server used to set {@code X-Vault-AWS-IAM-Server-ID} header in the headers of login requests.
 |spring.cloud.vault.aws.access-key-property | `cloud.aws.credentials.accessKey` | Target property for the obtained access key.
 |spring.cloud.vault.aws.backend | `aws` | aws backend path.
+|spring.cloud.vault.aws.credential-type |  | aws credential type
 |spring.cloud.vault.aws.enabled | `false` | Enable aws backend usage.
 |spring.cloud.vault.aws.role |  | Role name for credentials.
+|spring.cloud.vault.aws.role-arn |  | Role arn for assumed_role in case we have multiple roles associated with the vault role. @since 3.0.2
 |spring.cloud.vault.aws.secret-key-property | `cloud.aws.credentials.secretKey` | Target property for the obtained secret key.
+|spring.cloud.vault.aws.session-token-key-property | `cloud.aws.credentials.sessionToken` | Target property for the obtained secret key.
+|spring.cloud.vault.aws.ttl | `0` | TTL for sts tokens. Defaults to whatever the vault Role may have for Max. Also limited to what AWS supports to be the max for STS. @since 3.0.2
 |spring.cloud.vault.azure-msi.azure-path | `azure` | Mount path of the Azure MSI authentication backend.
 |spring.cloud.vault.azure-msi.identity-token-service |  | Identity token service URI. @since 3.0
 |spring.cloud.vault.azure-msi.metadata-service |  | Instance metadata service URI. @since 3.0
@@ -119,6 +123,8 @@
 |spring.cloud.vault.session.lifecycle.expiry-threshold | `7s` | The expiry threshold for a {@link LoginToken}. The threshold represents a minimum TTL duration to consider a login token as valid. Tokens with a shorter TTL are considered expired and are not used anymore. Should be greater than {@code refreshBeforeExpiry} to prevent token expiry.
 |spring.cloud.vault.session.lifecycle.refresh-before-expiry | `5s` | The time period that is at least required before renewing the {@link LoginToken}.
 |spring.cloud.vault.ssl.cert-auth-path | `cert` | Mount path of the TLS cert authentication backend.
+|spring.cloud.vault.ssl.enabled-cipher-suites |  | List of enabled SSL/TLS cipher suites. @since 3.0.2
+|spring.cloud.vault.ssl.enabled-protocols |  | List of enabled SSL/TLS protocol. @since 3.0.2
 |spring.cloud.vault.ssl.key-store |  | Trust store that holds certificates and private keys.
 |spring.cloud.vault.ssl.key-store-password |  | Password used to access the key store.
 |spring.cloud.vault.ssl.key-store-type |  | Type of the key store. @since 3.0

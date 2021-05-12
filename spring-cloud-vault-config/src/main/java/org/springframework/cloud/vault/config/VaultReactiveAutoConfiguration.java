@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,12 @@ import reactor.core.publisher.Flux;
 import reactor.netty.http.client.HttpClient;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -35,6 +37,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -79,6 +82,9 @@ import static org.springframework.cloud.vault.config.VaultAutoConfiguration.Task
 @AutoConfigureBefore(VaultAutoConfiguration.class)
 public class VaultReactiveAutoConfiguration implements InitializingBean {
 
+	@Nullable
+	private final ConfigurableApplicationContext applicationContext;
+
 	private final VaultProperties vaultProperties;
 
 	private final VaultReactiveConfiguration configuration;
@@ -91,20 +97,26 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 
 	private final List<WebClientCustomizer> customizers;
 
-	@Nullable
-	private ClientHttpConnector clientHttpConnector;
-
 	/**
-	 * Used for Vault communication.
+	 * @deprecated since 3.0.2, use
+	 * {@link #VaultReactiveAutoConfiguration(ConfigurableApplicationContext, VaultProperties, ObjectProvider, ObjectProvider, ObjectProvider)}
+	 * instead.
 	 */
-	@Nullable
-	private WebClientBuilder webClientBuilder;
-
+	@Deprecated
 	public VaultReactiveAutoConfiguration(VaultProperties vaultProperties,
 			ObjectProvider<ReactiveVaultEndpointProvider> reactiveEndpointProvider,
 			ObjectProvider<VaultEndpointProvider> endpointProvider,
 			ObjectProvider<List<WebClientCustomizer>> webClientCustomizers) {
+		this(null, vaultProperties, reactiveEndpointProvider, endpointProvider, webClientCustomizers);
+	}
 
+	@Autowired
+	public VaultReactiveAutoConfiguration(@Nullable ConfigurableApplicationContext applicationContext,
+			VaultProperties vaultProperties, ObjectProvider<ReactiveVaultEndpointProvider> reactiveEndpointProvider,
+			ObjectProvider<VaultEndpointProvider> endpointProvider,
+			ObjectProvider<List<WebClientCustomizer>> webClientCustomizers) {
+
+		this.applicationContext = applicationContext;
 		this.vaultProperties = vaultProperties;
 		this.configuration = new VaultReactiveConfiguration(vaultProperties);
 
@@ -122,14 +134,6 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 		AnnotationAwareOrderComparator.sort(this.customizers);
 	}
 
-	@Override
-	public void afterPropertiesSet() {
-
-		this.clientHttpConnector = createConnector(this.vaultProperties);
-
-		this.webClientBuilder = webClientBuilder(this.clientHttpConnector);
-	}
-
 	protected WebClientBuilder webClientBuilder(ClientHttpConnector connector) {
 
 		if (this.reactiveEndpointProvider != null) {
@@ -143,6 +147,26 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 
 		throw new IllegalStateException(
 				"Cannot create WebClientBuilder as neither ReactiveEndpointProvider nor EndpointProvider configured");
+	}
+
+	/**
+	 * Creates a {@link ClientHttpConnectorWrapper} containing a
+	 * {@link ClientHttpConnector}. {@link ClientHttpConnector} is not exposed as root
+	 * bean because {@link ClientHttpConnector} is configured with {@link ClientOptions}
+	 * and {@link SslConfiguration} which are not necessarily applicable for the whole
+	 * application.
+	 * @return the {@link ClientHttpConnectorWrapper} to wrap a
+	 * {@link ClientHttpConnector} instance.
+	 * @since 3.0.2
+	 */
+	@Bean
+	@ConditionalOnMissingBean
+	public ClientHttpConnectorWrapper clientHttpConnectorWrapper() {
+		return new ClientHttpConnectorWrapper(createConnector(this.vaultProperties));
+	}
+
+	@Override
+	public void afterPropertiesSet() {
 	}
 
 	/**
@@ -165,9 +189,18 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 	@ConditionalOnMissingBean
 	public WebClientFactory vaultWebClientFactory() {
 
-		Assert.state(this.clientHttpConnector != null, "ClientHttpConnector must not be null");
+		ClientHttpConnector connector = getClientHttpConnector();
 
-		return new DefaultWebClientFactory(this.clientHttpConnector, this::webClientBuilder);
+		return new DefaultWebClientFactory(connector, this::webClientBuilder);
+	}
+
+	protected ClientHttpConnector getClientHttpConnector() {
+
+		if (this.applicationContext != null) {
+			return this.applicationContext.getBean(ClientHttpConnectorWrapper.class).getConnector();
+		}
+
+		return createConnector(this.vaultProperties);
 	}
 
 	/**
@@ -180,13 +213,13 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 	@ConditionalOnMissingBean(ReactiveVaultOperations.class)
 	public ReactiveVaultTemplate reactiveVaultTemplate(ObjectProvider<ReactiveSessionManager> sessionManager) {
 
-		Assert.state(this.webClientBuilder != null, "WebClientBuilder must not be null");
+		WebClientBuilder webClientBuilder = webClientBuilder(getClientHttpConnector());
 
 		if (this.vaultProperties.getAuthentication() == VaultProperties.AuthenticationMethod.NONE) {
-			return new ReactiveVaultTemplate(this.webClientBuilder);
+			return new ReactiveVaultTemplate(webClientBuilder);
 		}
 
-		return new ReactiveVaultTemplate(this.webClientBuilder, sessionManager.getObject());
+		return new ReactiveVaultTemplate(webClientBuilder, sessionManager.getObject());
 	}
 
 	/**
@@ -239,6 +272,40 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 		return this.configuration.createVaultTokenSupplier(webClientFactory,
 				() -> beanFactory.getBeanProvider(AuthenticationStepsFactory.class, false).getIfAvailable(),
 				() -> beanFactory.getBeanProvider(ClientAuthentication.class, false).getIfAvailable());
+	}
+
+	/**
+	 * Wrapper for {@link ClientHttpConnector} to not expose the bean globally.
+	 *
+	 * @since 3.0.2
+	 */
+	public static class ClientHttpConnectorWrapper implements InitializingBean, DisposableBean {
+
+		private final ClientHttpConnector connector;
+
+		public ClientHttpConnectorWrapper(ClientHttpConnector connector) {
+			this.connector = connector;
+		}
+
+		@Override
+		public void destroy() throws Exception {
+			if (this.connector instanceof DisposableBean) {
+				((DisposableBean) this.connector).destroy();
+			}
+		}
+
+		@Override
+		public void afterPropertiesSet() throws Exception {
+
+			if (this.connector instanceof InitializingBean) {
+				((InitializingBean) this.connector).afterPropertiesSet();
+			}
+		}
+
+		public ClientHttpConnector getConnector() {
+			return this.connector;
+		}
+
 	}
 
 }

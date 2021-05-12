@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.vault.config.aws;
 
+import java.time.Duration;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 import org.springframework.lang.Nullable;
@@ -24,6 +26,7 @@ import org.springframework.lang.Nullable;
  * Configuration properties for Vault using the AWS integration.
  *
  * @author Mark Paluch
+ * @author Kris Iyer
  */
 @ConfigurationProperties("spring.cloud.vault.aws")
 public class VaultAwsProperties implements VaultSecretBackendDescriptor {
@@ -45,6 +48,11 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 	private String backend = "aws";
 
 	/**
+	 * aws credential type
+	 */
+	private AwsCredentialType credentialType = AwsCredentialType.IAM_USER;
+
+	/**
 	 * Target property for the obtained access key.
 	 */
 	private String accessKeyProperty = "cloud.aws.credentials.accessKey";
@@ -53,6 +61,26 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 	 * Target property for the obtained secret key.
 	 */
 	private String secretKeyProperty = "cloud.aws.credentials.secretKey";
+
+	/**
+	 * Target property for the obtained secret key.
+	 */
+	private String sessionTokenKeyProperty = "cloud.aws.credentials.sessionToken";
+
+	/**
+	 * Role arn for assumed_role in case we have multiple roles associated with the vault
+	 * role.
+	 * @since 3.0.2
+	 */
+	@Nullable
+	private String roleArn;
+
+	/**
+	 * TTL for sts tokens. Defaults to whatever the vault Role may have for Max. Also
+	 * limited to what AWS supports to be the max for STS.
+	 * @since 3.0.2
+	 */
+	private Duration ttl = Duration.ZERO;
 
 	@Override
 	public boolean isEnabled() {
@@ -95,6 +123,39 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 
 	public void setSecretKeyProperty(String secretKeyProperty) {
 		this.secretKeyProperty = secretKeyProperty;
+	}
+
+	public AwsCredentialType getCredentialType() {
+		return this.credentialType;
+	}
+
+	public void setCredentialType(AwsCredentialType credentialType) {
+		this.credentialType = credentialType;
+	}
+
+	public String getSessionTokenKeyProperty() {
+		return this.sessionTokenKeyProperty;
+	}
+
+	public void setSessionTokenKeyProperty(String sessionTokenKeyProperty) {
+		this.sessionTokenKeyProperty = sessionTokenKeyProperty;
+	}
+
+	@Nullable
+	public String getRoleArn() {
+		return this.roleArn;
+	}
+
+	public void setRoleArn(String roleArn) {
+		this.roleArn = roleArn;
+	}
+
+	public Duration getTtl() {
+		return this.ttl;
+	}
+
+	public void setTtl(Duration ttl) {
+		this.ttl = ttl;
 	}
 
 }

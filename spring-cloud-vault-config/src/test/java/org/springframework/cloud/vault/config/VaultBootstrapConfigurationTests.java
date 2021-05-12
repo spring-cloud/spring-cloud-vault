@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.client.RestTemplateFactory;
 import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.support.SslConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,6 +52,23 @@ public class VaultBootstrapConfigurationTests {
 					assertThat(context).doesNotHaveBean(ClientAuthentication.class);
 					assertThat(context).hasSingleBean(VaultTemplate.class);
 					assertThat(context).hasSingleBean(RestTemplateFactory.class);
+				});
+	}
+
+	@Test
+	public void shouldApplySslSettings() {
+
+		this.contextRunner.withPropertyValues("spring.cloud.vault.kv.enabled=false",
+				"spring.cloud.vault.authentication=NONE", "spring.cloud.bootstrap.enabled=true",
+				"spring.cloud.vault.ssl.enabled-protocols=TLSv1.2,TLSv1.3",
+				"spring.cloud.vault.ssl.enabled-cipher-suites=one,two").run(context -> {
+
+					VaultProperties properties = context.getBean(VaultProperties.class);
+
+					SslConfiguration sslConfiguration = VaultConfiguration.createSslConfiguration(properties.getSsl());
+
+					assertThat(sslConfiguration.getEnabledProtocols()).containsExactly("TLSv1.2", "TLSv1.3");
+					assertThat(sslConfiguration.getEnabledCipherSuites()).containsExactly("one", "two");
 				});
 	}
 

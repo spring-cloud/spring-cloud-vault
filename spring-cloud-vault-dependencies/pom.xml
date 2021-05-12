@@ -7,20 +7,20 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dependencies-parent</artifactId>
-		<version>3.0.2-SNAPSHOT</version>
+		<version>3.0.2</version>
 		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
 
 	<artifactId>spring-cloud-vault-dependencies</artifactId>
-	<version>3.0.2-SNAPSHOT</version>
+	<version>3.0.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Spring Cloud Vault Dependencies</name>
 	<description>Spring Cloud Vault Dependencies</description>
 
 	<properties>
-		<spring-vault.version>2.3.0</spring-vault.version>
+		<spring-vault.version>2.3.2</spring-vault.version>
 	</properties>
 
 	<dependencyManagement>
