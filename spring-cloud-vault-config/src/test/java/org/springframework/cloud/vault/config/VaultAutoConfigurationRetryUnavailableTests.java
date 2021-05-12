@@ -17,8 +17,11 @@
 package org.springframework.cloud.vault.config;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.cloud.test.ClassPathExclusions;
+import org.springframework.cloud.test.ModifiedClassPathRunner;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -31,6 +34,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 /**
  * Tests without spring-retry on the classpath to be sure there is no hard dependency
  */
+@RunWith(ModifiedClassPathRunner.class)
+@ClassPathExclusions({ "spring-retry-*.jar" })
 public class VaultAutoConfigurationRetryUnavailableTests {
 
 	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()

@@ -111,11 +111,6 @@ final class VaultConfiguration {
 		return ClientHttpRequestFactoryFactory.create(clientOptions, sslConfiguration);
 	}
 
-	public ClientHttpRequestFactory createRetryableClientHttpRequestFactory() {
-		ClientHttpRequestFactory delegate = createClientHttpRequestFactory();
-		return VaultRetryUtil.createRetryableClientHttpRequestFactory(this.vaultProperties, delegate);
-	}
-
 	/**
 	 * Create a {@link VaultEndpoint} from {@link VaultProperties}.
 	 * @return the endpoint.

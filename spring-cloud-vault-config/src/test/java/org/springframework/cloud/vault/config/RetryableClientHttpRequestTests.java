@@ -41,7 +41,7 @@ public class RetryableClientHttpRequestTests {
 		when(delegateRequest.execute()).thenThrow(new SocketTimeoutException());
 		when(delegate.createRequest(any(), any())).thenReturn(delegateRequest);
 		ClientHttpRequestFactory retryableFactory = VaultRetryUtil
-				.createRetryableClientHttpRequestFactory(new VaultProperties(), delegate);
+				.createRetryableClientHttpRequestFactory(new RetryProperties(), delegate);
 		ClientHttpRequest request = retryableFactory.createRequest(new URI("https://spring.io/"), HttpMethod.GET);
 		try {
 			request.execute();
