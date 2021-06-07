@@ -42,6 +42,8 @@ public class VaultConfigLocation extends ConfigDataResource {
 
 	public VaultConfigLocation(String contextPath, boolean optional) {
 
+		super(optional);
+
 		Assert.hasText(contextPath, "Context path must not be empty");
 
 		this.secretBackendMetadata = KeyValueSecretBackendMetadata.create(contextPath);

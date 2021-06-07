@@ -18,7 +18,6 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,13 +32,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link VaultConfigDataLoader}.
+ * Integration tests for {@link VaultConfigDataLoader}.
  *
  * @author Mark Paluch
  */
 public class VaultConfigDataLoaderIntegrationTests extends IntegrationTestSupport {
-
-	private ConfigurableApplicationContext context;
 
 	@Before
 	public void before() {
@@ -49,24 +46,32 @@ public class VaultConfigDataLoaderIntegrationTests extends IntegrationTestSuppor
 
 		this.vaultRule.prepare().getVaultOperations().write("secret/my-config-loader/cloud",
 				Collections.singletonMap("default-key", "cloud"));
+	}
+
+	@Test
+	public void shouldConsiderProfiles() {
 
 		SpringApplication application = new SpringApplication(Config.class);
 		application.setWebApplicationType(WebApplicationType.NONE);
 		application.setAdditionalProfiles("cloud");
 
-		this.context = application.run("--spring.application.name=my-config-loader", "--spring.config.import=vault:",
-				"--spring.cloud.vault.token=" + Settings.token().getToken());
+		try (ConfigurableApplicationContext context = application.run("--spring.application.name=my-config-loader",
+				"--spring.config.import=vault:", "--spring.cloud.vault.token=" + Settings.token().getToken())) {
+
+			assertThat(context.getEnvironment().getProperty("default-key")).isEqualTo("cloud");
+		}
 	}
 
 	@Test
-	public void shouldConsiderProfiles() {
-		assertThat(this.context.getEnvironment().getProperty("default-key")).isEqualTo("cloud");
-	}
+	public void shouldConsiderDisabledVault() {
 
-	@After
-	public void after() {
-		if (this.context != null) {
-			this.context.close();
+		SpringApplication application = new SpringApplication(Config.class);
+		application.setWebApplicationType(WebApplicationType.NONE);
+
+		try (ConfigurableApplicationContext context = application.run("--spring.application.name=my-config-loader",
+				"--spring.config.import=optional:vault:", "--spring.cloud.vault.enabled=false")) {
+
+			assertThat(context.getEnvironment().getProperty("default-key")).isNull();
 		}
 	}
 

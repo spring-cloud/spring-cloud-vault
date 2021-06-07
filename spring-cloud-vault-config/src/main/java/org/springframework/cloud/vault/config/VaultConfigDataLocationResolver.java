@@ -81,10 +81,7 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 
 	@Override
 	public boolean isResolvable(ConfigDataLocationResolverContext context, ConfigDataLocation location) {
-		boolean vaultEnabled = context.getBinder().bind(VaultProperties.PREFIX + ".enabled", Boolean.class)
-				.orElse(true);
-
-		return location.getValue().startsWith(VaultConfigLocation.VAULT_PREFIX) && vaultEnabled;
+		return location.getValue().startsWith(VaultConfigLocation.VAULT_PREFIX);
 	}
 
 	@Override
