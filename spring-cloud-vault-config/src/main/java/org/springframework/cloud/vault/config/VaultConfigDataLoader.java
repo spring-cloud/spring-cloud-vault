@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.vault.config;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -93,6 +92,8 @@ import static org.springframework.vault.config.AbstractVaultConfiguration.Client
  */
 public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocation> {
 
+	private final static ConfigData SKIP_LOCATION = null;
+
 	private final static boolean FLUX_AVAILABLE = ClassUtils.isPresent("reactor.core.publisher.Flux",
 			VaultConfigDataLoader.class.getClassLoader());
 
@@ -110,10 +111,14 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 	@Override
 	public ConfigData load(ConfigDataLoaderContext context, VaultConfigLocation location)
-			throws IOException, ConfigDataLocationNotFoundException {
+			throws ConfigDataLocationNotFoundException {
 
 		ConfigurableBootstrapContext bootstrap = context.getBootstrapContext();
 		VaultProperties vaultProperties = bootstrap.get(VaultProperties.class);
+
+		if (!vaultProperties.isEnabled()) {
+			return SKIP_LOCATION;
+		}
 
 		if (vaultProperties.getSession().getLifecycle().isEnabled()
 				|| vaultProperties.getConfig().getLifecycle().isEnabled()) {
