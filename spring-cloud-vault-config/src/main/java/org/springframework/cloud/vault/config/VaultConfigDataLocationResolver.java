@@ -77,6 +77,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * required later on by {@link VaultConfigDataLoader}.
  *
  * @author Mark Paluch
+ * @author Jeffrey van der Laan
  * @since 3.0
  * @see VaultConfigurer
  * @see BootstrapRegistry
@@ -118,17 +119,20 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 			contextPath = contextPath.substring(1);
 		}
 
+		return Collections.singletonList(
+				new VaultConfigLocation(contextPath, getPropertyTransformer(contextPath), location.isOptional()));
+	}
+
+	private static PropertyTransformer getPropertyTransformer(String contextPath) {
+
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString(contextPath).build();
 		String prefix = uriComponents.getQueryParams().getFirst("prefix");
-		String path = uriComponents.getPath();
-		if (StringUtils.hasLength(prefix) && StringUtils.hasLength(path)) {
-			PropertyTransformer keyPrefixPropertyTransformer = PropertyTransformers.propertyNamePrefix(prefix);
-			SecretBackendMetadata secretBackendMetadata = KeyValueSecretBackendMetadata.create(path, keyPrefixPropertyTransformer);
-			return Collections.singletonList(new VaultConfigLocation(secretBackendMetadata, location.isOptional()));
+
+		if (StringUtils.hasText(prefix) && StringUtils.hasText(uriComponents.getPath())) {
+			return PropertyTransformers.propertyNamePrefix(prefix);
 		}
-		else {
-			return Collections.singletonList(new VaultConfigLocation(contextPath, location.isOptional()));
-		}
+
+		return PropertyTransformers.noop();
 	}
 
 	private static void registerVaultProperties(ConfigDataLocationResolverContext context) {
