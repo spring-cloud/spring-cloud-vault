@@ -17,23 +17,17 @@
 package org.springframework.cloud.vault.config;
 
 import java.util.Arrays;
-import java.util.List;
-
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.boot.DefaultBootstrapContext;
 import org.springframework.boot.context.config.ConfigDataLocation;
 import org.springframework.boot.context.config.ConfigDataLocationResolverContext;
 import org.springframework.boot.context.config.Profiles;
 import org.springframework.boot.context.properties.bind.Binder;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -44,6 +38,7 @@ import static org.mockito.Mockito.when;
  * Unit tests for {@link VaultConfigDataLocationResolver}.
  *
  * @author Mark Paluch
+ * @author Jeffrey van der Laan
  */
 public class VaultConfigDataLocationResolverUnitTests {
 
@@ -106,10 +101,9 @@ public class VaultConfigDataLocationResolverUnitTests {
 		VaultConfigDataLocationResolver resolver = new VaultConfigDataLocationResolver();
 
 		List<VaultConfigLocation> locations = resolver.resolveProfileSpecific(this.contextMock,
-				ConfigDataLocation.of("vault://my/context/path?prefix=myPrefix"), this.profilesMock);
+				ConfigDataLocation.of("vault://my/context/path?prefix=myPrefix."), this.profilesMock);
 
 		assertThat(locations).hasSize(1);
-		assertThat(locations.get(0)).hasToString("VaultConfigLocation [path='my/context/path', optional=false]");
 		assertThat(locations.get(0).getSecretBackendMetadata().getPropertyTransformer()
 				.transformProperties(Collections.singletonMap("key", "value"))).containsEntry("myPrefix.key", "value");
 	}
@@ -123,7 +117,6 @@ public class VaultConfigDataLocationResolverUnitTests {
 				ConfigDataLocation.of("vault://my/context/path?prefix="), this.profilesMock);
 
 		assertThat(locations).hasSize(1);
-		assertThat(locations.get(0)).hasToString("VaultConfigLocation [path='my/context/path', optional=false]");
 		assertThat(locations.get(0).getSecretBackendMetadata().getPropertyTransformer()
 				.transformProperties(Collections.singletonMap("key", "value"))).containsEntry("key", "value");
 	}

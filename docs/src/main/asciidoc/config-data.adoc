@@ -38,6 +38,22 @@ spring.config.import: vault://first/context/path, vault://other/path, vault://
 ----
 ====
 
+Property names within a Spring `Environment` must be unique to avoid shadowing.
+If you use the same secret names in different context paths and you want to expose these as individual properties you can distinguish them by adding a `prefix` query parameter to the location.
+
+.application.yml
+====
+[source,yaml]
+----
+spring.config.import: vault://my/path?prefix=foo., vault://my/other/path?prefix=bar.
+secret: ${foo.secret}
+other.secret: ${bar.secret}
+----
+
+NOTE: Prefixes are added as-is to all property names returned by Vault. If you want key names to be separated with a dot between the prefix and key name, make sure to add a trailing dot to the prefix.
+
+====
+
 [[vault.configdata.location.optional]]
 === Conditionally enable/disable Vault Configuration
 
@@ -50,18 +66,6 @@ Optional locations are skipped during application startup if Vault support was d
 
 NOTE: Vault context paths that cannot be found (HTTP Status 404) are skipped regardless of whether the config location is marked optional. <<vault.config.fail-fast>> allows failing on start if a Vault context path cannot be found because of HTTP Status 404.
 
-If you have the same secret names in different paths, you can distinguish them by using a prefix on the path.
-
-.application.yml
-====
-[source,yaml]
-----
-spring.config.import: vault://my/prefixed/path?prefix=prefix1, vault://my/other/path?prefix=prefix2
-secret: ${prefix1.secret}
-other.secret: ${prefix2.secret}
-----
-
-====
 
 [[vault.configdata.customization]]
 === Infrastructure Customization
