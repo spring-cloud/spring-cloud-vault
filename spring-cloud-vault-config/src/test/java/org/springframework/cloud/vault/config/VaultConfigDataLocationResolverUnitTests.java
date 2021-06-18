@@ -29,6 +29,7 @@ import org.springframework.boot.context.config.Profiles;
 import org.springframework.boot.context.properties.bind.Binder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -65,6 +66,17 @@ public class VaultConfigDataLocationResolverUnitTests {
 		assertThat(
 				resolver.resolveProfileSpecific(this.contextMock, ConfigDataLocation.of("vault://"), this.profilesMock))
 						.hasSize(3);
+	}
+
+	@Test
+	public void shouldRejectLocationWithTrailingSlash() {
+
+		VaultConfigDataLocationResolver resolver = new VaultConfigDataLocationResolver();
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> resolver.resolveProfileSpecific(this.contextMock,
+						ConfigDataLocation.of("vault://foo/"), this.profilesMock))
+				.withMessage("Location 'vault://foo/' must not end with a trailing slash");
 	}
 
 	@Test

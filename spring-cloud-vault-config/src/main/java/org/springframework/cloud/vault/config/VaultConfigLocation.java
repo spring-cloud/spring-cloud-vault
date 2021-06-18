@@ -44,7 +44,8 @@ public class VaultConfigLocation extends ConfigDataResource {
 
 		super(optional);
 
-		Assert.hasText(contextPath, "Context path must not be empty");
+		Assert.hasText(contextPath, "Location must not be empty");
+		validatePath(contextPath);
 
 		this.secretBackendMetadata = KeyValueSecretBackendMetadata.create(contextPath);
 		this.optional = optional;
@@ -54,6 +55,7 @@ public class VaultConfigLocation extends ConfigDataResource {
 
 		Assert.notNull(secretBackendMetadata, "SecretBackendMetadata must not be null");
 
+		validatePath(secretBackendMetadata.getPath());
 		this.secretBackendMetadata = secretBackendMetadata;
 		this.optional = optional;
 	}
@@ -99,6 +101,11 @@ public class VaultConfigLocation extends ConfigDataResource {
 		sb.append(", optional=").append(this.optional);
 		sb.append(']');
 		return sb.toString();
+	}
+
+	private static void validatePath(String contextPath) {
+		Assert.isTrue(!contextPath.endsWith("/"),
+				() -> String.format("Location 'vault://%s' must not end with a trailing slash", contextPath));
 	}
 
 }
