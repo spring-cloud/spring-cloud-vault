@@ -30,6 +30,7 @@ import org.springframework.cloud.vault.util.Settings;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Integration tests for {@link VaultConfigDataLoader}.
@@ -59,6 +60,25 @@ public class VaultConfigDataLoaderIntegrationTests extends IntegrationTestSuppor
 				"--spring.config.import=vault:", "--spring.cloud.vault.token=" + Settings.token().getToken())) {
 
 			assertThat(context.getEnvironment().getProperty("default-key")).isEqualTo("cloud");
+		}
+	}
+
+	@Test
+	public void vaultLocationEndingWithSlashShouldFail() {
+
+		SpringApplication application = new SpringApplication(Config.class);
+		application.setWebApplicationType(WebApplicationType.NONE);
+		application.setAdditionalProfiles("cloud");
+
+		try (ConfigurableApplicationContext context = application.run("--spring.application.name=my-config-loader",
+				"--spring.config.import=vault://secret/my-config-loader/cloud/",
+				"--spring.cloud.vault.token=" + Settings.token().getToken())) {
+
+			fail("expected exception");
+		}
+		catch (IllegalArgumentException e) {
+			assertThat(e).hasMessageContaining(
+					"Location 'vault://secret/my-config-loader/cloud/' must not end with a trailing slash");
 		}
 	}
 
