@@ -50,6 +50,19 @@ Optional locations are skipped during application startup if Vault support was d
 
 NOTE: Vault context paths that cannot be found (HTTP Status 404) are skipped regardless of whether the config location is marked optional. <<vault.config.fail-fast>> allows failing on start if a Vault context path cannot be found because of HTTP Status 404.
 
+If you have the same secret names in different paths, you can distinguish them by using a prefix on the path.
+
+.application.yml
+====
+[source,yaml]
+----
+spring.config.import: vault://my/prefixed/path?prefix=prefix1, vault://my/other/path?prefix=prefix2
+secret: ${prefix1.secret}
+other.secret: ${prefix2.secret}
+----
+
+====
+
 [[vault.configdata.customization]]
 === Infrastructure Customization
 

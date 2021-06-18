@@ -37,6 +37,11 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.vault.core.util.PropertyTransformer;
+import org.springframework.vault.core.util.PropertyTransformers;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * {@link ConfigDataLocationResolver} for Vault resolving {@link VaultConfigLocation}
@@ -113,7 +118,17 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 			contextPath = contextPath.substring(1);
 		}
 
-		return Collections.singletonList(new VaultConfigLocation(contextPath, location.isOptional()));
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(contextPath).build();
+		String prefix = uriComponents.getQueryParams().getFirst("prefix");
+		String path = uriComponents.getPath();
+		if (StringUtils.hasLength(prefix) && StringUtils.hasLength(path)) {
+			PropertyTransformer keyPrefixPropertyTransformer = PropertyTransformers.propertyNamePrefix(prefix);
+			SecretBackendMetadata secretBackendMetadata = KeyValueSecretBackendMetadata.create(path, keyPrefixPropertyTransformer);
+			return Collections.singletonList(new VaultConfigLocation(secretBackendMetadata, location.isOptional()));
+		}
+		else {
+			return Collections.singletonList(new VaultConfigLocation(contextPath, location.isOptional()));
+		}
 	}
 
 	private static void registerVaultProperties(ConfigDataLocationResolverContext context) {
