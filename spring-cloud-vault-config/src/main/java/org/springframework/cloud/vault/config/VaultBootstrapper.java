@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.vault.config;
 
-import org.springframework.boot.Bootstrapper;
+import org.springframework.boot.BootstrapRegistryInitializer;
 import org.springframework.util.Assert;
 
 /**
@@ -32,11 +32,12 @@ public abstract class VaultBootstrapper {
 	}
 
 	/**
-	 * Create a {@link Bootstrapper} that configures a {@link VaultConfigurer}.
+	 * Create a {@link BootstrapRegistryInitializer} that configures a
+	 * {@link VaultConfigurer}.
 	 * @param configurer the configurer to apply.
 	 * @return the bootstrapper object.
 	 */
-	public static Bootstrapper fromConfigurer(VaultConfigurer configurer) {
+	public static BootstrapRegistryInitializer fromConfigurer(VaultConfigurer configurer) {
 
 		Assert.notNull(configurer, "VaultConfigurer must not be null");
 
