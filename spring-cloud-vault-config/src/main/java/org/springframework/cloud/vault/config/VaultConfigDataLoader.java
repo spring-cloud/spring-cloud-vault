@@ -31,7 +31,7 @@ import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.BootstrapContext;
 import org.springframework.boot.BootstrapRegistry;
-import org.springframework.boot.Bootstrapper;
+import org.springframework.boot.BootstrapRegistryInitializer;
 import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.context.config.ConfigData;
 import org.springframework.boot.context.config.ConfigDataLoader;
@@ -82,7 +82,7 @@ import static org.springframework.vault.config.AbstractVaultConfiguration.Client
  * {@link VaultReactiveAutoConfiguration}.
  * <p>
  * Infrastructure beans can be customized by registering instances through
- * {@link Bootstrapper}.
+ * {@link BootstrapRegistryInitializer}.
  *
  * @author Mark Paluch
  * @since 3.0
