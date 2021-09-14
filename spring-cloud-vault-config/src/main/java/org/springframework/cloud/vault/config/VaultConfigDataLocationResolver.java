@@ -191,8 +191,9 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 
 		Binder binder = context.getBinder();
 
-		kvProperties.setApplicationName(binder.bind("spring.cloud.vault.application-name", String.class)
-				.orElseGet(() -> binder.bind("spring.application.name", String.class).orElse("")));
+		kvProperties.setApplicationName(binder.bind("spring.cloud.vault.kv.application-name", String.class)
+				.orElseGet(() -> binder.bind("spring.cloud.vault.application-name", String.class)
+						.orElseGet(() -> binder.bind("spring.application.name", String.class).orElse(""))));
 		kvProperties.setProfiles(profiles.getActive());
 
 		return kvProperties;
