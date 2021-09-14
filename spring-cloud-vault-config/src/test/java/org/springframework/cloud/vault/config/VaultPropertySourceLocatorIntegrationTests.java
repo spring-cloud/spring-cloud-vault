@@ -41,9 +41,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultPropertySourceLocatorIntegrationTests.TestApplication.class,
-		properties = { "spring.application.name=wintermute", "spring.cloud.vault.application-name=neuromancer",
-				"spring.cloud.vault.kv.application-name=neuromancer,icebreaker",
-				"spring.cloud.bootstrap.enabled=true" })
+		properties = { "spring.cloud.vault.kv.application-name=neuromancer,icebreaker",
+				"spring.cloud.bootstrap.enabled=false", "spring.config.import=vault://" })
 @ActiveProfiles({ "integrationtest" })
 public class VaultPropertySourceLocatorIntegrationTests extends IntegrationTestSupport {
 
@@ -60,27 +59,29 @@ public class VaultPropertySourceLocatorIntegrationTests extends IntegrationTestS
 		vaultRule.before();
 
 		vaultRule.prepare().getVaultOperations().write("secret/wintermute",
-				Collections.singletonMap("vault.value", "spring.application.name value"));
+				Collections.singletonMap("vault.value", "wintermute"));
 		vaultRule.prepare().getVaultOperations().write("secret/wintermute/integrationtest",
-				Collections.singletonMap("vault.value", "spring.application.name:integrationtest value"));
+				Collections.singletonMap("vault.value", "integrationtest wintermute"));
+
 		vaultRule.prepare().getVaultOperations().write("secret/neuromancer",
-				Collections.singletonMap("vault.value", "spring.cloud.vault.applicationName value"));
+				Collections.singletonMap("vault.value", "neuromancer"));
 		vaultRule.prepare().getVaultOperations().write("secret/neuromancer/integrationtest",
-				Collections.singletonMap("vault.value", "spring.cloud.vault.applicationName:integrationtest value"));
+				Collections.singletonMap("vault.value", "integrationtest neuromancer"));
+
 		vaultRule.prepare().getVaultOperations().write("secret/icebreaker",
-				Collections.singletonMap("icebreaker.value", "additional context value"));
+				Collections.singletonMap("icebreaker.value", "icebreaker"));
 		vaultRule.prepare().getVaultOperations().write("secret/icebreaker/integrationtest",
-				Collections.singletonMap("icebreaker.value", "additional context:integrationtest value"));
+				Collections.singletonMap("icebreaker.value", "integrationtest icebreaker"));
 	}
 
 	@Test
 	public void getsSecretFromVaultUsingVaultApplicationName() {
-		assertThat(this.configValue).isEqualTo("spring.cloud.vault.applicationName:integrationtest value");
+		assertThat(this.configValue).isEqualTo("integrationtest neuromancer");
 	}
 
 	@Test
 	public void getsSecretFromVaultUsingAdditionalContext() {
-		assertThat(this.additionalValue).isEqualTo("additional context:integrationtest value");
+		assertThat(this.additionalValue).isEqualTo("integrationtest icebreaker");
 	}
 
 	@SpringBootApplication
