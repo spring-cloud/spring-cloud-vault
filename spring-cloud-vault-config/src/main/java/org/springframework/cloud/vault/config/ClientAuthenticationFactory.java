@@ -406,8 +406,7 @@ class ClientAuthenticationFactory {
 
 		Resource tokenFileResource = tokenFile.getLocation();
 
-		// Default token file to ~/.vault-token because that's where the vault CLI will
-		// place it
+		// Default token file to ~/.vault-token because that's where the vault CLI will place it
 		if (Objects.isNull(tokenFileResource)) {
 			tokenFileResource = new FileSystemResource(Paths.get(System.getProperty("user.home"), ".vault-token"));
 		}
