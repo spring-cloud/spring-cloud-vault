@@ -126,6 +126,8 @@ public class VaultProperties implements EnvironmentAware {
 
 	private PcfProperties pcf = new PcfProperties();
 
+	private TokenFileProperties tokenFile = new TokenFileProperties();
+
 	private Ssl ssl = new Ssl();
 
 	private Config config = new Config();
@@ -312,6 +314,14 @@ public class VaultProperties implements EnvironmentAware {
 		this.pcf = pcf;
 	}
 
+	public TokenFileProperties getTokenFile() {
+		return this.tokenFile;
+	}
+
+	public void setTokenFile(TokenFileProperties tokenFile) {
+		this.tokenFile = tokenFile;
+	}
+
 	public Ssl getSsl() {
 		return this.ssl;
 	}
@@ -357,7 +367,7 @@ public class VaultProperties implements EnvironmentAware {
 	 */
 	public enum AuthenticationMethod {
 
-		APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, KUBERNETES, NONE, PCF, TOKEN;
+		APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, KUBERNETES, NONE, PCF, TOKEN, TOKEN_FILE
 
 	}
 
@@ -988,6 +998,28 @@ public class VaultProperties implements EnvironmentAware {
 
 		public void setInstanceKey(@Nullable Resource instanceKey) {
 			this.instanceKey = instanceKey;
+		}
+
+	}
+
+	/**
+	 * TOKEN_FILE properties.
+	 */
+	public static class TokenFileProperties {
+
+		/**
+		 * Path to the file containing a vault token. Defaults to ~/.vault-token .
+		 */
+		@Nullable
+		private Resource location;
+
+		@Nullable
+		public Resource getLocation() {
+			return this.location;
+		}
+
+		public void setLocation(@Nullable Resource location) {
+			this.location = location;
 		}
 
 	}

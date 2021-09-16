@@ -24,6 +24,7 @@ import org.springframework.vault.authentication.AppRoleAuthenticationOptions.Rol
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.PcfAuthentication;
+import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
@@ -163,4 +164,16 @@ public class ClientAuthenticationFactoryUnitTests {
 		assertThat(clientAuthentication).isInstanceOf(PcfAuthentication.class);
 	}
 
+	@Test
+	public void shouldSupportTokenFileAuthentication() {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.TOKEN_FILE);
+		properties.getTokenFile().setLocation(new ClassPathResource("bootstrap.yml"));
+
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate()).createClientAuthentication();
+
+		assertThat(clientAuthentication).isInstanceOf(TokenAuthentication.class);
+	}
 }

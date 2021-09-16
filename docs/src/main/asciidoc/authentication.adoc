@@ -30,6 +30,32 @@ spring.cloud.vault:
 
 See also: https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
 
+[[vault.config.authentication.token-file]]
+=== Token File authentication
+
+An option to load a vault token from a file rather than the static declaration of the TOKEN authentication mechanism.
+This is particularly helpful for local development when using the Vault CLI to obtain a token. Once logged in to Vault
+via the Vault CLI, a file is placed in the user's home directory at `~/.vault-token`.
+
+.application.yml
+====
+[source,yaml]
+----
+spring.cloud.vault:
+    authentication: TOKEN_FILE
+    token-file:
+        location: file:\${user.home}/.vault-token
+----
+====
+
+* `authentication` setting this value to `TOKEN_FILE` selects the Token File authentication method
+* `location` sets the path to a file containing a vault token. Defaults to `file:${user.home}/.vault-token` which is the location where the vault CLI places the token
+
+See also:
+
+* https://www.vaultproject.io/docs/commands/login[Vault Documentation: CLI login]
+* https://www.vaultproject.io/docs/commands/token-helper[Vault Documentation: CLI default to ~/.vault-token]
+
 [[vault.config.authentication.vault-agent]]
 === Vault Agent authentication
 
