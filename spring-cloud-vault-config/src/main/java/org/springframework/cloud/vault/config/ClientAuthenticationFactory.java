@@ -54,6 +54,7 @@ import org.springframework.vault.authentication.AzureMsiAuthentication;
 import org.springframework.vault.authentication.AzureMsiAuthenticationOptions;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.ClientCertificateAuthentication;
+import org.springframework.vault.authentication.ClientCertificateAuthenticationOptions;
 import org.springframework.vault.authentication.CubbyholeAuthentication;
 import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
 import org.springframework.vault.authentication.GcpComputeAuthentication;
@@ -82,6 +83,7 @@ import org.springframework.web.client.RestOperations;
  * @author Mark Paluch
  * @author Kevin Holditch
  * @author Michal Budzyn
+ * @author Quincy Conduff
  * @since 1.1
  */
 class ClientAuthenticationFactory {
@@ -122,7 +124,7 @@ class ClientAuthenticationFactory {
 			return azureMsiAuthentication(this.vaultProperties);
 
 		case CERT:
-			return new ClientCertificateAuthentication(this.restOperations);
+			return certificateAuthentication(this.vaultProperties, this.restOperations);
 
 		case CUBBYHOLE:
 			return cubbyholeAuthentication();
@@ -446,6 +448,15 @@ class ClientAuthenticationFactory {
 		}
 
 		return new PcfAuthentication(builder.build(), this.restOperations);
+	}
+
+	private ClientAuthentication certificateAuthentication(VaultProperties vaultProperties,
+			RestOperations restOperations) {
+
+		ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions.builder()
+				.path(vaultProperties.getSsl().getCertAuthPath()).build();
+
+		return new ClientCertificateAuthentication(options, this.restOperations);
 	}
 
 	private static class AwsCredentialProvider {
