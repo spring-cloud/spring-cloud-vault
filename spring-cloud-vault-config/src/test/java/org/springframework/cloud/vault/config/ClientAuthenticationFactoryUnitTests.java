@@ -23,6 +23,7 @@ import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.authentication.ClientAuthentication;
+import org.springframework.vault.authentication.ClientCertificateAuthentication;
 import org.springframework.vault.authentication.PcfAuthentication;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
@@ -34,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Unit tests for {@link ClientAuthenticationFactory}.
  *
  * @author Mark Paluch
+ * @author Quincy Conduff
  */
 public class ClientAuthenticationFactoryUnitTests {
 
@@ -161,6 +163,19 @@ public class ClientAuthenticationFactoryUnitTests {
 				new RestTemplate()).createClientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(PcfAuthentication.class);
+	}
+
+	@Test
+	public void shouldSupportSslCertificateAuthentication() {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.CERT);
+		properties.getSsl().setCertAuthPath("bert");
+
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate()).createClientAuthentication();
+
+		assertThat(clientAuthentication).isInstanceOf(ClientCertificateAuthentication.class);
 	}
 
 }
