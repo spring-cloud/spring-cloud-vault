@@ -16,6 +16,11 @@
 
 package org.springframework.cloud.vault.config;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.amazonaws.auth.AWSCredentials;
@@ -28,6 +33,7 @@ import org.springframework.cloud.vault.config.VaultProperties.AwsIamProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AzureMsiProperties;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.AppIdAuthentication;
 import org.springframework.vault.authentication.AppIdAuthenticationOptions;
@@ -64,6 +70,8 @@ import org.springframework.vault.authentication.StaticUserId;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Factory for {@link ClientAuthentication}.
@@ -136,8 +144,7 @@ class ClientAuthenticationFactory {
 			return pcfAuthentication(this.vaultProperties);
 
 		case TOKEN:
-			Assert.hasText(this.vaultProperties.getToken(), "Token (spring.cloud.vault.token) must not be empty");
-			return new TokenAuthentication(this.vaultProperties.getToken());
+			return tokenAuthentication(this.vaultProperties);
 		}
 
 		throw new UnsupportedOperationException(
@@ -386,6 +393,28 @@ class ClientAuthenticationFactory {
 		}
 
 		return new PcfAuthentication(builder.build(), this.restOperations);
+	}
+
+	private ClientAuthentication tokenAuthentication(VaultProperties vaultProperties) {
+		if (StringUtils.hasText(vaultProperties.getToken())) {
+			return new TokenAuthentication(vaultProperties.getToken());
+		}
+		else {
+			Path vaultTokenPath = Paths.get(System.getProperty("user.home"), ".vault-token");
+			if (Files.exists(vaultTokenPath)) {
+				try (InputStream inputStream = Files.newInputStream(vaultTokenPath)) {
+					String token = StreamUtils.copyToString(inputStream, UTF_8);
+					return new TokenAuthentication(token);
+				}
+				catch (IOException ex) {
+					throw new IllegalStateException("Could not retrieve vault token from ~/.vault-token", ex);
+				}
+			}
+			else {
+				throw new IllegalStateException(
+						"Cannot create authentication mechanism for TOKEN. This method requires either a Token (spring.cloud.vault.token) or File ~/.vault-token.");
+			}
+		}
 	}
 
 	private static class AwsCredentialProvider {
