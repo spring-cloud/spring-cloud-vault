@@ -124,7 +124,7 @@ class ClientAuthenticationFactory {
 			return azureMsiAuthentication(this.vaultProperties);
 
 		case CERT:
-			return certificateAuthentication(this.vaultProperties, this.restOperations);
+			return certificateAuthentication(this.vaultProperties);
 
 		case CUBBYHOLE:
 			return cubbyholeAuthentication();
@@ -450,8 +450,7 @@ class ClientAuthenticationFactory {
 		return new PcfAuthentication(builder.build(), this.restOperations);
 	}
 
-	private ClientAuthentication certificateAuthentication(VaultProperties vaultProperties,
-			RestOperations restOperations) {
+	private ClientAuthentication certificateAuthentication(VaultProperties vaultProperties) {
 
 		ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions.builder()
 				.path(vaultProperties.getSsl().getCertAuthPath()).build();
