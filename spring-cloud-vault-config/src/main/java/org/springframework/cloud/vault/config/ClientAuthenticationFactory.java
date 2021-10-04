@@ -17,7 +17,6 @@
 package org.springframework.cloud.vault.config;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,12 +27,12 @@ import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.boot.system.SystemProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AppRoleProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AwsIamProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AzureMsiProperties;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.AppIdAuthentication;
 import org.springframework.vault.authentication.AppIdAuthenticationOptions;
@@ -406,24 +405,25 @@ class ClientAuthenticationFactory {
 	}
 
 	private ClientAuthentication tokenAuthentication(VaultProperties vaultProperties) {
+
 		if (StringUtils.hasText(vaultProperties.getToken())) {
 			return new TokenAuthentication(vaultProperties.getToken());
 		}
+
+		Path vaultTokenPath = Paths.get(SystemProperties.get("user.home"), ".vault-token");
+
+		if (Files.exists(vaultTokenPath)) {
+			try {
+				return new TokenAuthentication(new String(Files.readAllBytes(vaultTokenPath), UTF_8));
+			}
+			catch (IOException ex) {
+				throw new IllegalStateException(String.format("Could not retrieve vault token from %s", vaultTokenPath),
+						ex);
+			}
+		}
 		else {
-			Path vaultTokenPath = Paths.get(System.getProperty("user.home"), ".vault-token");
-			if (Files.exists(vaultTokenPath)) {
-				try (InputStream inputStream = Files.newInputStream(vaultTokenPath)) {
-					String token = StreamUtils.copyToString(inputStream, UTF_8);
-					return new TokenAuthentication(token);
-				}
-				catch (IOException ex) {
-					throw new IllegalStateException("Could not retrieve vault token from ~/.vault-token", ex);
-				}
-			}
-			else {
-				throw new IllegalStateException(
-						"Cannot create authentication mechanism for TOKEN. This method requires either a Token (spring.cloud.vault.token) or File ~/.vault-token.");
-			}
+			throw new IllegalStateException(
+					"Cannot create authentication mechanism for TOKEN. This method requires either a Token (spring.cloud.vault.token) or a token file at ~/.vault-token.");
 		}
 	}
 
