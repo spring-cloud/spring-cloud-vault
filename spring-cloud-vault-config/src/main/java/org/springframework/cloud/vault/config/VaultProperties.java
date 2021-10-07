@@ -82,6 +82,11 @@ public class VaultProperties implements EnvironmentAware {
 	@Nullable
 	private String namespace;
 
+    /**
+     * Reactive properties
+     */
+    private Reactive reactive = new Reactive();
+
 	/**
 	 * Discovery properties.
 	 */
@@ -198,6 +203,14 @@ public class VaultProperties implements EnvironmentAware {
 	public void setNamespace(@Nullable String namespace) {
 		this.namespace = namespace;
 	}
+
+    public Reactive getReactive() {
+        return this.reactive;
+    }
+
+    public void setReactive(Reactive reactive) {
+        this.reactive = reactive;
+    }
 
 	public Discovery getDiscovery() {
 		return this.discovery;
@@ -360,6 +373,24 @@ public class VaultProperties implements EnvironmentAware {
 		APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, KUBERNETES, NONE, PCF, TOKEN;
 
 	}
+
+    /**
+     * Reactive properties.
+     */
+    public static class Reactive {
+        /**
+         * Flag to indicate that reactive discovery is enabled
+         */
+        private boolean enabled = true;
+
+        public boolean isEnabled() {
+            return this.enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+    }
 
 	/**
 	 * Discovery properties.
