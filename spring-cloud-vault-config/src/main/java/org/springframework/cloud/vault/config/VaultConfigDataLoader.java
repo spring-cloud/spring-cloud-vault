@@ -127,7 +127,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 		registerImperativeInfrastructure(bootstrap, vaultProperties);
 
-		if (REGISTER_REACTIVE_INFRASTRUCTURE) {
+		if (REGISTER_REACTIVE_INFRASTRUCTURE && vaultProperties.getReactive().isEnabled()) {
 			registerReactiveInfrastructure(bootstrap, vaultProperties);
 		}
 
@@ -191,7 +191,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 			infra.registerClientAuthentication();
 
-			if (!REGISTER_REACTIVE_INFRASTRUCTURE) {
+			if (!REGISTER_REACTIVE_INFRASTRUCTURE || !vaultProperties.getReactive().isEnabled()) {
 				infra.registerVaultSessionManager();
 			}
 
