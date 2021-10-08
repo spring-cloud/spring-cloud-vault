@@ -189,7 +189,31 @@ public class ClientAuthenticationFactoryUnitTests {
 	}
 
 	@Test
-	public void shouldSupportTokenFromFile() throws IOException {
+	public void shouldSupportTokenFromCustomFile() throws IOException {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.TOKEN);
+		properties.setTokenFile(SystemProperties.get("user.home") + "/.custom-vault-token");
+
+		Path vaultTokenPath = Paths.get(SystemProperties.get("user.home"), ".custom-vault-token");
+		Files.write(vaultTokenPath, "hello".getBytes(StandardCharsets.UTF_8), StandardOpenOption.WRITE,
+				StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+		try {
+			ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+					new RestTemplate()).createClientAuthentication();
+
+			assertThat(clientAuthentication).isInstanceOf(TokenAuthentication.class);
+			VaultToken token = clientAuthentication.login();
+
+			assertThat(new String(token.toCharArray())).isEqualTo("hello");
+		}
+		finally {
+			Files.deleteIfExists(vaultTokenPath);
+		}
+	}
+
+	@Test
+	public void shouldSupportTokenFromDefaultFile() throws IOException {
 
 		VaultProperties properties = new VaultProperties();
 		properties.setAuthentication(VaultProperties.AuthenticationMethod.TOKEN);

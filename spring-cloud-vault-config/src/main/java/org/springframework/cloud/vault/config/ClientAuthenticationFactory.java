@@ -410,7 +410,12 @@ class ClientAuthenticationFactory {
 			return new TokenAuthentication(vaultProperties.getToken());
 		}
 
-		Path vaultTokenPath = Paths.get(SystemProperties.get("user.home"), ".vault-token");
+		Path vaultTokenPath;
+		if(vaultProperties.getTokenFile() != null) {
+			vaultTokenPath = Paths.get(vaultProperties.getTokenFile());
+		} else {
+			vaultTokenPath = Paths.get(SystemProperties.get("user.home"), ".vault-token");
+		}
 
 		if (Files.exists(vaultTokenPath)) {
 			try {

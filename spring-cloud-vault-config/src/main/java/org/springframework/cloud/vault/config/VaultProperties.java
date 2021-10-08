@@ -108,6 +108,12 @@ public class VaultProperties implements EnvironmentAware {
 	@Nullable
 	private String token;
 
+	/**
+	 * File from which vault token is read, if not passed. ~/.vault-token if not passed.
+	 */
+	@Nullable
+	private String tokenFile;
+
 	private AppIdProperties appId = new AppIdProperties();
 
 	private AppRoleProperties appRole = new AppRoleProperties();
@@ -238,6 +244,15 @@ public class VaultProperties implements EnvironmentAware {
 
 	public void setToken(@Nullable String token) {
 		this.token = token;
+	}
+
+	@Nullable
+	public String getTokenFile() {
+		return tokenFile;
+	}
+
+	public void setTokenFile(@Nullable String tokenFile) {
+		this.tokenFile = tokenFile;
 	}
 
 	public AppIdProperties getAppId() {

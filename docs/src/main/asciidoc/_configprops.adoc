@@ -132,6 +132,7 @@
 |spring.cloud.vault.ssl.trust-store-password |  | Password used to access the trust store.
 |spring.cloud.vault.ssl.trust-store-type |  | Type of the trust store. @since 3.0
 |spring.cloud.vault.token |  | Static vault token. Required if {@link #authentication} is {@code TOKEN}.
+|spring.cloud.vault.token-file | `~/.vault-token` | File from which vault token is read, if not passed.
 |spring.cloud.vault.uri |  | Vault URI. Can be set with scheme, host and port.
 
 |===
