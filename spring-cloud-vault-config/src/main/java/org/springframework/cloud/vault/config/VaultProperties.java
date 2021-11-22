@@ -82,10 +82,10 @@ public class VaultProperties implements EnvironmentAware {
 	@Nullable
 	private String namespace;
 
-    /**
-     * Reactive properties
-     */
-    private Reactive reactive = new Reactive();
+	/**
+	 * Reactive properties.
+	 */
+	private Reactive reactive = new Reactive();
 
 	/**
 	 * Discovery properties.
@@ -204,13 +204,13 @@ public class VaultProperties implements EnvironmentAware {
 		this.namespace = namespace;
 	}
 
-    public Reactive getReactive() {
-        return this.reactive;
-    }
+	public Reactive getReactive() {
+		return this.reactive;
+	}
 
-    public void setReactive(Reactive reactive) {
-        this.reactive = reactive;
-    }
+	public void setReactive(Reactive reactive) {
+		this.reactive = reactive;
+	}
 
 	public Discovery getDiscovery() {
 		return this.discovery;
@@ -374,23 +374,27 @@ public class VaultProperties implements EnvironmentAware {
 
 	}
 
-    /**
-     * Reactive properties.
-     */
-    public static class Reactive {
-        /**
-         * Flag to indicate that reactive discovery is enabled
-         */
-        private boolean enabled = true;
+	/**
+	 * Reactive properties.
+	 *
+	 * @since 3.0.5
+	 */
+	public static class Reactive {
 
-        public boolean isEnabled() {
-            return this.enabled;
-        }
+		/**
+		 * Flag to indicate that reactive discovery is enabled
+		 */
+		private boolean enabled = true;
 
-        public void setEnabled(boolean enabled) {
-            this.enabled = enabled;
-        }
-    }
+		public boolean isEnabled() {
+			return this.enabled;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+
+	}
 
 	/**
 	 * Discovery properties.
