@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.vault.config.databases;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.vault.config.PropertyNameTransformer;
@@ -31,7 +29,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.util.Assert;
 import org.springframework.vault.core.util.PropertyTransformer;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,26 +45,9 @@ import java.util.Map;
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({ VaultMySqlProperties.class, VaultPostgreSqlProperties.class,
 		VaultCassandraProperties.class, VaultCouchbaseProperties.class, VaultMongoProperties.class,
-		VaultElasticsearchProperties.class, VaultMultipleDatabaseProperties.class, VaultDatabaseProperties.class })
+		VaultElasticsearchProperties.class, VaultDatabaseProperties.class, VaultDatabasesProperties.class })
 @Order(Ordered.LOWEST_PRECEDENCE - 15)
 public class VaultConfigDatabaseBootstrapConfiguration {
-
-	@Autowired
-	private ConfigurableBeanFactory beanFactory;
-
-	@Autowired
-	private VaultMultipleDatabaseProperties multipleDatabaseProperties;
-
-	@PostConstruct
-	public void registerBeans() {
-		multipleDatabaseProperties.getDatabases().forEach(d -> {
-			String beanName = String.format("vaultMultipleDatabaseProperties_%s",
-					multipleDatabaseProperties.getDatabases().indexOf(d));
-			if (!beanFactory.containsBean(beanName)) {
-				beanFactory.registerSingleton(beanName, d);
-			}
-		});
-	}
 
 	@Bean
 	@ConditionalOnMissingBean

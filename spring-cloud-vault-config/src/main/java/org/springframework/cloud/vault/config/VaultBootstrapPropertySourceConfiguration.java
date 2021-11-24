@@ -16,7 +16,9 @@
 
 package org.springframework.cloud.vault.config;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectFactory;
@@ -62,6 +64,9 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	private Collection<VaultSecretBackendDescriptor> vaultSecretBackendDescriptors;
 
 	@Nullable
+	private Collection<VaultSecretBackendDescriptorFactory> vaultSecretBackendDescriptorFactories;
+
+	@Nullable
 	private Collection<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> factories;
 
 	public VaultBootstrapPropertySourceConfiguration(VaultProperties vaultProperties,
@@ -76,6 +81,9 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 
 		this.vaultSecretBackendDescriptors = this.applicationContext.getBeansOfType(VaultSecretBackendDescriptor.class)
 				.values();
+
+		this.vaultSecretBackendDescriptorFactories = this.applicationContext
+				.getBeansOfType(VaultSecretBackendDescriptorFactory.class).values();
 
 		this.factories = (Collection) this.applicationContext.getBeansOfType(SecretBackendMetadataFactory.class)
 				.values();
@@ -93,8 +101,12 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 
 		Collection<VaultConfigurer> vaultConfigurers = this.applicationContext.getBeansOfType(VaultConfigurer.class)
 				.values();
+
+		List<VaultSecretBackendDescriptor> descriptors = new ArrayList<>(this.vaultSecretBackendDescriptors);
+		this.vaultSecretBackendDescriptorFactories.forEach(it -> descriptors.addAll(it.create()));
+
 		PropertySourceLocatorConfigurationFactory factory = new PropertySourceLocatorConfigurationFactory(
-				vaultConfigurers, this.vaultSecretBackendDescriptors, this.factories);
+				vaultConfigurers, descriptors, this.factories);
 
 		PropertySourceLocatorConfiguration configuration = factory.getPropertySourceConfiguration(kvBackendProperties);
 

@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.config.KeyValueSecretBackendMetadata;
@@ -46,6 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class VaultConfigDatabaseBootstrapConfigurationTests extends IntegrationTestSupport {
 
 	@Autowired
+	@Qualifier("customFactory")
 	DatabaseSecretBackendMetadataFactory factory;
 
 	@SuppressWarnings("deprecation")

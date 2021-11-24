@@ -13,3 +13,6 @@ org.springframework.cloud.vault.config.databases.VaultElasticsearchProperties,\
 org.springframework.cloud.vault.config.databases.VaultMongoProperties,\
 org.springframework.cloud.vault.config.databases.VaultMySqlProperties,\
 org.springframework.cloud.vault.config.databases.VaultPostgreSqlProperties
+
+org.springframework.cloud.vault.config.VaultSecretBackendDescriptorFactory=\
+org.springframework.cloud.vault.config.databases.VaultDatabasesProperties

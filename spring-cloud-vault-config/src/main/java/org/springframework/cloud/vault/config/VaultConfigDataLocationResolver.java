@@ -201,21 +201,35 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 
 	private static List<VaultSecretBackendDescriptor> findDescriptors(Binder binder) {
 
-		List<String> descriptorClasses = SpringFactoriesLoader.loadFactoryNames(VaultSecretBackendDescriptor.class,
-				VaultConfigDataLocationResolver.class.getClassLoader());
+		List<String> descriptorClasses = new ArrayList<>();
+		descriptorClasses.addAll(SpringFactoriesLoader.loadFactoryNames(VaultSecretBackendDescriptor.class,
+				VaultConfigDataLocationResolver.class.getClassLoader()));
+		descriptorClasses.addAll(SpringFactoriesLoader.loadFactoryNames(VaultSecretBackendDescriptorFactory.class,
+				VaultConfigDataLocationResolver.class.getClassLoader()));
 
 		List<VaultSecretBackendDescriptor> descriptors = new ArrayList<>(descriptorClasses.size());
 
 		for (String className : descriptorClasses) {
 
-			Class<VaultSecretBackendDescriptor> descriptorClass = loadClass(className);
+			Class<?> descriptorClass = loadClass(className);
 
 			MergedAnnotations annotations = MergedAnnotations.from(descriptorClass);
 			if (annotations.isPresent(ConfigurationProperties.class)) {
 
 				String prefix = annotations.get(ConfigurationProperties.class).getString("prefix");
-				VaultSecretBackendDescriptor hydratedDescriptor = binder.bindOrCreate(prefix, descriptorClass);
-				descriptors.add(hydratedDescriptor);
+				Object hydratedDescriptor = binder.bindOrCreate(prefix, descriptorClass);
+
+				if (hydratedDescriptor instanceof VaultSecretBackendDescriptorFactory) {
+					descriptors.addAll(((VaultSecretBackendDescriptorFactory) hydratedDescriptor).create());
+				}
+				else if (hydratedDescriptor instanceof VaultSecretBackendDescriptor) {
+					descriptors.add((VaultSecretBackendDescriptor) hydratedDescriptor);
+				}
+				else {
+					throw new IllegalStateException(String.format(
+							"Descriptor %s is neither implements VaultSecretBackendDescriptorFactory nor VaultSecretBackendDescriptor",
+							className));
+				}
 			}
 			else {
 				throw new IllegalStateException(String.format(
@@ -233,10 +247,9 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Class<VaultSecretBackendDescriptor> loadClass(String className) {
+	private static Class<?> loadClass(String className) {
 		try {
-			return (Class<VaultSecretBackendDescriptor>) ClassUtils.forName(className,
-					VaultConfigDataLocationResolver.class.getClassLoader());
+			return ClassUtils.forName(className, VaultConfigDataLocationResolver.class.getClassLoader());
 		}
 		catch (ReflectiveOperationException e) {
 			ReflectionUtils.rethrowRuntimeException(e);
