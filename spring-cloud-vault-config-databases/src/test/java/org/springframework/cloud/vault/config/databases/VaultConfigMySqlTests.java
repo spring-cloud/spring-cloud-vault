@@ -50,19 +50,9 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigMySqlTests.TestApplication.class,
 		properties = { "spring.cloud.vault.mysql.enabled=true", "spring.cloud.vault.mysql.role=readonly",
-				"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=UTC",
-				"spring.main.allow-bean-definition-overriding=true", "spring.cloud.bootstrap.enabled=true" })
+				"spring.datasource.url=" + MySqlFixtures.JDBC_URL, "spring.main.allow-bean-definition-overriding=true",
+				"spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigMySqlTests {
-
-	private static final int MYSQL_PORT = 3306;
-
-	private static final String MYSQL_HOST = "localhost";
-
-	private static final String ROOT_CREDENTIALS = String.format("springvault:springvault@tcp(%s:%d)/", MYSQL_HOST,
-			MYSQL_PORT);
-
-	private static final String CREATE_USER_AND_GRANT_SQL = "CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';"
-			+ "GRANT SELECT ON *.* TO '{{name}}'@'%';";
 
 	@Value("${spring.datasource.username}")
 	String username;
@@ -79,7 +69,7 @@ public class VaultConfigMySqlTests {
 	@BeforeClass
 	public static void beforeClass() {
 
-		assumeTrue(CanConnect.to(new InetSocketAddress(MYSQL_HOST, MYSQL_PORT)));
+		assumeTrue(CanConnect.to(new InetSocketAddress(MySqlFixtures.MYSQL_HOST, MySqlFixtures.MYSQL_PORT)));
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
@@ -90,22 +80,21 @@ public class VaultConfigMySqlTests {
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
-		vaultOperations.write("mysql/config/connection", Collections.singletonMap("connection_url", ROOT_CREDENTIALS));
+		vaultOperations.write("mysql/config/connection",
+				Collections.singletonMap("connection_url", MySqlFixtures.ROOT_CREDENTIALS));
 
-		vaultOperations.write("mysql/roles/readonly", Collections.singletonMap("sql", CREATE_USER_AND_GRANT_SQL));
+		vaultOperations.write("mysql/roles/readonly",
+				Collections.singletonMap("sql", MySqlFixtures.CREATE_USER_AND_GRANT_SQL));
 	}
 
 	@Test
 	public void shouldConnectUsingDataSource() throws SQLException {
-
 		this.dataSource.getConnection().close();
 	}
 
 	@Test
 	public void shouldConnectUsingJdbcUrlConnection() throws SQLException {
-
-		String url = String.format("jdbc:mysql://%s?useSSL=false&serverTimezone=UTC", MYSQL_HOST);
-		DriverManager.getConnection(url, this.username, this.password).close();
+		DriverManager.getConnection(MySqlFixtures.JDBC_URL, this.username, this.password).close();
 	}
 
 	@SpringBootApplication

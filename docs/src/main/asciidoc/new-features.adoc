@@ -9,3 +9,4 @@ This section briefly covers items that are new and noteworthy in the latest rele
 * Support for the <<vault.config.backends.couchbase>> backend.
 * Configuration of keystore/truststore types through `spring.cloud.vault.ssl.key-store-type=…`/`spring.cloud.vault.ssl.trust-store-type=…` including PEM support.
 * Support for `ReactiveDiscoveryClient` by configuring a `ReactiveVaultEndpointProvider`.
+* Support to configure <<vault.config.backends.databases>>.

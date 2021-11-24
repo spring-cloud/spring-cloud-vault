@@ -17,28 +17,37 @@
 package org.springframework.cloud.vault.config.databases;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
+import org.springframework.cloud.vault.config.VaultSecretBackendDescriptorFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Configuration properties for multiple database secrets using the Database backend. This
- * is configured with the spring.cloud.vault.databases list.
+ * Configuration properties for multiple database secrets using the {@code database}
+ * backend. This is configured with the {@code spring.cloud.vault.databases.*} mapping.
  *
  * @author Quintin Beukes
+ * @author Mark Paluch
  * @since 3.0.3
  */
 @ConfigurationProperties("spring.cloud.vault")
-public class VaultMultipleDatabaseProperties {
+public class VaultDatabasesProperties implements VaultSecretBackendDescriptorFactory {
 
-	private List<VaultDatabaseProperties> databases = new ArrayList<>();
+	private Map<String, VaultDatabaseProperties> databases = new HashMap<>();
 
-	public List<VaultDatabaseProperties> getDatabases() {
-		return databases;
+	public Map<String, VaultDatabaseProperties> getDatabases() {
+		return this.databases;
 	}
 
-	public void setDatabases(List<VaultDatabaseProperties> databases) {
+	public void setDatabases(Map<String, VaultDatabaseProperties> databases) {
 		this.databases = databases;
+	}
+
+	@Override
+	public Collection<? extends VaultSecretBackendDescriptor> create() {
+		return getDatabases().values();
 	}
 
 }
