@@ -59,6 +59,7 @@
 |spring.cloud.vault.database.role |  | Role name for credentials.
 |spring.cloud.vault.database.static-role | `false` | Enable static role usage.
 |spring.cloud.vault.database.username-property | `spring.datasource.username` | Target property for the obtained username.
+|spring.cloud.vault.databases |  | 
 |spring.cloud.vault.discovery.enabled | `false` | Flag to indicate that Vault server discovery is enabled (vault server URL will be looked up via discovery).
 |spring.cloud.vault.discovery.service-id | `vault` | Service id to locate Vault.
 |spring.cloud.vault.elasticsearch.backend | `database` | Database backend path.
