@@ -118,7 +118,6 @@
 |spring.cloud.vault.rabbitmq.password-property | `spring.rabbitmq.password` | Target property for the obtained password.
 |spring.cloud.vault.rabbitmq.role |  | Role name for credentials.
 |spring.cloud.vault.rabbitmq.username-property | `spring.rabbitmq.username` | Target property for the obtained username.
-|spring.cloud.vault.reactive.enabled | `true` | Flag to indicate that reactive discovery is enabled
 |spring.cloud.vault.read-timeout | `15000` | Read timeout.
 |spring.cloud.vault.scheme | `https` | Protocol scheme. Can be either "http" or "https".
 |spring.cloud.vault.session.lifecycle.enabled | `true` | Enable session lifecycle management.
