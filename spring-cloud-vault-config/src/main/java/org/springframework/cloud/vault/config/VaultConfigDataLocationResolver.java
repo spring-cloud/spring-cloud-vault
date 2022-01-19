@@ -42,6 +42,8 @@ import org.springframework.vault.core.util.PropertyTransformer;
 import org.springframework.vault.core.util.PropertyTransformers;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.core.ResolvableType;
+import org.springframework.boot.context.properties.bind.Bindable;
 
 /**
  * {@link ConfigDataLocationResolver} for Vault resolving {@link VaultConfigLocation}
@@ -194,7 +196,8 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 		kvProperties.setApplicationName(binder.bind("spring.cloud.vault.kv.application-name", String.class)
 				.orElseGet(() -> binder.bind("spring.cloud.vault.application-name", String.class)
 						.orElseGet(() -> binder.bind("spring.application.name", String.class).orElse(""))));
-		kvProperties.setProfiles(profiles.getActive());
+		kvProperties.setProfiles(binder.bind("spring.cloud.vault.kv.profiles", Bindable.listOf(String.class))
+				.orElseGet(profiles::getActive));
 
 		return kvProperties;
 	}

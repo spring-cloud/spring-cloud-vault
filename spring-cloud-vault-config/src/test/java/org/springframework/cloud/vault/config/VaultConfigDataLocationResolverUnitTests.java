@@ -28,6 +28,8 @@ import org.springframework.boot.context.config.ConfigDataLocation;
 import org.springframework.boot.context.config.ConfigDataLocationResolverContext;
 import org.springframework.boot.context.config.Profiles;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
+import org.springframework.core.env.MapPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -119,6 +121,22 @@ public class VaultConfigDataLocationResolverUnitTests {
 		assertThat(locations).hasSize(1);
 		assertThat(locations.get(0).getSecretBackendMetadata().getPropertyTransformer()
 				.transformProperties(Collections.singletonMap("key", "value"))).containsEntry("key", "value");
+	}
+
+	@Test
+	public void kvProfilesPropertyPrecedenceShouldBeRespected() {
+
+		VaultConfigDataLocationResolver resolver = new VaultConfigDataLocationResolver();
+
+		when(this.profilesMock.getActive()).thenReturn(Arrays.asList("a", "b"));
+		when(this.contextMock.getBinder()).thenReturn(new Binder(ConfigurationPropertySource.from(
+				new MapPropertySource("test",
+						Collections.singletonMap("spring.cloud.vault.kv.profiles", "c, d, e")))
+		));
+
+		assertThat(
+				resolver.resolveProfileSpecific(this.contextMock, ConfigDataLocation.of("vault://"), this.profilesMock))
+				.hasSize(4);
 	}
 
 }
