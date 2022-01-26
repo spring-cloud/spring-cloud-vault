@@ -137,8 +137,8 @@ public class VaultAutoConfiguration {
 	 * {@link RestTemplate}.
 	 * @param clientFactoryWrapper the {@link ClientFactoryWrapper}.
 	 * @return the {@link RestTemplateFactory}.
-	 * @see #clientHttpRequestFactoryWrapper()
 	 * @since 3.0
+	 * @see #clientHttpRequestFactoryWrapper()
 	 */
 	@Bean
 	@ConditionalOnMissingBean
@@ -189,11 +189,11 @@ public class VaultAutoConfiguration {
 	}
 
 	/**
-	 * @return the {@link SessionManager} for Vault session management.
 	 * @param clientAuthentication the {@link ClientAuthentication}.
 	 * @param asyncTaskExecutorFactory the {@link ObjectFactory} for
 	 * {@link TaskSchedulerWrapper}.
 	 * @param restTemplateFactory the {@link RestTemplateFactory}.
+	 * @return the {@link SessionManager} for Vault session management.
 	 * @see SessionManager
 	 * @see LifecycleAwareSessionManager
 	 */
@@ -208,10 +208,10 @@ public class VaultAutoConfiguration {
 	}
 
 	/**
-	 * @return the {@link ClientAuthentication} to obtain a
-	 * {@link org.springframework.vault.support.VaultToken}.
 	 * @param clientFactoryWrapper the {@link ClientFactoryWrapper}.
 	 * @param restTemplateFactory the {@link RestTemplateFactory}.
+	 * @return the {@link ClientAuthentication} to obtain a
+	 * {@link org.springframework.vault.support.VaultToken}.
 	 * @see SessionManager
 	 * @see LifecycleAwareSessionManager
 	 */
