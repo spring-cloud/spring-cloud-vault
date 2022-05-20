@@ -22,9 +22,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.system.SystemProperties;
@@ -277,7 +277,7 @@ class ClientAuthenticationFactory {
 
 		AwsIamProperties awsIam = vaultProperties.getAwsIam();
 
-		AWSCredentialsProvider credentialsProvider = AwsCredentialProvider.getAwsCredentialsProvider();
+		AwsCredentialsProvider credentialsProvider = AwsCredentialProvider.getAwsCredentialsProvider();
 
 		AwsIamAuthenticationOptionsBuilder builder = AwsIamAuthenticationOptions.builder();
 
@@ -429,32 +429,27 @@ class ClientAuthenticationFactory {
 
 	private static class AwsCredentialProvider {
 
-		private static AWSCredentialsProvider getAwsCredentialsProvider() {
+		private static AwsCredentialsProvider getAwsCredentialsProvider() {
 
-			DefaultAWSCredentialsProviderChain backingCredentialsProvider = DefaultAWSCredentialsProviderChain
-					.getInstance();
+			DefaultCredentialsProvider backingCredentialsProvider = DefaultCredentialsProvider.create();
 
 			// Eagerly fetch credentials preventing lag during the first, actual login.
-			AWSCredentials firstAccess = backingCredentialsProvider.getCredentials();
+			AwsCredentials firstAccess = backingCredentialsProvider.resolveCredentials();
 
-			AtomicReference<AWSCredentials> once = new AtomicReference<>(firstAccess);
+			AtomicReference<AwsCredentials> once = new AtomicReference<>(firstAccess);
 
-			return new AWSCredentialsProvider() {
+			return new AwsCredentialsProvider() {
 
 				@Override
-				public AWSCredentials getCredentials() {
+				public AwsCredentials resolveCredentials() {
 
 					if (once.compareAndSet(firstAccess, null)) {
 						return firstAccess;
 					}
 
-					return backingCredentialsProvider.getCredentials();
+					return backingCredentialsProvider.resolveCredentials();
 				}
 
-				@Override
-				public void refresh() {
-					backingCredentialsProvider.refresh();
-				}
 			};
 		}
 
