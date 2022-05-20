@@ -353,7 +353,7 @@ If one is not supplied then the friendly name of the current IAM user will be us
 * `server-name` sets the value to use for the `X-Vault-AWS-IAM-Server-ID` header preventing certain types of replay attacks.
 * `endpoint-uri` sets the value to use for the AWS STS API used for the `iam_request_url` parameter.
 
-AWS-IAM requires the AWS Java SDK dependency (`com.amazonaws:aws-java-sdk-core`) as the authentication implementation uses AWS SDK types for credentials and request signing.
+AWS-IAM requires the AWS Java SDK v2 dependency (`software.amazon.awssdk:auth`) as the authentication implementation uses AWS SDK types for credentials and request signing.
 
 See also: https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Using the aws auth backend]
 
