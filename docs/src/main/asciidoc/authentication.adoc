@@ -190,12 +190,12 @@ The following scenarios are supported along the required configuration details:
 | *Method*                          | *RoleId* | *SecretId*| *RoleName* | *Token*
 | Provided RoleId/SecretId          | Provided | Provided  |            |
 | Provided RoleId without SecretId  | Provided |           |            |
-| Provided RoleId, Pull SecretId    | Provided | Provided  | Provided   | Provided
+| Provided RoleId, Pull SecretId    | Provided |           | Provided   | Provided
 | Pull RoleId, provided SecretId    |          | Provided  | Provided   | Provided
 | Full Pull Mode                    |          |           | Provided   | Provided
 | Wrapped                           |          |           |            | Provided
-| Wrapped RoleId, provided SecretId | Provided |           |            | Provided
-| Provided RoleId, wrapped SecretId |          | Provided  |            | Provided
+| Wrapped RoleId, provided SecretId |          | Provided  |            | Provided
+| Provided RoleId, wrapped SecretId | Provided |           |            | Provided
 |===
 
 .Pull/Push/Wrapped Matrix
