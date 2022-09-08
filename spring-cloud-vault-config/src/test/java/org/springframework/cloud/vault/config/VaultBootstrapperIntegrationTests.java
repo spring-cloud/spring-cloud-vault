@@ -52,8 +52,8 @@ public class VaultBootstrapperIntegrationTests extends IntegrationTestSupport {
 
 		SpringApplication application = new SpringApplication(Config.class);
 		application.setWebApplicationType(WebApplicationType.NONE);
-		application
-				.addBootstrapper(VaultBootstrapper.fromConfigurer(configurer -> configurer.add("secret/customized")));
+		application.addBootstrapRegistryInitializer(
+				VaultBootstrapper.fromConfigurer(configurer -> configurer.add("secret/customized")));
 
 		this.context = application.run("--spring.application.name=VaultBootstrapPropertySourceConfigurationTests",
 				"--spring.config.import=vault:", "--spring.cloud.vault.token=" + Settings.token().getToken());

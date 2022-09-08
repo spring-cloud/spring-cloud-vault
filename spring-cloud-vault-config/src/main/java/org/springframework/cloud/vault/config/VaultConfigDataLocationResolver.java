@@ -37,6 +37,11 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.vault.core.util.PropertyTransformer;
+import org.springframework.vault.core.util.PropertyTransformers;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * {@link ConfigDataLocationResolver} for Vault resolving {@link VaultConfigLocation}
@@ -72,6 +77,7 @@ import org.springframework.util.ReflectionUtils;
  * required later on by {@link VaultConfigDataLoader}.
  *
  * @author Mark Paluch
+ * @author Jeffrey van der Laan
  * @since 3.0
  * @see VaultConfigurer
  * @see BootstrapRegistry
@@ -81,10 +87,7 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 
 	@Override
 	public boolean isResolvable(ConfigDataLocationResolverContext context, ConfigDataLocation location) {
-		boolean vaultEnabled = context.getBinder().bind(VaultProperties.PREFIX + ".enabled", Boolean.class)
-				.orElse(true);
-
-		return location.getValue().startsWith(VaultConfigLocation.VAULT_PREFIX) && vaultEnabled;
+		return location.getValue().startsWith(VaultConfigLocation.VAULT_PREFIX);
 	}
 
 	@Override
@@ -116,7 +119,20 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 			contextPath = contextPath.substring(1);
 		}
 
-		return Collections.singletonList(new VaultConfigLocation(contextPath, location.isOptional()));
+		return Collections.singletonList(
+				new VaultConfigLocation(contextPath, getPropertyTransformer(contextPath), location.isOptional()));
+	}
+
+	private static PropertyTransformer getPropertyTransformer(String contextPath) {
+
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(contextPath).build();
+		String prefix = uriComponents.getQueryParams().getFirst("prefix");
+
+		if (StringUtils.hasText(prefix) && StringUtils.hasText(uriComponents.getPath())) {
+			return PropertyTransformers.propertyNamePrefix(prefix);
+		}
+
+		return PropertyTransformers.noop();
 	}
 
 	private static void registerVaultProperties(ConfigDataLocationResolverContext context) {
@@ -178,8 +194,9 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 
 		Binder binder = context.getBinder();
 
-		kvProperties.setApplicationName(binder.bind("spring.cloud.vault.application-name", String.class)
-				.orElseGet(() -> binder.bind("spring.application.name", String.class).orElse("")));
+		kvProperties.setApplicationName(binder.bind("spring.cloud.vault.kv.application-name", String.class)
+				.orElseGet(() -> binder.bind("spring.cloud.vault.application-name", String.class)
+						.orElseGet(() -> binder.bind("spring.application.name", String.class).orElse(""))));
 		kvProperties.setProfiles(profiles.getActive());
 
 		return kvProperties;
@@ -187,21 +204,35 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 
 	private static List<VaultSecretBackendDescriptor> findDescriptors(Binder binder) {
 
-		List<String> descriptorClasses = SpringFactoriesLoader.loadFactoryNames(VaultSecretBackendDescriptor.class,
-				VaultConfigDataLocationResolver.class.getClassLoader());
+		List<String> descriptorClasses = new ArrayList<>();
+		descriptorClasses.addAll(SpringFactoriesLoader.loadFactoryNames(VaultSecretBackendDescriptor.class,
+				VaultConfigDataLocationResolver.class.getClassLoader()));
+		descriptorClasses.addAll(SpringFactoriesLoader.loadFactoryNames(VaultSecretBackendDescriptorFactory.class,
+				VaultConfigDataLocationResolver.class.getClassLoader()));
 
 		List<VaultSecretBackendDescriptor> descriptors = new ArrayList<>(descriptorClasses.size());
 
 		for (String className : descriptorClasses) {
 
-			Class<VaultSecretBackendDescriptor> descriptorClass = loadClass(className);
+			Class<?> descriptorClass = loadClass(className);
 
 			MergedAnnotations annotations = MergedAnnotations.from(descriptorClass);
 			if (annotations.isPresent(ConfigurationProperties.class)) {
 
 				String prefix = annotations.get(ConfigurationProperties.class).getString("prefix");
-				VaultSecretBackendDescriptor hydratedDescriptor = binder.bindOrCreate(prefix, descriptorClass);
-				descriptors.add(hydratedDescriptor);
+				Object hydratedDescriptor = binder.bindOrCreate(prefix, descriptorClass);
+
+				if (hydratedDescriptor instanceof VaultSecretBackendDescriptorFactory) {
+					descriptors.addAll(((VaultSecretBackendDescriptorFactory) hydratedDescriptor).create());
+				}
+				else if (hydratedDescriptor instanceof VaultSecretBackendDescriptor) {
+					descriptors.add((VaultSecretBackendDescriptor) hydratedDescriptor);
+				}
+				else {
+					throw new IllegalStateException(String.format(
+							"Descriptor %s is neither implements VaultSecretBackendDescriptorFactory nor VaultSecretBackendDescriptor",
+							className));
+				}
 			}
 			else {
 				throw new IllegalStateException(String.format(
@@ -219,10 +250,9 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Class<VaultSecretBackendDescriptor> loadClass(String className) {
+	private static Class<?> loadClass(String className) {
 		try {
-			return (Class<VaultSecretBackendDescriptor>) ClassUtils.forName(className,
-					VaultConfigDataLocationResolver.class.getClassLoader());
+			return ClassUtils.forName(className, VaultConfigDataLocationResolver.class.getClassLoader());
 		}
 		catch (ReflectiveOperationException e) {
 			ReflectionUtils.rethrowRuntimeException(e);

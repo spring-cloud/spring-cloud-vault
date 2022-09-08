@@ -17,6 +17,7 @@
 package org.springframework.cloud.vault.config;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -29,6 +30,7 @@ import org.springframework.boot.context.config.Profiles;
 import org.springframework.boot.context.properties.bind.Binder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +38,7 @@ import static org.mockito.Mockito.when;
  * Unit tests for {@link VaultConfigDataLocationResolver}.
  *
  * @author Mark Paluch
+ * @author Jeffrey van der Laan
  */
 public class VaultConfigDataLocationResolverUnitTests {
 
@@ -68,6 +71,17 @@ public class VaultConfigDataLocationResolverUnitTests {
 	}
 
 	@Test
+	public void shouldRejectLocationWithTrailingSlash() {
+
+		VaultConfigDataLocationResolver resolver = new VaultConfigDataLocationResolver();
+
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> resolver.resolveProfileSpecific(this.contextMock,
+						ConfigDataLocation.of("vault://foo/"), this.profilesMock))
+				.withMessage("Location 'vault://foo/' must not end with a trailing slash");
+	}
+
+	@Test
 	public void shouldDiscoverContextualLocations() {
 
 		VaultConfigDataLocationResolver resolver = new VaultConfigDataLocationResolver();
@@ -77,6 +91,34 @@ public class VaultConfigDataLocationResolverUnitTests {
 
 		assertThat(locations).hasSize(1);
 		assertThat(locations.get(0)).hasToString("VaultConfigLocation [path='my/context/path', optional=false]");
+		assertThat(locations.get(0).getSecretBackendMetadata().getPropertyTransformer()
+				.transformProperties(Collections.singletonMap("key", "value"))).containsEntry("key", "value");
+	}
+
+	@Test
+	public void shouldDiscoverContextualLocationsWithPrefix() {
+
+		VaultConfigDataLocationResolver resolver = new VaultConfigDataLocationResolver();
+
+		List<VaultConfigLocation> locations = resolver.resolveProfileSpecific(this.contextMock,
+				ConfigDataLocation.of("vault://my/context/path?prefix=myPrefix."), this.profilesMock);
+
+		assertThat(locations).hasSize(1);
+		assertThat(locations.get(0).getSecretBackendMetadata().getPropertyTransformer()
+				.transformProperties(Collections.singletonMap("key", "value"))).containsEntry("myPrefix.key", "value");
+	}
+
+	@Test
+	public void shouldNotPrefixWhenPrefixIsEmpty() {
+
+		VaultConfigDataLocationResolver resolver = new VaultConfigDataLocationResolver();
+
+		List<VaultConfigLocation> locations = resolver.resolveProfileSpecific(this.contextMock,
+				ConfigDataLocation.of("vault://my/context/path?prefix="), this.profilesMock);
+
+		assertThat(locations).hasSize(1);
+		assertThat(locations.get(0).getSecretBackendMetadata().getPropertyTransformer()
+				.transformProperties(Collections.singletonMap("key", "value"))).containsEntry("key", "value");
 	}
 
 }

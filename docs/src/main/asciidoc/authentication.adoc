@@ -9,8 +9,8 @@ Spring Cloud Vault supports token and AppId authentication.
 === Token authentication
 
 Tokens are the core method for authentication within Vault.
-Token authentication requires a static token to be provided using the
-https://github.com/spring-cloud/spring-cloud-commons/blob/master/docs/src/main/asciidoc/spring-cloud-commons.adoc#the-bootstrap-application-context[Bootstrap Application Context].
+Token authentication requires a static token to be provided using the configuration.
+As a fallback, the token may also be retrieved from `~/.vault-token` which is the default location used by the Vault CLI to cache tokens.
 
 NOTE: Token authentication is the default authentication method.
 If a token is disclosed an unintended party gains access to Vault and can access secrets for the intended client.
@@ -26,9 +26,13 @@ spring.cloud.vault:
 ====
 
 * `authentication` setting this value to `TOKEN` selects the Token authentication method
-* `token` sets the static token to use
+* `token` sets the static token to use. If missing or empty, then an attempt will be made to retrieve a token from ~/.vault-token.
 
-See also: https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
+See also:
+
+* https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
+* https://www.vaultproject.io/docs/commands/login[Vault Documentation: CLI login]
+* https://www.vaultproject.io/docs/commands/token-helper[Vault Documentation: CLI default to ~/.vault-token]
 
 [[vault.config.authentication.vault-agent]]
 === Vault Agent authentication

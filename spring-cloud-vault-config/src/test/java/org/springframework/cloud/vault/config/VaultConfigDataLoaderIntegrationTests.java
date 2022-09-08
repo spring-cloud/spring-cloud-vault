@@ -18,7 +18,6 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,15 +30,14 @@ import org.springframework.cloud.vault.util.Settings;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
- * Unit tests for {@link VaultConfigDataLoader}.
+ * Integration tests for {@link VaultConfigDataLoader}.
  *
  * @author Mark Paluch
  */
 public class VaultConfigDataLoaderIntegrationTests extends IntegrationTestSupport {
-
-	private ConfigurableApplicationContext context;
 
 	@Before
 	public void before() {
@@ -49,24 +47,51 @@ public class VaultConfigDataLoaderIntegrationTests extends IntegrationTestSuppor
 
 		this.vaultRule.prepare().getVaultOperations().write("secret/my-config-loader/cloud",
 				Collections.singletonMap("default-key", "cloud"));
+	}
+
+	@Test
+	public void shouldConsiderProfiles() {
 
 		SpringApplication application = new SpringApplication(Config.class);
 		application.setWebApplicationType(WebApplicationType.NONE);
 		application.setAdditionalProfiles("cloud");
 
-		this.context = application.run("--spring.application.name=my-config-loader", "--spring.config.import=vault:",
-				"--spring.cloud.vault.token=" + Settings.token().getToken());
+		try (ConfigurableApplicationContext context = application.run("--spring.application.name=my-config-loader",
+				"--spring.config.import=vault:", "--spring.cloud.vault.token=" + Settings.token().getToken())) {
+
+			assertThat(context.getEnvironment().getProperty("default-key")).isEqualTo("cloud");
+		}
 	}
 
 	@Test
-	public void shouldConsiderProfiles() {
-		assertThat(this.context.getEnvironment().getProperty("default-key")).isEqualTo("cloud");
+	public void vaultLocationEndingWithSlashShouldFail() {
+
+		SpringApplication application = new SpringApplication(Config.class);
+		application.setWebApplicationType(WebApplicationType.NONE);
+		application.setAdditionalProfiles("cloud");
+
+		try (ConfigurableApplicationContext context = application.run("--spring.application.name=my-config-loader",
+				"--spring.config.import=vault://secret/my-config-loader/cloud/",
+				"--spring.cloud.vault.token=" + Settings.token().getToken())) {
+
+			fail("expected exception");
+		}
+		catch (IllegalArgumentException e) {
+			assertThat(e).hasMessageContaining(
+					"Location 'vault://secret/my-config-loader/cloud/' must not end with a trailing slash");
+		}
 	}
 
-	@After
-	public void after() {
-		if (this.context != null) {
-			this.context.close();
+	@Test
+	public void shouldConsiderDisabledVault() {
+
+		SpringApplication application = new SpringApplication(Config.class);
+		application.setWebApplicationType(WebApplicationType.NONE);
+
+		try (ConfigurableApplicationContext context = application.run("--spring.application.name=my-config-loader",
+				"--spring.config.import=optional:vault:", "--spring.cloud.vault.enabled=false")) {
+
+			assertThat(context.getEnvironment().getProperty("default-key")).isNull();
 		}
 	}
 

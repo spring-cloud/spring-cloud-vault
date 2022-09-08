@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.vault.config.databases;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.vault.config.PropertyNameTransformer;
@@ -27,8 +24,13 @@ import org.springframework.cloud.vault.config.SecretBackendMetadataFactory;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.util.Assert;
 import org.springframework.vault.core.util.PropertyTransformer;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Bootstrap configuration providing support for the Database secret backends such as
@@ -38,11 +40,13 @@ import org.springframework.vault.core.util.PropertyTransformer;
  * @author Per Abich
  * @author Sebastien Nahelou
  * @author Francis Hitchens
+ * @author Quintin Beukes
  */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties({ VaultMySqlProperties.class, VaultPostgreSqlProperties.class,
 		VaultCassandraProperties.class, VaultCouchbaseProperties.class, VaultMongoProperties.class,
-		VaultElasticsearchProperties.class, VaultDatabaseProperties.class })
+		VaultElasticsearchProperties.class, VaultDatabaseProperties.class, VaultDatabasesProperties.class })
+@Order(Ordered.LOWEST_PRECEDENCE - 15)
 public class VaultConfigDatabaseBootstrapConfiguration {
 
 	@Bean

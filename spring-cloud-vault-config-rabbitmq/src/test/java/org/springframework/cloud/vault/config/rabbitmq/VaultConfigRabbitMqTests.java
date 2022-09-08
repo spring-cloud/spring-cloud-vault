@@ -24,6 +24,7 @@ import java.util.Map;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -52,6 +53,7 @@ import static org.junit.Assume.assumeTrue;
 @SpringBootTest(classes = VaultConfigRabbitMqTests.TestApplication.class,
 		properties = { "spring.cloud.vault.rabbitmq.enabled=true", "spring.cloud.vault.rabbitmq.role=readonly",
 				"spring.rabbitmq.address=localhost", "spring.cloud.bootstrap.enabled=true" })
+@Ignore
 public class VaultConfigRabbitMqTests {
 
 	private static final int RABBITMQ_HTTP_MANAGEMENT_PORT = 15672;

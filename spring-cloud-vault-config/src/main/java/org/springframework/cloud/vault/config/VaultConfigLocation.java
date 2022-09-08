@@ -20,6 +20,8 @@ import org.springframework.boot.context.config.ConfigDataLocation;
 import org.springframework.boot.context.config.ConfigDataResource;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.vault.core.util.PropertyTransformer;
+import org.springframework.vault.core.util.PropertyTransformers;
 
 /**
  * Vault-specific implementation for a {@link ConfigDataLocation}. Consists of a
@@ -40,18 +42,43 @@ public class VaultConfigLocation extends ConfigDataResource {
 
 	private final boolean optional;
 
+	/**
+	 * Create a new {@link VaultConfigLocation} instance.
+	 * @param contextPath the context path
+	 * @param optional if the resource is optional
+	 */
 	public VaultConfigLocation(String contextPath, boolean optional) {
+		this(contextPath, PropertyTransformers.noop(), optional);
+	}
 
-		Assert.hasText(contextPath, "Context path must not be empty");
+	/**
+	 * Create a new {@link VaultConfigLocation} instance.
+	 * @param contextPath the context path
+	 * @param propertyTransformer the property transformer
+	 * @param optional if the resource is optional
+	 * @since 3.0.4
+	 */
+	public VaultConfigLocation(String contextPath, PropertyTransformer propertyTransformer, boolean optional) {
 
-		this.secretBackendMetadata = KeyValueSecretBackendMetadata.create(contextPath);
+		super(optional);
+
+		Assert.hasText(contextPath, "Location must not be empty");
+		validatePath(contextPath);
+
+		this.secretBackendMetadata = KeyValueSecretBackendMetadata.create(contextPath, propertyTransformer);
 		this.optional = optional;
 	}
 
+	/**
+	 * Create a new {@link VaultConfigLocation} instance.
+	 * @param secretBackendMetadata the backend descriptor.
+	 * @param optional if the resource is optional
+	 */
 	public VaultConfigLocation(SecretBackendMetadata secretBackendMetadata, boolean optional) {
 
 		Assert.notNull(secretBackendMetadata, "SecretBackendMetadata must not be null");
 
+		validatePath(secretBackendMetadata.getPath());
 		this.secretBackendMetadata = secretBackendMetadata;
 		this.optional = optional;
 	}
@@ -97,6 +124,11 @@ public class VaultConfigLocation extends ConfigDataResource {
 		sb.append(", optional=").append(this.optional);
 		sb.append(']');
 		return sb.toString();
+	}
+
+	private static void validatePath(String contextPath) {
+		Assert.isTrue(!contextPath.endsWith("/"),
+				() -> String.format("Location 'vault://%s' must not end with a trailing slash", contextPath));
 	}
 
 }

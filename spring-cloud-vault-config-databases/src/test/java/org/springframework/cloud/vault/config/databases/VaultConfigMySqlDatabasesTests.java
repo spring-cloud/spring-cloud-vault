@@ -39,19 +39,19 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.junit.Assume.assumeTrue;
 
 /**
- * Integration tests using the database secret backend. In case this test should fail
- * because of SSL make sure you run the test within the
+ * Integration tests using the database secret backend with multi-database support. In
+ * case this test should fail because of SSL make sure you run the test within the
  * spring-cloud-vault-config/spring-cloud-vault-config directory as the keystore is
  * referenced with {@code ../work/keystore.jks}.
  *
  * @author Mark Paluch
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = VaultConfigMySqlDatabaseTests.TestApplication.class,
-		properties = { "spring.cloud.vault.database.enabled=true", "spring.cloud.vault.database.role=readonly",
-				"spring.datasource.url=" + MySqlFixtures.JDBC_URL, "spring.main.allow-bean-definition-overriding=true",
-				"spring.cloud.bootstrap.enabled=true" })
-public class VaultConfigMySqlDatabaseTests {
+@SpringBootTest(classes = VaultConfigMySqlDatabasesTests.TestApplication.class,
+		properties = { "spring.cloud.vault.databases.mysql.enabled=true",
+				"spring.cloud.vault.databases.mysql.role=readonly", "spring.datasource.url=" + MySqlFixtures.JDBC_URL,
+				"spring.config.import=vault://" })
+public class VaultConfigMySqlDatabasesTests {
 
 	@Value("${spring.datasource.username}")
 	String username;
@@ -79,6 +79,7 @@ public class VaultConfigMySqlDatabaseTests {
 
 	@Test
 	public void shouldConnectUsingDataSource() throws SQLException {
+
 		this.dataSource.getConnection().close();
 	}
 

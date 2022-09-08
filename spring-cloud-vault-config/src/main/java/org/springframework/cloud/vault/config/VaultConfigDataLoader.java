@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.vault.config;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -32,7 +31,7 @@ import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.BootstrapContext;
 import org.springframework.boot.BootstrapRegistry;
-import org.springframework.boot.Bootstrapper;
+import org.springframework.boot.BootstrapRegistryInitializer;
 import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.context.config.ConfigData;
 import org.springframework.boot.context.config.ConfigDataLoader;
@@ -84,7 +83,7 @@ import static org.springframework.vault.config.AbstractVaultConfiguration.Client
  * {@link VaultReactiveAutoConfiguration}.
  * <p>
  * Infrastructure beans can be customized by registering instances through
- * {@link Bootstrapper}.
+ * {@link BootstrapRegistryInitializer}.
  *
  * @author Mark Paluch
  * @since 3.0
@@ -93,6 +92,8 @@ import static org.springframework.vault.config.AbstractVaultConfiguration.Client
  * @see VaultReactiveAutoConfiguration
  */
 public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocation> {
+
+	private final static ConfigData SKIP_LOCATION = null;
 
 	private final static boolean FLUX_AVAILABLE = ClassUtils.isPresent("reactor.core.publisher.Flux",
 			VaultConfigDataLoader.class.getClassLoader());
@@ -114,11 +115,15 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 	@Override
 	public ConfigData load(ConfigDataLoaderContext context, VaultConfigLocation location)
-			throws IOException, ConfigDataLocationNotFoundException {
+			throws ConfigDataLocationNotFoundException {
 
 		ConfigurableBootstrapContext bootstrap = context.getBootstrapContext();
 		VaultProperties vaultProperties = bootstrap.get(VaultProperties.class);
 		RetryProperties retryProperties = bootstrap.get(RetryProperties.class);
+
+		if (!vaultProperties.isEnabled()) {
+			return SKIP_LOCATION;
+		}
 
 		if (vaultProperties.getSession().getLifecycle().isEnabled()
 				|| vaultProperties.getConfig().getLifecycle().isEnabled()) {
@@ -192,7 +197,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 			infra.registerClientAuthentication();
 
-			if (!(REGISTER_REACTIVE_INFRASTRUCTURE && vaultProperties.getReactive().isEnabled())) {
+			if (!REGISTER_REACTIVE_INFRASTRUCTURE || !vaultProperties.getReactive().isEnabled()) {
 				infra.registerVaultSessionManager();
 			}
 

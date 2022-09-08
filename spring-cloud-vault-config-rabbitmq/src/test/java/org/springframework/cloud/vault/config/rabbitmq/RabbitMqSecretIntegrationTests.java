@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.cloud.vault.config.VaultConfigTemplate;
@@ -42,6 +43,7 @@ import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitM
  *
  * @author Mark Paluch
  */
+@Ignore
 public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 
 	private static final int RABBITMQ_HTTP_MANAGEMENT_PORT = 15672;

@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.vault.config;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.amazonaws.auth.AWSCredentials;
@@ -23,6 +27,7 @@ import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.boot.system.SystemProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AppRoleProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AwsIamProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AzureMsiProperties;
@@ -47,6 +52,7 @@ import org.springframework.vault.authentication.AzureMsiAuthentication;
 import org.springframework.vault.authentication.AzureMsiAuthenticationOptions;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.ClientCertificateAuthentication;
+import org.springframework.vault.authentication.ClientCertificateAuthenticationOptions;
 import org.springframework.vault.authentication.CubbyholeAuthentication;
 import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
 import org.springframework.vault.authentication.GcpComputeAuthentication;
@@ -65,12 +71,15 @@ import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * Factory for {@link ClientAuthentication}.
  *
  * @author Mark Paluch
  * @author Kevin Holditch
  * @author Michal Budzyn
+ * @author Quincy Conduff
  * @since 1.1
  */
 class ClientAuthenticationFactory {
@@ -118,7 +127,7 @@ class ClientAuthenticationFactory {
 			return azureMsiAuthentication(this.vaultProperties);
 
 		case CERT:
-			return new ClientCertificateAuthentication(this.restOperations);
+			return certificateAuthentication(this.vaultProperties);
 
 		case CUBBYHOLE:
 			return cubbyholeAuthentication();
@@ -136,8 +145,7 @@ class ClientAuthenticationFactory {
 			return pcfAuthentication(this.vaultProperties);
 
 		case TOKEN:
-			Assert.hasText(this.vaultProperties.getToken(), "Token (spring.cloud.vault.token) must not be empty");
-			return new TokenAuthentication(this.vaultProperties.getToken());
+			return tokenAuthentication(this.vaultProperties);
 		}
 
 		throw new UnsupportedOperationException(
@@ -386,6 +394,37 @@ class ClientAuthenticationFactory {
 		}
 
 		return new PcfAuthentication(builder.build(), this.restOperations);
+	}
+
+	private ClientAuthentication certificateAuthentication(VaultProperties vaultProperties) {
+
+		ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions.builder()
+				.path(vaultProperties.getSsl().getCertAuthPath()).build();
+
+		return new ClientCertificateAuthentication(options, this.restOperations);
+	}
+
+	private ClientAuthentication tokenAuthentication(VaultProperties vaultProperties) {
+
+		if (StringUtils.hasText(vaultProperties.getToken())) {
+			return new TokenAuthentication(vaultProperties.getToken());
+		}
+
+		Path vaultTokenPath = Paths.get(SystemProperties.get("user.home"), ".vault-token");
+
+		if (Files.exists(vaultTokenPath)) {
+			try {
+				return new TokenAuthentication(new String(Files.readAllBytes(vaultTokenPath), UTF_8));
+			}
+			catch (IOException ex) {
+				throw new IllegalStateException(String.format("Could not retrieve vault token from %s", vaultTokenPath),
+						ex);
+			}
+		}
+		else {
+			throw new IllegalStateException(
+					"Cannot create authentication mechanism for TOKEN. This method requires either a Token (spring.cloud.vault.token) or a token file at ~/.vault-token.");
+		}
 	}
 
 	private static class AwsCredentialProvider {

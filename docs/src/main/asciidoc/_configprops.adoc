@@ -59,6 +59,7 @@
 |spring.cloud.vault.database.role |  | Role name for credentials.
 |spring.cloud.vault.database.static-role | `false` | Enable static role usage.
 |spring.cloud.vault.database.username-property | `spring.datasource.username` | Target property for the obtained username.
+|spring.cloud.vault.databases |  | 
 |spring.cloud.vault.discovery.enabled | `false` | Flag to indicate that Vault server discovery is enabled (vault server URL will be looked up via discovery).
 |spring.cloud.vault.discovery.service-id | `vault` | Service id to locate Vault.
 |spring.cloud.vault.elasticsearch.backend | `database` | Database backend path.
@@ -117,6 +118,7 @@
 |spring.cloud.vault.rabbitmq.password-property | `spring.rabbitmq.password` | Target property for the obtained password.
 |spring.cloud.vault.rabbitmq.role |  | Role name for credentials.
 |spring.cloud.vault.rabbitmq.username-property | `spring.rabbitmq.username` | Target property for the obtained username.
+|spring.cloud.vault.reactive.enabled | `true` | Flag to indicate that reactive discovery is enabled
 |spring.cloud.vault.read-timeout | `15000` | Read timeout.
 |spring.cloud.vault.retry.initial-interval | `1000` | Initial retry interval in milliseconds.
 |spring.cloud.vault.retry.multiplier | `1.1` | Multiplier for next interval.

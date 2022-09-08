@@ -49,7 +49,7 @@ public class TestRestTemplateFactory {
 	 * {@link #create(ClientHttpRequestFactory)} to create {@link RestTemplate} for a
 	 * given {@link ClientHttpRequestFactory}.
 	 * @param sslConfiguration must not be {@literal null}.
-	 * @return
+	 * @return the configured {@link RestTemplate}.
 	 */
 	public static RestTemplate create(SslConfiguration sslConfiguration) {
 
@@ -70,7 +70,7 @@ public class TestRestTemplateFactory {
 	 * {@link org.springframework.web.client.HttpStatusCodeException exceptions} in error
 	 * cases and behave in that aspect like the regular {@link RestTemplate}.
 	 * @param requestFactory must not be {@literal null}.
-	 * @return
+	 * @return the configured {@link RestTemplate}.
 	 */
 	public static RestTemplate create(ClientHttpRequestFactory requestFactory) {
 

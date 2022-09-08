@@ -16,24 +16,36 @@
 
 package org.springframework.cloud.vault.config;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+
 import org.junit.Test;
 
+import org.springframework.boot.system.SystemProperties;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.authentication.ClientAuthentication;
+import org.springframework.vault.authentication.ClientCertificateAuthentication;
 import org.springframework.vault.authentication.PcfAuthentication;
+import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link ClientAuthenticationFactory}.
  *
  * @author Mark Paluch
+ * @author Quincy Conduff
  */
 public class ClientAuthenticationFactoryUnitTests {
 
@@ -161,6 +173,56 @@ public class ClientAuthenticationFactoryUnitTests {
 				new RestTemplate()).createClientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(PcfAuthentication.class);
+	}
+
+	@Test
+	public void shouldSupportSslCertificateAuthentication() {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.CERT);
+		properties.getSsl().setCertAuthPath("bert");
+
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate()).createClientAuthentication();
+
+		assertThat(clientAuthentication).isInstanceOf(ClientCertificateAuthentication.class);
+	}
+
+	@Test
+	public void shouldSupportTokenFromFile() throws IOException {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.TOKEN);
+
+		Path vaultTokenPath = Paths.get(SystemProperties.get("user.home"), ".vault-token");
+		Files.write(vaultTokenPath, "hello".getBytes(StandardCharsets.UTF_8), StandardOpenOption.WRITE,
+				StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+		try {
+			ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+					new RestTemplate()).createClientAuthentication();
+
+			assertThat(clientAuthentication).isInstanceOf(TokenAuthentication.class);
+			VaultToken token = clientAuthentication.login();
+
+			assertThat(new String(token.toCharArray())).isEqualTo("hello");
+		}
+		finally {
+			Files.deleteIfExists(vaultTokenPath);
+		}
+	}
+
+	@Test
+	public void tokenAuthShouldFailIfTokenFileNotExistsAndTokenEmpty() throws IOException {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.TOKEN);
+		Path vaultTokenPath = Paths.get(SystemProperties.get("user.home"), ".vault-token");
+		Files.deleteIfExists(vaultTokenPath);
+
+		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate());
+
+		assertThatIllegalStateException().isThrownBy(factory::createClientAuthentication);
 	}
 
 }

@@ -7,12 +7,12 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-vault-parent</artifactId>
-		<version>3.0.3-SNAPSHOT</version>
+		<version>3.1.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
 	<artifactId>spring-cloud-vault-docs</artifactId>
-	<version>3.0.3-SNAPSHOT</version>
+	<version>3.1.1-SNAPSHOT</version>
 
 	<packaging>jar</packaging>
 	<name>Spring Cloud Vault Docs</name>
@@ -24,6 +24,8 @@
 		<configprops.inclusionPattern>spring.cloud.vault.*|
 		</configprops.inclusionPattern>
 		<upload-docs-zip.phase>deploy</upload-docs-zip.phase>
+		<!-- Don't upload docs jar to central / repo.spring.io -->
+		<maven-deploy-plugin-default.phase>none</maven-deploy-plugin-default.phase>
 	</properties>
 
 	<dependencies>
