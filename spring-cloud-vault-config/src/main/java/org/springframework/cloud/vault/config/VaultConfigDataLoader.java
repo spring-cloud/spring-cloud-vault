@@ -43,6 +43,7 @@ import org.springframework.cloud.vault.config.VaultReactiveAutoConfiguration.Cli
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.lang.Nullable;
@@ -456,10 +457,21 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			registerIfAbsent(this.bootstrap, "clientHttpRequestFactoryWrapper", ClientFactoryWrapper.class, () -> {
 
 				ClientHttpRequestFactory factory = this.configuration.createClientHttpRequestFactory();
-				if (RETRY_AVAILABLE && this.vaultProperties.isFailFast()) {
-					RetryTemplate retryTemplate = bootstrap.getOrElse(RetryTemplate.class,
-							VaultRetryUtil.createRetryTemplate(retryProperties));
-					factory = VaultRetryUtil.createRetryableClientHttpRequestFactory(retryTemplate, factory);
+				if (this.vaultProperties.isFailFast()) {
+					if (RETRY_AVAILABLE) {
+						RetryTemplate retryTemplate = bootstrap.getOrElse(RetryTemplate.class,
+								VaultRetryUtil.createRetryTemplate(retryProperties));
+						factory = VaultRetryUtil.createRetryableClientHttpRequestFactory(retryTemplate, factory);
+					}
+					else {
+						Environment env = bootstrap.get(Environment.class);
+						boolean retryPropertySet = RetryProperties.PROPERTY_SET.stream()
+								.anyMatch(s -> env.getProperty(s) != null);
+						if (retryPropertySet) {
+							throw new IllegalStateException(
+									"One or more spring.cloud.vault.retry.* properties are set, but spring-retry is not on the classpath");
+						}
+					}
 				}
 
 				// early initialization

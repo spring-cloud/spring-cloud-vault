@@ -18,10 +18,12 @@ package org.springframework.cloud.vault.config;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.test.ClassPathExclusions;
 import org.springframework.cloud.test.ModifiedClassPathRunner;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -54,6 +56,22 @@ public class VaultAutoConfigurationRetryUnavailableTests {
 							HttpMethod.GET);
 					assertThat(request instanceof RetryableClientHttpRequest).isFalse();
 				});
+	}
+
+	@Test
+	public void shouldThrowErrorIfRetryPropertiesConfigured() {
+
+		try {
+			this.contextRunner
+					.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.fail-fast=true",
+							"spring.cloud.vault.token=foo", "spring.cloud.vault.retry.max-attempts=5")
+					.run(context -> {
+					});
+		}
+		catch (BeanCreationException e) {
+			Throwable cause = NestedExceptionUtils.getRootCause(e);
+			assertThat(cause.getMessage()).contains("spring-retry is not on the classpath");
+		}
 	}
 
 }

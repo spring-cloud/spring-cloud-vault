@@ -38,6 +38,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.retry.support.RetryTemplate;
@@ -142,17 +143,28 @@ public class VaultAutoConfiguration {
 	@ConditionalOnMissingBean
 	public ClientFactoryWrapper clientHttpRequestFactoryWrapper() {
 		ClientHttpRequestFactory clientHttpRequestFactory = this.configuration.createClientHttpRequestFactory();
-		if (ClassUtils.isPresent(RETRY_TEMPLATE, getClass().getClassLoader()) && this.vaultProperties.isFailFast()) {
-			Map<String, RetryTemplate> beans = applicationContext.getBeansOfType(RetryTemplate.class);
-			if (!beans.isEmpty()) {
-				Map.Entry<String, RetryTemplate> existingBean = beans.entrySet().stream().findFirst().get();
-				log.info("Using existing RestTemplate '" + existingBean.getKey() + "' for vault retries");
-				clientHttpRequestFactory = VaultRetryUtil
-						.createRetryableClientHttpRequestFactory(existingBean.getValue(), clientHttpRequestFactory);
+		if (this.vaultProperties.isFailFast()) {
+			if (ClassUtils.isPresent(RETRY_TEMPLATE, getClass().getClassLoader())) {
+				Map<String, RetryTemplate> beans = applicationContext.getBeansOfType(RetryTemplate.class);
+				if (!beans.isEmpty()) {
+					Map.Entry<String, RetryTemplate> existingBean = beans.entrySet().stream().findFirst().get();
+					log.info("Using existing RestTemplate '" + existingBean.getKey() + "' for vault retries");
+					clientHttpRequestFactory = VaultRetryUtil
+							.createRetryableClientHttpRequestFactory(existingBean.getValue(), clientHttpRequestFactory);
+				}
+				else {
+					clientHttpRequestFactory = VaultRetryUtil.createRetryableClientHttpRequestFactory(retryProperties,
+							clientHttpRequestFactory);
+				}
 			}
 			else {
-				clientHttpRequestFactory = VaultRetryUtil.createRetryableClientHttpRequestFactory(retryProperties,
-						clientHttpRequestFactory);
+				ConfigurableEnvironment env = applicationContext.getEnvironment();
+				boolean retryPropertySet = RetryProperties.PROPERTY_SET.stream()
+						.anyMatch(s -> env.getProperty(s) != null);
+				if (retryPropertySet) {
+					throw new IllegalStateException(
+							"One or more spring.cloud.vault.retry.* properties are set, but spring-retry is not on the classpath");
+				}
 			}
 		}
 		return new ClientFactoryWrapper(clientHttpRequestFactory);

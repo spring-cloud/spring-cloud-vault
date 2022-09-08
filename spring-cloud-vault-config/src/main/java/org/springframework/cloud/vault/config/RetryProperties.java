@@ -18,6 +18,10 @@ package org.springframework.cloud.vault.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 @ConfigurationProperties(RetryProperties.PREFIX)
 public class RetryProperties {
 
@@ -25,6 +29,10 @@ public class RetryProperties {
 	 * ConfigurationProperties prefix.
 	 */
 	public static final String PREFIX = "spring.cloud.vault.retry";
+
+	public static final Set<String> PROPERTY_SET = new HashSet<>(
+			Arrays.asList("spring.cloud.vault.retry.max-attempts", "spring.cloud.vault.retry.multiplier",
+					"spring.cloud.vault.retry.initial-interval", "spring.cloud.vault.retry.max-interval"));
 
 	/**
 	 * Initial retry interval in milliseconds.
