@@ -111,41 +111,41 @@ class ClientAuthenticationFactory {
 
 		switch (this.vaultProperties.getAuthentication()) {
 
-		case APPID:
-			return appIdAuthentication(this.vaultProperties);
+			case APPID:
+				return appIdAuthentication(this.vaultProperties);
 
-		case APPROLE:
-			return appRoleAuthentication(this.vaultProperties);
+			case APPROLE:
+				return appRoleAuthentication(this.vaultProperties);
 
-		case AWS_EC2:
-			return awsEc2Authentication(this.vaultProperties);
+			case AWS_EC2:
+				return awsEc2Authentication(this.vaultProperties);
 
-		case AWS_IAM:
-			return awsIamAuthentication(this.vaultProperties);
+			case AWS_IAM:
+				return awsIamAuthentication(this.vaultProperties);
 
-		case AZURE_MSI:
-			return azureMsiAuthentication(this.vaultProperties);
+			case AZURE_MSI:
+				return azureMsiAuthentication(this.vaultProperties);
 
-		case CERT:
-			return certificateAuthentication(this.vaultProperties);
+			case CERT:
+				return certificateAuthentication(this.vaultProperties);
 
-		case CUBBYHOLE:
-			return cubbyholeAuthentication();
+			case CUBBYHOLE:
+				return cubbyholeAuthentication();
 
-		case GCP_GCE:
-			return gcpGceAuthentication(this.vaultProperties);
+			case GCP_GCE:
+				return gcpGceAuthentication(this.vaultProperties);
 
-		case GCP_IAM:
-			return gcpIamAuthentication(this.vaultProperties);
+			case GCP_IAM:
+				return gcpIamAuthentication(this.vaultProperties);
 
-		case KUBERNETES:
-			return kubernetesAuthentication(this.vaultProperties);
+			case KUBERNETES:
+				return kubernetesAuthentication(this.vaultProperties);
 
-		case PCF:
-			return pcfAuthentication(this.vaultProperties);
+			case PCF:
+				return pcfAuthentication(this.vaultProperties);
 
-		case TOKEN:
-			return tokenAuthentication(this.vaultProperties);
+			case TOKEN:
+				return tokenAuthentication(this.vaultProperties);
 		}
 
 		throw new UnsupportedOperationException(
@@ -175,23 +175,23 @@ class ClientAuthenticationFactory {
 
 			switch (appId.getUserId().toUpperCase()) {
 
-			case VaultProperties.AppIdProperties.IP_ADDRESS:
-				return new IpAddressUserId();
+				case VaultProperties.AppIdProperties.IP_ADDRESS:
+					return new IpAddressUserId();
 
-			case VaultProperties.AppIdProperties.MAC_ADDRESS:
+				case VaultProperties.AppIdProperties.MAC_ADDRESS:
 
-				if (StringUtils.hasText(appId.getNetworkInterface())) {
-					try {
-						return new MacAddressUserId(Integer.parseInt(appId.getNetworkInterface()));
+					if (StringUtils.hasText(appId.getNetworkInterface())) {
+						try {
+							return new MacAddressUserId(Integer.parseInt(appId.getNetworkInterface()));
+						}
+						catch (NumberFormatException e) {
+							return new MacAddressUserId(appId.getNetworkInterface());
+						}
 					}
-					catch (NumberFormatException e) {
-						return new MacAddressUserId(appId.getNetworkInterface());
-					}
-				}
 
-				return new MacAddressUserId();
-			default:
-				return new StaticUserId(appId.getUserId());
+					return new MacAddressUserId();
+				default:
+					return new StaticUserId(appId.getUserId());
 			}
 		}
 	}
