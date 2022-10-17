@@ -20,7 +20,7 @@
 	<description>Spring Cloud Vault Dependencies</description>
 
 	<properties>
-		<spring-vault.version>3.0.0-M2</spring-vault.version>
+		<spring-vault.version>3.0.0-SNAPSHOT</spring-vault.version>
 	</properties>
 
 	<dependencyManagement>
