@@ -59,6 +59,14 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- Micrometer -->
+
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 		<!-- HTTP Client Libraries -->
 		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
