@@ -27,8 +27,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
-
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.BootstrapContext;
 import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.BootstrapRegistryInitializer;
@@ -62,6 +62,7 @@ import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.WebClientBuilder;
 import org.springframework.vault.client.WebClientFactory;
+import org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
 import org.springframework.vault.core.ReactiveVaultTemplate;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.core.env.LeaseAwareVaultPropertySource;
@@ -69,8 +70,6 @@ import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.event.LeaseErrorListener;
 import org.springframework.web.client.RestTemplate;
-
-import static org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
 
 /**
  * {@link ConfigDataLoader} for Vault for {@link VaultConfigLocation}. This class
@@ -94,13 +93,13 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 	private final static ConfigData SKIP_LOCATION = null;
 
-	private final static boolean FLUX_AVAILABLE = ClassUtils.isPresent("reactor.core.publisher.Flux",
+	final static boolean reactorPresent = ClassUtils.isPresent("reactor.core.publisher.Flux",
 			VaultConfigDataLoader.class.getClassLoader());
 
-	private final static boolean WEBCLIENT_AVAILABLE = ClassUtils.isPresent(
+	final static boolean webclientPresent = ClassUtils.isPresent(
 			"org.springframework.web.reactive.function.client.WebClient", VaultConfigDataLoader.class.getClassLoader());
 
-	private final static boolean REGISTER_REACTIVE_INFRASTRUCTURE = FLUX_AVAILABLE && WEBCLIENT_AVAILABLE;
+	private final static boolean REGISTER_REACTIVE_INFRASTRUCTURE = reactorPresent && webclientPresent;
 
 	private final DeferredLogFactory logFactory;
 
@@ -366,10 +365,16 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 			GenericApplicationContext gac = (GenericApplicationContext) event.getApplicationContext();
 
+			ConfigurableListableBeanFactory factory = gac.getBeanFactory();
+
+			if (factory.containsSingleton(beanName) || factory.containsBeanDefinition(beanName)) {
+				return;
+			}
+
 			contextCustomizer.accept(gac);
 			T instance = event.getBootstrapContext().get(instanceType);
 
-			gac.registerBean(beanName, instanceType, () -> instance);
+			factory.registerSingleton(beanName, instance);
 		});
 	}
 
@@ -389,7 +394,6 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 			field.setAccessible(true);
 			field.set(null, logFactory.getLog(type));
-
 		}, VaultConfigDataLoader::isUpdateableLogField);
 	}
 
@@ -399,7 +403,6 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 			field.setAccessible(true);
 			field.set(object, logFactory.getLog(object.getClass()));
-
 		}, VaultConfigDataLoader::isUpdateableLogField);
 	}
 
@@ -419,7 +422,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 	/**
 	 * Support class to register imperative infrastructure bootstrap instances and beans.
-	 *
+	 * <p>
 	 * Mirrors {@link VaultAutoConfiguration}.
 	 */
 	static class ImperativeInfrastructure {

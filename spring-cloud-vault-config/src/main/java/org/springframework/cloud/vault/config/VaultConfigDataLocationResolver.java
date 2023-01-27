@@ -36,7 +36,6 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.core.util.PropertyTransformer;
 import org.springframework.vault.core.util.PropertyTransformers;
@@ -201,17 +200,17 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 
 	private static List<VaultSecretBackendDescriptor> findDescriptors(Binder binder) {
 
-		List<String> descriptorClasses = new ArrayList<>();
-		descriptorClasses.addAll(SpringFactoriesLoader.loadFactoryNames(VaultSecretBackendDescriptor.class,
+		List<Object> descriptorsOrFactories = new ArrayList<>();
+		descriptorsOrFactories.addAll(SpringFactoriesLoader.loadFactories(VaultSecretBackendDescriptor.class,
 				VaultConfigDataLocationResolver.class.getClassLoader()));
-		descriptorClasses.addAll(SpringFactoriesLoader.loadFactoryNames(VaultSecretBackendDescriptorFactory.class,
+		descriptorsOrFactories.addAll(SpringFactoriesLoader.loadFactories(VaultSecretBackendDescriptorFactory.class,
 				VaultConfigDataLocationResolver.class.getClassLoader()));
 
-		List<VaultSecretBackendDescriptor> descriptors = new ArrayList<>(descriptorClasses.size());
+		List<VaultSecretBackendDescriptor> descriptors = new ArrayList<>(descriptorsOrFactories.size());
 
-		for (String className : descriptorClasses) {
+		for (Object descriptorOrFactory : descriptorsOrFactories) {
 
-			Class<?> descriptorClass = loadClass(className);
+			Class<?> descriptorClass = descriptorOrFactory.getClass();
 
 			MergedAnnotations annotations = MergedAnnotations.from(descriptorClass);
 			if (annotations.isPresent(ConfigurationProperties.class)) {
@@ -228,12 +227,13 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 				else {
 					throw new IllegalStateException(String.format(
 							"Descriptor %s is neither implements VaultSecretBackendDescriptorFactory nor VaultSecretBackendDescriptor",
-							className));
+							ClassUtils.getQualifiedName(descriptorOrFactory.getClass())));
 				}
 			}
 			else {
-				throw new IllegalStateException(String.format(
-						"VaultSecretBackendDescriptor %s is not annotated with @ConfigurationProperties", className));
+				throw new IllegalStateException(
+						String.format("VaultSecretBackendDescriptor %s is not annotated with @ConfigurationProperties",
+								ClassUtils.getQualifiedName(descriptorOrFactory.getClass())));
 			}
 		}
 
@@ -244,19 +244,6 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 	private static List<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> getSecretBackendMetadataFactories() {
 		return (List) SpringFactoriesLoader.loadFactories(SecretBackendMetadataFactory.class,
 				VaultConfigDataLocationResolver.class.getClassLoader());
-	}
-
-	@SuppressWarnings("unchecked")
-	private static Class<?> loadClass(String className) {
-		try {
-			return ClassUtils.forName(className, VaultConfigDataLocationResolver.class.getClassLoader());
-		}
-		catch (ReflectiveOperationException e) {
-			ReflectionUtils.rethrowRuntimeException(e);
-
-			// should never happen.
-			return null;
-		}
 	}
 
 }
