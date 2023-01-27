@@ -84,11 +84,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 class ClientAuthenticationFactory {
 
-	private static final boolean GOOGLE_CREDENTIAL_AVAILABLE = ClassUtils.isPresent(
+	private static final boolean GOOGLE_CREDENTIAL_PRESENT = ClassUtils.isPresent(
 			"com.google.api.client.googleapis.auth.oauth2.GoogleCredential",
 			ClientAuthenticationFactory.class.getClassLoader());
 
-	private static final boolean GOOGLE_CREDENTIALS_AVAILABLE = ClassUtils
+	private static final boolean GOOGLE_CREDENTIALS_PRESENT = ClassUtils
 			.isPresent("com.google.auth.oauth2.GoogleCredentials", ClientAuthenticationFactory.class.getClassLoader());
 
 	private final VaultProperties vaultProperties;
@@ -347,11 +347,11 @@ class ClientAuthenticationFactory {
 
 	private ClientAuthentication gcpIamAuthentication(VaultProperties vaultProperties) {
 
-		if (GOOGLE_CREDENTIAL_AVAILABLE) {
+		if (GOOGLE_CREDENTIAL_PRESENT) {
 			return GcpIamAuthenticationFactory.create(vaultProperties, this.restOperations);
 		}
 
-		if (GOOGLE_CREDENTIALS_AVAILABLE) {
+		if (GOOGLE_CREDENTIALS_PRESENT) {
 			return GcpIamCredentialsAuthenticationFactory.create(vaultProperties, this.restOperations);
 		}
 

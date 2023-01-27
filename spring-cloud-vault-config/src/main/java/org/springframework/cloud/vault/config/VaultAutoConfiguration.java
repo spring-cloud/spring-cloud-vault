@@ -245,12 +245,12 @@ public class VaultAutoConfiguration {
 			this(taskScheduler, true);
 		}
 
-		TaskSchedulerWrapper(ThreadPoolTaskScheduler taskScheduler, boolean acceptAfterPropertiesSet) {
+		public TaskSchedulerWrapper(ThreadPoolTaskScheduler taskScheduler, boolean acceptAfterPropertiesSet) {
 			this.taskScheduler = taskScheduler;
 			this.acceptAfterPropertiesSet = acceptAfterPropertiesSet;
 		}
 
-		ThreadPoolTaskScheduler getTaskScheduler() {
+		public ThreadPoolTaskScheduler getTaskScheduler() {
 			return this.taskScheduler;
 		}
 
