@@ -47,7 +47,7 @@ public class VaultKeyValueBackendProperties implements EnvironmentAware, VaultKe
 	public static final String PREFIX = "spring.cloud.vault.kv";
 
 	/**
-	 * Enable the kev-value backend.
+	 * Enable the key-value backend.
 	 */
 	private boolean enabled = true;
 
