@@ -88,7 +88,7 @@
 |spring.cloud.vault.kv.backend | `+++secret+++` | Name of the default backend.
 |spring.cloud.vault.kv.backend-version | `+++2+++` | Key-Value backend version. Currently supported versions are: <ul> <li>Version 1 (unversioned key-value backend).</li> <li>Version 2 (versioned key-value backend).</li> </ul>
 |spring.cloud.vault.kv.default-context | `+++application+++` | Name of the default context.
-|spring.cloud.vault.kv.enabled | `+++true+++` | Enable the kev-value backend.
+|spring.cloud.vault.kv.enabled | `+++true+++` | Enable the key-value backend.
 |spring.cloud.vault.kv.profile-separator | `+++/+++` | Profile-separator to combine application name and profile.
 |spring.cloud.vault.kv.profiles |  | List of active profiles. @since 3.0
 |spring.cloud.vault.mongodb.backend | `+++mongodb+++` | MongoDB backend path.
