@@ -31,6 +31,7 @@ import org.springframework.boot.context.config.ConfigDataLocationResolverContext
 import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.boot.context.config.Profiles;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.MergedAnnotations;
@@ -194,9 +195,8 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 		kvProperties.setApplicationName(binder.bind("spring.cloud.vault.kv.application-name", String.class)
 				.orElseGet(() -> binder.bind("spring.cloud.vault.application-name", String.class)
 						.orElseGet(() -> binder.bind("spring.application.name", String.class).orElse(""))));
-		if (kvProperties.profiles == null) {
-			kvProperties.setProfiles(profiles.getActive());
-		}
+		kvProperties.setProfiles(binder.bind("spring.cloud.vault.kv.profiles", Bindable.listOf(String.class))
+				.orElseGet(profiles::getActive));
 
 		return kvProperties;
 	}
