@@ -7,7 +7,8 @@ Spring Cloud Vault uses as of version 3.0 the ConfigData API to mount Vault's se
 In previous versions, the Bootstrap context was used.
 The ConfigData API is much more flexible as it allows specifying which configuration systems to import and in which order.
 
-NOTE: You can enable the deprecated bootstrap context either by setting the configuration property `spring.cloud.bootstrap.enabled=true` or by including the dependency `org.springframework.cloud:spring-cloud-starter-bootstrap`.
+NOTE: You can enable the bootstrap context either by setting the configuration property `spring.cloud.bootstrap.enabled=true` or by including the dependency `org.springframework.cloud:spring-cloud-starter-bootstrap`.
+Using the boostrap context should be only rarely required hence we recommend using the Config Data API for more flexibility regarding property source ordering.
 
 [[vault.configdata.locations]]
 === ConfigData Locations
