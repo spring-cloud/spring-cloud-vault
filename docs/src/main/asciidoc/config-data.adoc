@@ -75,16 +75,36 @@ Spring Boot bootstraps the application before a Spring Context is available. The
 
 You can customize the infrastructure used by Spring Cloud Vault by registering custom instances using the `Bootstrapper` API:
 
+.Customizing `ClientHttpRequestFactory`
 ====
 [source,java]
 ----
-InstanceSupplier<RestTemplateBuilder> builderSupplier = ctx -> RestTemplateBuilder
-      .builder()
-      .requestFactory(ctx.get(ClientFactoryWrapper.class).getClientHttpRequestFactory())
-      .defaultHeader("X-Vault-Namespace", "my-namespace");
+ClientOptions options = new ClientOptions();
+SslConfiguration sslConfiguration = SslConfiguration.unconfigured();
+HttpClientBuilder builder = HttpComponents.getHttpClientBuilder(options, sslConfiguration);
+
+InstanceSupplier<ClientFactoryWrapper> supplier = context ->
+new ClientFactoryWrapper(new HttpComponentsClientHttpRequestFactory(builder.build()));
 
 SpringApplication application = new SpringApplication(MyApplication.class);
-application.addBootstrapper(registry -> registry.register(RestTemplateBuilder.class, builderSupplier));
+application.addBootstrapRegistryInitializer(registry -> registry.register(ClientFactoryWrapper.class, supplier));
+----
+====
+
+.Customizing `RestTemplateBuilder`
+====
+[source,java]
+----
+InstanceSupplier<RestTemplateBuilder> supplier = context -> {
+
+	return RestTemplateBuilder
+			.builder()
+			.requestFactory(context.get(ClientFactoryWrapper.class).getClientHttpRequestFactory())
+			.defaultHeader("X-Vault-Namespace", "my-namespace");
+};
+
+SpringApplication application = new SpringApplication(MyApplication.class);
+application.addBootstrapRegistryInitializer(registry -> registry.register(RestTemplateBuilder.class, supplier));
 ----
 ====
 
