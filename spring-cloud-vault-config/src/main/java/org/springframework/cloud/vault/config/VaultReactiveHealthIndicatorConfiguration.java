@@ -32,7 +32,7 @@ import org.springframework.vault.core.ReactiveVaultOperations;
 /**
  * Configuration for {@link VaultReactiveHealthIndicator}.
  *
- * @author Mark Paluch
+ * @author Mark Paluch, Rastislav Zlacky
  * @since 2.0
  */
 @Configuration(proxyBeanMethods = false)
@@ -47,9 +47,9 @@ class VaultReactiveHealthIndicatorConfiguration
 		this.reactiveVaultTemplates = reactiveVaultTemplates;
 	}
 
-	@Bean
-	@ConditionalOnMissingBean(name = { "vaultReactiveHealthIndicator" })
-	ReactiveHealthContributor vaultReactiveHealthIndicator() {
+	@Bean(name = { "vaultHealthIndicator", "vaultReactiveHealthIndicator" })
+	@ConditionalOnMissingBean(name = { "vaultHealthIndicator" })
+	ReactiveHealthContributor vaultHealthIndicator() {
 		return createContributor(this.reactiveVaultTemplates);
 	}
 
