@@ -30,7 +30,7 @@ import static org.mockito.Mockito.mock;
 /**
  * Unit tests for {@link VaultHealthIndicatorAutoConfiguration}.
  *
- * @author Mark Paluch
+ * @author Mark Paluch, Rastislav Zlacky
  */
 class VaultHealthIndicatorAutoConfigurationTests {
 
@@ -62,6 +62,17 @@ class VaultHealthIndicatorAutoConfigurationTests {
 
 	}
 
+	@Test
+	void shouldConfigureSingleHealthIndicator() {
+
+		this.contextRunner.withUserConfiguration(ImperativeConfiguration.class, ReactiveConfiguration.class)
+				.run(context -> {
+					assertThat(context).hasBean("vaultHealthIndicator")
+							.hasSingleBean(VaultReactiveHealthIndicator.class)
+							.doesNotHaveBean(VaultHealthIndicator.class);
+				});
+	}
+
 	static class ImperativeConfiguration {
 
 		@Bean
@@ -74,7 +85,7 @@ class VaultHealthIndicatorAutoConfigurationTests {
 	static class ReactiveConfiguration {
 
 		@Bean
-		ReactiveVaultOperations vaultOperations() {
+		ReactiveVaultOperations reactiveVaultOperations() {
 			return mock(ReactiveVaultOperations.class);
 		}
 
