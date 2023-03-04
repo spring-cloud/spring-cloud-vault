@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Import;
  * {@link org.springframework.boot.autoconfigure.EnableAutoConfiguration
  * Auto-configuration} for Vault providing beans for the application context.
  *
- * @author Mark Paluch
+ * @author Mark Paluch, Rastislav Zlacky
  * @since 2.0
  */
 @Configuration(proxyBeanMethods = false)
@@ -39,7 +39,7 @@ import org.springframework.context.annotation.Import;
 @ConditionalOnProperty(name = "spring.cloud.vault.enabled", matchIfMissing = true)
 @AutoConfigureBefore(HealthContributorAutoConfiguration.class)
 @AutoConfigureAfter({ VaultAutoConfiguration.class, VaultReactiveAutoConfiguration.class })
-@Import({ VaultHealthIndicatorConfiguration.class, VaultReactiveHealthIndicatorConfiguration.class })
+@Import({ VaultReactiveHealthIndicatorConfiguration.class, VaultHealthIndicatorConfiguration.class })
 public class VaultHealthIndicatorAutoConfiguration {
 
 }
