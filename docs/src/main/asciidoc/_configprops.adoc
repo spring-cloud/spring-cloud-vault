@@ -16,6 +16,7 @@
 |spring.cloud.vault.aws-ec2.role |  | Name of the role, optional.
 |spring.cloud.vault.aws-iam.aws-path | `+++aws+++` | Mount path of the AWS authentication backend.
 |spring.cloud.vault.aws-iam.endpoint-uri |  | STS server URI. @since 2.2
+|spring.cloud.vault.aws-iam.region |  | Name of the region, optional. Inferred by AWS defaults if not set. @since 4.0.1
 |spring.cloud.vault.aws-iam.role |  | Name of the role, optional. Defaults to the friendly IAM name if not set.
 |spring.cloud.vault.aws-iam.server-name |  | Name of the server used to set {@code X-Vault-AWS-IAM-Server-ID} header in the headers of login requests.
 |spring.cloud.vault.aws.access-key-property | `+++cloud.aws.credentials.accessKey+++` | Target property for the obtained access key.
