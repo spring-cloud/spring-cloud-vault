@@ -32,7 +32,8 @@ import org.springframework.vault.core.ReactiveVaultOperations;
 /**
  * Configuration for {@link VaultReactiveHealthIndicator}.
  *
- * @author Mark Paluch, Rastislav Zlacky
+ * @author Mark Paluch
+ * @author Rastislav Zlacky
  * @since 2.0
  */
 @Configuration(proxyBeanMethods = false)

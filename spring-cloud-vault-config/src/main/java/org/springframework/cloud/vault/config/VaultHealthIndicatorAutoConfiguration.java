@@ -30,7 +30,8 @@ import org.springframework.context.annotation.Import;
  * {@link org.springframework.boot.autoconfigure.EnableAutoConfiguration
  * Auto-configuration} for Vault providing beans for the application context.
  *
- * @author Mark Paluch, Rastislav Zlacky
+ * @author Mark Paluch
+ * @author Rastislav Zlacky
  * @since 2.0
  */
 @Configuration(proxyBeanMethods = false)
