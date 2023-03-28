@@ -72,6 +72,7 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import software.amazon.awssdk.regions.Region;
 
 /**
  * Factory for {@link ClientAuthentication}.
@@ -273,13 +274,16 @@ class ClientAuthenticationFactory {
 		return new AwsEc2Authentication(authenticationOptions, this.restOperations, this.externalRestOperations);
 	}
 
-	private ClientAuthentication awsIamAuthentication(VaultProperties vaultProperties) {
+	ClientAuthentication awsIamAuthentication(VaultProperties vaultProperties) {
 
 		AwsIamProperties awsIam = vaultProperties.getAwsIam();
 
+		AwsIamAuthenticationOptionsBuilder builder = AwsIamAuthenticationOptions.builder();
 		AwsCredentialsProvider credentialsProvider = AwsCredentialProvider.getAwsCredentialsProvider();
 
-		AwsIamAuthenticationOptionsBuilder builder = AwsIamAuthenticationOptions.builder();
+		if (StringUtils.hasText(awsIam.getRegion())) {
+			builder.region(Region.of(awsIam.getRegion()));
+		}
 
 		if (StringUtils.hasText(awsIam.getRole())) {
 			builder.role(awsIam.getRole());

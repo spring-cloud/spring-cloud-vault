@@ -339,6 +339,7 @@ spring.cloud.vault:
 spring.cloud.vault:
     authentication: AWS_IAM
     aws-iam:
+        region: aws-global
         role: my-dev-role
         aws-path: aws
         server-name: some.server.name
@@ -346,6 +347,7 @@ spring.cloud.vault:
 ----
 ====
 
+* `region` sets the name of the AWS region. If not supplied, the region will be determined by AWS defaults.
 * `role` sets the name of the role against which the login is being attempted.
 This should be bound to your IAM role.
 If one is not supplied then the friendly name of the current IAM user will be used as the vault role.

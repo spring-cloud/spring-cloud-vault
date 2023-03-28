@@ -634,6 +634,12 @@ public class VaultProperties implements EnvironmentAware {
 		private String awsPath = "aws";
 
 		/**
+		 * Name of the region, optional. Inferred by AWS defaults if not set.
+		 * @since 4.0.1
+		 */
+		private String region = "";
+
+		/**
 		 * Name of the role, optional. Defaults to the friendly IAM name if not set.
 		 */
 		private String role = "";
@@ -657,6 +663,10 @@ public class VaultProperties implements EnvironmentAware {
 			return this.awsPath;
 		}
 
+		public String getRegion() {
+			return this.region;
+		}
+
 		public String getRole() {
 			return this.role;
 		}
@@ -668,6 +678,10 @@ public class VaultProperties implements EnvironmentAware {
 
 		public void setAwsPath(String awsPath) {
 			this.awsPath = awsPath;
+		}
+
+		public void setRegion(String region) {
+			this.region = region;
 		}
 
 		public void setRole(String role) {
