@@ -24,18 +24,23 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 import org.junit.Test;
-
 import org.springframework.boot.system.SystemProperties;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
+import org.springframework.vault.authentication.AwsIamAuthentication;
+import org.springframework.vault.authentication.AwsIamAuthenticationOptions;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.ClientCertificateAuthentication;
 import org.springframework.vault.authentication.PcfAuthentication;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
+
+import software.amazon.awssdk.core.SdkSystemSetting;
+import software.amazon.awssdk.regions.Region;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -48,6 +53,31 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Quincy Conduff
  */
 public class ClientAuthenticationFactoryUnitTests {
+
+	@Test
+	public void shouldSupportAwsIam() {
+
+		try {
+			System.setProperty(SdkSystemSetting.AWS_ACCESS_KEY_ID.property(), "foo");
+			System.setProperty(SdkSystemSetting.AWS_SECRET_ACCESS_KEY.property(), "bar");
+
+			VaultProperties properties = new VaultProperties();
+			properties.getAwsIam().setRegion(Region.AWS_GLOBAL.id());
+			properties.getAwsIam().setRole("bar");
+
+			ClientAuthenticationFactory factory = new ClientAuthenticationFactory(properties, new RestTemplate(),
+					new RestTemplate());
+			AwsIamAuthentication authentication = (AwsIamAuthentication) factory.awsIamAuthentication(properties);
+			AwsIamAuthenticationOptions options = (AwsIamAuthenticationOptions) ReflectionTestUtils
+					.getField(authentication, "options");
+
+			assertThat(options.getRegionProvider().getRegion()).isEqualTo(Region.AWS_GLOBAL);
+		}
+		finally {
+			System.getProperties().remove(SdkSystemSetting.AWS_ACCESS_KEY_ID.property());
+			System.getProperties().remove(SdkSystemSetting.AWS_SECRET_ACCESS_KEY.property());
+		}
+	}
 
 	@Test
 	public void shouldSupportAppRoleRoleIdProvidedSecretIdProvided() {
