@@ -43,7 +43,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring-cloud-commons.version>4.0.2-SNAPSHOT</spring-cloud-commons.version>
-		<bcpkix-jdk15on.version>1.67</bcpkix-jdk15on.version>
+		<bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
 
 		<google-api-services-iam.version>v1-rev20201112-1.31.0</google-api-services-iam.version>
 		<google-cloud-iamcredentials.version>1.2.2</google-cloud-iamcredentials.version>
