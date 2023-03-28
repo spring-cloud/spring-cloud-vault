@@ -41,6 +41,7 @@ class VaultHealthIndicatorConfiguration
 	private final Map<String, VaultOperations> vaultTemplates;
 
 	VaultHealthIndicatorConfiguration(Map<String, VaultOperations> vaultTemplates) {
+		super(VaultHealthIndicator::new);
 		this.vaultTemplates = vaultTemplates;
 	}
 

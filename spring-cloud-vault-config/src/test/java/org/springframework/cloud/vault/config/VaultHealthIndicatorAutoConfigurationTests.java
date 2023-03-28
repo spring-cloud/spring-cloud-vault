@@ -30,7 +30,8 @@ import static org.mockito.Mockito.mock;
 /**
  * Unit tests for {@link VaultHealthIndicatorAutoConfiguration}.
  *
- * @author Mark Paluch, Rastislav Zlacky
+ * @author Mark Paluch
+ * @author Rastislav Zlacky
  */
 class VaultHealthIndicatorAutoConfigurationTests {
 
