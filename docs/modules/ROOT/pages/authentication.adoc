@@ -167,7 +167,7 @@ See also: https://www.vaultproject.io/docs/auth/app-id.html[Vault Documentation:
 [[approle-authentication]]
 == AppRole authentication
 
-https://www.vaultproject.io/docs/auth/app-id.html[AppRole] is intended for machine authentication, like the deprecated (since Vault 0.6.1) <<vault.config.authentication.appid>>.
+https://www.vaultproject.io/docs/auth/app-id.html[AppRole] is intended for machine authentication, like the deprecated (since Vault 0.6.1) xref:authentication.adoc#vault.config.authentication.appid[AppId authentication].
 AppRole authentication consists of two hard to guess (secret) tokens: RoleId and SecretId.
 
 Spring Vault supports various AppRole scenarios (push/pull mode and wrapped).
@@ -415,7 +415,7 @@ The `cert` auth backend allows authentication using SSL/TLS client certificates 
 
 To enable `cert` authentication you need to:
 
-1. Use SSL, see <<vault.config.ssl>>
+1. Use SSL, see xref:other-topics.adoc#vault.config.ssl[Vault Client SSL configuration]
 2. Configure a Java `Keystore` that contains the client certificate and the private key
 3. Set the `spring.cloud.vault.authentication` to `CERT`
 

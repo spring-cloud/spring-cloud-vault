@@ -19,12 +19,12 @@ Spring Cloud Vault supports two config locations:
 * `vault://` (default location)
 * `vault:///<context-path>` (contextual location)
 
-Using the default location mounts property sources for all enabled <<vault.config.backends>>.
+Using the default location mounts property sources for all enabled xref:secret-backends.adoc[Secret Backends].
 Without further configuration, Spring Cloud Vault mounts the key-value backend at `/secret/${spring.application.name}`.
 Each activated profile adds another context path following the form `/secret/${spring.application.name}/${profile}`.
 Adding further modules to the classpath, such as `spring-cloud-config-databases`, provides additional secret backend configuration options which get mounted as property sources if enabled.
 
-If you want to control which context paths are mounted from Vault as `PropertySource`, you can either use a contextual location (`vault:///my/context/path`) or configure a <<vault.config.backends.configurer,`VaultConfigurer`>>.
+If you want to control which context paths are mounted from Vault as `PropertySource`, you can either use a contextual location (`vault:///my/context/path`) or configure a xref:secret-backends.adoc#vault.config.backends.configurer[`VaultConfigurer`].
 
 Contextual locations are specified and mounted individually.
 Spring Cloud Vault mounts each location as a unique `PropertySource`.
@@ -65,7 +65,7 @@ In some cases, it can be required to launch an application without Vault. You ca
 
 Optional locations are skipped during application startup if Vault support was disabled through `spring.cloud.vault.enabled=false`.
 
-NOTE: Vault context paths that cannot be found (HTTP Status 404) are skipped regardless of whether the config location is marked optional. <<vault.config.fail-fast>> allows failing on start if a Vault context path cannot be found because of HTTP Status 404.
+NOTE: Vault context paths that cannot be found (HTTP Status 404) are skipped regardless of whether the config location is marked optional. xref:other-topics.adoc#vault.config.fail-fast[Vault Client Fail Fast] allows failing on start if a Vault context path cannot be found because of HTTP Status 404.
 
 
 [[vault.configdata.customization]]
@@ -109,4 +109,4 @@ application.addBootstrapRegistryInitializer(registry -> registry.register(RestTe
 ----
 ====
 
-See also <<vault.config.backends.configurer>> and the source of `VaultConfigDataLoader` for customization hooks.
+See also xref:secret-backends.adoc#vault.config.backends.configurer[Customize which secret backends to expose as PropertySource] and the source of `VaultConfigDataLoader` for customization hooks.
