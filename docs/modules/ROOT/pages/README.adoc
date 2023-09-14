@@ -2,8 +2,10 @@
 
 include::intro.adoc[]
 
+[[features]]
 == Features
 
+[[spring-cloud-vault-config-client]]
 === Spring Cloud Vault Config Client
 
 Specifically for Spring applications:
@@ -28,12 +30,15 @@ Specifically for Spring applications:
 
 * Bootstrap application context: a parent context for the main application that can be trained to do anything.
 
+[[quick-start]]
 == Quick Start
 
 include::quickstart.adoc[]
 
+[[building]]
 == Building
 
+[[build-requirements-for-vault]]
 === Build requirements for Vault
 
 Spring Cloud Vault Config requires SSL certificates and a running Vault instance listening on `localhost:8200`.
@@ -64,6 +69,7 @@ This script requires ruby and the asciidoctor gem installed (`gem install asciid
 
 include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/master/docs/src/main/asciidoc/building.adoc[]
 
+[[contributing]]
 == Contributing
 
 include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/master/docs/src/main/asciidoc/contributing.adoc[]

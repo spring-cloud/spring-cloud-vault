@@ -1,3 +1,4 @@
+[[service-registry-configuration]]
 == Service Registry Configuration
 
 You can use a `DiscoveryClient` (such as from Spring Cloud Consul) to locate a Vault server by setting spring.cloud.vault.discovery.enabled=true (default `false`).
