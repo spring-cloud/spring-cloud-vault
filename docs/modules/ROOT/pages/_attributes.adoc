@@ -1,8 +1,6 @@
 :doctype: book
 :idprefix:
 :idseparator: -
-:toc: left
-:toclevels: 4
 :tabsize: 4
 :numbered:
 :sectanchors:
@@ -13,3 +11,8 @@
 
 :sc-ext: java
 :project-full-name: Spring Cloud Vault
+
+:github: https://github.com/spring-cloud/spring-cloud-vault
+:githubmaster: {github}/tree/main
+:revnumber: {project-version}
+:docslink: {githubmaster}/docs/src/main/asciidoc

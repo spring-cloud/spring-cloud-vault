@@ -1,13 +1,14 @@
 :docs: https://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html
 
-include::intro.adoc[]
+[[features]]
+= Features
 
-== Features
-
-=== Spring Cloud Vault Config Client
+[[spring-cloud-vault-config-client]]
+== Spring Cloud Vault Config Client
 
 Specifically for Spring applications:
 
+// TODO: fix links
 * Retrieve secrets from Vault and initialize Spring Environment with remote property sources.
 * Obtain {docs}#vault.config.backends.kv[Key-Value secrets] secured with SSL.
 * Generate credentials for
@@ -28,13 +29,13 @@ Specifically for Spring applications:
 
 * Bootstrap application context: a parent context for the main application that can be trained to do anything.
 
-== Quick Start
+include::../../../modules/ROOT/pages/quickstart.adoc[]
 
-include::quickstart.adoc[]
+[[building]]
+= Building
 
-== Building
-
-=== Build requirements for Vault
+[[build-requirements-for-vault]]
+== Build requirements for Vault
 
 Spring Cloud Vault Config requires SSL certificates and a running Vault instance listening on `localhost:8200`.
 Certificates and the Vault setup are scripted, the scripts are located in `src/test/bash`.
@@ -62,8 +63,9 @@ $ ./docs/src/main/ruby/generate_readme.sh > README.adoc
 
 This script requires ruby and the asciidoctor gem installed (`gem install asciidoctor`)
 
-include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/master/docs/src/main/asciidoc/building.adoc[]
+include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/main/docs/modules/ROOT/pages/building.adoc[]
 
-== Contributing
+[[contributing]]
+= Contributing
 
 include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/master/docs/src/main/asciidoc/contributing.adoc[]

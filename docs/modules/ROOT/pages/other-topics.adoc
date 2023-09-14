@@ -1,4 +1,5 @@
-== Service Registry Configuration
+[[service-registry-configuration]]
+= Service Registry Configuration
 
 You can use a `DiscoveryClient` (such as from Spring Cloud Consul) to locate a Vault server by setting spring.cloud.vault.discovery.enabled=true (default `false`).
 The net result of that is that your apps need a application.yml (or an environment variable) with the appropriate discovery configuration.
@@ -11,14 +12,12 @@ Some additional properties of the service may need to be configured in its servi
 Service registries that do not provide details about transport layer security need to provide a `scheme` metadata entry to be set either to `https` or `http`.
 If no scheme is configured and the service is not exposed as secure service, then configuration defaults to `spring.cloud.vault.scheme` which is `https` when it's not set.
 
-====
 [source,yaml]
 ----
 spring.cloud.vault.discovery:
     enabled: true
     service-id: my-vault-service
 ----
-====
 
 [[vault.config.fail-fast]]
 == Vault Client Fail Fast
@@ -27,13 +26,11 @@ In some cases, it may be desirable to fail startup of a service if it cannot con
 If this is the desired behavior, set the bootstrap configuration property
 `spring.cloud.vault.fail-fast=true` and the client will halt with an Exception.
 
-====
 [source,yaml]
 ----
 spring.cloud.vault:
     fail-fast: true
 ----
-====
 
 [[vault.config.namespaces]]
 == Vault Enterprise Namespace Support
@@ -46,13 +43,11 @@ Configuring a namespace by setting
 
 Please note that this feature is not supported by Vault Community edition and has no effect on Vault operations.
 
-====
 [source,yaml]
 ----
 spring.cloud.vault:
     namespace: my-namespace
 ----
-====
 
 See also: https://www.vaultproject.io/docs/enterprise/namespaces/index.html[Vault Enterprise: Namespaces]
 
@@ -63,7 +58,6 @@ SSL can be configured declaratively by setting various properties.
 You can set either `javax.net.ssl.trustStore` to configure JVM-wide SSL settings or `spring.cloud.vault.ssl.trust-store`
 to set SSL settings only for Spring Cloud Vault Config.
 
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -74,7 +68,6 @@ spring.cloud.vault:
         enabled-protocols: TLSv1.2,TLSv1.3
         enabled-cipher-suites: TLS_AES_128_GCM_SHA256
 ----
-====
 
 * `trust-store` sets the resource for the trust-store.
 SSL-secured Vault communication will validate the Vault SSL certificate with the specified trust-store.
@@ -106,7 +99,6 @@ Lease renewal and revocation is enabled by default and can be disabled by settin
 to `false`.
 This is not recommended as leases can expire and Spring Cloud Vault cannot longer access Vault or services using generated credentials and valid credentials remain active after application shutdown.
 
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -117,7 +109,6 @@ spring.cloud.vault:
     	lease-endpoints: Legacy
 
 ----
-====
 
 * `enabled` controls whether leases associated with secrets are considered to be renewed and expired secrets are rotated.
 Enabled by default.
@@ -147,7 +138,6 @@ Session lifecycle is enabled by default and can be disabled by setting `spring.c
 to `false`.
 Disabling is not recommended as session tokens can expire and Spring Cloud Vault cannot longer access Vault.
 
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -156,7 +146,6 @@ spring.cloud.vault:
         refresh-before-expiry: 10s
         expiry-threshold: 20s
 ----
-====
 
 * `enabled` controls whether session lifecycle management is enabled to renew session tokens.
 Enabled by default.

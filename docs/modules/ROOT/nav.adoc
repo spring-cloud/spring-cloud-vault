@@ -1,0 +1,8 @@
+* xref:index.adoc[Introduction]
+* xref:new-features.adoc[]
+* xref:quickstart.adoc[]
+* xref:config-data.adoc[]
+* xref:authentication.adoc[]
+* xref:secret-backends.adoc[]
+* xref:other-topics.adoc[]
+* xref:appendix.adoc[]
