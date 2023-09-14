@@ -3,29 +3,24 @@
 		 xmlns="http://maven.apache.org/POM/4.0.0"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-vault-docs</artifactId>
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-vault-parent</artifactId>
 		<version>4.1.0-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
-
-	<artifactId>spring-cloud-vault-docs</artifactId>
-	<version>4.1.0-SNAPSHOT</version>
-
 	<packaging>jar</packaging>
 	<name>Spring Cloud Vault Docs</name>
-	<description>Spring Cloud Docs</description>
-
+	<description>Spring Cloud Vault Docs</description>
 	<properties>
 		<docs.main>spring-cloud-vault</docs.main>
 		<main.basedir>${basedir}/..</main.basedir>
-		<configprops.inclusionPattern>spring.cloud.vault.*|
-		</configprops.inclusionPattern>
-		<upload-docs-zip.phase>deploy</upload-docs-zip.phase>
+		<configprops.inclusionPattern>spring.cloud.vault.*</configprops.inclusionPattern>
+		<!-- Don't upload docs jar to central / repo.spring.io -->
+		<maven-deploy-plugin-default.phase>none</maven-deploy-plugin-default.phase>
 	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -48,7 +43,6 @@
 			<artifactId>spring-cloud-vault-config-rabbitmq</artifactId>
 		</dependency>
 	</dependencies>
-
 	<build>
 		<sourceDirectory>src/main/asciidoc</sourceDirectory>
 		<pluginManagement>
@@ -81,11 +75,16 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-
 	<profiles>
 		<profile>
 			<id>docs</id>
 			<build>
+				<resources>
+					<resource>
+						<directory>src/main/antora/resources/antora-resources</directory>
+						<filtering>true</filtering>
+					</resource>
+				</resources>
 				<plugins>
 					<plugin>
 						<groupId>pl.project13.maven</groupId>
@@ -96,16 +95,16 @@
 						<artifactId>maven-dependency-plugin</artifactId>
 					</plugin>
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-resources-plugin</artifactId>
+						<groupId>io.spring.maven.antora</groupId>
+						<artifactId>antora-component-version-maven-plugin</artifactId>
+					</plugin>
+					<plugin>
+						<groupId>io.spring.maven.antora</groupId>
+						<artifactId>antora-maven-plugin</artifactId>
 					</plugin>
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
-					</plugin>
-					<plugin>
-						<groupId>org.asciidoctor</groupId>
-						<artifactId>asciidoctor-maven-plugin</artifactId>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -118,15 +117,4 @@
 			</build>
 		</profile>
 	</profiles>
-
-	<repositories>
-		<repository>
-			<id>spring-milestones</id>
-			<name>Spring Milestones</name>
-			<url>https://repo.spring.io/milestone</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 </project>

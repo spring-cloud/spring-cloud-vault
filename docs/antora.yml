@@ -1,6 +1,6 @@
-name: PROJECT_WITHOUT_SPRING
+name: cloud-vault
 version: true
-title: PROJECT_NAME
+title: Spring Cloud Vault
 nav:
   - modules/ROOT/nav.adoc
 ext:

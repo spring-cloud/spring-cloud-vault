@@ -1,6 +1,5 @@
 :docs: https://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html
 
-
 [[features]]
 = Features
 
@@ -9,6 +8,7 @@
 
 Specifically for Spring applications:
 
+// TODO: fix links
 * Retrieve secrets from Vault and initialize Spring Environment with remote property sources.
 * Obtain {docs}#vault.config.backends.kv[Key-Value secrets] secured with SSL.
 * Generate credentials for
@@ -29,9 +29,7 @@ Specifically for Spring applications:
 
 * Bootstrap application context: a parent context for the main application that can be trained to do anything.
 
-[[quick-start]]
-= Quick Start
-
+include::../../../modules/ROOT/pages/quickstart.adoc[]
 
 [[building]]
 = Building
@@ -65,7 +63,7 @@ $ ./docs/src/main/ruby/generate_readme.sh > README.adoc
 
 This script requires ruby and the asciidoctor gem installed (`gem install asciidoctor`)
 
-include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/master/docs/src/main/asciidoc/building.adoc[]
+include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/main/docs/modules/ROOT/pages/building.adoc[]
 
 [[contributing]]
 = Contributing

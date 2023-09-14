@@ -26,3 +26,9 @@ release.properties
 .vscode/
 plugins/
 
+
+node
+node_modules
+build
+package.json
+package-lock.json

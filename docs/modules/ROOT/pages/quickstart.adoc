@@ -1,4 +1,5 @@
-:docs: https://cloud.spring.io/spring-cloud-vault/reference/html/
+[[quick-start]]
+= Quick Start
 
 *Prerequisites*
 
@@ -127,13 +128,12 @@ where the "application" is injected as the `spring.application.name` in the
 Properties retrieved from Vault will be used "as-is" without further prefixing of the property names.
 
 [[client-side-usage]]
-= Client Side Usage
+== Client Side Usage
 
 To use these features in an application, just build it as a Spring Boot application that depends on `spring-cloud-vault-config` (e.g. see the test cases).
 Example Maven configuration:
 
 .pom.xml
-====
 [source,xml,indent=0,subs="verbatim,quotes,attributes"]
 ----
 <parent>
@@ -167,11 +167,9 @@ Example Maven configuration:
 
 <!-- repositories also needed for snapshots and milestones -->
 ----
-====
 
 Then you can create a standard Spring Boot application, like this simple HTTP server:
 
-====
 [source,java]
 ----
 @SpringBootApplication
@@ -188,13 +186,11 @@ public class Application {
     }
 }
 ----
-====
 
 When it runs it will pick up the external configuration from the default local Vault server on port `8200` if it is running.
 To modify the startup behavior you can change the location of the Vault server using `application.properties`, for example
 
 .application.yml
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -207,7 +203,6 @@ spring.cloud.vault:
     config:
 spring.config.import: vault://
 ----
-====
 
 * `host` sets the hostname of the Vault host.
 The host name will be used for SSL certificate validation
@@ -221,8 +216,8 @@ Supported schemes are `http` and `https`.
 
 Enabling further integrations requires additional dependencies and configuration.
 Depending on how you have set up Vault you might need additional configuration like
-{docs}#vault.config.ssl[SSL] and
-{docs}#vault.config.authentication[authentication].
+xref:other-topics.adoc#vault.config.ssl[SSL] and
+xref:authentication.adoc#vault.config.authentication[authentication].
 
 If the application imports the `spring-boot-starter-actuator` project, the status of the vault server will be available via the `/health` endpoint.
 
@@ -237,19 +232,17 @@ You can enable the bootstrap context either by setting the configuration propert
 
 Vault requires an https://www.vaultproject.io/docs/concepts/auth.html[authentication mechanism] to https://www.vaultproject.io/docs/concepts/tokens.html[authorize client requests].
 
-Spring Cloud Vault supports multiple {docs}#vault.config.authentication[authentication mechanisms] to authenticate applications with Vault.
+Spring Cloud Vault supports multiple xref:authentication.adoc#vault.config.authentication[authentication mechanisms] to authenticate applications with Vault.
 
 For a quickstart, use the root token printed by the xref:quickstart.adoc#quickstart.vault.start[Vault initialization].
 
 .application.yml
-====
 [source,yaml]
 ----
 spring.cloud.vault:
     token: 19aefa97-cccc-bbbb-aaaa-225940e63d76
 spring.config.import: vault://
 ----
-====
 
 WARNING: Consider carefully your security requirements.
 Static token authentication is fine if you want quickly get started with Vault, but a static token is not protected any further.

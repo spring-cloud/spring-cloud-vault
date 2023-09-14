@@ -21,7 +21,7 @@ Spring Cloud Vault supports two config locations:
 
 Using the default location mounts property sources for all enabled xref:secret-backends.adoc[Secret Backends].
 Without further configuration, Spring Cloud Vault mounts the key-value backend at `/secret/${spring.application.name}`.
-Each activated profile adds another context path following the form `/secret/${spring.application.name}/${profile}`.
+Each activated profile adds another context path following the form `/secret/$\{spring.application.name}/$\{profile}`.
 Adding further modules to the classpath, such as `spring-cloud-config-databases`, provides additional secret backend configuration options which get mounted as property sources if enabled.
 
 If you want to control which context paths are mounted from Vault as `PropertySource`, you can either use a contextual location (`vault:///my/context/path`) or configure a xref:secret-backends.adoc#vault.config.backends.configurer[`VaultConfigurer`].
@@ -32,12 +32,10 @@ You can mix the default locations with contextual locations (or other config sys
 This approach is useful in particular if you want to disable the default key-value path computation and mount each key-value backend yourself instead.
 
 .application.yml
-====
 [source,yaml]
 ----
 spring.config.import: vault://first/context/path, vault://other/path, vault://
 ----
-====
 
 Property names within a Spring `Environment` must be unique to avoid shadowing.
 If you use the same secret names in different context paths and you want to expose these as individual properties you can distinguish them by adding a `prefix` query parameter to the location.
@@ -77,7 +75,6 @@ Spring Boot bootstraps the application before a Spring Context is available. The
 You can customize the infrastructure used by Spring Cloud Vault by registering custom instances using the `Bootstrapper` API:
 
 .Customizing `ClientHttpRequestFactory`
-====
 [source,java]
 ----
 ClientOptions options = new ClientOptions();
@@ -90,10 +87,8 @@ new ClientFactoryWrapper(new HttpComponentsClientHttpRequestFactory(builder.buil
 SpringApplication application = new SpringApplication(MyApplication.class);
 application.addBootstrapRegistryInitializer(registry -> registry.register(ClientFactoryWrapper.class, supplier));
 ----
-====
 
 .Customizing `RestTemplateBuilder`
-====
 [source,java]
 ----
 InstanceSupplier<RestTemplateBuilder> supplier = context -> {
@@ -107,6 +102,5 @@ InstanceSupplier<RestTemplateBuilder> supplier = context -> {
 SpringApplication application = new SpringApplication(MyApplication.class);
 application.addBootstrapRegistryInitializer(registry -> registry.register(RestTemplateBuilder.class, supplier));
 ----
-====
 
 See also xref:secret-backends.adoc#vault.config.backends.configurer[Customize which secret backends to expose as PropertySource] and the source of `VaultConfigDataLoader` for customization hooks.

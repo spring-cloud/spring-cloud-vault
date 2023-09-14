@@ -16,14 +16,12 @@ NOTE: Token authentication is the default authentication method.
 If a token is disclosed an unintended party gains access to Vault and can access secrets for the intended client.
 
 .application.yml
-====
 [source,yaml]
 ----
 spring.cloud.vault:
     authentication: TOKEN
     token: 00000000-0000-0000-0000-000000000000
 ----
-====
 
 * `authentication` setting this value to `TOKEN` selects the Token authentication method
 * `token` sets the static token to use. If missing or empty, then an attempt will be made to retrieve a token from ~/.vault-token.
@@ -45,13 +43,11 @@ Spring Vault can send requests without the
 Disable Spring Vault's authentication infrastructure to disable client authentication and session management.
 
 .application.yml
-====
 [source,yaml]
 ----
 spring.cloud.vault:
     authentication: NONE
 ----
-====
 
 * `authentication` setting this value to `NONE` disables `ClientAuthentication`
 and `SessionManager`.
@@ -72,7 +68,6 @@ The IP and Mac address are represented as Hex-encoded SHA256 hash.
 IP address-based UserId's use the local host's IP address.
 
 .application.yml using SHA256 IP-Address UserId's
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -80,7 +75,6 @@ spring.cloud.vault:
     app-id:
         user-id: IP_ADDRESS
 ----
-====
 
 * `authentication` setting this value to `APPID` selects the AppId authentication method
 * `app-id-path` sets the path of the AppId mount to use
@@ -102,7 +96,6 @@ The value of
 `network-interface` is optional and can be either an interface name or interface index (0-based).
 
 .application.yml using SHA256 Mac-Address UserId's
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -111,7 +104,6 @@ spring.cloud.vault:
         user-id: MAC_ADDRESS
         network-interface: eth0
 ----
-====
 
 * `network-interface` sets network interface to obtain the physical address
 
@@ -137,7 +129,6 @@ This class must be on your classpath and must implement the `org.springframework
 Spring Cloud Vault will obtain the UserId by calling `createUserId` each time it authenticates using AppId to obtain a token.
 
 .application.yml
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -145,10 +136,8 @@ spring.cloud.vault:
     app-id:
         user-id: com.examlple.MyUserIdMechanism
 ----
-====
 
 .MyUserIdMechanism.java
-====
 [source,yaml]
 ----
 public class MyUserIdMechanism implements AppIdUserIdMechanism {
@@ -160,7 +149,6 @@ public class MyUserIdMechanism implements AppIdUserIdMechanism {
   }
 }
 ----
-====
 
 See also: https://www.vaultproject.io/docs/auth/app-id.html[Vault Documentation: Using the App ID auth backend]
 
@@ -175,7 +163,6 @@ Spring Vault supports various AppRole scenarios (push/pull mode and wrapped).
 RoleId and optionally SecretId must be provided by configuration, Spring Vault will not look up these or create a custom SecretId.
 
 .application.yml with AppRole authentication properties
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -183,7 +170,6 @@ spring.cloud.vault:
     app-role:
         role-id: bde2076b-cccb-3cf0-d57e-bca7b1e83a52
 ----
-====
 
 The following scenarios are supported along the required configuration details:
 
@@ -225,7 +211,6 @@ Full pull mode is not yet supported.
 Using Spring Cloud Vault with the Spring WebFlux stack enables Vault's reactive auto-configuration which can be disabled by setting `spring.cloud.vault.reactive.enabled=false`.
 
 .application.yml with all AppRole authentication properties
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -236,7 +221,6 @@ spring.cloud.vault:
         role: my-role
         app-role-path: approle
 ----
-====
 
 * `role-id` sets the RoleId.
 * `secret-id` sets the SecretId.
@@ -255,13 +239,11 @@ Unlike most Vault authentication backends, this backend does not require first-d
 Instead, it treats AWS as a Trusted Third Party and uses the cryptographically signed dynamic metadata information that uniquely represents each EC2 instance.
 
 .application.yml using AWS-EC2 Authentication
-====
 [source,yaml]
 ----
 spring.cloud.vault:
     authentication: AWS_EC2
 ----
-====
 
 AWS-EC2 authentication enables nonce by default to follow the Trust On First Use (TOFU) principle.
 Any unintended party that gains access to the PKCS#7 identity metadata can authenticate against Vault.
@@ -278,7 +260,6 @@ You can configure the authentication role by setting the
 `spring.cloud.vault.aws-ec2.role` property.
 
 .application.yml with configured role
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -286,10 +267,8 @@ spring.cloud.vault:
     aws-ec2:
         role: application-server
 ----
-====
 
 .application.yml with all AWS EC2 authentication properties
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -300,7 +279,6 @@ spring.cloud.vault:
         identity-document: http://...
         nonce: my-static-nonce
 ----
-====
 
 * `authentication` setting this value to `AWS_EC2` selects the AWS EC2 authentication method
 * `role` sets the name of the role against which the login is being attempted.
@@ -326,16 +304,13 @@ When using the AWS-IAM authentication you must create a role in Vault and assign
 An empty `role` defaults to the friendly name the current IAM role.
 
 .application.yml with required AWS-IAM Authentication properties
-====
 [source,yaml]
 ----
 spring.cloud.vault:
     authentication: AWS_IAM
 ----
-====
 
 .application.yml with all AWS-IAM Authentication properties
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -347,7 +322,6 @@ spring.cloud.vault:
         server-name: some.server.name
         endpoint-uri: https://sts.eu-central-1.amazonaws.com
 ----
-====
 
 * `region` sets the name of the AWS region. If not supplied, the region will be determined by AWS defaults.
 * `role` sets the name of the role against which the login is being attempted.
@@ -370,7 +344,6 @@ Unlike most Vault authentication backends, this backend does not require first-d
 Instead, it treats Azure as a Trusted Third Party and uses the managed service identity and instance metadata information that can be bound to a VM instance.
 
 .application.yml with required Azure Authentication properties
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -378,10 +351,8 @@ spring.cloud.vault:
     azure-msi:
         role: my-dev-role
 ----
-====
 
 .application.yml with all Azure Authentication properties
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -392,7 +363,6 @@ spring.cloud.vault:
         metadata-service: http://169.254.169.254/metadata/instance…
         identity-token-service: http://169.254.169.254/metadata/identity…
 ----
-====
 
 * `role` sets the name of the role against which the login is being attempted.
 * `azure-path` sets the path of the Azure mount to use
@@ -420,7 +390,6 @@ To enable `cert` authentication you need to:
 3. Set the `spring.cloud.vault.authentication` to `CERT`
 
 .application.yml
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -431,7 +400,6 @@ spring.cloud.vault:
         key-store-type: JKS
         cert-auth-path: cert
 ----
-====
 
 See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the Cert auth backend]
 
@@ -449,7 +417,6 @@ The login token will be retrieved from a wrapped response stored at `/cubbyhole/
 NOTE: Response Wrapping for token creation requires Vault 0.6.0 or higher.
 
 .Creating and storing tokens
-====
 [source,shell]
 ----
 $ vault token-create -wrap-ttl="10m"
@@ -460,17 +427,14 @@ wrapping_token_ttl:            0h10m0s
 wrapping_token_creation_time:  2016-09-18 20:29:48.652957077 +0200 CEST
 wrapped_accessor:              46b6aebb-187f-932a-26d7-4f3d86a68319
 ----
-====
 
 .application.yml
-====
 [source,yaml]
 ----
 spring.cloud.vault:
     authentication: CUBBYHOLE
     token: 397ccb93-ff6c-b17b-9389-380b01ca2645
 ----
-====
 
 See also:
 
@@ -492,7 +456,6 @@ Unlike most Vault authentication backends, this backend does not require first-d
 Instead, it treats GCP as a Trusted Third Party and uses the cryptographically signed dynamic metadata information that uniquely represents each GCP service account.
 
 .application.yml with required GCP-GCE Authentication properties
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -500,10 +463,8 @@ spring.cloud.vault:
     gcp-gce:
         role: my-dev-role
 ----
-====
 
 .application.yml with all GCP-GCE Authentication properties
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -513,7 +474,6 @@ spring.cloud.vault:
         role: my-dev-role
         service-account: my-service@projectid.iam.gserviceaccount.com
 ----
-====
 
 * `role` sets the name of the role against which the login is being attempted.
 * `gcp-path` sets the path of the GCP mount to use
@@ -540,7 +500,6 @@ environment variable, the Google Compute metadata service, or supplied externall
 JSON is the preferred form as it carries the project id and service account identifier required for calling ``projects.serviceAccounts.signJwt``.
 
 .application.yml with required GCP-IAM Authentication properties
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -548,10 +507,8 @@ spring.cloud.vault:
     gcp-iam:
         role: my-dev-role
 ----
-====
 
 .application.yml with all GCP-IAM Authentication properties
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -566,7 +523,6 @@ spring.cloud.vault:
         role: my-dev-role
         service-account-id: my-service@projectid.iam.gserviceaccount.com
 ----
-====
 
 * `role` sets the name of the role against which the login is being attempted.
 * `credentials.location` path to the credentials resource that contains Google credentials in JSON format.
@@ -599,7 +555,6 @@ The authentication is role based and the role is bound to a service account name
 A file containing a JWT token for a pod’s service account is automatically mounted at `/var/run/secrets/kubernetes.io/serviceaccount/token`.
 
 .application.yml with all Kubernetes authentication properties
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -609,7 +564,6 @@ spring.cloud.vault:
         kubernetes-path: kubernetes
         service-account-token-file: /var/run/secrets/kubernetes.io/serviceaccount/token
 ----
-====
 
 * `role` sets the Role.
 * `kubernetes-path` sets the path of the Kubernetes mount to use.
@@ -630,7 +584,6 @@ Unlike most Vault authentication backends, this backend does not require first-d
 Instead, it treats PCF as a Trusted Third Party and uses the managed instance identity.
 
 .application.yml with required PCF Authentication properties
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -638,10 +591,8 @@ spring.cloud.vault:
     pcf:
         role: my-dev-role
 ----
-====
 
 .application.yml with all PCF Authentication properties
-====
 [source,yaml]
 ----
 spring.cloud.vault:
@@ -652,21 +603,20 @@ spring.cloud.vault:
         instance-certificate: /etc/cf-instance-credentials/instance.crt
         instance-key: /etc/cf-instance-credentials/instance.key
 ----
-====
 
 * `role` sets the name of the role against which the login is being attempted.
 * `pcf-path` sets the path of the PCF mount to use.
 * `instance-certificate` sets the path to the PCF instance identity certificate.
-Defaults to `${CF_INSTANCE_CERT}` env variable.
+Defaults to `$\{CF_INSTANCE_CERT}` env variable.
 * `instance-key` sets the path to the PCF instance identity key.
-Defaults to `${CF_INSTANCE_KEY}` env variable.
+Defaults to `$\{CF_INSTANCE_KEY}` env variable.
 
 NOTE: PCF authentication requires BouncyCastle (bcpkix-jdk15on) to be on the classpath for RSA PSS signing.
 
 See also: https://www.vaultproject.io/docs/auth/pcf.html[Vault Documentation: Using the pcf auth backend]
 
 [[vault.config.acl]]
-= ACL Requirements
+== ACL Requirements
 
 This section explains which paths are accessed by Spring Vault so you can derive your policy declarations from the required capabilities.
 
