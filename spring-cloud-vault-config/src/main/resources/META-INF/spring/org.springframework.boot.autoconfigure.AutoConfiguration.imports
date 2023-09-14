@@ -1,5 +1,0 @@
-org.springframework.cloud.vault.config.VaultObservationAutoConfiguration
-org.springframework.cloud.vault.config.VaultReactiveObservationAutoConfiguration
-org.springframework.cloud.vault.config.VaultReactiveAutoConfiguration
-org.springframework.cloud.vault.config.VaultAutoConfiguration
-org.springframework.cloud.vault.config.VaultHealthIndicatorAutoConfiguration

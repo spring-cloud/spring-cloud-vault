@@ -1,4 +1,0 @@
-# Bootstrap Configuration
-org.springframework.cloud.bootstrap.BootstrapConfiguration=\
-org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfigurationTests.CustomBootstrapConfiguration,\
-org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitMqBootstrapConfiguration

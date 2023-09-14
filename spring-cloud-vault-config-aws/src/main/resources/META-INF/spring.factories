@@ -1,9 +1,0 @@
-# Bootstrap Configuration
-org.springframework.cloud.bootstrap.BootstrapConfiguration=\
-org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrapConfiguration
-
-org.springframework.cloud.vault.config.SecretBackendMetadataFactory=\
-org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrapConfiguration.AwsSecretBackendMetadataFactory
-
-org.springframework.cloud.vault.config.VaultSecretBackendDescriptor=\
-org.springframework.cloud.vault.config.aws.VaultAwsProperties

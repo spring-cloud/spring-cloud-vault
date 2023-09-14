@@ -1,9 +1,0 @@
-# Bootstrap Configuration
-org.springframework.cloud.bootstrap.BootstrapConfiguration=\
-org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration
-
-org.springframework.cloud.vault.config.SecretBackendMetadataFactory=\
-org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration.ConsulSecretBackendMetadataFactory
-
-org.springframework.cloud.vault.config.VaultSecretBackendDescriptor=\
-org.springframework.cloud.vault.config.consul.VaultConsulProperties
