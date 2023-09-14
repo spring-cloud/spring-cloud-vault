@@ -125,6 +125,7 @@ $ echo -n 0AFEDE1234AC | sha256sum
 NOTE: The Mac address is specified uppercase and without colons.
 Including the line break of `echo` leads to a different hash value so make sure to include the `-n` flag.
 
+[[custom-userid]]
 ==== Custom UserId
 
 The UserId generation is an open mechanism.
@@ -163,6 +164,7 @@ public class MyUserIdMechanism implements AppIdUserIdMechanism {
 
 See also: https://www.vaultproject.io/docs/auth/app-id.html[Vault Documentation: Using the App ID auth backend]
 
+[[approle-authentication]]
 === AppRole authentication
 
 https://www.vaultproject.io/docs/auth/app-id.html[AppRole] is intended for machine authentication, like the deprecated (since Vault 0.6.1) <<vault.config.authentication.appid>>.
@@ -690,14 +692,17 @@ This section explains which paths are accessed by Spring Vault so you can derive
 
 See also https://www.vaultproject.io/guides/identity/policies.
 
+[[authentication]]
 === Authentication
 
 Login: `POST auth/$authMethod/login`
 
+[[keyvalue-mount-discovery]]
 === KeyValue Mount Discovery
 
 `GET sys/internal/ui/mounts/$mountPath`
 
+[[secretleasecontainer]]
 === SecretLeaseContainer
 
 `SecretLeaseContainer` uses different paths depending on the configured lease endpoint.
@@ -712,6 +717,7 @@ Login: `POST auth/$authMethod/login`
 * Revocation: `PUT sys/leases/revoke`
 * Renewal: `PUT sys/leases/renew`
 
+[[session-management]]
 === Session Management
 
 * Token lookup: `GET auth/token/lookup-self`
