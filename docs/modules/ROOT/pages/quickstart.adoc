@@ -127,7 +127,7 @@ where the "application" is injected as the `spring.application.name` in the
 Properties retrieved from Vault will be used "as-is" without further prefixing of the property names.
 
 [[client-side-usage]]
-== Client Side Usage
+= Client Side Usage
 
 To use these features in an application, just build it as a Spring Boot application that depends on `spring-cloud-vault-config` (e.g. see the test cases).
 Example Maven configuration:
@@ -233,7 +233,7 @@ Instead, Spring Cloud Vault favors Spring Boot's Config Data API which allows im
 You can enable the bootstrap context either by setting the configuration property `spring.cloud.bootstrap.enabled=true` or by including the dependency `org.springframework.cloud:spring-cloud-starter-bootstrap`.
 
 [[authentication]]
-=== Authentication
+== Authentication
 
 Vault requires an https://www.vaultproject.io/docs/concepts/auth.html[authentication mechanism] to https://www.vaultproject.io/docs/concepts/tokens.html[authorize client requests].
 
