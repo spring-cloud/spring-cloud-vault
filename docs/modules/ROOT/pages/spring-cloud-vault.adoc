@@ -10,23 +10,14 @@
 
 NOTE: _Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically._
 
-include::intro.adoc[]
 
-include::_attributes.adoc[]
 
-include::new-features.adoc[]
 
 [[quick-start]]
 == Quick Start
 
-include::quickstart.adoc[]
 
-include::config-data.adoc[]
 
-include::authentication.adoc[]
 
-include::secret-backends.adoc[]
 
-include::other-topics.adoc[]
 
-include::appendix.adoc[]

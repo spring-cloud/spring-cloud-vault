@@ -1,6 +1,5 @@
 :docs: https://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html
 
-include::intro.adoc[]
 
 [[features]]
 = Features
@@ -33,7 +32,6 @@ Specifically for Spring applications:
 [[quick-start]]
 = Quick Start
 
-include::quickstart.adoc[]
 
 [[building]]
 = Building
