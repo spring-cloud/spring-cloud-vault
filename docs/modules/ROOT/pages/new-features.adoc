@@ -1,5 +1,6 @@
 [[new-noteworthy]]
 = New & Noteworthy
+:page-section-summary-toc: 1
 
 This section briefly covers items that are new and noteworthy in the latest releases.
 
