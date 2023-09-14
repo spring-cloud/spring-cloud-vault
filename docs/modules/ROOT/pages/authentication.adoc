@@ -1,12 +1,12 @@
 [[vault.config.authentication]]
-== Authentication methods
+= Authentication methods
 
 Different organizations have different requirements for security and authentication.
 Vault reflects that need by shipping multiple authentication methods.
 Spring Cloud Vault supports token and AppId authentication.
 
 [[vault.config.authentication.token]]
-=== Token authentication
+== Token authentication
 
 Tokens are the core method for authentication within Vault.
 Token authentication requires a static token to be provided using the configuration.
@@ -35,7 +35,7 @@ See also:
 * https://www.vaultproject.io/docs/commands/token-helper[Vault Documentation: CLI default to ~/.vault-token]
 
 [[vault.config.authentication.vault-agent]]
-=== Vault Agent authentication
+== Vault Agent authentication
 
 Vault ships a sidecar utility with Vault Agent since version 0.11.0. Vault Agent implements the functionality of Spring Vault's `SessionManager`
 with its Auto-Auth feature.
@@ -59,7 +59,7 @@ and `SessionManager`.
 See also: https://www.vaultproject.io/docs/agent/index.html[Vault Documentation: Agent]
 
 [[vault.config.authentication.appid]]
-=== AppId authentication
+== AppId authentication
 
 Vault supports https://www.vaultproject.io/docs/auth/app-id.html[AppId]
 authentication that consists of two hard to guess tokens.
@@ -126,7 +126,7 @@ NOTE: The Mac address is specified uppercase and without colons.
 Including the line break of `echo` leads to a different hash value so make sure to include the `-n` flag.
 
 [[custom-userid]]
-==== Custom UserId
+=== Custom UserId
 
 The UserId generation is an open mechanism.
 You can set
@@ -165,7 +165,7 @@ public class MyUserIdMechanism implements AppIdUserIdMechanism {
 See also: https://www.vaultproject.io/docs/auth/app-id.html[Vault Documentation: Using the App ID auth backend]
 
 [[approle-authentication]]
-=== AppRole authentication
+== AppRole authentication
 
 https://www.vaultproject.io/docs/auth/app-id.html[AppRole] is intended for machine authentication, like the deprecated (since Vault 0.6.1) <<vault.config.authentication.appid>>.
 AppRole authentication consists of two hard to guess (secret) tokens: RoleId and SecretId.
@@ -247,7 +247,7 @@ SecretId can be omitted if AppRole is configured without requiring SecretId (See
 See also: https://www.vaultproject.io/docs/auth/approle.html[Vault Documentation: Using the AppRole auth backend]
 
 [[vault.config.authentication.awsec2]]
-=== AWS-EC2 authentication
+== AWS-EC2 authentication
 
 The https://www.vaultproject.io/docs/auth/aws-ec2.html[aws-ec2]
 auth backend provides a secure introduction mechanism for AWS EC2 instances, allowing automated retrieval of a Vault token.
@@ -312,7 +312,7 @@ An empty nonce defaults to nonce generation
 See also: https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Using the aws auth backend]
 
 [[vault.config.authentication.awsiam]]
-=== AWS-IAM authentication
+== AWS-IAM authentication
 
 The https://www.vaultproject.io/docs/auth/aws-ec2.html[aws] backend provides a secure authentication mechanism for AWS IAM roles, allowing the automatic authentication with vault based on the current IAM role of the running application.
 Unlike most Vault authentication backends, this backend does not require first-deploying, or provisioning security-sensitive credentials (tokens, username/password, client certificates, etc.).
@@ -362,7 +362,7 @@ AWS-IAM requires the AWS Java SDK v2 dependency (`software.amazon.awssdk:auth`) 
 See also: https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Using the aws auth backend]
 
 [[vault.config.authentication.azuremsi]]
-=== Azure MSI authentication
+== Azure MSI authentication
 
 The https://www.vaultproject.io/docs/auth/azure.html[azure]
 auth backend provides a secure introduction mechanism for Azure VM instances, allowing automated retrieval of a Vault token.
@@ -409,7 +409,7 @@ See also:
 * https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service[Azure Documentation: Azure Instance Metadata Service]
 
 [[vault.config.authentication.clientcert]]
-=== TLS certificate authentication
+== TLS certificate authentication
 
 The `cert` auth backend allows authentication using SSL/TLS client certificates that are either signed by a CA or self-signed.
 
@@ -436,7 +436,7 @@ spring.cloud.vault:
 See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the Cert auth backend]
 
 [[vault.config.authentication.cubbyhole]]
-=== Cubbyhole authentication
+== Cubbyhole authentication
 
 Cubbyhole authentication uses Vault primitives to provide a secured authentication workflow.
 Cubbyhole authentication uses tokens as primary login method.
@@ -479,7 +479,7 @@ See also:
 * https://www.vaultproject.io/docs/concepts/response-wrapping.html[Vault Documentation: Response Wrapping]
 
 [[vault.config.authentication.gcpgce]]
-=== GCP-GCE authentication
+== GCP-GCE authentication
 
 The https://www.vaultproject.io/docs/auth/gcp.html[gcp]
 auth backend allows Vault login by using existing GCP (Google Cloud Platform) IAM and GCE credentials.
@@ -526,7 +526,7 @@ See also:
 * https://cloud.google.com/compute/docs/instances/verifying-instance-identity[GCP Documentation: Verifying the Identity of Instances]
 
 [[vault.config.authentication.gcpiam]]
-=== GCP-IAM authentication
+== GCP-IAM authentication
 
 The https://www.vaultproject.io/docs/auth/gcp.html[gcp]
 auth backend allows Vault login by using existing GCP (Google Cloud Platform) IAM and GCE credentials.
@@ -591,7 +591,7 @@ See also:
 
 [[vault.authentication.gcpiam]]
 [[vault.config.authentication.kubernetes]]
-=== Kubernetes authentication
+== Kubernetes authentication
 
 Kubernetes authentication mechanism (since Vault 0.8.3) allows to authenticate with Vault using a Kubernetes Service Account Token.
 The authentication is role based and the role is bound to a service account name and a namespace.
@@ -622,7 +622,7 @@ See also:
 * https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/[Kubernetes Documentation: Configure Service Accounts for Pods]
 
 [[vault.config.authentication.pcf]]
-=== Pivotal CloudFoundry authentication
+== Pivotal CloudFoundry authentication
 
 The https://www.vaultproject.io/docs/auth/pcf.html[pcf]
 auth backend provides a secure introduction mechanism for applications running within Pivotal's CloudFoundry instances allowing automated retrieval of a Vault token.
@@ -666,7 +666,7 @@ NOTE: PCF authentication requires BouncyCastle (bcpkix-jdk15on) to be on the cla
 See also: https://www.vaultproject.io/docs/auth/pcf.html[Vault Documentation: Using the pcf auth backend]
 
 [[vault.config.acl]]
-== ACL Requirements
+= ACL Requirements
 
 This section explains which paths are accessed by Spring Vault so you can derive your policy declarations from the required capabilities.
 
@@ -693,17 +693,17 @@ This section explains which paths are accessed by Spring Vault so you can derive
 See also https://www.vaultproject.io/guides/identity/policies.
 
 [[authentication]]
-=== Authentication
+== Authentication
 
 Login: `POST auth/$authMethod/login`
 
 [[keyvalue-mount-discovery]]
-=== KeyValue Mount Discovery
+== KeyValue Mount Discovery
 
 `GET sys/internal/ui/mounts/$mountPath`
 
 [[secretleasecontainer]]
-=== SecretLeaseContainer
+== SecretLeaseContainer
 
 `SecretLeaseContainer` uses different paths depending on the configured lease endpoint.
 
@@ -718,7 +718,7 @@ Login: `POST auth/$authMethod/login`
 * Renewal: `PUT sys/leases/renew`
 
 [[session-management]]
-=== Session Management
+== Session Management
 
 * Token lookup: `GET auth/token/lookup-self`
 * Renewal: `POST auth/token/renew-self`

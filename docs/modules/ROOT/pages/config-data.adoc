@@ -1,5 +1,5 @@
 [[vault.configdata]]
-== ConfigData API
+= ConfigData API
 
 Spring Boot provides since version 2.4 a ConfigData API that allows the declaration of configuration sources and importing these as property sources.
 
@@ -11,7 +11,7 @@ NOTE: You can enable the bootstrap context either by setting the configuration p
 Using the boostrap context should be only rarely required hence we recommend using the Config Data API for more flexibility regarding property source ordering.
 
 [[vault.configdata.locations]]
-=== ConfigData Locations
+== ConfigData Locations
 
 You can mount Vault configuration through one or more `PropertySource` that are materialized from Vault.
 Spring Cloud Vault supports two config locations:
@@ -56,7 +56,7 @@ NOTE: Prefixes are added as-is to all property names returned by Vault. If you w
 ====
 
 [[vault.configdata.location.optional]]
-=== Conditionally enable/disable Vault Configuration
+== Conditionally enable/disable Vault Configuration
 
 In some cases, it can be required to launch an application without Vault. You can express whether a Vault config location should be optional or mandatory (default) through the location string:
 
@@ -69,7 +69,7 @@ NOTE: Vault context paths that cannot be found (HTTP Status 404) are skipped reg
 
 
 [[vault.configdata.customization]]
-=== Infrastructure Customization
+== Infrastructure Customization
 
 Spring Cloud Vault requires infrastructure classes to interact with Vault. When not using the ConfigData API (meaning that you haven't specified `spring.config.import=vault://` or a contextual Vault path), Spring Cloud Vault defines its beans through `VaultAutoConfiguration` and `VaultReactiveAutoConfiguration`.
 Spring Boot bootstraps the application before a Spring Context is available. Therefore `VaultConfigDataLoader` registers beans itself to propagate these later on into the application context.
