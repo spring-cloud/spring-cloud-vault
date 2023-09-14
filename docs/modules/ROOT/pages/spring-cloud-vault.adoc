@@ -4,7 +4,6 @@
 :githubmaster: {github}/tree/master
 :revnumber: {project-version}
 :docslink: {githubmaster}/docs/src/main/asciidoc
-:toc: left
 :nofooter:
 
 (C) 2016-2021 the original authors.
