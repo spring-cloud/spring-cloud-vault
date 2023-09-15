@@ -1,7 +1,9 @@
 [[quick-start]]
 = Quick Start
 
-*Prerequisites*
+This section explains how to get you started with Vault and Spring Cloud Vault.
+
+== Prerequisites
 
 To get started with Vault and this guide you need a *NIX-like operating systems that provides:
 
@@ -21,9 +23,9 @@ $ unzip vault_${vault_version}_${platform}.zip
 
 NOTE: These steps can be achieved by downloading and running https://github.com/spring-cloud/spring-cloud-vault/blob/master/src/test/bash/install_vault.sh[`install_vault.sh`].
 
-*Create SSL certificates for Vault*
+== Create SSL certificates for Vault
 
-Next, you'r required to generate a set of certificates:
+Next, you're required to generate a set of certificates:
 
 * Root CA
 * Vault Certificate (decrypted key `work/ca/private/localhost.decrypted.key.pem` and certificate `work/ca/certs/localhost.cert.pem`)
@@ -36,7 +38,7 @@ NOTE: https://github.com/spring-cloud/spring-cloud-vault/blob/master/src/test/ba
 If you want to run Spring Cloud Vault using this quickstart guide you need to configure the truststore the `spring.cloud.vault.ssl.trust-store` property to `file:work/keystore.jks`.
 
 [[quickstart.vault.start]]
-*Start Vault server*
+== Start Vault server
 
 Next create a config file along the lines of:
 
@@ -139,7 +141,7 @@ Example Maven configuration:
 <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.4.0.RELEASE</version>
+    <version>$\{springBootVersion}</version>
     <relativePath /> <!-- lookup parent from repository -->
 </parent>
 
@@ -216,7 +218,7 @@ Supported schemes are `http` and `https`.
 
 Enabling further integrations requires additional dependencies and configuration.
 Depending on how you have set up Vault you might need additional configuration like
-xref:other-topics.adoc#vault.config.ssl[SSL] and
+xref:advanced-topics.adoc#vault.config.ssl[SSL] and
 xref:authentication.adoc#vault.config.authentication[authentication].
 
 If the application imports the `spring-boot-starter-actuator` project, the status of the vault server will be available via the `/health` endpoint.
@@ -232,7 +234,7 @@ You can enable the bootstrap context either by setting the configuration propert
 
 Vault requires an https://www.vaultproject.io/docs/concepts/auth.html[authentication mechanism] to https://www.vaultproject.io/docs/concepts/tokens.html[authorize client requests].
 
-Spring Cloud Vault supports multiple xref:authentication.adoc#vault.config.authentication[authentication mechanisms] to authenticate applications with Vault.
+Spring Cloud Vault supports multiple xref:authentication.adoc[authentication mechanisms] to authenticate applications with Vault.
 
 For a quickstart, use the root token printed by the xref:quickstart.adoc#quickstart.vault.start[Vault initialization].
 

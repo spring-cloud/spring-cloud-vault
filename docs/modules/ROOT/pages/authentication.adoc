@@ -385,7 +385,7 @@ The `cert` auth backend allows authentication using SSL/TLS client certificates 
 
 To enable `cert` authentication you need to:
 
-1. Use SSL, see xref:other-topics.adoc#vault.config.ssl[Vault Client SSL configuration]
+1. Use SSL, see xref:advanced-topics.adoc#vault.config.ssl[Vault Client SSL configuration]
 2. Configure a Java `Keystore` that contains the client certificate and the private key
 3. Set the `spring.cloud.vault.authentication` to `CERT`
 

@@ -1,1 +1,21 @@
-include::intro.adoc[]
+= Spring Cloud Vault
+:feature-scroll: true
+
+Spring Cloud Vault Config provides client-side support for externalized configuration in a distributed system built on top of https://docs.spring.io/spring-vault/reference/[Spring Vault].
+With https://www.vaultproject.io[HashiCorp's Vault] you have a central place to manage external secret properties for applications across all environments.
+Vault can manage static and dynamic secrets such as username/password for remote applications/resources and provide credentials for external services such as MySQL, PostgreSQL, Apache Cassandra, Couchbase, MongoDB, Consul, AWS and more.
+ +
+ +
+
+[horizontal]
+xref:config-data.adoc[Config Data API] :: Application Configuration using Vault Secrets
+xref:authentication.adoc[Authentication] :: Configuring Authentication with Vault
+xref:secret-backends.adoc[Secret Backends] :: Mounting Secret Backends
+xref:advanced-topics.adoc[Advanced Topics] :: Service Discovery, Fail-Fast, SSL Configuration, Lifecycle Management
+
+Mark Paluch, Jay Bryant, Spencer Gibb
+
+(C) 2008-2023 VMware, Inc.
+
+Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.
+

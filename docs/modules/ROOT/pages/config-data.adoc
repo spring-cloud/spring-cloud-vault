@@ -63,7 +63,7 @@ In some cases, it can be required to launch an application without Vault. You ca
 
 Optional locations are skipped during application startup if Vault support was disabled through `spring.cloud.vault.enabled=false`.
 
-NOTE: Vault context paths that cannot be found (HTTP Status 404) are skipped regardless of whether the config location is marked optional. xref:other-topics.adoc#vault.config.fail-fast[Vault Client Fail Fast] allows failing on start if a Vault context path cannot be found because of HTTP Status 404.
+NOTE: Vault context paths that cannot be found (HTTP Status 404) are skipped regardless of whether the config location is marked optional. xref:advanced-topics.adoc#vault.config.fail-fast[Vault Client Fail Fast] allows failing on start if a Vault context path cannot be found because of HTTP Status 404.
 
 
 [[vault.configdata.customization]]
