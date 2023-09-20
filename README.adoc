@@ -59,7 +59,7 @@ $ wget https://releases.hashicorp.com/vault/${vault_version}/vault_${vault_versi
 $ unzip vault_${vault_version}_${platform}.zip
 ----
 
-NOTE: These steps can be achieved by downloading and running https://github.com/spring-cloud/spring-cloud-vault/blob/master/src/test/bash/install_vault.sh[`install_vault.sh`].
+NOTE: These steps can be achieved by downloading and running https://github.com/spring-cloud/spring-cloud-vault/blob/4.0.x/src/test/bash/install_vault.sh[`install_vault.sh`].
 
 *Create SSL certificates for Vault*
 
@@ -72,7 +72,7 @@ Make sure to import the Root Certificate into a Java-compliant truststore.
 
 The easiest way to achieve this is by using OpenSSL.
 
-NOTE: https://github.com/spring-cloud/spring-cloud-vault/blob/master/src/test/bash/[`create_certificates.sh`] creates certificates in `work/ca` and a JKS truststore `work/keystore.jks`.
+NOTE: https://github.com/spring-cloud/spring-cloud-vault/blob/4.0.x/src/test/bash/[`create_certificates.sh`] creates certificates in `work/ca` and a JKS truststore `work/keystore.jks`.
 If you want to run Spring Cloud Vault using this quickstart guide you need to configure the truststore the `spring.cloud.vault.ssl.trust-store` property to `file:work/keystore.jks`.
 
 [[quickstart.vault.start]]
@@ -94,7 +94,7 @@ listener "tcp" {
 disable_mlock = true
 ----
 
-NOTE: You can find an example config file at  https://github.com/spring-clod/spring-cloud-vault/blob/master/src/test/bash/vault.conf[`vault.conf`].
+NOTE: You can find an example config file at  https://github.com/spring-clod/spring-cloud-vault/blob/4.0.x/src/test/bash/vault.conf[`vault.conf`].
 
 [source,bash]
 ----
@@ -426,7 +426,7 @@ author credit if we do.  Active contributors might be asked to join the core tea
 given the ability to merge pull requests.
 
 === Code of Conduct
-This project adheres to the Contributor Covenant https://github.com/spring-cloud/spring-cloud-build/blob/master/docs/src/main/asciidoc/code-of-conduct.adoc[code of
+This project adheres to the Contributor Covenant https://github.com/spring-cloud/spring-cloud-build/blob/{spring-cloud-build-branch}/docs/src/main/asciidoc/code-of-conduct.adoc[code of
 conduct]. By participating, you  are expected to uphold this code. Please report
 unacceptable behavior to spring-code-of-conduct@pivotal.io.
 
@@ -437,7 +437,7 @@ added after the original pull request but before a merge.
 * Use the Spring Framework code format conventions. If you use Eclipse
   you can import formatter settings using the
   `eclipse-code-formatter.xml` file from the
-  https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/master/spring-cloud-dependencies-parent/eclipse-code-formatter.xml[Spring
+  https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/{spring-cloud-build-branch}/spring-cloud-dependencies-parent/eclipse-code-formatter.xml[Spring
   Cloud Build] project. If using IntelliJ, you can use the
   https://plugins.jetbrains.com/plugin/6546[Eclipse Code Formatter
   Plugin] to import the same file.

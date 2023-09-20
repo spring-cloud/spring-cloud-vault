@@ -18,7 +18,7 @@ $ wget https://releases.hashicorp.com/vault/${vault_version}/vault_${vault_versi
 $ unzip vault_${vault_version}_${platform}.zip
 ----
 
-NOTE: These steps can be achieved by downloading and running https://github.com/spring-cloud/spring-cloud-vault/blob/master/src/test/bash/install_vault.sh[`install_vault.sh`].
+NOTE: These steps can be achieved by downloading and running https://github.com/spring-cloud/spring-cloud-vault/blob/4.0.x/src/test/bash/install_vault.sh[`install_vault.sh`].
 
 *Create SSL certificates for Vault*
 
@@ -31,7 +31,7 @@ Make sure to import the Root Certificate into a Java-compliant truststore.
 
 The easiest way to achieve this is by using OpenSSL.
 
-NOTE: https://github.com/spring-cloud/spring-cloud-vault/blob/master/src/test/bash/[`create_certificates.sh`] creates certificates in `work/ca` and a JKS truststore `work/keystore.jks`.
+NOTE: https://github.com/spring-cloud/spring-cloud-vault/blob/4.0.x/src/test/bash/[`create_certificates.sh`] creates certificates in `work/ca` and a JKS truststore `work/keystore.jks`.
 If you want to run Spring Cloud Vault using this quickstart guide you need to configure the truststore the `spring.cloud.vault.ssl.trust-store` property to `file:work/keystore.jks`.
 
 [[quickstart.vault.start]]
@@ -53,7 +53,7 @@ listener "tcp" {
 disable_mlock = true
 ----
 
-NOTE: You can find an example config file at  https://github.com/spring-clod/spring-cloud-vault/blob/master/src/test/bash/vault.conf[`vault.conf`].
+NOTE: You can find an example config file at  https://github.com/spring-clod/spring-cloud-vault/blob/4.0.x/src/test/bash/vault.conf[`vault.conf`].
 
 [source,bash]
 ----

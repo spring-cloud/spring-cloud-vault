@@ -1,8 +1,8 @@
 = Spring Cloud Vault
 :github: https://github.com/spring-cloud/spring-cloud-vault
-:githubmaster: {github}/tree/master
+:githubbranch: {github}/tree/4.0.x
 :revnumber: {project-version}
-:docslink: {githubmaster}/docs/src/main/asciidoc
+:docslink: {githubbranch}/docs/src/main/asciidoc
 :toc: left
 :nofooter:
 
