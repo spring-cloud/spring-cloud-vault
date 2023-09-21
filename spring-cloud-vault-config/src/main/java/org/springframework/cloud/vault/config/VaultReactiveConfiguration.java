@@ -35,6 +35,11 @@ import org.springframework.vault.authentication.ReactiveSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.authentication.VaultTokenSupplier;
+import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
+import org.springframework.vault.authentication.event.AuthenticationErrorListener;
+import org.springframework.vault.authentication.event.AuthenticationEvent;
+import org.springframework.vault.authentication.event.AuthenticationEventMulticaster;
+import org.springframework.vault.authentication.event.AuthenticationListener;
 import org.springframework.vault.client.ClientHttpConnectorFactory;
 import org.springframework.vault.client.ReactiveVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpointProvider;
@@ -139,7 +144,9 @@ final class VaultReactiveConfiguration {
 	}
 
 	SessionManager createSessionManager(ReactiveSessionManager sessionManager) {
-		return new ReactiveSessionManagerAdapter(sessionManager);
+		return sessionManager instanceof AuthenticationEventMulticaster
+				? new ReactiveMulticastingSessionManagerAdapter(sessionManager)
+				: new ReactiveSessionManagerAdapter(sessionManager);
 	}
 
 	ReactiveSessionManager createReactiveSessionManager(VaultTokenSupplier vaultTokenSupplier,
@@ -158,11 +165,12 @@ final class VaultReactiveConfiguration {
 		return CachingVaultTokenSupplier.of(vaultTokenSupplier);
 	}
 
-	private static final class ReactiveSessionManagerAdapter implements SessionManager {
+	@SuppressWarnings("all")
+	static class ReactiveSessionManagerAdapter implements SessionManager {
 
 		private final ReactiveSessionManager sessionManager;
 
-		private ReactiveSessionManagerAdapter(ReactiveSessionManager sessionManager) {
+		ReactiveSessionManagerAdapter(ReactiveSessionManager sessionManager) {
 			this.sessionManager = sessionManager;
 		}
 
@@ -171,6 +179,49 @@ final class VaultReactiveConfiguration {
 			VaultToken token = this.sessionManager.getSessionToken().block();
 			Assert.state(token != null, "ReactiveSessionManager returned a null VaultToken");
 			return token;
+		}
+
+	}
+
+	@SuppressWarnings("all")
+	static class ReactiveMulticastingSessionManagerAdapter extends ReactiveSessionManagerAdapter
+			implements AuthenticationEventMulticaster {
+
+		private final AuthenticationEventMulticaster delegate;
+
+		ReactiveMulticastingSessionManagerAdapter(ReactiveSessionManager sessionManager) {
+			super(sessionManager);
+			this.delegate = (AuthenticationEventMulticaster) sessionManager;
+		}
+
+		@Override
+		public void addAuthenticationListener(AuthenticationListener listener) {
+			this.delegate.addAuthenticationListener(listener);
+		}
+
+		@Override
+		public void removeAuthenticationListener(AuthenticationListener listener) {
+			this.delegate.removeAuthenticationListener(listener);
+		}
+
+		@Override
+		public void addErrorListener(AuthenticationErrorListener listener) {
+			this.delegate.addErrorListener(listener);
+		}
+
+		@Override
+		public void removeErrorListener(AuthenticationErrorListener listener) {
+			this.delegate.removeErrorListener(listener);
+		}
+
+		@Override
+		public void multicastEvent(AuthenticationEvent event) {
+			this.delegate.multicastEvent(event);
+		}
+
+		@Override
+		public void multicastEvent(AuthenticationErrorEvent event) {
+			this.delegate.multicastEvent(event);
 		}
 
 	}

@@ -32,6 +32,7 @@ import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.LifecycleAwareSessionManagerSupport;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
+import org.springframework.vault.authentication.event.AuthenticationEventMulticaster;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.client.RestTemplateBuilder;
 import org.springframework.vault.client.RestTemplateCustomizer;
@@ -181,11 +182,16 @@ final class VaultConfiguration {
 	}
 
 	SecretLeaseContainer createSecretLeaseContainer(VaultOperations vaultOperations,
-			Supplier<TaskScheduler> taskSchedulerSupplier) {
+			Supplier<TaskScheduler> taskSchedulerSupplier, SessionManager sessionManager) {
 
 		VaultProperties.ConfigLifecycle lifecycle = this.vaultProperties.getConfig().getLifecycle();
 
 		SecretLeaseContainer container = new SecretLeaseContainer(vaultOperations, taskSchedulerSupplier.get());
+
+		if (sessionManager instanceof AuthenticationEventMulticaster am) {
+			am.addAuthenticationListener(container.getAuthenticationListener());
+			am.addErrorListener(container.getAuthenticationErrorListener());
+		}
 
 		customizeContainer(lifecycle, container);
 

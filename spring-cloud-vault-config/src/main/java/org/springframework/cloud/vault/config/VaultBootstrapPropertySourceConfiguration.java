@@ -131,7 +131,9 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	/**
 	 * @param vaultOperations the {@link VaultOperations}.
 	 * @param taskSchedulerWrapper the {@link TaskSchedulerWrapper}.
-	 * @return the {@link SessionManager} for Vault session management.
+	 * @param sessionManager the {@link SessionManager} to listen for authentication
+	 * events.
+	 * @return the {@link SecretLeaseContainer} for Vault secret lease management.
 	 * @see SessionManager
 	 * @see LifecycleAwareSessionManager
 	 */
@@ -139,8 +141,9 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	@Lazy
 	@ConditionalOnMissingBean
 	public SecretLeaseContainer secretLeaseContainer(VaultOperations vaultOperations,
-			TaskSchedulerWrapper taskSchedulerWrapper) {
-		return this.configuration.createSecretLeaseContainer(vaultOperations, taskSchedulerWrapper::getTaskScheduler);
+			TaskSchedulerWrapper taskSchedulerWrapper, SessionManager sessionManager) {
+		return this.configuration.createSecretLeaseContainer(vaultOperations, taskSchedulerWrapper::getTaskScheduler,
+				sessionManager);
 	}
 
 }
