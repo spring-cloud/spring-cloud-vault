@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.vault.config.VaultProperties.Ssl;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.StringUtils;
@@ -182,7 +183,7 @@ final class VaultConfiguration {
 	}
 
 	SecretLeaseContainer createSecretLeaseContainer(VaultOperations vaultOperations,
-			Supplier<TaskScheduler> taskSchedulerSupplier, SessionManager sessionManager) {
+			Supplier<TaskScheduler> taskSchedulerSupplier, @Nullable SessionManager sessionManager) {
 
 		VaultProperties.ConfigLifecycle lifecycle = this.vaultProperties.getConfig().getLifecycle();
 

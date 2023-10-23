@@ -252,7 +252,8 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			VaultConfiguration vaultConfiguration) {
 		registerIfAbsent(bootstrap, "secretLeaseContainer", SecretLeaseContainer.class, ctx -> {
 
-			SessionManager sessionManager = ctx.get(SessionManager.class);
+			SessionManager sessionManager = ctx.isRegistered(SessionManager.class) ? ctx.get(SessionManager.class)
+					: null;
 			SecretLeaseContainer container = vaultConfiguration.createSecretLeaseContainer(ctx.get(VaultTemplate.class),
 					() -> ctx.get(TaskSchedulerWrapper.class).getTaskScheduler(), sessionManager);
 

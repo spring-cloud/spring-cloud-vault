@@ -64,6 +64,21 @@ public class VaultConfigDataLoaderIntegrationTests extends IntegrationTestSuppor
 	}
 
 	@Test
+	public void shouldConsiderNoAuthentication() {
+
+		SpringApplication application = new SpringApplication(Config.class);
+		application.setWebApplicationType(WebApplicationType.NONE);
+
+		try (ConfigurableApplicationContext context = application.run("--spring.application.name=my-config-loader",
+				"--spring.config.import=vault:", "--spring.cloud.vault.authentication=NONE")) {
+
+			// while the Vault startup leads to Status 403 Forbidden [secret/application],
+			// we expect that the application can still boot up.
+			assertThat(context).isNotNull();
+		}
+	}
+
+	@Test
 	public void vaultLocationEndingWithSlashShouldFail() {
 
 		SpringApplication application = new SpringApplication(Config.class);
