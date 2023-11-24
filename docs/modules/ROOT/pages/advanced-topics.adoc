@@ -118,6 +118,7 @@ This setting prevents renewals from happening too often.
 A lease is renewed the configured period of time before it expires.
 * `lease-endpoints` sets the endpoints for renew and revoke.
 Legacy for vault versions before 0.8 and SysLeases for later.
+* `lease-strategy` sets the `LeaseStrategy` (`DropOnError`, `RetainOnError`, `RetainOnIoError`) to control error handling on lease renewal.
 
 See also: https://www.vaultproject.io/docs/concepts/lease.html[Vault Documentation: Lease, Renew, and Revoke]
 
