@@ -1262,7 +1262,7 @@ public class VaultProperties implements EnvironmentAware {
 		 * Sets the {@link LeaseStrategy} to be used with
 		 * {@link org.springframework.vault.core.lease.SecretLeaseContainer#setLeaseStrategy(LeaseStrategy)}
 		 * to retain or drop tokens on renewal errors.
-		 * @since 4.1
+		 * @since 4.0.4
 		 */
 		@Nullable
 		private PredefinedLeaseStrategy leaseStrategy;
@@ -1314,7 +1314,7 @@ public class VaultProperties implements EnvironmentAware {
 	}
 
 	/**
-	 * @since 4.1
+	 * @since 4.0.4
 	 * @see LeaseStrategy
 	 */
 	enum PredefinedLeaseStrategy {

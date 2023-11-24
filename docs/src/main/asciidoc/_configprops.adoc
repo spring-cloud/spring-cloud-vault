@@ -9,7 +9,7 @@
 |spring.cloud.vault.app-role.role-id |  | The RoleId.
 |spring.cloud.vault.app-role.secret-id |  | The SecretId.
 |spring.cloud.vault.application-name | `+++application+++` | Application name for AppId authentication.
-|spring.cloud.vault.authentication |  | 
+|spring.cloud.vault.authentication |  |
 |spring.cloud.vault.aws-ec2.aws-ec2-path | `+++aws-ec2+++` | Mount path of the AWS-EC2 authentication backend.
 |spring.cloud.vault.aws-ec2.identity-document | `+++http://169.254.169.254/latest/dynamic/instance-identity/pkcs7+++` | URL of the AWS-EC2 PKCS7 identity document.
 |spring.cloud.vault.aws-ec2.nonce |  | Nonce used for AWS-EC2 authentication. An empty nonce defaults to nonce generation.
@@ -41,6 +41,7 @@
 |spring.cloud.vault.config.lifecycle.enabled | `+++true+++` | Enable lifecycle management.
 |spring.cloud.vault.config.lifecycle.expiry-threshold |  | The expiry threshold. {@link Lease} is renewed the given {@link Duration} before it expires. @since 2.2
 |spring.cloud.vault.config.lifecycle.lease-endpoints |  | Set the {@link LeaseEndpoints} to delegate renewal/revocation calls to. {@link LeaseEndpoints} encapsulates differences between Vault versions that affect the location of renewal/revocation endpoints. Can be {@link LeaseEndpoints#SysLeases} for version 0.8 or above of Vault or {@link LeaseEndpoints#Legacy} for older versions (the default). @since 2.2
+|spring.cloud.vault.config.lifecycle.lease-strategy |  | Set the LeaseStrategy (DropOnError, RetainOnError, RetainOnIoError) to control error handling on lease renewal. since 4.0.4
 |spring.cloud.vault.config.lifecycle.min-renewal |  | The time period that is at least required before renewing a lease. @since 2.2
 |spring.cloud.vault.config.order | `+++0+++` | Used to set a {@link org.springframework.core.env.PropertySource} priority. This is useful to use Vault as an override on other property sources. @see org.springframework.core.PriorityOrdered
 |spring.cloud.vault.connection-timeout | `+++5000+++` | Connection timeout.
@@ -60,7 +61,7 @@
 |spring.cloud.vault.database.role |  | Role name for credentials.
 |spring.cloud.vault.database.static-role | `+++false+++` | Enable static role usage.
 |spring.cloud.vault.database.username-property | `+++spring.datasource.username+++` | Target property for the obtained username.
-|spring.cloud.vault.databases |  | 
+|spring.cloud.vault.databases |  |
 |spring.cloud.vault.discovery.enabled | `+++false+++` | Flag to indicate that Vault server discovery is enabled (vault server URL will be looked up via discovery).
 |spring.cloud.vault.discovery.service-id | `+++vault+++` | Service id to locate Vault.
 |spring.cloud.vault.elasticsearch.backend | `+++database+++` | Database backend path.
