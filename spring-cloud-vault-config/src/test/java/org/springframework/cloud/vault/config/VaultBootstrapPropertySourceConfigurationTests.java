@@ -29,6 +29,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.lease.LeaseEndpoints;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
+import org.springframework.vault.support.LeaseStrategy;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -45,13 +46,14 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 			.withConfiguration(AutoConfigurations.of(VaultBootstrapPropertySourceConfiguration.class));
 
 	@Test
-	public void shouldConfigureExpiryTimeouts() {
+	public void shouldConfigureExpiryTimeoutsAndStrategy() {
 
 		this.contextRunner.withUserConfiguration(MockConfiguration.class).withAllowBeanDefinitionOverriding(true)
 				.withPropertyValues("spring.cloud.vault.kv.enabled=false",
 						"spring.cloud.vault.config.lifecycle.expiry-threshold=5m",
 						"spring.cloud.vault.config.lifecycle.min-renewal=6m",
 						"spring.cloud.vault.config.lifecycle.lease-endpoints=Leases",
+						"spring.cloud.vault.config.lifecycle.lease-strategy=retain-on-error",
 						"spring.cloud.bootstrap.enabled=true")
 				.run(context -> {
 
@@ -59,6 +61,7 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 					verify(container).setExpiryThreshold(Duration.ofMinutes(5));
 					verify(container).setMinRenewal(Duration.ofMinutes(6));
 					verify(container).setLeaseEndpoints(LeaseEndpoints.Leases);
+					verify(container).setLeaseStrategy(LeaseStrategy.retainOnError());
 				});
 	}
 

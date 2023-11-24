@@ -43,6 +43,7 @@ import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.support.ClientOptions;
+import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.web.client.RestTemplate;
@@ -214,6 +215,15 @@ final class VaultConfiguration {
 
 			if (lifecycle.getLeaseEndpoints() != null) {
 				container.setLeaseEndpoints(lifecycle.getLeaseEndpoints());
+			}
+
+			if (lifecycle.getLeaseStrategy() != null) {
+
+				switch (lifecycle.getLeaseStrategy()) {
+					case DropOnError -> container.setLeaseStrategy(LeaseStrategy.dropOnError());
+					case RetainOnError -> container.setLeaseStrategy(LeaseStrategy.retainOnError());
+					case RetainOnIoError -> container.setLeaseStrategy(LeaseStrategy.retainOnIoError());
+				}
 			}
 		}
 	}

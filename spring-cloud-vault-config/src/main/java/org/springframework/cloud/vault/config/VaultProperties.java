@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.AzureMsiAuthenticationOptions;
 import org.springframework.vault.authentication.LoginToken;
 import org.springframework.vault.core.lease.LeaseEndpoints;
+import org.springframework.vault.support.LeaseStrategy;
 
 /**
  * Properties to configure Vault support.
@@ -1252,11 +1253,19 @@ public class VaultProperties implements EnvironmentAware {
 		 *
 		 * Can be {@link LeaseEndpoints#SysLeases} for version 0.8 or above of Vault or
 		 * {@link LeaseEndpoints#Legacy} for older versions (the default).
-		 *
 		 * @since 2.2
 		 */
 		@Nullable
 		private LeaseEndpoints leaseEndpoints;
+
+		/**
+		 * Sets the {@link LeaseStrategy} to be used with
+		 * {@link org.springframework.vault.core.lease.SecretLeaseContainer#setLeaseStrategy(LeaseStrategy)}
+		 * to retain or drop tokens on renewal errors.
+		 * @since 4.1
+		 */
+		@Nullable
+		private PredefinedLeaseStrategy leaseStrategy;
 
 		public boolean isEnabled() {
 			return this.enabled;
@@ -1292,6 +1301,25 @@ public class VaultProperties implements EnvironmentAware {
 		public void setLeaseEndpoints(@Nullable LeaseEndpoints leaseEndpoints) {
 			this.leaseEndpoints = leaseEndpoints;
 		}
+
+		@Nullable
+		public PredefinedLeaseStrategy getLeaseStrategy() {
+			return this.leaseStrategy;
+		}
+
+		public void setLeaseStrategy(@Nullable PredefinedLeaseStrategy leaseStrategy) {
+			this.leaseStrategy = leaseStrategy;
+		}
+
+	}
+
+	/**
+	 * @since 4.1
+	 * @see LeaseStrategy
+	 */
+	enum PredefinedLeaseStrategy {
+
+		RetainOnError, RetainOnIoError, DropOnError,
 
 	}
 
