@@ -203,7 +203,6 @@ spring.cloud.vault:
     uri: https://localhost:8200
     connection-timeout: 5000
     read-timeout: 15000
-    config:
 spring.config.import: vault://
 ----
 ====
