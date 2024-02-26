@@ -150,6 +150,9 @@ function main() {
   if [ "$(uname -m)" == aarch64 ]; then
     PLATFORM=arm64
   fi
+  if [ "$(uname -m)" == arm64 ]; then
+    PLATFORM=arm64
+  fi
   if [[ ${EDITION} == 'oss' ]]; then
     download_oss
   elif [[ ${EDITION} == 'enterprise' ]]; then
