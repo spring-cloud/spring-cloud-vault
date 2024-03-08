@@ -26,11 +26,13 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.lease.LeaseEndpoints;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.support.LeaseStrategy;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -48,7 +50,10 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 	@Test
 	public void shouldConfigureExpiryTimeoutsAndStrategy() {
 
-		this.contextRunner.withUserConfiguration(MockConfiguration.class).withAllowBeanDefinitionOverriding(true)
+		this.contextRunner
+				.withUserConfiguration(MockSecretLeaseContainerConfiguration.class,
+						MockVaultOperationsConfiguration.class)
+				.withAllowBeanDefinitionOverriding(true)
 				.withPropertyValues("spring.cloud.vault.kv.enabled=false",
 						"spring.cloud.vault.config.lifecycle.expiry-threshold=5m",
 						"spring.cloud.vault.config.lifecycle.min-renewal=6m",
@@ -65,9 +70,39 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 				});
 	}
 
+	@Test
+	public void shouldConfigureWithoutAuthentication() {
+
+		this.contextRunner.withUserConfiguration(MockVaultOperationsConfiguration.class)
+				.withAllowBeanDefinitionOverriding(true)
+				.withPropertyValues("spring.cloud.vault.kv.enabled=true",
+						"spring.cloud.vault.config.lifecycle.enabled=true", "spring.cloud.vault.authentication=NONE",
+						"spring.cloud.bootstrap.enabled=true")
+				.run(context -> {
+
+					assertThat(context).doesNotHaveBean(SessionManager.class);
+					assertThat(context).hasSingleBean(SecretLeaseContainer.class);
+				});
+	}
+
 	@EnableConfigurationProperties(VaultProperties.class)
 	@Configuration(proxyBeanMethods = false)
-	private static class MockConfiguration {
+	private static class MockSecretLeaseContainerConfiguration {
+
+		@Bean
+		SecretLeaseContainer secretLeaseContainer(VaultProperties properties) {
+
+			SecretLeaseContainer mock = mock(SecretLeaseContainer.class);
+			VaultConfiguration.customizeContainer(properties.getConfig().getLifecycle(), mock);
+
+			return mock;
+		}
+
+	}
+
+	@EnableConfigurationProperties(VaultProperties.class)
+	@Configuration(proxyBeanMethods = false)
+	private static class MockVaultOperationsConfiguration {
 
 		@Bean
 		VaultOperations vaultOperations() {
@@ -77,15 +112,6 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 		@Bean
 		VaultBootstrapConfiguration.TaskSchedulerWrapper taskSchedulerWrapper() {
 			return new VaultBootstrapConfiguration.TaskSchedulerWrapper(mock(ThreadPoolTaskScheduler.class));
-		}
-
-		@Bean
-		SecretLeaseContainer secretLeaseContainer(VaultProperties properties) {
-
-			SecretLeaseContainer mock = mock(SecretLeaseContainer.class);
-			VaultConfiguration.customizeContainer(properties.getConfig().getLifecycle(), mock);
-
-			return mock;
 		}
 
 	}

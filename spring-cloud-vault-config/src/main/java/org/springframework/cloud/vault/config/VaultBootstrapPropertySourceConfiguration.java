@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -132,7 +133,7 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	 * @param vaultOperations the {@link VaultOperations}.
 	 * @param taskSchedulerWrapper the {@link TaskSchedulerWrapper}.
 	 * @param sessionManager the {@link SessionManager} to listen for authentication
-	 * events.
+	 * events. Bean can be absent.
 	 * @return the {@link SecretLeaseContainer} for Vault secret lease management.
 	 * @see SessionManager
 	 * @see LifecycleAwareSessionManager
@@ -141,9 +142,9 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	@Lazy
 	@ConditionalOnMissingBean
 	public SecretLeaseContainer secretLeaseContainer(VaultOperations vaultOperations,
-			TaskSchedulerWrapper taskSchedulerWrapper, SessionManager sessionManager) {
+			TaskSchedulerWrapper taskSchedulerWrapper, ObjectProvider<SessionManager> sessionManager) {
 		return this.configuration.createSecretLeaseContainer(vaultOperations, taskSchedulerWrapper::getTaskScheduler,
-				sessionManager);
+				sessionManager.getIfAvailable());
 	}
 
 }
