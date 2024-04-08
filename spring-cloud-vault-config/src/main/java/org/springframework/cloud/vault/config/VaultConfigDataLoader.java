@@ -19,6 +19,7 @@ package org.springframework.cloud.vault.config;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,8 +28,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
+
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
 import org.springframework.boot.BootstrapContext;
 import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.BootstrapRegistryInitializer;
@@ -266,7 +270,8 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			container.start();
 
 			return container;
-		}, ConfigurableApplicationContext::registerShutdownHook);
+		}, ConfigurableApplicationContext::registerShutdownHook,
+				List.of("vaultTaskScheduler", "vaultSessionManager", "reactiveVaultSessionManager"));
 	}
 
 	private PropertySource<?> createVaultPropertySource(VaultConfigOperations configOperations, boolean failFast,
@@ -343,23 +348,24 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 	static <T> void registerIfAbsent(ConfigurableBootstrapContext bootstrap, String beanName, Class<T> instanceType,
 			Supplier<T> instanceSupplier) {
 		registerIfAbsent(bootstrap, beanName, instanceType, ctx -> instanceSupplier.get(), ctx -> {
-		});
+		}, Collections.emptyList());
 	}
 
 	static <T> void registerIfAbsent(ConfigurableBootstrapContext bootstrap, String beanName, Class<T> instanceType,
 			Supplier<T> instanceSupplier, Consumer<ConfigurableApplicationContext> contextCustomizer) {
-		registerIfAbsent(bootstrap, beanName, instanceType, ctx -> instanceSupplier.get(), contextCustomizer);
+		registerIfAbsent(bootstrap, beanName, instanceType, ctx -> instanceSupplier.get(), contextCustomizer,
+				Collections.emptyList());
 	}
 
 	static <T> void registerIfAbsent(ConfigurableBootstrapContext bootstrap, String beanName, Class<T> instanceType,
 			Function<BootstrapContext, T> instanceSupplier) {
 		registerIfAbsent(bootstrap, beanName, instanceType, instanceSupplier, ctx -> {
-		});
+		}, Collections.emptyList());
 	}
 
 	static <T> void registerIfAbsent(ConfigurableBootstrapContext bootstrap, String beanName, Class<T> instanceType,
-			Function<BootstrapContext, T> instanceSupplier,
-			Consumer<ConfigurableApplicationContext> contextCustomizer) {
+			Function<BootstrapContext, T> instanceSupplier, Consumer<ConfigurableApplicationContext> contextCustomizer,
+			Collection<String> dependsOn) {
 
 		bootstrap.registerIfAbsent(instanceType, instanceSupplier::apply);
 
@@ -377,6 +383,17 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			T instance = event.getBootstrapContext().get(instanceType);
 
 			factory.registerSingleton(beanName, instance);
+
+			if (instance instanceof DisposableBean db) {
+
+				if (factory instanceof DefaultSingletonBeanRegistry dsbr) {
+					dsbr.registerDisposableBean(beanName, db);
+
+					for (String dependencyName : dependsOn) {
+						dsbr.registerDependentBean(dependencyName, beanName);
+					}
+				}
+			}
 		});
 	}
 
@@ -504,7 +521,8 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 						ctx.get(RestTemplateFactory.class));
 				reconfigureLogger(sessionManager, this.logFactory);
 				return sessionManager;
-			});
+			}, ctx -> {
+			}, List.of("clientHttpRequestFactoryWrapper"));
 		}
 
 	}
@@ -575,7 +593,9 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			registerIfAbsent(this.bootstrap, "reactiveVaultSessionManager", ReactiveSessionManager.class,
 					ctx -> this.configuration.createReactiveSessionManager(ctx.get(VaultTokenSupplier.class),
 							() -> ctx.get(TaskSchedulerWrapper.class).getTaskScheduler(),
-							ctx.get(WebClientFactory.class)));
+							ctx.get(WebClientFactory.class)),
+					ctx -> {
+					}, List.of("clientHttpConnectorWrapper"));
 		}
 
 		void registerSessionManager() {
