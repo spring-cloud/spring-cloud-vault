@@ -55,14 +55,17 @@ public class VaultPropertySourceLocatorProfilesIntegrationTests extends Integrat
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		vaultRule.prepare().getVaultOperations().write("secret/my-profiles-app/hello",
-				Collections.singletonMap("vault.hello", "true"));
+		vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/my-profiles-app/hello", Collections.singletonMap("vault.hello", "true"));
 
-		vaultRule.prepare().getVaultOperations().write("secret/my-profiles-app/world",
-				Collections.singletonMap("vault.world", "true"));
+		vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/my-profiles-app/world", Collections.singletonMap("vault.world", "true"));
 
-		vaultRule.prepare().getVaultOperations().write("secret/my-profiles-app/other",
-				Collections.singletonMap("vault.other", "true"));
+		vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/my-profiles-app/other", Collections.singletonMap("vault.other", "true"));
 	}
 
 	@Test

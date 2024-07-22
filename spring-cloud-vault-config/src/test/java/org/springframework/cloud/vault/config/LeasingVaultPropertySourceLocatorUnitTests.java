@@ -98,7 +98,7 @@ public class LeasingVaultPropertySourceLocatorUnitTests {
 
 		verify(this.secretLeaseContainer).addRequestedSecret(rotating);
 		verify(this.secretLeaseContainer)
-				.addRequestedSecret(RequestedSecret.renewable("database/mysql/creds/readonly"));
+			.addRequestedSecret(RequestedSecret.renewable("database/mysql/creds/readonly"));
 	}
 
 }

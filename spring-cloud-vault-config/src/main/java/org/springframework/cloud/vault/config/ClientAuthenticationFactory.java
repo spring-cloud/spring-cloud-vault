@@ -90,7 +90,7 @@ class ClientAuthenticationFactory {
 			ClientAuthenticationFactory.class.getClassLoader());
 
 	private static final boolean googleCredentialsPresent = ClassUtils
-			.isPresent("com.google.auth.oauth2.GoogleCredentials", ClientAuthenticationFactory.class.getClassLoader());
+		.isPresent("com.google.auth.oauth2.GoogleCredentials", ClientAuthenticationFactory.class.getClassLoader());
 
 	private final VaultProperties vaultProperties;
 
@@ -159,9 +159,10 @@ class ClientAuthenticationFactory {
 		Assert.hasText(appId.getUserId(), "UserId (spring.cloud.vault.app-id.user-id) must not be empty");
 
 		AppIdAuthenticationOptions authenticationOptions = AppIdAuthenticationOptions.builder()
-				.appId(vaultProperties.getApplicationName()) //
-				.path(appId.getAppIdPath()) //
-				.userIdMechanism(getAppIdMechanism(appId)).build();
+			.appId(vaultProperties.getApplicationName()) //
+			.path(appId.getAppIdPath()) //
+			.userIdMechanism(getAppIdMechanism(appId))
+			.build();
 
 		return new AppIdAuthentication(authenticationOptions, this.restOperations);
 	}
@@ -209,7 +210,7 @@ class ClientAuthenticationFactory {
 		AppRoleProperties appRole = vaultProperties.getAppRole();
 
 		AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions.builder()
-				.path(appRole.getAppRolePath());
+			.path(appRole.getAppRolePath());
 
 		if (StringUtils.hasText(appRole.getRole())) {
 			builder.appRole(appRole.getRole());
@@ -265,11 +266,12 @@ class ClientAuthenticationFactory {
 		Nonce nonce = StringUtils.hasText(awsEc2.getNonce()) ? Nonce.provided(awsEc2.getNonce().toCharArray())
 				: Nonce.generated();
 
-		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions.builder().role(awsEc2.getRole()) //
-				.path(awsEc2.getAwsEc2Path()) //
-				.nonce(nonce) //
-				.identityDocumentUri(awsEc2.getIdentityDocument()) //
-				.build();
+		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions.builder()
+			.role(awsEc2.getRole()) //
+			.path(awsEc2.getAwsEc2Path()) //
+			.nonce(nonce) //
+			.identityDocumentUri(awsEc2.getIdentityDocument()) //
+			.build();
 
 		return new AwsEc2Authentication(authenticationOptions, this.restOperations, this.externalRestOperations);
 	}
@@ -298,7 +300,7 @@ class ClientAuthenticationFactory {
 		}
 
 		builder.path(awsIam.getAwsPath()) //
-				.credentialsProvider(credentialsProvider);
+			.credentialsProvider(credentialsProvider);
 
 		AwsIamAuthenticationOptions options = builder.credentialsProvider(credentialsProvider).build();
 
@@ -312,10 +314,11 @@ class ClientAuthenticationFactory {
 		Assert.hasText(azureMsi.getRole(), "Azure role (spring.cloud.vault.azure-msi.role) must not be empty");
 
 		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder() //
-				.role(azureMsi.getRole()).path(azureMsi.getAzurePath()) //
-				.instanceMetadataUri(azureMsi.getMetadataService()) //
-				.identityTokenServiceUri(azureMsi.getIdentityTokenService()) //
-				.build();
+			.role(azureMsi.getRole())
+			.path(azureMsi.getAzurePath()) //
+			.instanceMetadataUri(azureMsi.getMetadataService()) //
+			.identityTokenServiceUri(azureMsi.getIdentityTokenService()) //
+			.build();
 
 		return new AzureMsiAuthentication(options, this.restOperations, this.externalRestOperations);
 	}
@@ -326,9 +329,9 @@ class ClientAuthenticationFactory {
 				"Initial Token (spring.cloud.vault.token) for Cubbyhole authentication must not be empty");
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder() //
-				.wrapped() //
-				.initialToken(VaultToken.of(this.vaultProperties.getToken())) //
-				.build();
+			.wrapped() //
+			.initialToken(VaultToken.of(this.vaultProperties.getToken())) //
+			.build();
 
 		return new CubbyholeAuthentication(options, this.restOperations);
 	}
@@ -340,7 +343,8 @@ class ClientAuthenticationFactory {
 		Assert.hasText(gcp.getRole(), "Role (spring.cloud.vault.gcp-gce.role) must not be empty");
 
 		GcpComputeAuthenticationOptionsBuilder builder = GcpComputeAuthenticationOptions.builder()
-				.path(gcp.getGcpPath()).role(gcp.getRole());
+			.path(gcp.getGcpPath())
+			.role(gcp.getRole());
 
 		if (StringUtils.hasText(gcp.getServiceAccount())) {
 			builder.serviceAccount(gcp.getServiceAccount());
@@ -372,8 +376,10 @@ class ClientAuthenticationFactory {
 				"Service account token file (spring.cloud.vault.kubernetes.service-account-token-file) must not be empty");
 
 		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
-				.path(kubernetes.getKubernetesPath()).role(kubernetes.getRole())
-				.jwtSupplier(new KubernetesServiceAccountTokenFile(kubernetes.getServiceAccountTokenFile())).build();
+			.path(kubernetes.getKubernetesPath())
+			.role(kubernetes.getRole())
+			.jwtSupplier(new KubernetesServiceAccountTokenFile(kubernetes.getServiceAccountTokenFile()))
+			.build();
 
 		return new KubernetesAuthentication(options, this.restOperations);
 	}
@@ -387,7 +393,8 @@ class ClientAuthenticationFactory {
 		Assert.hasText(pcfProperties.getRole(), "Role (spring.cloud.vault.pcf.role) must not be empty");
 
 		PcfAuthenticationOptions.PcfAuthenticationOptionsBuilder builder = PcfAuthenticationOptions.builder()
-				.role(pcfProperties.getRole()).path(pcfProperties.getPcfPath());
+			.role(pcfProperties.getRole())
+			.path(pcfProperties.getPcfPath());
 
 		if (pcfProperties.getInstanceCertificate() != null) {
 			builder.instanceCertificate(new ResourceCredentialSupplier(pcfProperties.getInstanceCertificate()));
@@ -403,7 +410,8 @@ class ClientAuthenticationFactory {
 	private ClientAuthentication certificateAuthentication(VaultProperties vaultProperties) {
 
 		ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions.builder()
-				.path(vaultProperties.getSsl().getCertAuthPath()).build();
+			.path(vaultProperties.getSsl().getCertAuthPath())
+			.build();
 
 		return new ClientCertificateAuthentication(options, this.restOperations);
 	}

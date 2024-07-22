@@ -89,8 +89,8 @@ public class VaultPropertySourceLocatorUnitTests {
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
 		CompositePropertySource composite = (CompositePropertySource) propertySource;
-		assertThat(composite.getPropertySources()).extracting("name").containsSequence("secret/application/periwinkle",
-				"secret/application/vermillion");
+		assertThat(composite.getPropertySources()).extracting("name")
+			.containsSequence("secret/application/periwinkle", "secret/application/vermillion");
 	}
 
 	@Test
@@ -108,8 +108,8 @@ public class VaultPropertySourceLocatorUnitTests {
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
 		CompositePropertySource composite = (CompositePropertySource) propertySource;
-		assertThat(composite.getPropertySources()).extracting("name").containsSequence("secret/wintermute/periwinkle",
-				"secret/wintermute/vermillion", "secret/wintermute");
+		assertThat(composite.getPropertySources()).extracting("name")
+			.containsSequence("secret/wintermute/periwinkle", "secret/wintermute/vermillion", "secret/wintermute");
 	}
 
 	@Test
@@ -127,10 +127,11 @@ public class VaultPropertySourceLocatorUnitTests {
 		assertThat(propertySource).isInstanceOf(CompositePropertySource.class);
 
 		CompositePropertySource composite = (CompositePropertySource) propertySource;
-		assertThat(composite.getPropertySources()).extracting("name").contains("secret/wintermute", "secret/straylight",
-				"secret/icebreaker/armitage", "secret/wintermute/vermillion", "secret/wintermute/periwinkle",
-				"secret/straylight/vermillion", "secret/straylight/periwinkle", "secret/icebreaker/armitage/vermillion",
-				"secret/icebreaker/armitage/periwinkle");
+		assertThat(composite.getPropertySources()).extracting("name")
+			.contains("secret/wintermute", "secret/straylight", "secret/icebreaker/armitage",
+					"secret/wintermute/vermillion", "secret/wintermute/periwinkle", "secret/straylight/vermillion",
+					"secret/straylight/periwinkle", "secret/icebreaker/armitage/vermillion",
+					"secret/icebreaker/armitage/periwinkle");
 	}
 
 	@Test

@@ -37,9 +37,9 @@ public class ApplicationFailFastTests {
 	@Test
 	public void contextLoadsWithFailFastUsingLeasing() {
 		try {
-			new SpringApplicationBuilder().sources(ApplicationFailFastTests.class).run("--server.port=0",
-					"--spring.cloud.bootstrap.enabled=true", "--spring.cloud.vault.failFast=true",
-					"--spring.cloud.vault.config.lifecycle.enabled=true", "--spring.cloud.vault.port=9999");
+			new SpringApplicationBuilder().sources(ApplicationFailFastTests.class)
+				.run("--server.port=0", "--spring.cloud.bootstrap.enabled=true", "--spring.cloud.vault.failFast=true",
+						"--spring.cloud.vault.config.lifecycle.enabled=true", "--spring.cloud.vault.port=9999");
 			fail("failFast option did not produce an exception");
 		}
 		catch (Exception e) {
@@ -50,10 +50,10 @@ public class ApplicationFailFastTests {
 	@Test
 	public void contextLoadsWithFailFastWithoutLeasing() {
 		try {
-			new SpringApplicationBuilder().sources(ApplicationFailFastTests.class).run("--server.port=0",
-					"--spring.cloud.bootstrap.enabled=true", "--spring.cloud.vault.failFast=true",
-					"--spring.cloud.vault.config.lifecycle.enabled=false",
-					"--spring.cloud.vault.session.lifecycle.enabled=false", "--spring.cloud.vault.port=9999");
+			new SpringApplicationBuilder().sources(ApplicationFailFastTests.class)
+				.run("--server.port=0", "--spring.cloud.bootstrap.enabled=true", "--spring.cloud.vault.failFast=true",
+						"--spring.cloud.vault.config.lifecycle.enabled=false",
+						"--spring.cloud.vault.session.lifecycle.enabled=false", "--spring.cloud.vault.port=9999");
 			fail("failFast option did not produce an exception");
 		}
 		catch (Exception e) {
@@ -64,9 +64,9 @@ public class ApplicationFailFastTests {
 	@Test
 	@Ignore("Fails because of method errors in Discovery health check")
 	public void contextLoadsWithoutFailFast() {
-		new SpringApplicationBuilder().sources(ApplicationFailFastTests.class).run("--server.port=0",
-				"--spring.cloud.bootstrap.enabled=true", "--spring.cloud.vault.failFast=false",
-				"--spring.cloud.vault.port=9999");
+		new SpringApplicationBuilder().sources(ApplicationFailFastTests.class)
+			.run("--server.port=0", "--spring.cloud.bootstrap.enabled=true", "--spring.cloud.vault.failFast=false",
+					"--spring.cloud.vault.port=9999");
 	}
 
 }

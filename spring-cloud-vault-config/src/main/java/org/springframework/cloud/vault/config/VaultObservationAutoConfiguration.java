@@ -44,7 +44,8 @@ public class VaultObservationAutoConfiguration {
 	@ConditionalOnSingleCandidate(ObservationRegistry.class)
 	public RestTemplateCustomizer observationVaultRestTemplateCustomizer(ObservationRegistry observationRegistry) {
 		return restTemplate -> new ObservationRestTemplateCustomizer(observationRegistry,
-				new DefaultClientRequestObservationConvention()).customize(restTemplate);
+				new DefaultClientRequestObservationConvention())
+			.customize(restTemplate);
 	}
 
 }

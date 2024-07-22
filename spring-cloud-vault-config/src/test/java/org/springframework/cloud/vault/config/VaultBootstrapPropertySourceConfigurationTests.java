@@ -45,44 +45,43 @@ import static org.mockito.Mockito.verify;
 public class VaultBootstrapPropertySourceConfigurationTests {
 
 	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations.of(VaultBootstrapPropertySourceConfiguration.class));
+		.withConfiguration(AutoConfigurations.of(VaultBootstrapPropertySourceConfiguration.class));
 
 	@Test
 	public void shouldConfigureExpiryTimeoutsAndStrategy() {
 
 		this.contextRunner
-				.withUserConfiguration(MockSecretLeaseContainerConfiguration.class,
-						MockVaultOperationsConfiguration.class)
-				.withAllowBeanDefinitionOverriding(true)
-				.withPropertyValues("spring.cloud.vault.kv.enabled=false",
-						"spring.cloud.vault.config.lifecycle.expiry-threshold=5m",
-						"spring.cloud.vault.config.lifecycle.min-renewal=6m",
-						"spring.cloud.vault.config.lifecycle.lease-endpoints=Leases",
-						"spring.cloud.vault.config.lifecycle.lease-strategy=retain-on-error",
-						"spring.cloud.bootstrap.enabled=true")
-				.run(context -> {
+			.withUserConfiguration(MockSecretLeaseContainerConfiguration.class, MockVaultOperationsConfiguration.class)
+			.withAllowBeanDefinitionOverriding(true)
+			.withPropertyValues("spring.cloud.vault.kv.enabled=false",
+					"spring.cloud.vault.config.lifecycle.expiry-threshold=5m",
+					"spring.cloud.vault.config.lifecycle.min-renewal=6m",
+					"spring.cloud.vault.config.lifecycle.lease-endpoints=Leases",
+					"spring.cloud.vault.config.lifecycle.lease-strategy=retain-on-error",
+					"spring.cloud.bootstrap.enabled=true")
+			.run(context -> {
 
-					SecretLeaseContainer container = context.getBean(SecretLeaseContainer.class);
-					verify(container).setExpiryThreshold(Duration.ofMinutes(5));
-					verify(container).setMinRenewal(Duration.ofMinutes(6));
-					verify(container).setLeaseEndpoints(LeaseEndpoints.Leases);
-					verify(container).setLeaseStrategy(LeaseStrategy.retainOnError());
-				});
+				SecretLeaseContainer container = context.getBean(SecretLeaseContainer.class);
+				verify(container).setExpiryThreshold(Duration.ofMinutes(5));
+				verify(container).setMinRenewal(Duration.ofMinutes(6));
+				verify(container).setLeaseEndpoints(LeaseEndpoints.Leases);
+				verify(container).setLeaseStrategy(LeaseStrategy.retainOnError());
+			});
 	}
 
 	@Test
 	public void shouldConfigureWithoutAuthentication() {
 
 		this.contextRunner.withUserConfiguration(MockVaultOperationsConfiguration.class)
-				.withAllowBeanDefinitionOverriding(true)
-				.withPropertyValues("spring.cloud.vault.kv.enabled=true",
-						"spring.cloud.vault.config.lifecycle.enabled=true", "spring.cloud.vault.authentication=NONE",
-						"spring.cloud.bootstrap.enabled=true")
-				.run(context -> {
+			.withAllowBeanDefinitionOverriding(true)
+			.withPropertyValues("spring.cloud.vault.kv.enabled=true",
+					"spring.cloud.vault.config.lifecycle.enabled=true", "spring.cloud.vault.authentication=NONE",
+					"spring.cloud.bootstrap.enabled=true")
+			.run(context -> {
 
-					assertThat(context).doesNotHaveBean(SessionManager.class);
-					assertThat(context).hasSingleBean(SecretLeaseContainer.class);
-				});
+				assertThat(context).doesNotHaveBean(SessionManager.class);
+				assertThat(context).hasSingleBean(SecretLeaseContainer.class);
+			});
 	}
 
 	@EnableConfigurationProperties(VaultProperties.class)

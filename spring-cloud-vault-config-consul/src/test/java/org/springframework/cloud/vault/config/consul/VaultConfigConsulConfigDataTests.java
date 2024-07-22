@@ -70,8 +70,9 @@ public class VaultConfigConsulConfigDataTests extends IntegrationTestSupport {
 		role.put("max_ttl", "3s");
 		vaultOperations.write(String.format("%s/roles/%s", "consul", "short-readonly"), role);
 
-		this.vaultRule.prepare().getVaultOperations().write("secret/VaultConfigConsulConfigDataTests",
-				Collections.singletonMap("default-key", "default"));
+		this.vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/VaultConfigConsulConfigDataTests", Collections.singletonMap("default-key", "default"));
 
 		SpringApplication application = new SpringApplication(VaultConfigConsulConfigDataTests.Config.class);
 		application.setWebApplicationType(WebApplicationType.NONE);

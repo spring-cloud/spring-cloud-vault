@@ -58,20 +58,29 @@ public class VaultPropertySourceLocatorIntegrationTests extends IntegrationTestS
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		vaultRule.prepare().getVaultOperations().write("secret/wintermute",
-				Collections.singletonMap("vault.value", "wintermute"));
-		vaultRule.prepare().getVaultOperations().write("secret/wintermute/integrationtest",
-				Collections.singletonMap("vault.value", "integrationtest wintermute"));
+		vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/wintermute", Collections.singletonMap("vault.value", "wintermute"));
+		vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/wintermute/integrationtest",
+					Collections.singletonMap("vault.value", "integrationtest wintermute"));
 
-		vaultRule.prepare().getVaultOperations().write("secret/neuromancer",
-				Collections.singletonMap("vault.value", "neuromancer"));
-		vaultRule.prepare().getVaultOperations().write("secret/neuromancer/integrationtest",
-				Collections.singletonMap("vault.value", "integrationtest neuromancer"));
+		vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/neuromancer", Collections.singletonMap("vault.value", "neuromancer"));
+		vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/neuromancer/integrationtest",
+					Collections.singletonMap("vault.value", "integrationtest neuromancer"));
 
-		vaultRule.prepare().getVaultOperations().write("secret/icebreaker",
-				Collections.singletonMap("icebreaker.value", "icebreaker"));
-		vaultRule.prepare().getVaultOperations().write("secret/icebreaker/integrationtest",
-				Collections.singletonMap("icebreaker.value", "integrationtest icebreaker"));
+		vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/icebreaker", Collections.singletonMap("icebreaker.value", "icebreaker"));
+		vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/icebreaker/integrationtest",
+					Collections.singletonMap("icebreaker.value", "integrationtest icebreaker"));
 	}
 
 	@Test

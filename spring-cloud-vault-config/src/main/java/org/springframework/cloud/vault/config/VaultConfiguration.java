@@ -156,8 +156,9 @@ final class VaultConfiguration {
 	RestTemplateBuilder createRestTemplateBuilder(ClientHttpRequestFactory requestFactory,
 			VaultEndpointProvider endpointProvider, List<RestTemplateCustomizer> customizers,
 			List<RestTemplateRequestCustomizer<?>> requestCustomizers) {
-		RestTemplateBuilder builder = RestTemplateBuilder.builder().requestFactory(requestFactory)
-				.endpointProvider(endpointProvider);
+		RestTemplateBuilder builder = RestTemplateBuilder.builder()
+			.requestFactory(requestFactory)
+			.endpointProvider(endpointProvider);
 
 		customizers.forEach(builder::customizers);
 		requestCustomizers.forEach(builder::requestCustomizers);

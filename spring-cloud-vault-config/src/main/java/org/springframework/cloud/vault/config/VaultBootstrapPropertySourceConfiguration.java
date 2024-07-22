@@ -81,13 +81,14 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 	public void afterPropertiesSet() {
 
 		this.vaultSecretBackendDescriptors = this.applicationContext.getBeansOfType(VaultSecretBackendDescriptor.class)
-				.values();
+			.values();
 
 		this.vaultSecretBackendDescriptorFactories = this.applicationContext
-				.getBeansOfType(VaultSecretBackendDescriptorFactory.class).values();
+			.getBeansOfType(VaultSecretBackendDescriptorFactory.class)
+			.values();
 
 		this.factories = (Collection) this.applicationContext.getBeansOfType(SecretBackendMetadataFactory.class)
-				.values();
+			.values();
 	}
 
 	@Bean
@@ -101,7 +102,7 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 		VaultConfigTemplate vaultConfigTemplate = new VaultConfigTemplate(operations, vaultProperties);
 
 		Collection<VaultConfigurer> vaultConfigurers = this.applicationContext.getBeansOfType(VaultConfigurer.class)
-				.values();
+			.values();
 
 		List<VaultSecretBackendDescriptor> descriptors = new ArrayList<>(this.vaultSecretBackendDescriptors);
 		this.vaultSecretBackendDescriptorFactories.forEach(it -> descriptors.addAll(it.create()));

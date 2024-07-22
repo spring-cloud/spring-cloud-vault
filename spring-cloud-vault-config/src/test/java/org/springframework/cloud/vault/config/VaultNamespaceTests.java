@@ -63,16 +63,18 @@ public class VaultNamespaceTests {
 	@ClassRule
 	public static VaultRule vaultRule = new VaultRule();
 
-	static final Policy POLICY = Policy
-			.of(Policy.Rule.builder().path("/*").capabilities(Policy.BuiltinCapabilities.READ,
-					Policy.BuiltinCapabilities.CREATE, Policy.BuiltinCapabilities.UPDATE).build());
+	static final Policy POLICY = Policy.of(Policy.Rule.builder()
+		.path("/*")
+		.capabilities(Policy.BuiltinCapabilities.READ, Policy.BuiltinCapabilities.CREATE,
+				Policy.BuiltinCapabilities.UPDATE)
+		.build());
 
 	RestTemplateBuilder maketingRestTemplate;
 
 	WebClientBuilder marketingWebClientBuilder = WebClientBuilder.builder()
-			.httpConnector(ClientHttpConnectorFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
-			.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
-			.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
+		.httpConnector(ClientHttpConnectorFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
+		.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
+		.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
 
 	String marketingToken;
 
@@ -90,18 +92,20 @@ public class VaultNamespaceTests {
 		}
 
 		this.maketingRestTemplate = RestTemplateBuilder.builder()
-				.requestFactory(
-						ClientHttpRequestFactoryFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
-				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
-				.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
+			.requestFactory(
+					ClientHttpRequestFactoryFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
+			.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
+			.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
 
 		VaultTemplate marketing = new VaultTemplate(this.maketingRestTemplate,
 				new SimpleSessionManager(new TokenAuthentication(Settings.token())));
 
 		mountKv(marketing, "marketing-secrets");
 		marketing.opsForSys().createOrUpdatePolicy("relaxed", POLICY);
-		this.marketingToken = marketing.opsForToken().create(VaultTokenRequest.builder().withPolicy("relaxed").build())
-				.getToken().getToken();
+		this.marketingToken = marketing.opsForToken()
+			.create(VaultTokenRequest.builder().withPolicy("relaxed").build())
+			.getToken()
+			.getToken();
 	}
 
 	private void mountKv(VaultTemplate template, String path) {
@@ -136,8 +140,10 @@ public class VaultNamespaceTests {
 
 		Health.Builder builder = Health.unknown();
 
-		new VaultReactiveHealthIndicator(reactiveMarketing).doHealthCheck(builder).as(StepVerifier::create)
-				.assertNext(actual -> assertThat(actual.getStatus()).isEqualTo(Status.UP)).verifyComplete();
+		new VaultReactiveHealthIndicator(reactiveMarketing).doHealthCheck(builder)
+			.as(StepVerifier::create)
+			.assertNext(actual -> assertThat(actual.getStatus()).isEqualTo(Status.UP))
+			.verifyComplete();
 	}
 
 }

@@ -61,8 +61,9 @@ public class VaultConfigDisabledTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		vaultRule.prepare().getVaultOperations().write("secret/testVaultApp",
-				Collections.singletonMap("vault.value", "foo"));
+		vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/testVaultApp", Collections.singletonMap("vault.value", "foo"));
 	}
 
 	@Test

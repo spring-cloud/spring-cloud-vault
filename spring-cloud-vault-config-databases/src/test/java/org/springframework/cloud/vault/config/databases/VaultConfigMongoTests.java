@@ -63,7 +63,7 @@ public class VaultConfigMongoTests {
 	private static final String MONGODB_HOST = "localhost";
 
 	private static final String ROOT_CREDENTIALS = String
-			.format("mongodb://springvault:springvault@%s:%d/admin?ssl=false", MONGODB_HOST, MONGODB_PORT);
+		.format("mongodb://springvault:springvault@%s:%d/admin?ssl=false", MONGODB_HOST, MONGODB_PORT);
 
 	private static final String ROLES = "[ \"readWrite\", { \"role\": \"read\", \"db\": \"admin\" } ]";
 

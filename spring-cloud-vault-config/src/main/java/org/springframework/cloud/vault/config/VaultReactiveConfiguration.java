@@ -79,8 +79,9 @@ final class VaultReactiveConfiguration {
 	WebClientBuilder createWebClientBuilder(ClientHttpConnector connector,
 			ReactiveVaultEndpointProvider endpointProvider, List<WebClientCustomizer> customizers) {
 
-		WebClientBuilder builder = WebClientBuilder.builder().httpConnector(connector)
-				.endpointProvider(endpointProvider);
+		WebClientBuilder builder = WebClientBuilder.builder()
+			.httpConnector(connector)
+			.endpointProvider(endpointProvider);
 
 		return applyCustomizer(customizers, builder);
 	}
@@ -88,8 +89,9 @@ final class VaultReactiveConfiguration {
 	WebClientBuilder createWebClientBuilder(ClientHttpConnector connector, VaultEndpointProvider endpointProvider,
 			List<WebClientCustomizer> customizers) {
 
-		WebClientBuilder builder = WebClientBuilder.builder().httpConnector(connector)
-				.endpointProvider(endpointProvider);
+		WebClientBuilder builder = WebClientBuilder.builder()
+			.httpConnector(connector)
+			.endpointProvider(endpointProvider);
 
 		return applyCustomizer(customizers, builder);
 	}

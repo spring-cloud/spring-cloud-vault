@@ -49,8 +49,10 @@ final class GcpIamAuthenticationFactory {
 
 		Assert.hasText(gcp.getRole(), "Role (spring.cloud.vault.gcp-iam.role) must not be empty");
 
-		GcpIamAuthenticationOptionsBuilder builder = GcpIamAuthenticationOptions.builder().path(gcp.getGcpPath())
-				.role(gcp.getRole()).jwtValidity(gcp.getJwtValidity());
+		GcpIamAuthenticationOptionsBuilder builder = GcpIamAuthenticationOptions.builder()
+			.path(gcp.getGcpPath())
+			.role(gcp.getRole())
+			.jwtValidity(gcp.getJwtValidity());
 
 		if (StringUtils.hasText(gcp.getProjectId())) {
 			builder.projectId(gcp.getProjectId());
@@ -76,8 +78,8 @@ final class GcpIamAuthenticationFactory {
 		}
 
 		if (StringUtils.hasText(credentialProperties.getEncodedKey())) {
-			return GoogleCredential.fromStream(
-					new ByteArrayInputStream(Base64.getDecoder().decode(credentialProperties.getEncodedKey())));
+			return GoogleCredential
+				.fromStream(new ByteArrayInputStream(Base64.getDecoder().decode(credentialProperties.getEncodedKey())));
 		}
 
 		return GoogleCredential.getApplicationDefault();

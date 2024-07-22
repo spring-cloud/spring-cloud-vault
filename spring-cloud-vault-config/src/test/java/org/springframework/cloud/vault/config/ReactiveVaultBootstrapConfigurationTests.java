@@ -41,15 +41,17 @@ public class ReactiveVaultBootstrapConfigurationTests {
 	@Test
 	public void shouldConfigureWithoutAuthentication() {
 
-		this.contextRunner.withPropertyValues("spring.cloud.vault.kv.enabled=false",
-				"spring.cloud.vault.authentication=NONE", "spring.cloud.bootstrap.enabled=true").run(context -> {
+		this.contextRunner
+			.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.authentication=NONE",
+					"spring.cloud.bootstrap.enabled=true")
+			.run(context -> {
 
-					assertThat(context).doesNotHaveBean(SessionManager.class);
-					assertThat(context).doesNotHaveBean(ClientAuthentication.class);
-					assertThat(context).doesNotHaveBean(VaultTokenSupplier.class);
-					assertThat(context).doesNotHaveBean(ReactiveSessionManager.class);
-					assertThat(context).hasSingleBean(ReactiveVaultTemplate.class);
-				});
+				assertThat(context).doesNotHaveBean(SessionManager.class);
+				assertThat(context).doesNotHaveBean(ClientAuthentication.class);
+				assertThat(context).doesNotHaveBean(VaultTokenSupplier.class);
+				assertThat(context).doesNotHaveBean(ReactiveSessionManager.class);
+				assertThat(context).hasSingleBean(ReactiveVaultTemplate.class);
+			});
 	}
 
 }

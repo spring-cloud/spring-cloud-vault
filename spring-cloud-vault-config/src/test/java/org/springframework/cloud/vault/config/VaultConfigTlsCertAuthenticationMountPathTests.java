@@ -69,8 +69,10 @@ public class VaultConfigTlsCertAuthenticationMountPathTests {
 		vaultProperties.getSsl().setCertAuthPath("nonstandard");
 
 		if (!vaultRule.prepare().hasAuth(vaultProperties.getSsl().getCertAuthPath())) {
-			vaultRule.prepare().getVaultOperations().opsForSys().authMount(vaultProperties.getSsl().getCertAuthPath(),
-					VaultMount.builder().type("cert").build());
+			vaultRule.prepare()
+				.getVaultOperations()
+				.opsForSys()
+				.authMount(vaultProperties.getSsl().getCertAuthPath(), VaultMount.builder().type("cert").build());
 		}
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();

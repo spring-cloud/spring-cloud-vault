@@ -124,7 +124,7 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 
 		if (this.reactiveEndpointProvider == null) {
 			this.endpointProvider = endpointProvider.getIfAvailable(() -> SimpleVaultEndpointProvider
-					.of(new VaultConfiguration(vaultProperties).createVaultEndpoint()));
+				.of(new VaultConfiguration(vaultProperties).createVaultEndpoint()));
 		}
 		else {
 			this.endpointProvider = null;

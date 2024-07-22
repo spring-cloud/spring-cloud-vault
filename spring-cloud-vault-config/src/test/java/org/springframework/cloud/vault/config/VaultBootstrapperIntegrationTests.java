@@ -44,11 +44,14 @@ public class VaultBootstrapperIntegrationTests extends IntegrationTestSupport {
 	@Before
 	public void before() {
 
-		this.vaultRule.prepare().getVaultOperations().write("secret/VaultBootstrapPropertySourceConfigurationTests",
-				Collections.singletonMap("default-key", "default"));
+		this.vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/VaultBootstrapPropertySourceConfigurationTests",
+					Collections.singletonMap("default-key", "default"));
 
-		this.vaultRule.prepare().getVaultOperations().write("secret/customized",
-				Collections.singletonMap("key", "customized"));
+		this.vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/customized", Collections.singletonMap("key", "customized"));
 
 		SpringApplication application = new SpringApplication(Config.class);
 		application.setWebApplicationType(WebApplicationType.NONE);

@@ -40,66 +40,70 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class VaultBootstrapConfigurationTests {
 
 	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations.of(VaultBootstrapConfiguration.class));
+		.withConfiguration(AutoConfigurations.of(VaultBootstrapConfiguration.class));
 
 	@Test
 	public void shouldConfigureWithoutAuthentication() {
 
-		this.contextRunner.withPropertyValues("spring.cloud.vault.kv.enabled=true",
-				"spring.cloud.vault.authentication=NONE", "spring.cloud.bootstrap.enabled=true").run(context -> {
+		this.contextRunner
+			.withPropertyValues("spring.cloud.vault.kv.enabled=true", "spring.cloud.vault.authentication=NONE",
+					"spring.cloud.bootstrap.enabled=true")
+			.run(context -> {
 
-					assertThat(context).doesNotHaveBean(SessionManager.class);
-					assertThat(context).doesNotHaveBean(ClientAuthentication.class);
-					assertThat(context).hasSingleBean(VaultTemplate.class);
-					assertThat(context).hasSingleBean(RestTemplateFactory.class);
-				});
+				assertThat(context).doesNotHaveBean(SessionManager.class);
+				assertThat(context).doesNotHaveBean(ClientAuthentication.class);
+				assertThat(context).hasSingleBean(VaultTemplate.class);
+				assertThat(context).hasSingleBean(RestTemplateFactory.class);
+			});
 	}
 
 	@Test
 	public void shouldApplySslSettings() {
 
-		this.contextRunner.withPropertyValues("spring.cloud.vault.kv.enabled=false",
-				"spring.cloud.vault.authentication=NONE", "spring.cloud.bootstrap.enabled=true",
-				"spring.cloud.vault.ssl.enabled-protocols=TLSv1.2,TLSv1.3",
-				"spring.cloud.vault.ssl.enabled-cipher-suites=one,two").run(context -> {
+		this.contextRunner
+			.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.authentication=NONE",
+					"spring.cloud.bootstrap.enabled=true", "spring.cloud.vault.ssl.enabled-protocols=TLSv1.2,TLSv1.3",
+					"spring.cloud.vault.ssl.enabled-cipher-suites=one,two")
+			.run(context -> {
 
-					VaultProperties properties = context.getBean(VaultProperties.class);
+				VaultProperties properties = context.getBean(VaultProperties.class);
 
-					SslConfiguration sslConfiguration = VaultConfiguration.createSslConfiguration(properties.getSsl());
+				SslConfiguration sslConfiguration = VaultConfiguration.createSslConfiguration(properties.getSsl());
 
-					assertThat(sslConfiguration.getEnabledProtocols()).containsExactly("TLSv1.2", "TLSv1.3");
-					assertThat(sslConfiguration.getEnabledCipherSuites()).containsExactly("one", "two");
-				});
+				assertThat(sslConfiguration.getEnabledProtocols()).containsExactly("TLSv1.2", "TLSv1.3");
+				assertThat(sslConfiguration.getEnabledCipherSuites()).containsExactly("one", "two");
+			});
 	}
 
 	@Test
 	public void shouldDisableSessionManagement() {
 
 		this.contextRunner
-				.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
-						"spring.cloud.vault.session.lifecycle.enabled=false", "spring.cloud.bootstrap.enabled=true")
-				.run(context -> {
+			.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
+					"spring.cloud.vault.session.lifecycle.enabled=false", "spring.cloud.bootstrap.enabled=true")
+			.run(context -> {
 
-					SessionManager bean = context.getBean(SessionManager.class);
-					assertThat(bean).isExactlyInstanceOf(SimpleSessionManager.class);
-				});
+				SessionManager bean = context.getBean(SessionManager.class);
+				assertThat(bean).isExactlyInstanceOf(SimpleSessionManager.class);
+			});
 	}
 
 	@Test
 	public void shouldConfigureSessionManagement() {
 
-		this.contextRunner.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
-				"spring.cloud.vault.session.lifecycle.refresh-before-expiry=11s",
-				"spring.cloud.vault.session.lifecycle.expiry-threshold=12s", "spring.cloud.bootstrap.enabled=true")
-				.run(context -> {
+		this.contextRunner
+			.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
+					"spring.cloud.vault.session.lifecycle.refresh-before-expiry=11s",
+					"spring.cloud.vault.session.lifecycle.expiry-threshold=12s", "spring.cloud.bootstrap.enabled=true")
+			.run(context -> {
 
-					SessionManager bean = context.getBean(SessionManager.class);
+				SessionManager bean = context.getBean(SessionManager.class);
 
-					Object refreshTrigger = ReflectionTestUtils.getField(bean, "refreshTrigger");
+				Object refreshTrigger = ReflectionTestUtils.getField(bean, "refreshTrigger");
 
-					assertThat(refreshTrigger).hasFieldOrPropertyWithValue("duration", Duration.ofSeconds(11))
-							.hasFieldOrPropertyWithValue("expiryThreshold", Duration.ofSeconds(12));
-				});
+				assertThat(refreshTrigger).hasFieldOrPropertyWithValue("duration", Duration.ofSeconds(11))
+					.hasFieldOrPropertyWithValue("expiryThreshold", Duration.ofSeconds(12));
+			});
 	}
 
 }

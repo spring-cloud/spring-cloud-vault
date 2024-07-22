@@ -53,7 +53,7 @@ class PropertySourceLocatorConfigurationFactory {
 
 		if (this.configurers.isEmpty()) {
 			secretBackendConfigurer.registerDefaultKeyValueSecretBackends(true)
-					.registerDefaultDiscoveredSecretBackends(true);
+				.registerDefaultDiscoveredSecretBackends(true);
 		}
 		else {
 
@@ -75,12 +75,12 @@ class PropertySourceLocatorConfigurationFactory {
 
 				for (String context : contexts) {
 					secretBackendConfigurer
-							.add(KeyValueSecretBackendMetadata.create(keyValueBackend.getBackend(), context));
+						.add(KeyValueSecretBackendMetadata.create(keyValueBackend.getBackend(), context));
 				}
 			}
 
 			Collection<SecretBackendMetadata> backendAccessors = SecretBackendFactories
-					.createSecretBackendMetadata(this.vaultSecretBackendDescriptors, this.factories);
+				.createSecretBackendMetadata(this.vaultSecretBackendDescriptors, this.factories);
 
 			backendAccessors.forEach(secretBackendConfigurer::add);
 		}
@@ -88,7 +88,7 @@ class PropertySourceLocatorConfigurationFactory {
 		if (secretBackendConfigurer.isRegisterDefaultDiscoveredSecretBackends()) {
 
 			Collection<SecretBackendMetadata> backendAccessors = SecretBackendFactories
-					.createSecretBackendMetadata(this.vaultSecretBackendDescriptors, this.factories);
+				.createSecretBackendMetadata(this.vaultSecretBackendDescriptors, this.factories);
 
 			backendAccessors.forEach(secretBackendConfigurer::add);
 		}

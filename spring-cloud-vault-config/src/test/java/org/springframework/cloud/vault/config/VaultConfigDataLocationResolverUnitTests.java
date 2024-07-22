@@ -65,11 +65,11 @@ public class VaultConfigDataLocationResolverUnitTests {
 
 		assertThat(
 				resolver.resolveProfileSpecific(this.contextMock, ConfigDataLocation.of("vault:"), this.profilesMock))
-						.hasSize(3);
+			.hasSize(3);
 
 		assertThat(
 				resolver.resolveProfileSpecific(this.contextMock, ConfigDataLocation.of("vault://"), this.profilesMock))
-						.hasSize(3);
+			.hasSize(3);
 	}
 
 	@Test
@@ -78,9 +78,9 @@ public class VaultConfigDataLocationResolverUnitTests {
 		VaultConfigDataLocationResolver resolver = new VaultConfigDataLocationResolver();
 
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> resolver.resolveProfileSpecific(this.contextMock,
-						ConfigDataLocation.of("vault://foo/"), this.profilesMock))
-				.withMessage("Location 'vault://foo/' must not end with a trailing slash");
+			.isThrownBy(() -> resolver.resolveProfileSpecific(this.contextMock, ConfigDataLocation.of("vault://foo/"),
+					this.profilesMock))
+			.withMessage("Location 'vault://foo/' must not end with a trailing slash");
 	}
 
 	@Test
@@ -93,8 +93,10 @@ public class VaultConfigDataLocationResolverUnitTests {
 
 		assertThat(locations).hasSize(1);
 		assertThat(locations.get(0)).hasToString("VaultConfigLocation [path='my/context/path', optional=false]");
-		assertThat(locations.get(0).getSecretBackendMetadata().getPropertyTransformer()
-				.transformProperties(Collections.singletonMap("key", "value"))).containsEntry("key", "value");
+		assertThat(locations.get(0)
+			.getSecretBackendMetadata()
+			.getPropertyTransformer()
+			.transformProperties(Collections.singletonMap("key", "value"))).containsEntry("key", "value");
 	}
 
 	@Test
@@ -106,8 +108,10 @@ public class VaultConfigDataLocationResolverUnitTests {
 				ConfigDataLocation.of("vault://my/context/path?prefix=myPrefix."), this.profilesMock);
 
 		assertThat(locations).hasSize(1);
-		assertThat(locations.get(0).getSecretBackendMetadata().getPropertyTransformer()
-				.transformProperties(Collections.singletonMap("key", "value"))).containsEntry("myPrefix.key", "value");
+		assertThat(locations.get(0)
+			.getSecretBackendMetadata()
+			.getPropertyTransformer()
+			.transformProperties(Collections.singletonMap("key", "value"))).containsEntry("myPrefix.key", "value");
 	}
 
 	@Test
@@ -119,8 +123,10 @@ public class VaultConfigDataLocationResolverUnitTests {
 				ConfigDataLocation.of("vault://my/context/path?prefix="), this.profilesMock);
 
 		assertThat(locations).hasSize(1);
-		assertThat(locations.get(0).getSecretBackendMetadata().getPropertyTransformer()
-				.transformProperties(Collections.singletonMap("key", "value"))).containsEntry("key", "value");
+		assertThat(locations.get(0)
+			.getSecretBackendMetadata()
+			.getPropertyTransformer()
+			.transformProperties(Collections.singletonMap("key", "value"))).containsEntry("key", "value");
 	}
 
 	@Test
@@ -134,7 +140,7 @@ public class VaultConfigDataLocationResolverUnitTests {
 
 		assertThat(
 				resolver.resolveProfileSpecific(this.contextMock, ConfigDataLocation.of("vault://"), this.profilesMock))
-						.hasSize(4);
+			.hasSize(4);
 	}
 
 }

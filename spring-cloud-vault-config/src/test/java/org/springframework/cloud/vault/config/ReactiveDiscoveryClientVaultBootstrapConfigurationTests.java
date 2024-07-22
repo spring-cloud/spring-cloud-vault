@@ -47,68 +47,66 @@ import static org.mockito.Mockito.when;
 public class ReactiveDiscoveryClientVaultBootstrapConfigurationTests {
 
 	private ApplicationContextRunner contextRunner = new ApplicationContextRunner().withConfiguration(AutoConfigurations
-			.of(ReactiveDiscoveryClientVaultBootstrapConfiguration.class, VaultBootstrapConfiguration.class));
+		.of(ReactiveDiscoveryClientVaultBootstrapConfiguration.class, VaultBootstrapConfiguration.class));
 
 	@Test
 	public void shouldRegisterDefaultBeans() {
 
 		this.contextRunner.withUserConfiguration(ReactiveDiscoveryConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.discovery.enabled=true",
-						"spring.cloud.bootstrap.enabled=true")
-				.run(context -> {
+			.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.discovery.enabled=true",
+					"spring.cloud.bootstrap.enabled=true")
+			.run(context -> {
 
-					assertThat(context).hasSingleBean(ReactiveVaultEndpointProvider.class);
+				assertThat(context).hasSingleBean(ReactiveVaultEndpointProvider.class);
 
-					ReactiveVaultEndpointProvider endpointProvider = context
-							.getBean(ReactiveVaultEndpointProvider.class);
+				ReactiveVaultEndpointProvider endpointProvider = context.getBean(ReactiveVaultEndpointProvider.class);
 
-					endpointProvider.getVaultEndpoint().as(StepVerifier::create).assertNext(actual -> {
-						assertThat(actual.getPort()).isEqualTo(1234);
-					}).verifyComplete();
-				});
+				endpointProvider.getVaultEndpoint().as(StepVerifier::create).assertNext(actual -> {
+					assertThat(actual.getPort()).isEqualTo(1234);
+				}).verifyComplete();
+			});
 	}
 
 	@Test
 	public void shouldRegisterVaultEndpointAdapterBean() {
 
 		this.contextRunner.withUserConfiguration(BridgedDiscoveryConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.discovery.enabled=true",
-						"spring.cloud.bootstrap.enabled=true")
-				.run(context -> {
+			.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.discovery.enabled=true",
+					"spring.cloud.bootstrap.enabled=true")
+			.run(context -> {
 
-					assertThat(context).hasSingleBean(ReactiveVaultEndpointProvider.class);
+				assertThat(context).hasSingleBean(ReactiveVaultEndpointProvider.class);
 
-					ReactiveVaultEndpointProvider endpointProvider = context
-							.getBean(ReactiveVaultEndpointProvider.class);
+				ReactiveVaultEndpointProvider endpointProvider = context.getBean(ReactiveVaultEndpointProvider.class);
 
-					endpointProvider.getVaultEndpoint().as(StepVerifier::create).assertNext(actual -> {
-						assertThat(actual.getPort()).isEqualTo(1234);
-					}).verifyComplete();
-				});
+				endpointProvider.getVaultEndpoint().as(StepVerifier::create).assertNext(actual -> {
+					assertThat(actual.getPort()).isEqualTo(1234);
+				}).verifyComplete();
+			});
 	}
 
 	@Test
 	public void shouldNotRegisterBeansIfDiscoveryDisabled() {
 
 		this.contextRunner.withUserConfiguration(ReactiveDiscoveryConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.discovery.enabled=false",
-						"spring.cloud.bootstrap.enabled=true")
-				.run(context -> {
+			.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.discovery.enabled=false",
+					"spring.cloud.bootstrap.enabled=true")
+			.run(context -> {
 
-					assertThat(context.getBeanNamesForType(ReactiveVaultEndpointProvider.class)).isEmpty();
-				});
+				assertThat(context.getBeanNamesForType(ReactiveVaultEndpointProvider.class)).isEmpty();
+			});
 	}
 
 	@Test
 	public void shouldNotRegisterBeansIfVaultDisabled() {
 
 		this.contextRunner.withUserConfiguration(ReactiveDiscoveryConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.enabled=false",
-						"spring.cloud.bootstrap.enabled=true")
-				.run(context -> {
+			.withPropertyValues("spring.cloud.vault.token=foo", "spring.cloud.vault.enabled=false",
+					"spring.cloud.bootstrap.enabled=true")
+			.run(context -> {
 
-					assertThat(context.getBeanNamesForType(ReactiveVaultEndpointProvider.class)).isEmpty();
-				});
+				assertThat(context.getBeanNamesForType(ReactiveVaultEndpointProvider.class)).isEmpty();
+			});
 
 	}
 
@@ -120,7 +118,7 @@ public class ReactiveDiscoveryClientVaultBootstrapConfigurationTests {
 
 			ReactiveDiscoveryClient mock = Mockito.mock(ReactiveDiscoveryClient.class);
 			when(mock.getInstances(anyString()))
-					.thenReturn(Flux.just(new SimpleServiceInstance(URI.create("https://foo:1234"))));
+				.thenReturn(Flux.just(new SimpleServiceInstance(URI.create("https://foo:1234"))));
 
 			return mock;
 		}

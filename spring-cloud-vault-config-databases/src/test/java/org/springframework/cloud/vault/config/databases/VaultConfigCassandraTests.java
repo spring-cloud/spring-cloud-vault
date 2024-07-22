@@ -113,9 +113,11 @@ public class VaultConfigCassandraTests {
 	@Test
 	public void shouldConnectUsingCassandraClient() {
 
-		try (CqlSession session = CqlSession.builder().withLocalDatacenter("dc1")
-				.addContactPoint(new InetSocketAddress(CASSANDRA_HOST, CASSANDRA_PORT))
-				.withAuthCredentials(this.username, this.password).build()) {
+		try (CqlSession session = CqlSession.builder()
+			.withLocalDatacenter("dc1")
+			.addContactPoint(new InetSocketAddress(CASSANDRA_HOST, CASSANDRA_PORT))
+			.withAuthCredentials(this.username, this.password)
+			.build()) {
 			assertThat(session.getMetadata().getKeyspace("system")).isNotEmpty();
 		}
 	}

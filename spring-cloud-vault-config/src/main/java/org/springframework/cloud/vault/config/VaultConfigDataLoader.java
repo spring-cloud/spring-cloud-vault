@@ -150,7 +150,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 			bootstrap.addCloseListener(event -> {
 				((ApplicationEventPublisherAware) location.getSecretBackendMetadata())
-						.setApplicationEventPublisher(event.getApplicationContext());
+					.setApplicationEventPublisher(event.getApplicationContext());
 			});
 		}
 
@@ -502,7 +502,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			registerIfAbsent(this.bootstrap, "clientAuthentication", ClientAuthentication.class, ctx -> {
 
 				ClientHttpRequestFactory factory = this.bootstrap.get(ClientFactoryWrapper.class)
-						.getClientHttpRequestFactory();
+					.getClientHttpRequestFactory();
 
 				RestTemplate externalRestTemplate = new RestTemplate(factory);
 
@@ -546,7 +546,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			this.bootstrap = bootstrap;
 			this.configuration = new VaultReactiveConfiguration(vaultProperties);
 			this.endpointProvider = SimpleVaultEndpointProvider
-					.of(new VaultConfiguration(vaultProperties).createVaultEndpoint());
+				.of(new VaultConfiguration(vaultProperties).createVaultEndpoint());
 			this.logFactory = logFactory;
 		}
 
@@ -601,7 +601,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 		void registerSessionManager() {
 			registerIfAbsent(this.bootstrap, "vaultSessionManager", SessionManager.class, ctx -> {
 				SessionManager sessionManager = this.configuration
-						.createSessionManager(ctx.get(ReactiveSessionManager.class));
+					.createSessionManager(ctx.get(ReactiveSessionManager.class));
 				reconfigureLogger(sessionManager, this.logFactory);
 				return sessionManager;
 			});

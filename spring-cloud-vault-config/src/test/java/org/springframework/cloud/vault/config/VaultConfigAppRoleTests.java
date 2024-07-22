@@ -94,11 +94,13 @@ public class VaultConfigAppRoleTests {
 
 		vaultOperations.write("auth/approle/role/with-secret-id", withSecretId);
 
-		String roleId = (String) vaultOperations.read("auth/approle/role/with-secret-id/role-id").getData()
-				.get("role_id");
+		String roleId = (String) vaultOperations.read("auth/approle/role/with-secret-id/role-id")
+			.getData()
+			.get("role_id");
 		String secretId = (String) vaultOperations
-				.write(String.format("auth/approle/role/with-secret-id/secret-id", "with-secret-id"), null).getData()
-				.get("secret_id");
+			.write(String.format("auth/approle/role/with-secret-id/secret-id", "with-secret-id"), null)
+			.getData()
+			.get("secret_id");
 
 		System.setProperty("spring.cloud.vault.app-role.role-id", roleId);
 		System.setProperty("spring.cloud.vault.app-role.secret-id", secretId);

@@ -69,7 +69,7 @@ public class ClientAuthenticationFactoryUnitTests {
 					new RestTemplate());
 			AwsIamAuthentication authentication = (AwsIamAuthentication) factory.awsIamAuthentication(properties);
 			AwsIamAuthenticationOptions options = (AwsIamAuthenticationOptions) ReflectionTestUtils
-					.getField(authentication, "options");
+				.getField(authentication, "options");
 
 			assertThat(options.getRegionProvider().getRegion()).isEqualTo(Region.AWS_GLOBAL);
 		}
@@ -177,7 +177,7 @@ public class ClientAuthenticationFactoryUnitTests {
 		VaultProperties properties = new VaultProperties();
 
 		assertThatThrownBy(() -> ClientAuthenticationFactory.getAppRoleAuthenticationOptions(properties))
-				.isInstanceOf(IllegalArgumentException.class);
+			.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -187,7 +187,7 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.getAppRole().setRole("my-role");
 
 		assertThatThrownBy(() -> ClientAuthenticationFactory.getAppRoleAuthenticationOptions(properties))
-				.isInstanceOf(IllegalArgumentException.class);
+			.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
@@ -200,7 +200,8 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.getPcf().setInstanceCertificate(new ClassPathResource("bootstrap.yml"));
 
 		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
-				new RestTemplate()).createClientAuthentication();
+				new RestTemplate())
+			.createClientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(PcfAuthentication.class);
 	}
@@ -213,7 +214,8 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.getSsl().setCertAuthPath("bert");
 
 		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
-				new RestTemplate()).createClientAuthentication();
+				new RestTemplate())
+			.createClientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(ClientCertificateAuthentication.class);
 	}
@@ -229,7 +231,8 @@ public class ClientAuthenticationFactoryUnitTests {
 				StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 		try {
 			ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
-					new RestTemplate()).createClientAuthentication();
+					new RestTemplate())
+				.createClientAuthentication();
 
 			assertThat(clientAuthentication).isInstanceOf(TokenAuthentication.class);
 			VaultToken token = clientAuthentication.login();

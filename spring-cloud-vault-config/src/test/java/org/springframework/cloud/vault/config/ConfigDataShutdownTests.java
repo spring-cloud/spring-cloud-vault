@@ -39,8 +39,8 @@ public class ConfigDataShutdownTests extends IntegrationTestSupport {
 	@Test
 	public void contextShutdownDestroysSecretLeaseContainer() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder().sources(ConfigDataShutdownTests.class)
-				.run("--server.port=0", "--spring.cloud.bootstrap.enabled=false", "--spring.cloud.vault.failFast=true",
-						"--spring.cloud.vault.config.lifecycle.enabled=true", "--spring.config.import=vault://");
+			.run("--server.port=0", "--spring.cloud.bootstrap.enabled=false", "--spring.cloud.vault.failFast=true",
+					"--spring.cloud.vault.config.lifecycle.enabled=true", "--spring.config.import=vault://");
 
 		SecretLeaseContainer container = context.getBean(SecretLeaseContainer.class);
 

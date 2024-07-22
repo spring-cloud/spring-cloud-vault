@@ -72,10 +72,10 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 	protected Mono<Health> doHealthCheck(Builder builder) {
 
 		return this.vaultOperations
-				.doWithVault((it) -> it.get().uri("sys/health").header(VaultHttpHeaders.VAULT_NAMESPACE, "").exchange())
-				.flatMap((it) -> it.bodyToMono(VaultHealthImpl.class))
-				.onErrorResume(WebClientResponseException.class, VaultReactiveHealthIndicator::deserializeError)
-				.map((vaultHealthResponse) -> getHealth(builder, vaultHealthResponse));
+			.doWithVault((it) -> it.get().uri("sys/health").header(VaultHttpHeaders.VAULT_NAMESPACE, "").exchange())
+			.flatMap((it) -> it.bodyToMono(VaultHealthImpl.class))
+			.onErrorResume(WebClientResponseException.class, VaultReactiveHealthIndicator::deserializeError)
+			.map((vaultHealthResponse) -> getHealth(builder, vaultHealthResponse));
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)

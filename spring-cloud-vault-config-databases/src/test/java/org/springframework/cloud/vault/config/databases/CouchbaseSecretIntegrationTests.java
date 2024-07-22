@@ -94,7 +94,7 @@ public class CouchbaseSecretIntegrationTests extends IntegrationTestSupport {
 	public void shouldCreateCredentialsCorrectly() {
 
 		Map<String, Object> secretProperties = this.configOperations.read(forDatabase(this.couchbaseProperties))
-				.getData();
+			.getData();
 
 		assertThat(secretProperties).containsKeys("spring.couchbase.username", "spring.couchbase.password");
 	}

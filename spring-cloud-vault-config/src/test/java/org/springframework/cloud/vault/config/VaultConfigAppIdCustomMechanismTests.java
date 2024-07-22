@@ -124,8 +124,9 @@ public class VaultConfigAppIdCustomMechanismTests {
 			RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
 			return new AppIdAuthentication(AppIdAuthenticationOptions.builder()
-					.appId(VaultConfigAppIdCustomMechanismTests.class.getSimpleName())
-					.userIdMechanism(new StaticUserIdMechanism()).build(), restTemplate);
+				.appId(VaultConfigAppIdCustomMechanismTests.class.getSimpleName())
+				.userIdMechanism(new StaticUserIdMechanism())
+				.build(), restTemplate);
 		}
 
 	}

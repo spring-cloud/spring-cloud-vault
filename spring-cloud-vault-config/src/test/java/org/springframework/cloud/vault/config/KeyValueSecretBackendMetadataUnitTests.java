@@ -59,8 +59,9 @@ public class KeyValueSecretBackendMetadataUnitTests {
 		List<String> contexts = KeyValueSecretBackendMetadata.buildContexts(this.properties,
 				Arrays.asList("cloud", "local"));
 
-		assertThat(contexts).hasSize(6).containsSequence("my-app/local", "my-app/cloud", "my-app", "application/local",
-				"application/cloud", "application");
+		assertThat(contexts).hasSize(6)
+			.containsSequence("my-app/local", "my-app/cloud", "my-app", "application/local", "application/cloud",
+					"application");
 	}
 
 	@Test
@@ -92,8 +93,9 @@ public class KeyValueSecretBackendMetadataUnitTests {
 		List<String> contexts = KeyValueSecretBackendMetadata.buildContexts(this.properties,
 				Arrays.asList("cloud", "local"));
 
-		assertThat(contexts).hasSize(9).containsSequence("bar/local", "bar/cloud", "bar", "foo/local", "foo/cloud",
-				"foo", "application/local", "application/cloud", "application");
+		assertThat(contexts).hasSize(9)
+			.containsSequence("bar/local", "bar/cloud", "bar", "foo/local", "foo/cloud", "foo", "application/local",
+					"application/cloud", "application");
 	}
 
 }

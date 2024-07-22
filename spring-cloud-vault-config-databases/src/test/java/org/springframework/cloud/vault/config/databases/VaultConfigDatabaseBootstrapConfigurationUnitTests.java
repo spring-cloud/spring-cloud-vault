@@ -33,7 +33,7 @@ public class VaultConfigDatabaseBootstrapConfigurationUnitTests {
 	public void shouldConsiderCredentialPath() {
 
 		VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory factory = new VaultConfigDatabaseBootstrapConfiguration()
-				.databaseSecretBackendMetadataFactory();
+			.databaseSecretBackendMetadataFactory();
 
 		VaultDatabaseProperties properties = new VaultDatabaseProperties();
 		properties.setStaticRole(true);

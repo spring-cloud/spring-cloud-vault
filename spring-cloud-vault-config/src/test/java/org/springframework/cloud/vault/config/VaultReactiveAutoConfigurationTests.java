@@ -61,150 +61,161 @@ import static org.mockito.Mockito.when;
 public class VaultReactiveAutoConfigurationTests {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations.of(VaultReactiveAutoConfiguration.class));
+		.withConfiguration(AutoConfigurations.of(VaultReactiveAutoConfiguration.class));
 
 	@Test
 	public void shouldConfigureTemplate() {
 
 		this.contextRunner.withUserConfiguration(AuthenticationFactoryConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false").run(context -> {
+			.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false")
+			.run(context -> {
 
-					assertThat(context).hasSingleBean(ReactiveVaultOperations.class);
-					assertThat(context).hasSingleBean(AuthenticationStepsFactory.class);
-					assertThat(context.getBean(SessionManager.class)).isNotNull()
-							.isNotInstanceOf(LifecycleAwareSessionManager.class)
-							.isNotInstanceOf(SimpleSessionManager.class);
-					assertThat(context.getBeanNamesForType(WebClient.class)).isEmpty();
-					assertThat(context).hasSingleBean(WebClientFactory.class);
-				});
+				assertThat(context).hasSingleBean(ReactiveVaultOperations.class);
+				assertThat(context).hasSingleBean(AuthenticationStepsFactory.class);
+				assertThat(context.getBean(SessionManager.class)).isNotNull()
+					.isNotInstanceOf(LifecycleAwareSessionManager.class)
+					.isNotInstanceOf(SimpleSessionManager.class);
+				assertThat(context.getBeanNamesForType(WebClient.class)).isEmpty();
+				assertThat(context).hasSingleBean(WebClientFactory.class);
+			});
 	}
 
 	@Test
 	public void shouldNotConfigureIfHttpClientIsMissing() {
 
 		this.contextRunner.withUserConfiguration(AuthenticationFactoryConfiguration.class)
-				.withClassLoader(new FilteredClassLoader("reactor.netty.http.client.HttpClient")).run(context -> {
+			.withClassLoader(new FilteredClassLoader("reactor.netty.http.client.HttpClient"))
+			.run(context -> {
 
-					assertThat(context).doesNotHaveBean(ReactiveVaultOperations.class);
-				});
+				assertThat(context).doesNotHaveBean(ReactiveVaultOperations.class);
+			});
 	}
 
 	@Test
 	public void shouldConfigureTemplateWithTokenSupplier() {
 
 		this.contextRunner.withUserConfiguration(TokenSupplierConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false").run(context -> {
+			.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false")
+			.run(context -> {
 
-					assertThat(context).hasSingleBean(ReactiveVaultOperations.class);
-					assertThat(context.getBean(SessionManager.class)).isNotNull()
-							.isNotInstanceOf(LifecycleAwareSessionManager.class)
-							.isNotInstanceOf(SimpleSessionManager.class);
-					assertThat(context).doesNotHaveBean(WebClient.class);
-				});
+				assertThat(context).hasSingleBean(ReactiveVaultOperations.class);
+				assertThat(context.getBean(SessionManager.class)).isNotNull()
+					.isNotInstanceOf(LifecycleAwareSessionManager.class)
+					.isNotInstanceOf(SimpleSessionManager.class);
+				assertThat(context).doesNotHaveBean(WebClient.class);
+			});
 	}
 
 	@Test
 	public void shouldNotConfigureReactiveSupport() {
 
 		this.contextRunner.withUserConfiguration(VaultAutoConfiguration.class)
-				.withPropertyValues("spring.cloud.vault.reactive.enabled=false", "spring.cloud.vault.token=foo")
-				.run(context -> {
+			.withPropertyValues("spring.cloud.vault.reactive.enabled=false", "spring.cloud.vault.token=foo")
+			.run(context -> {
 
-					assertThat(context).doesNotHaveBean(ReactiveVaultTemplate.class)
-							.doesNotHaveBean(ReactiveVaultOperations.class);
-					assertThat(context.getBean(SessionManager.class)).isInstanceOf(LifecycleAwareSessionManager.class);
-				});
+				assertThat(context).doesNotHaveBean(ReactiveVaultTemplate.class)
+					.doesNotHaveBean(ReactiveVaultOperations.class);
+				assertThat(context.getBean(SessionManager.class)).isInstanceOf(LifecycleAwareSessionManager.class);
+			});
 	}
 
 	@Test
 	public void sessionManagerBridgeShouldNotCacheTokens() {
 
 		this.contextRunner.withUserConfiguration(TokenSupplierConfiguration.class, CustomSessionManager.class)
-				.run(context -> {
+			.run(context -> {
 
-					SessionManager sessionManager = context.getBean(SessionManager.class);
+				SessionManager sessionManager = context.getBean(SessionManager.class);
 
-					assertThat(sessionManager.getSessionToken().getToken()).isEqualTo("token-1");
-					assertThat(sessionManager.getSessionToken().getToken()).isEqualTo("token-2");
-				});
+				assertThat(sessionManager.getSessionToken().getToken()).isEqualTo("token-1");
+				assertThat(sessionManager.getSessionToken().getToken()).isEqualTo("token-2");
+			});
 	}
 
 	@Test
 	public void shouldDisableSessionManagement() {
 
 		this.contextRunner
-				.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
-						"spring.cloud.vault.session.lifecycle.enabled=false")
-				.withBean("vaultTokenSupplier", VaultTokenSupplier.class, () -> Mono::empty)
-				.withBean("taskSchedulerWrapper", VaultAutoConfiguration.TaskSchedulerWrapper.class,
-						() -> new VaultAutoConfiguration.TaskSchedulerWrapper(new ThreadPoolTaskScheduler()))
-				.run(context -> {
+			.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
+					"spring.cloud.vault.session.lifecycle.enabled=false")
+			.withBean("vaultTokenSupplier", VaultTokenSupplier.class, () -> Mono::empty)
+			.withBean("taskSchedulerWrapper", VaultAutoConfiguration.TaskSchedulerWrapper.class,
+					() -> new VaultAutoConfiguration.TaskSchedulerWrapper(new ThreadPoolTaskScheduler()))
+			.run(context -> {
 
-					ReactiveSessionManager bean = context.getBean(ReactiveSessionManager.class);
-					assertThat(bean).isExactlyInstanceOf(CachingVaultTokenSupplier.class);
-				});
+				ReactiveSessionManager bean = context.getBean(ReactiveSessionManager.class);
+				assertThat(bean).isExactlyInstanceOf(CachingVaultTokenSupplier.class);
+			});
 	}
 
 	@Test
 	public void shouldConfigureSessionManagement() {
 
 		this.contextRunner
-				.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
-						"spring.cloud.vault.session.lifecycle.refresh-before-expiry=11s",
-						"spring.cloud.vault.session.lifecycle.expiry-threshold=12s")
-				.withBean("vaultTokenSupplier", VaultTokenSupplier.class, () -> Mono::empty)
-				.withBean("taskSchedulerWrapper", VaultAutoConfiguration.TaskSchedulerWrapper.class,
-						() -> new VaultAutoConfiguration.TaskSchedulerWrapper(new ThreadPoolTaskScheduler()))
-				.run(context -> {
+			.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
+					"spring.cloud.vault.session.lifecycle.refresh-before-expiry=11s",
+					"spring.cloud.vault.session.lifecycle.expiry-threshold=12s")
+			.withBean("vaultTokenSupplier", VaultTokenSupplier.class, () -> Mono::empty)
+			.withBean("taskSchedulerWrapper", VaultAutoConfiguration.TaskSchedulerWrapper.class,
+					() -> new VaultAutoConfiguration.TaskSchedulerWrapper(new ThreadPoolTaskScheduler()))
+			.run(context -> {
 
-					ReactiveSessionManager bean = context.getBean(ReactiveSessionManager.class);
+				ReactiveSessionManager bean = context.getBean(ReactiveSessionManager.class);
 
-					Object refreshTrigger = ReflectionTestUtils.getField(bean, "refreshTrigger");
+				Object refreshTrigger = ReflectionTestUtils.getField(bean, "refreshTrigger");
 
-					assertThat(refreshTrigger).hasFieldOrPropertyWithValue("duration", Duration.ofSeconds(11))
-							.hasFieldOrPropertyWithValue("expiryThreshold", Duration.ofSeconds(12));
-				});
+				assertThat(refreshTrigger).hasFieldOrPropertyWithValue("duration", Duration.ofSeconds(11))
+					.hasFieldOrPropertyWithValue("expiryThreshold", Duration.ofSeconds(12));
+			});
 	}
 
 	@Test
 	public void shouldConfigureEndpointProvider() {
 
 		this.contextRunner
-				.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
-						"spring.cloud.vault.session.lifecycle.enabled=false")
-				.withUserConfiguration(ReactiveEndpointProviderConfiguration.class)
-				.withBean("vaultTokenSupplier", VaultTokenSupplier.class, () -> Mono::empty)
-				.withBean("taskSchedulerWrapper", VaultAutoConfiguration.TaskSchedulerWrapper.class,
-						() -> new VaultAutoConfiguration.TaskSchedulerWrapper(new ThreadPoolTaskScheduler()))
-				.run(context -> {
+			.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
+					"spring.cloud.vault.session.lifecycle.enabled=false")
+			.withUserConfiguration(ReactiveEndpointProviderConfiguration.class)
+			.withBean("vaultTokenSupplier", VaultTokenSupplier.class, () -> Mono::empty)
+			.withBean("taskSchedulerWrapper", VaultAutoConfiguration.TaskSchedulerWrapper.class,
+					() -> new VaultAutoConfiguration.TaskSchedulerWrapper(new ThreadPoolTaskScheduler()))
+			.run(context -> {
 
-					WebClientFactory factory = context.getBean(WebClientFactory.class);
-					WebClient webClient = factory.create();
+				WebClientFactory factory = context.getBean(WebClientFactory.class);
+				WebClient webClient = factory.create();
 
-					webClient.get().uri("foo").retrieve().bodyToMono(String.class).as(StepVerifier::create)
-							.verifyErrorMatches(throwable -> throwable.getMessage().contains("foobar-1"));
+				webClient.get()
+					.uri("foo")
+					.retrieve()
+					.bodyToMono(String.class)
+					.as(StepVerifier::create)
+					.verifyErrorMatches(throwable -> throwable.getMessage().contains("foobar-1"));
 
-					webClient.get().uri("foo").retrieve().bodyToMono(String.class).as(StepVerifier::create)
-							.verifyErrorMatches(throwable -> throwable.getMessage().contains("foobar-2"));
-				});
+				webClient.get()
+					.uri("foo")
+					.retrieve()
+					.bodyToMono(String.class)
+					.as(StepVerifier::create)
+					.verifyErrorMatches(throwable -> throwable.getMessage().contains("foobar-2"));
+			});
 	}
 
 	@Test
 	public void shouldConsiderCustomConnector() {
 
 		this.contextRunner
-				.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
-						"spring.cloud.vault.session.lifecycle.enabled=false")
-				.withUserConfiguration(CustomConnector.class)
-				.withBean("vaultTokenSupplier", VaultTokenSupplier.class,
-						() -> () -> Mono.just(VaultToken.of("foo".toCharArray())))
-				.withBean("taskSchedulerWrapper", VaultAutoConfiguration.TaskSchedulerWrapper.class,
-						() -> new VaultAutoConfiguration.TaskSchedulerWrapper(new ThreadPoolTaskScheduler()))
-				.run(context -> {
+			.withPropertyValues("spring.cloud.vault.kv.enabled=false", "spring.cloud.vault.token=foo",
+					"spring.cloud.vault.session.lifecycle.enabled=false")
+			.withUserConfiguration(CustomConnector.class)
+			.withBean("vaultTokenSupplier", VaultTokenSupplier.class,
+					() -> () -> Mono.just(VaultToken.of("foo".toCharArray())))
+			.withBean("taskSchedulerWrapper", VaultAutoConfiguration.TaskSchedulerWrapper.class,
+					() -> new VaultAutoConfiguration.TaskSchedulerWrapper(new ThreadPoolTaskScheduler()))
+			.run(context -> {
 
-					ReactiveVaultOperations operations = context.getBean(ReactiveVaultOperations.class);
-					operations.delete("foo").as(StepVerifier::create).verifyError(WebClientRequestException.class);
-				});
+				ReactiveVaultOperations operations = context.getBean(ReactiveVaultOperations.class);
+				operations.delete("foo").as(StepVerifier::create).verifyError(WebClientRequestException.class);
+			});
 	}
 
 	@Configuration(proxyBeanMethods = false)

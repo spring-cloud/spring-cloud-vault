@@ -51,7 +51,8 @@ public class KeyValueSecretIntegrationTests extends IntegrationTestSupport {
 	public void shouldReturnSecretsCorrectly() {
 
 		Map<String, Object> secretProperties = this.configOperations
-				.read(KeyValueSecretBackendMetadata.create("secret", "app-name")).getData();
+			.read(KeyValueSecretBackendMetadata.create("secret", "app-name"))
+			.getData();
 
 		assertThat(secretProperties).containsAllEntriesOf(createExpectedMap());
 	}

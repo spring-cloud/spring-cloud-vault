@@ -80,8 +80,9 @@ public class VaultVersionedKvBackendConfigTests {
 		object.put("vault.value", "foo");
 		object.put("nested", Collections.singletonMap("key", "value"));
 
-		vaultRule.prepare().getVaultOperations().write("versioned/data/testVaultApp",
-				Collections.singletonMap("data", object));
+		vaultRule.prepare()
+			.getVaultOperations()
+			.write("versioned/data/testVaultApp", Collections.singletonMap("data", object));
 	}
 
 	@Test

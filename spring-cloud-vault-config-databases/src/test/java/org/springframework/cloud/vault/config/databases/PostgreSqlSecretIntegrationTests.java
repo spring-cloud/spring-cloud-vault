@@ -49,8 +49,8 @@ public class PostgreSqlSecretIntegrationTests extends IntegrationTestSupport {
 
 	private static final int POSTGRES_PORT = 5432;
 
-	private static final String CONNECTION_URL = String.format(
-			"postgresql://springvault:springvault@%s:%d/postgres?sslmode=disable", POSTGRES_HOST, POSTGRES_PORT);
+	private static final String CONNECTION_URL = String
+		.format("postgresql://springvault:springvault@%s:%d/postgres?sslmode=disable", POSTGRES_HOST, POSTGRES_PORT);
 
 	private static final String CREATE_USER_AND_GRANT_SQL = "CREATE ROLE \"{{name}}\" WITH "
 			+ "LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';\n"

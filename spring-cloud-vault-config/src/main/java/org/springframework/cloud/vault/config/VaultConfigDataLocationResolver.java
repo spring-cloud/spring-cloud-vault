@@ -109,8 +109,9 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 		if (location.getValue().equals(VaultConfigLocation.VAULT_PREFIX)
 				|| location.getValue().equals(VaultConfigLocation.VAULT_PREFIX + "//")) {
 			List<SecretBackendMetadata> sorted = getSecretBackends(context, profiles);
-			return sorted.stream().map(it -> new VaultConfigLocation(it, location.isOptional()))
-					.collect(Collectors.toList());
+			return sorted.stream()
+				.map(it -> new VaultConfigLocation(it, location.isOptional()))
+				.collect(Collectors.toList());
 		}
 
 		String contextPath = location.getValue().substring(VaultConfigLocation.VAULT_PREFIX.length());
@@ -139,11 +140,12 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 
 		context.getBootstrapContext().registerIfAbsent(VaultProperties.class, ignore -> {
 
-			VaultProperties vaultProperties = context.getBinder().bindOrCreate(VaultProperties.PREFIX,
-					VaultProperties.class);
+			VaultProperties vaultProperties = context.getBinder()
+				.bindOrCreate(VaultProperties.PREFIX, VaultProperties.class);
 
-			vaultProperties.setApplicationName(context.getBinder().bind("spring.application.name", String.class)
-					.orElse(vaultProperties.getApplicationName()));
+			vaultProperties.setApplicationName(context.getBinder()
+				.bind("spring.application.name", String.class)
+				.orElse(vaultProperties.getApplicationName()));
 
 			return vaultProperties;
 		});
@@ -187,15 +189,15 @@ public class VaultConfigDataLocationResolver implements ConfigDataLocationResolv
 			Profiles profiles) {
 
 		VaultKeyValueBackendProperties kvProperties = context.getBinder()
-				.bindOrCreate(VaultKeyValueBackendProperties.PREFIX, VaultKeyValueBackendProperties.class);
+			.bindOrCreate(VaultKeyValueBackendProperties.PREFIX, VaultKeyValueBackendProperties.class);
 
 		Binder binder = context.getBinder();
 
 		kvProperties.setApplicationName(binder.bind("spring.cloud.vault.kv.application-name", String.class)
-				.orElseGet(() -> binder.bind("spring.cloud.vault.application-name", String.class)
-						.orElseGet(() -> binder.bind("spring.application.name", String.class).orElse(""))));
+			.orElseGet(() -> binder.bind("spring.cloud.vault.application-name", String.class)
+				.orElseGet(() -> binder.bind("spring.application.name", String.class).orElse(""))));
 		kvProperties.setProfiles(binder.bind("spring.cloud.vault.kv.profiles", Bindable.listOf(String.class))
-				.orElseGet(profiles::getActive));
+			.orElseGet(profiles::getActive));
 
 		return kvProperties;
 	}

@@ -47,15 +47,19 @@ class VaultRuntimeHints implements RuntimeHintsRegistrar {
 		ReflectionHints reflection = hints.reflection();
 
 		// reflection required for ConfigDataLoader, early logging capture
-		reflection.registerTypes(Arrays.asList(SimpleSessionManager.class, LifecycleAwareSessionManager.class,
-				LifecycleAwareSessionManagerSupport.class, ClientHttpRequestFactoryFactory.class,
-				org.springframework.vault.core.env.VaultPropertySource.class, LeaseAwareVaultPropertySource.class)
-				.stream().map(TypeReference::of).collect(Collectors.toList()),
-				builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
+		reflection.registerTypes(Arrays
+			.asList(SimpleSessionManager.class, LifecycleAwareSessionManager.class,
+					LifecycleAwareSessionManagerSupport.class, ClientHttpRequestFactoryFactory.class,
+					org.springframework.vault.core.env.VaultPropertySource.class, LeaseAwareVaultPropertySource.class)
+			.stream()
+			.map(TypeReference::of)
+			.collect(Collectors.toList()), builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
 
 		reflection.registerTypes(
-				Arrays.asList(VaultKeyValueBackendProperties.class).stream().map(TypeReference::of)
-						.collect(Collectors.toList()),
+				Arrays.asList(VaultKeyValueBackendProperties.class)
+					.stream()
+					.map(TypeReference::of)
+					.collect(Collectors.toList()),
 				builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS,
 						MemberCategory.INTROSPECT_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_METHODS,
 						MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
@@ -69,15 +73,14 @@ class VaultRuntimeHints implements RuntimeHintsRegistrar {
 				builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
 
 		reflection.registerType(TypeReference
-				.of("org.springframework.cloud.vault.config.VaultReactiveConfiguration$ReactiveSessionManagerAdapter"),
+			.of("org.springframework.cloud.vault.config.VaultReactiveConfiguration$ReactiveSessionManagerAdapter"),
 				builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
 
 		if (VaultConfigDataLoader.webclientPresent && VaultConfigDataLoader.reactorPresent) {
-			reflection
-					.registerTypes(
-							Arrays.asList(ReactiveLifecycleAwareSessionManager.class).stream().map(TypeReference::of)
-									.collect(Collectors.toList()),
-							builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
+			reflection.registerTypes(Arrays.asList(ReactiveLifecycleAwareSessionManager.class)
+				.stream()
+				.map(TypeReference::of)
+				.collect(Collectors.toList()), builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
 		}
 
 		// presence checks
@@ -96,14 +99,16 @@ class VaultRuntimeHints implements RuntimeHintsRegistrar {
 		List<Object> pluggableDescriptors = new ArrayList<>();
 
 		pluggableDescriptors
-				.addAll(SpringFactoriesLoader.loadFactories(SecretBackendMetadataFactory.class, classLoader));
+			.addAll(SpringFactoriesLoader.loadFactories(SecretBackendMetadataFactory.class, classLoader));
 		pluggableDescriptors
-				.addAll(SpringFactoriesLoader.loadFactories(VaultSecretBackendDescriptor.class, classLoader));
+			.addAll(SpringFactoriesLoader.loadFactories(VaultSecretBackendDescriptor.class, classLoader));
 		pluggableDescriptors
-				.addAll(SpringFactoriesLoader.loadFactories(VaultSecretBackendDescriptorFactory.class, classLoader));
+			.addAll(SpringFactoriesLoader.loadFactories(VaultSecretBackendDescriptorFactory.class, classLoader));
 
-		List<TypeReference> pluggableDescriptorReferences = pluggableDescriptors.stream().map(Object::getClass)
-				.map(TypeReference::of).collect(Collectors.toList());
+		List<TypeReference> pluggableDescriptorReferences = pluggableDescriptors.stream()
+			.map(Object::getClass)
+			.map(TypeReference::of)
+			.collect(Collectors.toList());
 
 		reflection.registerTypes(pluggableDescriptorReferences, builder -> {
 			builder.withMembers(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,

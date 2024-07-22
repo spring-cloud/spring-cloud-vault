@@ -42,11 +42,13 @@ public class VaultConfigDataLoaderIntegrationTests extends IntegrationTestSuppor
 	@Before
 	public void before() {
 
-		this.vaultRule.prepare().getVaultOperations().write("secret/my-config-loader",
-				Collections.singletonMap("default-key", "default"));
+		this.vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/my-config-loader", Collections.singletonMap("default-key", "default"));
 
-		this.vaultRule.prepare().getVaultOperations().write("secret/my-config-loader/cloud",
-				Collections.singletonMap("default-key", "cloud"));
+		this.vaultRule.prepare()
+			.getVaultOperations()
+			.write("secret/my-config-loader/cloud", Collections.singletonMap("default-key", "cloud"));
 	}
 
 	@Test

@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
 class VaultHealthIndicatorAutoConfigurationTests {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations.of(VaultHealthIndicatorAutoConfiguration.class));
+		.withConfiguration(AutoConfigurations.of(VaultHealthIndicatorAutoConfiguration.class));
 
 	@Test
 	void shouldNotConfigureHealthIndicatorWithoutVaultOperations() {
@@ -67,11 +67,11 @@ class VaultHealthIndicatorAutoConfigurationTests {
 	void shouldConfigureSingleHealthIndicator() {
 
 		this.contextRunner.withUserConfiguration(ImperativeConfiguration.class, ReactiveConfiguration.class)
-				.run(context -> {
-					assertThat(context).hasBean("vaultHealthIndicator")
-							.hasSingleBean(VaultReactiveHealthIndicator.class)
-							.doesNotHaveBean(VaultHealthIndicator.class);
-				});
+			.run(context -> {
+				assertThat(context).hasBean("vaultHealthIndicator")
+					.hasSingleBean(VaultReactiveHealthIndicator.class)
+					.doesNotHaveBean(VaultHealthIndicator.class);
+			});
 	}
 
 	static class ImperativeConfiguration {

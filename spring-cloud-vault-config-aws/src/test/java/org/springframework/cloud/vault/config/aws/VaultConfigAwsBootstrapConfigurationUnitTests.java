@@ -39,7 +39,7 @@ public class VaultConfigAwsBootstrapConfigurationUnitTests {
 		properties.setRole("readonly");
 
 		SecretBackendMetadataFactory<VaultAwsProperties> factory = new VaultConfigAwsBootstrapConfiguration()
-				.awsSecretBackendMetadataFactory();
+			.awsSecretBackendMetadataFactory();
 
 		SecretBackendMetadata metadata = factory.createMetadata(properties);
 
@@ -55,7 +55,7 @@ public class VaultConfigAwsBootstrapConfigurationUnitTests {
 		properties.setRole("readonly");
 
 		SecretBackendMetadataFactory<VaultAwsProperties> factory = new VaultConfigAwsBootstrapConfiguration()
-				.awsSecretBackendMetadataFactory();
+			.awsSecretBackendMetadataFactory();
 
 		SecretBackendMetadata metadata = factory.createMetadata(properties);
 
@@ -73,7 +73,7 @@ public class VaultConfigAwsBootstrapConfigurationUnitTests {
 		properties.setRole("readonly");
 
 		SecretBackendMetadataFactory<VaultAwsProperties> factory = new VaultConfigAwsBootstrapConfiguration()
-				.awsSecretBackendMetadataFactory();
+			.awsSecretBackendMetadataFactory();
 
 		SecretBackendMetadata metadata = factory.createMetadata(properties);
 

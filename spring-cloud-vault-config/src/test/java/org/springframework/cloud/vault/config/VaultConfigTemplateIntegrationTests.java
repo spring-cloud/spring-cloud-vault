@@ -57,8 +57,10 @@ public class VaultConfigTemplateIntegrationTests extends IntegrationTestSupport 
 
 		assumeTrue(this.vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.10.0")));
 
-		this.vaultRule.prepare().getVaultOperations().write("versioned/data/testVaultApp",
-				Collections.singletonMap("data", Collections.singletonMap("key", "value")));
+		this.vaultRule.prepare()
+			.getVaultOperations()
+			.write("versioned/data/testVaultApp",
+					Collections.singletonMap("data", Collections.singletonMap("key", "value")));
 
 		VaultProperties vaultProperties = Settings.createVaultProperties();
 
