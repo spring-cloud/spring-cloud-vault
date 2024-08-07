@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.vault.config.consul;
 
+import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,7 +35,6 @@ import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.EventListener;
-import org.springframework.util.Base64Utils;
 import org.springframework.vault.core.VaultOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,7 +65,7 @@ public class VaultConfigConsulConfigDataTests extends IntegrationTestSupport {
 		SetupConsul.setupConsul(vaultOperations, "consul");
 
 		Map<String, Object> role = new LinkedHashMap<>();
-		role.put("policy", Base64Utils.encodeToString(POLICY.getBytes()));
+		role.put("policy", Base64.getEncoder().encodeToString(POLICY.getBytes()));
 		role.put("ttl", "3s");
 		role.put("max_ttl", "3s");
 		vaultOperations.write(String.format("%s/roles/%s", "consul", "short-readonly"), role);

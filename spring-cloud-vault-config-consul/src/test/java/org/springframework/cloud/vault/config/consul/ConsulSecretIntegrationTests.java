@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.vault.config.consul;
 
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
 
@@ -28,7 +29,6 @@ import org.springframework.cloud.vault.config.VaultProperties;
 import org.springframework.cloud.vault.config.consul.VaultConfigConsulBootstrapConfiguration.ConsulSecretBackendMetadataFactory;
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
-import org.springframework.util.Base64Utils;
 import org.springframework.vault.core.VaultOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,7 +70,7 @@ public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 		SetupConsul.setupConsul(vaultOperations, this.consul.getBackend());
 
 		vaultOperations.write(String.format("%s/roles/%s", this.consul.getBackend(), this.consul.getRole()),
-				Collections.singletonMap("policy", Base64Utils.encodeToString(POLICY.getBytes())));
+				Collections.singletonMap("policy", Base64.getEncoder().encodeToString(POLICY.getBytes())));
 
 		this.configOperations = new VaultConfigTemplate(vaultOperations, this.vaultProperties);
 	}
