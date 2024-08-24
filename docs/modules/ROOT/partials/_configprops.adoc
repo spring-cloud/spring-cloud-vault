@@ -9,7 +9,7 @@
 |spring.cloud.vault.app-role.role-id |  | The RoleId.
 |spring.cloud.vault.app-role.secret-id |  | The SecretId.
 |spring.cloud.vault.application-name | `+++application+++` | Application name for AppId authentication.
-|spring.cloud.vault.authentication |  | 
+|spring.cloud.vault.authentication | `+++token+++` | 
 |spring.cloud.vault.aws-ec2.aws-ec2-path | `+++aws-ec2+++` | Mount path of the AWS-EC2 authentication backend.
 |spring.cloud.vault.aws-ec2.identity-document | `+++http://169.254.169.254/latest/dynamic/instance-identity/pkcs7+++` | URL of the AWS-EC2 PKCS7 identity document.
 |spring.cloud.vault.aws-ec2.nonce |  | Nonce used for AWS-EC2 authentication. An empty nonce defaults to nonce generation.
@@ -21,7 +21,7 @@
 |spring.cloud.vault.aws-iam.server-name |  | Name of the server used to set {@code X-Vault-AWS-IAM-Server-ID} header in the headers of login requests.
 |spring.cloud.vault.aws.access-key-property | `+++cloud.aws.credentials.accessKey+++` | Target property for the obtained access key.
 |spring.cloud.vault.aws.backend | `+++aws+++` | aws backend path.
-|spring.cloud.vault.aws.credential-type |  | aws credential type
+|spring.cloud.vault.aws.credential-type | `+++iam-user+++` | aws credential type
 |spring.cloud.vault.aws.enabled | `+++false+++` | Enable aws backend usage.
 |spring.cloud.vault.aws.role |  | Role name for credentials.
 |spring.cloud.vault.aws.role-arn |  | Role arn for assumed_role in case we have multiple roles associated with the vault role. @since 3.0.2
