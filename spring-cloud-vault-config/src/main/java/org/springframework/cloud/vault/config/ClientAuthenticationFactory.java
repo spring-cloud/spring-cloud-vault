@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
@@ -175,7 +176,7 @@ class ClientAuthenticationFactory {
 		}
 		catch (ClassNotFoundException ex) {
 
-			switch (appId.getUserId().toUpperCase()) {
+			switch (appId.getUserId().toUpperCase(Locale.ROOT)) {
 
 				case VaultProperties.AppIdProperties.IP_ADDRESS:
 					return new IpAddressUserId();
