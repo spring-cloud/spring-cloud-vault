@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-vault-parent</artifactId>
-		<version>4.1.4-SNAPSHOT</version>
+		<version>4.1.4</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -16,7 +16,7 @@
 	<description>Spring Cloud Vault Config Consul support</description>
 
 	<properties>
-		<spring-cloud-consul.version>4.1.3-SNAPSHOT</spring-cloud-consul.version>
+		<spring-cloud-consul.version>4.1.3</spring-cloud-consul.version>
 	</properties>
 
 	<dependencies>
