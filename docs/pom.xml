@@ -21,28 +21,6 @@
 		<!-- Don't upload docs jar to central / repo.spring.io -->
 		<maven-deploy-plugin-default.phase>none</maven-deploy-plugin-default.phase>
 	</properties>
-<!-- 	<dependencies>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>spring-cloud-starter-vault-config</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>spring-cloud-vault-config-aws</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>spring-cloud-vault-config-consul</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>spring-cloud-vault-config-databases</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>spring-cloud-vault-config-rabbitmq</artifactId>
-		</dependency>
-	</dependencies> -->
 	<build>
 		<sourceDirectory>src/main/asciidoc</sourceDirectory>
 		<pluginManagement>
@@ -76,6 +54,36 @@
 		</pluginManagement>
 	</build>
 	<profiles>
+		<profile>
+			<id>enable-configuration-properties</id>
+			<activation>
+				<property>
+					<name>!disableConfigurationProperties</name>
+				</property>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>${project.groupId}</groupId>
+					<artifactId>spring-cloud-starter-vault-config</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>${project.groupId}</groupId>
+					<artifactId>spring-cloud-vault-config-aws</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>${project.groupId}</groupId>
+					<artifactId>spring-cloud-vault-config-consul</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>${project.groupId}</groupId>
+					<artifactId>spring-cloud-vault-config-databases</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>${project.groupId}</groupId>
+					<artifactId>spring-cloud-vault-config-rabbitmq</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
 		<profile>
 			<id>docs</id>
 			<build>
