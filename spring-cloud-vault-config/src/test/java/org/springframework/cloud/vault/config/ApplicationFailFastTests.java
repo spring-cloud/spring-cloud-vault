@@ -23,7 +23,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for fail fast option.
