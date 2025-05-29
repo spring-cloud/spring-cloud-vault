@@ -37,6 +37,7 @@ import org.springframework.vault.authentication.AwsIamAuthentication;
 import org.springframework.vault.authentication.AwsIamAuthenticationOptions;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.ClientCertificateAuthentication;
+import org.springframework.vault.authentication.GitHubAuthentication;
 import org.springframework.vault.authentication.PcfAuthentication;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.support.VaultToken;
@@ -51,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  *
  * @author Mark Paluch
  * @author Quincy Conduff
+ * @author Issam El-atif
  */
 public class ClientAuthenticationFactoryUnitTests {
 
@@ -188,6 +190,20 @@ public class ClientAuthenticationFactoryUnitTests {
 
 		assertThatThrownBy(() -> ClientAuthenticationFactory.getAppRoleAuthenticationOptions(properties))
 			.isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	public void shouldSupportGitHubAuthentication() throws IOException {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.GITHUB);
+		properties.setToken("token");
+
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate())
+			.createClientAuthentication();
+
+		assertThat(clientAuthentication).isInstanceOf(GitHubAuthentication.class);
 	}
 
 	@Test
