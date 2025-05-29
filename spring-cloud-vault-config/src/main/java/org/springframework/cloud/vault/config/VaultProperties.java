@@ -132,6 +132,8 @@ public class VaultProperties implements EnvironmentAware {
 
 	private PcfProperties pcf = new PcfProperties();
 
+	private GithubProperties github = new GithubProperties();
+
 	private Ssl ssl = new Ssl();
 
 	private Config config = new Config();
@@ -310,6 +312,14 @@ public class VaultProperties implements EnvironmentAware {
 		this.gcpIam = gcpIam;
 	}
 
+	public GithubProperties getGithub() {
+		return this.github;
+	}
+
+	public void setGithub(GithubProperties github) {
+		this.github = github;
+	}
+
 	public KubernetesProperties getKubernetes() {
 		return this.kubernetes;
 	}
@@ -371,7 +381,7 @@ public class VaultProperties implements EnvironmentAware {
 	 */
 	public enum AuthenticationMethod {
 
-		APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, KUBERNETES, NONE, PCF, TOKEN;
+		APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, GITHUB, KUBERNETES, NONE, PCF, TOKEN;
 
 	}
 
@@ -383,7 +393,7 @@ public class VaultProperties implements EnvironmentAware {
 	public static class Reactive {
 
 		/**
-		 * Flag to indicate that reactive discovery is enabled
+		 * Flag to indicate that reactive discovery is enabled.
 		 */
 		private boolean enabled = true;
 
@@ -927,6 +937,39 @@ public class VaultProperties implements EnvironmentAware {
 
 		public void setEncodedKey(String encodedKey) {
 			this.encodedKey = encodedKey;
+		}
+
+	}
+
+	/**
+	 * GitHub properties.
+	 */
+	public static class GithubProperties {
+
+		/**
+		 * Mount path of the GitHub authentication backend.
+		 */
+		private String githubPath = "github";
+
+		/**
+		 * GitHub personal token.
+		 */
+		private String token;
+
+		public String getGithubPath() {
+			return githubPath;
+		}
+
+		public void setGithubPath(String githubPath) {
+			this.githubPath = githubPath;
+		}
+
+		public String getToken() {
+			return token;
+		}
+
+		public void setToken(String token) {
+			this.token = token;
 		}
 
 	}
