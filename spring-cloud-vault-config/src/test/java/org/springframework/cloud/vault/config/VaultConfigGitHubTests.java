@@ -21,29 +21,29 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.MockedConstruction;
 import org.mockito.internal.creation.MockSettingsImpl;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.vault.util.VaultRule;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.Policy;
 import org.springframework.vault.support.Policy.BuiltinCapabilities;
 import org.springframework.vault.support.Policy.Rule;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Answers.RETURNS_MOCKS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
@@ -54,12 +54,11 @@ import static org.mockito.Mockito.when;
  *
  * @author Issam El-atif
  */
-@SpringBootTest(classes = VaultConfigGitHubTests.TestApplication.class,
-		properties = { "spring.cloud.vault.authentication=github",
-				"spring.cloud.vault.application-name=VaultConfigGitHubTests", "spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigGitHubTests {
 
-	@BeforeAll
+	private ConfigurableApplicationContext context;
+
+	@BeforeClass
 	public static void beforeClass() throws IOException {
 
 		VaultRule vaultRule = new VaultRule();
@@ -100,51 +99,76 @@ public class VaultConfigGitHubTests {
 		githubConfig.put("token_policies", "testpolicy");
 
 		vaultOperations.write("auth/github/config", githubConfig);
+	}
 
+	@After
+	public void after() {
+		if (this.context != null) {
+			this.context.close();
+		}
+	}
+
+	@Test
+	public void authenticateWithPropertyToken() {
+		SpringApplication app = new SpringApplication(TestConfig.class);
+		app.setWebApplicationType(WebApplicationType.NONE);
+		this.context = app.run("--spring.cloud.vault.authentication=github",
+				"--spring.cloud.vault.application-name=VaultConfigGitHubTests", "--spring.cloud.bootstrap.enabled=true",
+				"--spring.cloud.vault.github.token=gho_00000000-0000-0000-0000-000000000000");
+
+		assertThat(this.context.getEnvironment().getProperty("vault.value")).isEqualTo("foo");
+
+	}
+
+	@Test
+	public void authenticateWithGithubCliToken() {
 		// Mock Process for gh cli calls
-		mockConstruction(ProcessBuilder.class, context -> new MockSettingsImpl<>().defaultAnswer(RETURNS_MOCKS),
-				(builderMock, context) -> {
+		MockedConstruction<ProcessBuilder> processBuilderMockedConstruction = mockConstruction(ProcessBuilder.class,
+				context -> new MockSettingsImpl<>().defaultAnswer(RETURNS_MOCKS), (builderMock, context) -> {
 					Process processMock = mock(Process.class);
 					when(builderMock.start()).thenReturn(processMock);
-					when(processMock.waitFor(1L, TimeUnit.SECONDS)).thenReturn(true);
+					when(processMock.waitFor()).thenReturn(0);
 					when(processMock.getInputStream())
 						.thenReturn(new ByteArrayInputStream("gho_00000000-0000-0000-0000-000000000000".getBytes()));
 				});
+
+		SpringApplication app = new SpringApplication(TestConfig.class);
+		app.setWebApplicationType(WebApplicationType.NONE);
+		this.context = app.run("--spring.cloud.vault.authentication=github",
+				"--spring.cloud.vault.application-name=VaultConfigGitHubTests",
+				"--spring.cloud.bootstrap.enabled=true");
+
+		assertThat(this.context.getEnvironment().getProperty("vault.value")).isEqualTo("foo");
+
+		processBuilderMockedConstruction.close();
 	}
 
-	@Nested
-	@TestPropertySource(properties = { "spring.cloud.vault.github.token=gho_00000000-0000-0000-0000-000000000000" })
-	class GitHubTokenSuppliedByPropertyTest {
+	@Test
+	public void authenticationFailWhenNoTokenProvided() {
+		MockedConstruction<ProcessBuilder> processBuilderMockedConstruction = mockConstruction(ProcessBuilder.class,
+				context -> new MockSettingsImpl<>().defaultAnswer(RETURNS_MOCKS), (builderMock, context) -> {
+					Process processMock = mock(Process.class);
+					when(builderMock.start()).thenReturn(processMock);
+					// GitHub cli not installed return exitcode=1
+					when(processMock.waitFor()).thenReturn(1);
+				});
 
-		@Value("${vault.value}")
-		String configValue;
+		SpringApplication app = new SpringApplication(TestConfig.class);
+		app.setWebApplicationType(WebApplicationType.NONE);
 
-		@Test
-		void contextLoads() {
-			assertThat(configValue).isEqualTo("foo");
-		}
+		assertThatThrownBy(() -> app.run("--spring.cloud.vault.authentication=github",
+				"--spring.cloud.vault.application-name=VaultConfigGitHubTests",
+				"--spring.cloud.bootstrap.enabled=true"))
+			.getRootCause()
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessage("Cannot create authentication mechanism for GITHUB. This method requires a Token "
+					+ "supplied by spring.cloud.vault.token or GitHub CLI.");
 
+		processBuilderMockedConstruction.close();
 	}
 
-	@Nested
-	class GitHubTokenSuppliedByGhCliTest {
-
-		@Value("${vault.value}")
-		String configValue;
-
-		@Test
-		void contextLoads() {
-			assertThat(configValue).isEqualTo("foo");
-		}
-
-	}
-
-	@SpringBootApplication
-	public static class TestApplication {
-
-		public static void main(String[] args) {
-			SpringApplication.run(TestApplication.class, args);
-		}
+	@TestConfiguration
+	public static class TestConfig {
 
 	}
 

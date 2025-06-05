@@ -197,7 +197,7 @@ public class ClientAuthenticationFactoryUnitTests {
 
 		VaultProperties properties = new VaultProperties();
 		properties.setAuthentication(VaultProperties.AuthenticationMethod.GITHUB);
-		properties.setToken("token");
+		properties.getGithub().setToken("token");
 
 		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
 				new RestTemplate())
