@@ -20,14 +20,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.boot.system.SystemProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AppRoleProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AwsIamProperties;
@@ -35,9 +33,6 @@ import org.springframework.cloud.vault.config.VaultProperties.AzureMsiProperties
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.authentication.AppIdAuthentication;
-import org.springframework.vault.authentication.AppIdAuthenticationOptions;
-import org.springframework.vault.authentication.AppIdUserIdMechanism;
 import org.springframework.vault.authentication.AppRoleAuthentication;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.AppRoleAuthenticationOptionsBuilder;
@@ -59,15 +54,12 @@ import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
 import org.springframework.vault.authentication.GcpComputeAuthentication;
 import org.springframework.vault.authentication.GcpComputeAuthenticationOptions;
 import org.springframework.vault.authentication.GcpComputeAuthenticationOptions.GcpComputeAuthenticationOptionsBuilder;
-import org.springframework.vault.authentication.IpAddressUserId;
 import org.springframework.vault.authentication.KubernetesAuthentication;
 import org.springframework.vault.authentication.KubernetesAuthenticationOptions;
 import org.springframework.vault.authentication.KubernetesServiceAccountTokenFile;
-import org.springframework.vault.authentication.MacAddressUserId;
 import org.springframework.vault.authentication.PcfAuthentication;
 import org.springframework.vault.authentication.PcfAuthenticationOptions;
 import org.springframework.vault.authentication.ResourceCredentialSupplier;
-import org.springframework.vault.authentication.StaticUserId;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
@@ -113,9 +105,6 @@ class ClientAuthenticationFactory {
 
 		switch (this.vaultProperties.getAuthentication()) {
 
-			case APPID:
-				return appIdAuthentication(this.vaultProperties);
-
 			case APPROLE:
 				return appRoleAuthentication(this.vaultProperties);
 
@@ -137,9 +126,6 @@ class ClientAuthenticationFactory {
 			case GCP_GCE:
 				return gcpGceAuthentication(this.vaultProperties);
 
-			case GCP_IAM:
-				return gcpIamAuthentication(this.vaultProperties);
-
 			case KUBERNETES:
 				return kubernetesAuthentication(this.vaultProperties);
 
@@ -152,51 +138,6 @@ class ClientAuthenticationFactory {
 
 		throw new UnsupportedOperationException(
 				String.format("Client authentication %s not supported", this.vaultProperties.getAuthentication()));
-	}
-
-	private ClientAuthentication appIdAuthentication(VaultProperties vaultProperties) {
-
-		VaultProperties.AppIdProperties appId = vaultProperties.getAppId();
-		Assert.hasText(appId.getUserId(), "UserId (spring.cloud.vault.app-id.user-id) must not be empty");
-
-		AppIdAuthenticationOptions authenticationOptions = AppIdAuthenticationOptions.builder()
-			.appId(vaultProperties.getApplicationName()) //
-			.path(appId.getAppIdPath()) //
-			.userIdMechanism(getAppIdMechanism(appId))
-			.build();
-
-		return new AppIdAuthentication(authenticationOptions, this.restOperations);
-	}
-
-	private AppIdUserIdMechanism getAppIdMechanism(VaultProperties.AppIdProperties appId) {
-
-		try {
-			Class<?> userIdClass = ClassUtils.forName(appId.getUserId(), null);
-			return (AppIdUserIdMechanism) BeanUtils.instantiateClass(userIdClass);
-		}
-		catch (ClassNotFoundException ex) {
-
-			switch (appId.getUserId().toUpperCase(Locale.ROOT)) {
-
-				case VaultProperties.AppIdProperties.IP_ADDRESS:
-					return new IpAddressUserId();
-
-				case VaultProperties.AppIdProperties.MAC_ADDRESS:
-
-					if (StringUtils.hasText(appId.getNetworkInterface())) {
-						try {
-							return new MacAddressUserId(Integer.parseInt(appId.getNetworkInterface()));
-						}
-						catch (NumberFormatException e) {
-							return new MacAddressUserId(appId.getNetworkInterface());
-						}
-					}
-
-					return new MacAddressUserId();
-				default:
-					return new StaticUserId(appId.getUserId());
-			}
-		}
 	}
 
 	private ClientAuthentication appRoleAuthentication(VaultProperties vaultProperties) {
@@ -352,20 +293,6 @@ class ClientAuthenticationFactory {
 		}
 
 		return new GcpComputeAuthentication(builder.build(), this.restOperations, this.externalRestOperations);
-	}
-
-	private ClientAuthentication gcpIamAuthentication(VaultProperties vaultProperties) {
-
-		if (googleCredentialPresent) {
-			return GcpIamAuthenticationFactory.create(vaultProperties, this.restOperations);
-		}
-
-		if (googleCredentialsPresent) {
-			return GcpIamCredentialsAuthenticationFactory.create(vaultProperties, this.restOperations);
-		}
-
-		throw new IllegalStateException(
-				"Cannot create authentication mechanism for GCP IAM. This method requires one of the following dependencies: google-auth-library-oauth2-http or google-api-client (deprecated).");
 	}
 
 	private ClientAuthentication kubernetesAuthentication(VaultProperties vaultProperties) {

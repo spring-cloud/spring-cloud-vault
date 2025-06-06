@@ -1,4 +1,3 @@
 # Bootstrap Configuration
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
-org.springframework.cloud.vault.config.VaultConfigAppIdCustomMechanismTests.BootstrapConfiguration,\
 org.springframework.cloud.vault.config.VaultConfigWithVaultConfigurerTests.ConfigurerBootstrapApplication
