@@ -54,6 +54,8 @@ import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
 import org.springframework.vault.authentication.GcpComputeAuthentication;
 import org.springframework.vault.authentication.GcpComputeAuthenticationOptions;
 import org.springframework.vault.authentication.GcpComputeAuthenticationOptions.GcpComputeAuthenticationOptionsBuilder;
+import org.springframework.vault.authentication.GitHubAuthentication;
+import org.springframework.vault.authentication.GitHubAuthenticationOptions;
 import org.springframework.vault.authentication.KubernetesAuthentication;
 import org.springframework.vault.authentication.KubernetesAuthenticationOptions;
 import org.springframework.vault.authentication.KubernetesServiceAccountTokenFile;
@@ -74,6 +76,7 @@ import software.amazon.awssdk.regions.Region;
  * @author Kevin Holditch
  * @author Michal Budzyn
  * @author Quincy Conduff
+ * @author Issam El-atif
  * @since 1.1
  */
 class ClientAuthenticationFactory {
@@ -125,6 +128,9 @@ class ClientAuthenticationFactory {
 
 			case GCP_GCE:
 				return gcpGceAuthentication(this.vaultProperties);
+
+			case GITHUB:
+				return gitHubAuthentication(this.vaultProperties);
 
 			case KUBERNETES:
 				return kubernetesAuthentication(this.vaultProperties);
@@ -293,6 +299,63 @@ class ClientAuthenticationFactory {
 		}
 
 		return new GcpComputeAuthentication(builder.build(), this.restOperations, this.externalRestOperations);
+	}
+
+	private ClientAuthentication gitHubAuthentication(VaultProperties vaultProperties) {
+		GitHubAuthenticationOptions options = GitHubAuthenticationOptions.builder()
+			.path(vaultProperties.getGithub().getGithubPath())
+			.token(getGitHubToken(vaultProperties))
+			.build();
+		return new GitHubAuthentication(options, this.restOperations);
+	}
+
+	private String getGitHubToken(VaultProperties vaultProperties) {
+
+		String token = vaultProperties.getGithub().getToken();
+		if (StringUtils.hasText(token)) {
+			return token;
+		}
+
+		// Try to get token from gh cli if installed
+		if (isGhCliInstalled()) {
+			try {
+				ProcessBuilder processBuilder = new ProcessBuilder("gh", "auth", "token");
+				Process process = processBuilder.start();
+				int exitCode = process.waitFor();
+				if (exitCode != 0) {
+					String error = new String(process.getErrorStream().readAllBytes());
+					throw new IllegalStateException(
+							String.format("Could not retrieve GitHub token using GitHub CLI: %s", error));
+				}
+				return new String(process.getInputStream().readAllBytes()).strip();
+			}
+			catch (Exception ex) {
+				if (Thread.currentThread().isInterrupted()) {
+					Thread.currentThread().interrupt();
+				}
+				throw new IllegalStateException("Could not retrieve GitHub token using GitHub CLI", ex);
+			}
+		}
+		else {
+			throw new IllegalStateException(
+					"Cannot create authentication mechanism for GITHUB. This method requires a Token supplied by spring.cloud.vault.token or GitHub CLI.");
+		}
+	}
+
+	private boolean isGhCliInstalled() {
+		try {
+			ProcessBuilder builder = new ProcessBuilder("gh", "--version");
+			builder.redirectErrorStream(true);
+			Process process = builder.start();
+			int exitCode = process.waitFor();
+			return exitCode == 0;
+		}
+		catch (Exception e) {
+			if (Thread.currentThread().isInterrupted()) {
+				Thread.currentThread().interrupt();
+			}
+			return false;
+		}
 	}
 
 	private ClientAuthentication kubernetesAuthentication(VaultProperties vaultProperties) {
