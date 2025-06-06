@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.vault.config;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.DefaultBootstrapContext;
 import org.springframework.boot.context.config.ConfigData;

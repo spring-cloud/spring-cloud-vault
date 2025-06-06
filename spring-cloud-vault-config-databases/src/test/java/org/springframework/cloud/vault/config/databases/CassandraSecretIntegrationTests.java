@@ -20,8 +20,8 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.vault.config.VaultConfigOperations;
 import org.springframework.cloud.vault.config.VaultConfigTemplate;
@@ -64,7 +64,7 @@ public class CassandraSecretIntegrationTests extends IntegrationTestSupport {
 	/**
 	 * Initialize cassandra secret backend.
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(CASSANDRA_HOST, CASSANDRA_PORT)));

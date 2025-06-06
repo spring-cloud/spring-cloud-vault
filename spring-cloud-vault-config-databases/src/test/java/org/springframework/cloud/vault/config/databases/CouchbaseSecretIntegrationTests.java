@@ -20,8 +20,8 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.vault.config.VaultConfigOperations;
 import org.springframework.cloud.vault.config.VaultConfigTemplate;
@@ -57,7 +57,7 @@ public class CouchbaseSecretIntegrationTests extends IntegrationTestSupport {
 	/**
 	 * Initialize couchbase secret backend.
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(COUCHBASE_HOST, COUCHBASE_PORT)));

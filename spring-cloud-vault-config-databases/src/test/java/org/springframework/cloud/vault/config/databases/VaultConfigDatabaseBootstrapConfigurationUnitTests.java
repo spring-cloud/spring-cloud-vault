@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.vault.config.databases;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.vault.config.SecretBackendMetadata;
 

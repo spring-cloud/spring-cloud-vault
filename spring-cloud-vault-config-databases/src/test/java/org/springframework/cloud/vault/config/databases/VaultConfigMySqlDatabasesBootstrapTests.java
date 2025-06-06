@@ -24,9 +24,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +35,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.cloud.vault.util.Version;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultOperations;
 
 import static org.junit.Assume.assumeTrue;
@@ -49,7 +47,7 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = VaultConfigMySqlDatabasesBootstrapTests.TestApplication.class, properties = {
 		"spring.cloud.vault.databases.mysql.enabled=true", "spring.cloud.vault.databases.mysql.role=readonly",
 		"spring.datasource.url=jdbc:mysql://localhost:3306/mysql?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true",
@@ -78,7 +76,7 @@ public class VaultConfigMySqlDatabasesBootstrapTests {
 	/**
 	 * Initialize the mysql secret backend.
 	 */
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();

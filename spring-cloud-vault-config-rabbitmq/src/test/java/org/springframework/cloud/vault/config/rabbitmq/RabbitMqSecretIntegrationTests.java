@@ -21,9 +21,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.vault.config.VaultConfigTemplate;
 import org.springframework.cloud.vault.config.VaultProperties;
@@ -43,7 +43,7 @@ import static org.springframework.cloud.vault.config.rabbitmq.VaultConfigRabbitM
  *
  * @author Mark Paluch
  */
-@Ignore
+@Disabled
 public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 
 	private static final int RABBITMQ_HTTP_MANAGEMENT_PORT = 15672;
@@ -68,7 +68,7 @@ public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 	/**
 	 * Initialize the rabbitmq secret backend.
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT)));

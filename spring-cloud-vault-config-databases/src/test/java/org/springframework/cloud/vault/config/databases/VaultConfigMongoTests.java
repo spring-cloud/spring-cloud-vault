@@ -26,9 +26,8 @@ import java.util.Map;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,7 +37,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.cloud.vault.util.Version;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultOperations;
 
 import static org.junit.Assume.assumeTrue;
@@ -51,7 +49,7 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = VaultConfigMongoTests.TestApplication.class,
 		properties = { "spring.cloud.vault.mongodb.enabled=true", "spring.cloud.vault.mongodb.role=readonly",
 				"spring.data.mongodb.url=mongodb://localhost", "spring.data.mongodb.database=admin",
@@ -79,7 +77,7 @@ public class VaultConfigMongoTests {
 	/**
 	 * Initialize the mongo secret backend.
 	 */
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(MONGODB_HOST, MONGODB_PORT)));

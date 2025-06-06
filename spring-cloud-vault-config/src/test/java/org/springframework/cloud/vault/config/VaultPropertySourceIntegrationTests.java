@@ -18,8 +18,8 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
@@ -35,7 +35,7 @@ import static org.junit.Assume.assumeTrue;
  */
 public class VaultPropertySourceIntegrationTests extends IntegrationTestSupport {
 
-	@Before
+	@BeforeEach
 	public void before() {
 		prepare().getVaultOperations().write("secret/myapp", Collections.singletonMap("key", "value"));
 	}

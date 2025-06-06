@@ -19,8 +19,8 @@ package org.springframework.cloud.vault.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
@@ -38,7 +38,7 @@ public class KeyValueSecretIntegrationTests extends IntegrationTestSupport {
 
 	private VaultConfigOperations configOperations;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		this.vaultProperties.setFailFast(false);

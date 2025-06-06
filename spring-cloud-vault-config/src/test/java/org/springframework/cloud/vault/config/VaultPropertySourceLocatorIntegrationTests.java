@@ -18,9 +18,8 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -28,7 +27,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Ryan Hoegg
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = VaultPropertySourceLocatorIntegrationTests.TestApplication.class,
 		properties = { "spring.cloud.vault.kv.application-name=neuromancer,icebreaker",
 				"spring.cloud.bootstrap.enabled=false", "spring.config.import=vault://" })
@@ -52,7 +50,7 @@ public class VaultPropertySourceLocatorIntegrationTests extends IntegrationTestS
 	@Value("${icebreaker.value}")
 	String additionalValue;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();

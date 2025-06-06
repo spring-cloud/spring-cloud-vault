@@ -21,9 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.datastax.oss.driver.api.core.CqlSession;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +31,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +44,7 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = VaultConfigCassandraTests.TestApplication.class,
 		properties = { "spring.cloud.vault.cassandra.enabled=true", "spring.cloud.vault.cassandra.role=readonly",
 				"spring.data.cassandra.jmx-enabled=false", "spring.cloud.bootstrap.enabled=true" })
@@ -75,7 +73,7 @@ public class VaultConfigCassandraTests {
 	/**
 	 * Initialize the cassandra secret backend.
 	 */
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(CASSANDRA_HOST, CASSANDRA_PORT)));

@@ -20,8 +20,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.boot.DefaultBootstrapContext;
 import org.springframework.boot.context.config.ConfigDataLocation;
 import org.springframework.boot.context.config.ConfigDataLocationResolverContext;
@@ -50,7 +51,7 @@ public class VaultConfigDataLocationResolverUnitTests {
 
 	DefaultBootstrapContext bootstrapContext = new DefaultBootstrapContext();
 
-	@Before
+	@BeforeEach
 	public void before() {
 		when(this.contextMock.getBootstrapContext()).thenReturn(this.bootstrapContext);
 		when(this.contextMock.getBinder()).thenReturn(new Binder());

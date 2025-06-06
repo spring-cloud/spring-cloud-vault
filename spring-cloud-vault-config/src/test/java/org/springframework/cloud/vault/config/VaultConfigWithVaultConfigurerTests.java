@@ -18,9 +18,8 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -29,7 +28,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = VaultConfigWithVaultConfigurerTests.TestApplication.class, properties = {
 		"VaultConfigWithVaultConfigurerTests.custom.config=true", "spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigWithVaultConfigurerTests {
@@ -52,7 +50,7 @@ public class VaultConfigWithVaultConfigurerTests {
 	@Value("${vault.value}")
 	String configValue;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();

@@ -16,9 +16,8 @@
 
 package org.springframework.cloud.vault.config.aws;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -30,7 +29,6 @@ import org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrapConfigu
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,8 +38,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 // FIXME: 4.0.0
-@Ignore("NoClassDefFoundError: org/springframework/http/client/Netty4ClientHttpRequestFactory")
-@RunWith(SpringRunner.class)
+@Disabled("NoClassDefFoundError: org/springframework/http/client/Netty4ClientHttpRequestFactory")
+
 @SpringBootTest(classes = CustomBootstrapConfiguration.class,
 		properties = { "VaultConfigAwsBootstrapConfigurationTests.custom.config=true",
 				"spring.cloud.vault.aws.role=foo", "spring.cloud.bootstrap.enabled=true" })

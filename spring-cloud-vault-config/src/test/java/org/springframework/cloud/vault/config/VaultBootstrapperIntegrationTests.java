@@ -18,9 +18,9 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
@@ -41,7 +41,7 @@ public class VaultBootstrapperIntegrationTests extends IntegrationTestSupport {
 
 	private ConfigurableApplicationContext context;
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		this.vaultRule.prepare()
@@ -69,7 +69,7 @@ public class VaultBootstrapperIntegrationTests extends IntegrationTestSupport {
 		assertThat(this.context.getEnvironment().getProperty("key")).isEqualTo("customized");
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		if (this.context != null) {
 			this.context.close();

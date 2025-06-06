@@ -60,7 +60,6 @@ class VaultHealthIndicatorAutoConfigurationTests {
 		this.contextRunner.withUserConfiguration(ReactiveConfiguration.class).run(context -> {
 			assertThat(context).hasBean("vaultReactiveHealthIndicator");
 		});
-
 	}
 
 	@Test

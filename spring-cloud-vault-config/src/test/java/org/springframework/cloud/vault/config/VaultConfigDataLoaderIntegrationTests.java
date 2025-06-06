@@ -18,8 +18,8 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.fail;
  */
 public class VaultConfigDataLoaderIntegrationTests extends IntegrationTestSupport {
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		this.vaultRule.prepare()

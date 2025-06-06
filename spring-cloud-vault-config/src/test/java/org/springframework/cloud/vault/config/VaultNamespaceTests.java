@@ -23,10 +23,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assume;
-import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -35,7 +34,6 @@ import org.springframework.boot.actuate.health.Status;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.TestRestTemplateFactory;
 import org.springframework.cloud.vault.util.VaultRule;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.client.ClientHttpConnectorFactory;
@@ -57,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Integration tests for Vault's namespace feature.
  */
-@RunWith(SpringRunner.class)
+
 public class VaultNamespaceTests {
 
 	@ClassRule
@@ -78,7 +76,7 @@ public class VaultNamespaceTests {
 
 	String marketingToken;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		Assume.assumeTrue("Namespaces require enterprise version",
 				this.vaultRule.prepare().getVersion().isEnterprise());

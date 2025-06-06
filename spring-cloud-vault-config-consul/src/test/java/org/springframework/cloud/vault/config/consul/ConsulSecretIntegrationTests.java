@@ -20,8 +20,8 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.vault.config.VaultConfigOperations;
 import org.springframework.cloud.vault.config.VaultConfigTemplate;
@@ -53,7 +53,7 @@ public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 	/**
 	 * Initialize the consul secret backend.
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		assumeTrue(SetupConsul.isConsulAvailable());

@@ -23,10 +23,9 @@ import java.util.Map;
 
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +35,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.cloud.vault.util.Version;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultOperations;
 
 import static org.junit.Assume.assumeTrue;
@@ -49,11 +47,11 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = VaultConfigRabbitMqTests.TestApplication.class,
 		properties = { "spring.cloud.vault.rabbitmq.enabled=true", "spring.cloud.vault.rabbitmq.role=readonly",
 				"spring.rabbitmq.address=localhost", "spring.cloud.bootstrap.enabled=true" })
-@Ignore
+@Disabled
 public class VaultConfigRabbitMqTests {
 
 	private static final int RABBITMQ_HTTP_MANAGEMENT_PORT = 15672;
@@ -83,7 +81,7 @@ public class VaultConfigRabbitMqTests {
 	/**
 	 * Initialize the rabbitmq secret backend.
 	 */
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(RABBITMQ_HOST, RABBITMQ_HTTP_MANAGEMENT_PORT)));

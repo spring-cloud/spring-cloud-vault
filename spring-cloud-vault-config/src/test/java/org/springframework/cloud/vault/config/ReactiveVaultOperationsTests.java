@@ -20,9 +20,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.ReactiveVaultOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = ReactiveVaultOperationsTests.TestApplication.class,
 		properties = { "spring.cloud.vault.host=foo", "spring.cloud.vault.uri=https://localhost:8200",
 				"spring.cloud.bootstrap.enabled=true" })
@@ -54,7 +52,7 @@ public class ReactiveVaultOperationsTests {
 	@Autowired
 	ReactiveVaultOperations reactiveOperations;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();

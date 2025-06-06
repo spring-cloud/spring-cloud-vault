@@ -24,16 +24,14 @@ import com.ecwid.consul.v1.QueryParams;
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.agent.model.NewService;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultHealth;
 
@@ -45,9 +43,9 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(properties = { "spring.cloud.vault.discovery.enabled=true" })
-@Ignore("Consul discovery client is set up in the main context, no longer in the bootstrap context")
+@Disabled("Consul discovery client is set up in the main context, no longer in the bootstrap context")
 public class DiscoveryBootstrapConfigurationTests extends IntegrationTestSupport {
 
 	private static final String CONSUL_HOST = "localhost";
@@ -57,7 +55,7 @@ public class DiscoveryBootstrapConfigurationTests extends IntegrationTestSupport
 	@Autowired
 	VaultOperations vaultOperations;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(CONSUL_HOST, CONSUL_PORT)));

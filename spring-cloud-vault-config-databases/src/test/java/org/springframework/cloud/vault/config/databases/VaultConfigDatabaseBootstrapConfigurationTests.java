@@ -16,8 +16,7 @@
 
 package org.springframework.cloud.vault.config.databases;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,7 +29,6 @@ import org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBoots
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = CustomBootstrapConfiguration.class,
 		properties = { "VaultConfigDatabaseBootstrapConfigurationTests.custom.config=true",
 				"spring.cloud.vault.mysql.role=foo", "spring.cloud.vault.mysql.enabled=true",

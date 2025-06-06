@@ -20,16 +20,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.core.VaultOperations;
 
@@ -49,7 +47,7 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = VaultConfigAwsTests.TestApplication.class,
 		properties = { "spring.cloud.vault.aws.enabled=true", "spring.cloud.vault.aws.role=readonly",
 				"cloud.aws.region.auto=false", "cloud.aws.region.static=eu-west-1",
@@ -73,7 +71,7 @@ public class VaultConfigAwsTests {
 	/**
 	 * Initialize the aws secret backend.
 	 */
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		assumeTrue(StringUtils.hasText(AWS_ACCESS_KEY) && StringUtils.hasText(AWS_SECRET_KEY));

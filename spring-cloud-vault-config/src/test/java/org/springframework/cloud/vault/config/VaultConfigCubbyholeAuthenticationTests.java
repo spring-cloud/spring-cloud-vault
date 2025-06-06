@@ -18,10 +18,9 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -31,7 +30,6 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.cloud.vault.util.Version;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 
@@ -48,7 +46,7 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = VaultConfigCubbyholeAuthenticationTests.TestApplication.class,
 		properties = { "spring.cloud.vault.authentication=cubbyhole",
 				"spring.cloud.vault.kv.applicationName=VaultConfigCubbyholeAuthenticationTests",
@@ -58,7 +56,7 @@ public class VaultConfigCubbyholeAuthenticationTests {
 	@Value("${vault.value}")
 	String configValue;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();
@@ -83,7 +81,7 @@ public class VaultConfigCubbyholeAuthenticationTests {
 		System.setProperty("spring.cloud.vault.token", initialToken);
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() {
 		System.clearProperty("spring.cloud.vault.token");
 	}

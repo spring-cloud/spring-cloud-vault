@@ -17,17 +17,14 @@
 package org.springframework.cloud.vault.config.databases;
 
 import java.net.InetSocketAddress;
-
-import com.couchbase.client.java.Cluster;
-import com.couchbase.client.core.error.UnambiguousTimeoutException;
-
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.time.Duration;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.couchbase.client.core.error.UnambiguousTimeoutException;
+import com.couchbase.client.java.Cluster;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -36,9 +33,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.cloud.vault.util.Version;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultOperations;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -49,7 +46,6 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Francis Hitchens
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigCouchbaseDatabaseTests.TestApplication.class,
 		properties = { "spring.cloud.vault.couchbase.enabled=true", "spring.config.import=vault://",
 				"spring.cloud.vault.couchbase.role=couchbase-readonly",
@@ -71,7 +67,7 @@ public class VaultConfigCouchbaseDatabaseTests {
 	/**
 	 * Initialize the couchbase secret backend.
 	 */
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();
@@ -110,12 +106,16 @@ public class VaultConfigCouchbaseDatabaseTests {
 		this.cluster.disconnect();
 	}
 
-	@Test(expected = UnambiguousTimeoutException.class)
+	@Test
 	public void shouldFailConnectConnection() throws UnambiguousTimeoutException {
 
 		this.cluster = Cluster.connect("127.0.0.1", this.username, "fake.pwd");
-		this.cluster.waitUntilReady(Duration.ofSeconds(5));
-		this.cluster.disconnect();
+
+		assertThatExceptionOfType(UnambiguousTimeoutException.class).isThrownBy(() -> {
+
+			this.cluster.waitUntilReady(Duration.ofSeconds(5));
+			this.cluster.disconnect();
+		});
 	}
 
 	@SpringBootApplication

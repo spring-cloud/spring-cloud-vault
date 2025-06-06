@@ -21,9 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.couchbase.client.java.Cluster;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +32,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.cloud.vault.util.Version;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +45,7 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = VaultConfigCouchbaseTests.TestApplication.class,
 		properties = { "spring.cloud.vault.couchbase.enabled=true", "spring.config.import=vault://",
 				"spring.cloud.vault.couchbase.role=couchbase-readonly",
@@ -70,7 +68,7 @@ public class VaultConfigCouchbaseTests {
 	/**
 	 * Initialize the couchbase secret backend.
 	 */
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();

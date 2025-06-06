@@ -16,11 +16,11 @@
 
 package org.springframework.cloud.vault.config;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
  *
  * @author Mark Paluch
  */
-@RunWith(MockitoJUnitRunner.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class VaultHealthIndicatorUnitTests {
 
 	@Mock
@@ -51,7 +51,7 @@ public class VaultHealthIndicatorUnitTests {
 
 	VaultHealthIndicator healthIndicator;
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		this.healthIndicator = new VaultHealthIndicator(this.vaultOperations);

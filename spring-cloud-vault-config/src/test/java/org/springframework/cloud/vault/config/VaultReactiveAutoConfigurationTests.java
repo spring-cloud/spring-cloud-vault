@@ -19,7 +19,7 @@ package org.springframework.cloud.vault.config;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 

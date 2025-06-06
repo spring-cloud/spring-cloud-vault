@@ -23,9 +23,9 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
@@ -51,7 +51,7 @@ public class VaultConfigConsulConfigDataTests extends IntegrationTestSupport {
 
 	private ConfigurableApplicationContext context;
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		assumeTrue(SetupConsul.isConsulAvailable());
@@ -96,7 +96,7 @@ public class VaultConfigConsulConfigDataTests extends IntegrationTestSupport {
 		assertThat(config.events).isNotEmpty();
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		if (this.context != null) {
 			this.context.close();

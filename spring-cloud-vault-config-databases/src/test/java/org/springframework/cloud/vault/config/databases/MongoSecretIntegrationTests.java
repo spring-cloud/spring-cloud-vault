@@ -21,8 +21,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.vault.config.VaultConfigOperations;
 import org.springframework.cloud.vault.config.VaultConfigTemplate;
@@ -63,7 +63,7 @@ public class MongoSecretIntegrationTests extends IntegrationTestSupport {
 	/**
 	 * Initialize the mongodb secret backend.
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(MONGODB_HOST, MONGODB_PORT)));

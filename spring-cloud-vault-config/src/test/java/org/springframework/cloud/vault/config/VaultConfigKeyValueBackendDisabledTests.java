@@ -18,9 +18,8 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Collections;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -28,7 +27,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.core.env.Environment;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = VaultConfigKeyValueBackendDisabledTests.TestApplication.class,
 		properties = "spring.cloud.vault.kv.enabled=false")
 public class VaultConfigKeyValueBackendDisabledTests {
@@ -50,7 +48,7 @@ public class VaultConfigKeyValueBackendDisabledTests {
 	@Autowired
 	Environment environment;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();

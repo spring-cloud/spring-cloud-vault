@@ -20,9 +20,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +33,6 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.web.client.RestTemplate;
 
@@ -50,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = VaultConfigLoaderTests.TestApplication.class,
 		properties = { "spring.cloud.vault.uri=https://localhost:8200",
 				"spring.cloud.vault.application-name=config-data", "spring.config.import=vault:" })
@@ -65,7 +63,7 @@ public class VaultConfigLoaderTests {
 	@Autowired
 	ApplicationContext applicationContext;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();

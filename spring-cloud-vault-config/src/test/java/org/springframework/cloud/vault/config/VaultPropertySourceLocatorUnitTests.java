@@ -18,11 +18,11 @@ package org.springframework.cloud.vault.config;
 
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.CompositePropertySource;
@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Ryan Hoegg
  * @author Mark Paluch
  */
-@RunWith(MockitoJUnitRunner.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class VaultPropertySourceLocatorUnitTests {
 
 	private VaultPropertySourceLocator propertySourceLocator;
@@ -50,7 +50,7 @@ public class VaultPropertySourceLocatorUnitTests {
 
 	private VaultKeyValueBackendProperties properties = new VaultKeyValueBackendProperties();
 
-	@Before
+	@BeforeEach
 	public void before() {
 		this.propertySourceLocator = new VaultPropertySourceLocator(this.operations, new VaultProperties(),
 				VaultPropertySourceLocatorSupport.createConfiguration(this.properties));

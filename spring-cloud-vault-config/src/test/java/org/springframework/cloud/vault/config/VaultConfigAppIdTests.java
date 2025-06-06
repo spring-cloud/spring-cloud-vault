@@ -20,9 +20,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -30,7 +29,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.VaultRule;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.authentication.IpAddressUserId;
 import org.springframework.vault.core.VaultOperations;
 
@@ -46,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = VaultConfigAppIdTests.TestApplication.class,
 		properties = { "spring.cloud.vault.authentication=appid", "spring.cloud.vault.app-id.user-id=IP_ADDRESS",
 				"spring.cloud.vault.application-name=VaultConfigAppIdTests", "spring.cloud.bootstrap.enabled=true" })
@@ -55,7 +53,7 @@ public class VaultConfigAppIdTests {
 	@Value("${vault.value}")
 	String configValue;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();

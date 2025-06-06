@@ -23,16 +23,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.assertj.core.util.Files;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.VaultRule;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultMount;
 
@@ -47,7 +46,6 @@ import static org.springframework.cloud.vault.util.Settings.findWorkDir;
  *
  * @author Quincy Conduff
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = VaultConfigTlsCertAuthenticationMountPathTests.TestApplication.class, properties = {
 		"spring.cloud.vault.authentication=CERT", "spring.cloud.vault.ssl.key-store=file:../work/client-cert.jks",
 		"spring.cloud.vault.ssl.key-store-password=changeit", "spring.cloud.vault.ssl.cert-auth-path=nonstandard",
@@ -58,7 +56,7 @@ public class VaultConfigTlsCertAuthenticationMountPathTests {
 	@Value("${vault.value}")
 	String configValue;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		VaultRule vaultRule = new VaultRule();

@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.vault.config;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -62,7 +62,7 @@ public class ApplicationFailFastTests {
 	}
 
 	@Test
-	@Ignore("Fails because of method errors in Discovery health check")
+	@Disabled("Fails because of method errors in Discovery health check")
 	public void contextLoadsWithoutFailFast() {
 		new SpringApplicationBuilder().sources(ApplicationFailFastTests.class)
 			.run("--server.port=0", "--spring.cloud.bootstrap.enabled=true", "--spring.cloud.vault.failFast=false",

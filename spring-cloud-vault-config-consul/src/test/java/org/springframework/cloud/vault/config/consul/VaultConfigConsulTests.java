@@ -22,9 +22,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +40,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
@@ -59,7 +57,7 @@ import static org.junit.Assume.assumeTrue;
  * @author Mark Paluch
  * @author Spencer Gibb
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = VaultConfigConsulTests.TestApplication.class,
 		properties = { "spring.cloud.vault.consul.enabled=true", "spring.cloud.vault.consul.role=readonly",
 				"spring.cloud.consul.discovery.catalog-services-watch.enabled=false",
@@ -97,7 +95,7 @@ public class VaultConfigConsulTests {
 	/**
 	 * Initialize the consul secret backend.
 	 */
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 
 		assumeTrue(CanConnect.to(new InetSocketAddress(CONSUL_HOST, CONSUL_PORT)));

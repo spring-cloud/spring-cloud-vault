@@ -23,7 +23,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.core.SdkSystemSetting;
+import software.amazon.awssdk.regions.Region;
+
 import org.springframework.boot.system.SystemProperties;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -38,9 +41,6 @@ import org.springframework.vault.authentication.PcfAuthentication;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
-
-import software.amazon.awssdk.core.SdkSystemSetting;
-import software.amazon.awssdk.regions.Region;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
