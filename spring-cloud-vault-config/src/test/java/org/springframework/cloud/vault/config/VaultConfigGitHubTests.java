@@ -26,9 +26,9 @@ import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.After;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.internal.creation.MockSettingsImpl;
 
@@ -58,7 +58,7 @@ public class VaultConfigGitHubTests {
 
 	private ConfigurableApplicationContext context;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() throws IOException {
 
 		VaultRule vaultRule = new VaultRule();
@@ -101,7 +101,7 @@ public class VaultConfigGitHubTests {
 		vaultOperations.write("auth/github/config", githubConfig);
 	}
 
-	@After
+	@AfterEach
 	public void after() {
 		if (this.context != null) {
 			this.context.close();
@@ -109,7 +109,7 @@ public class VaultConfigGitHubTests {
 	}
 
 	@Test
-	public void authenticateWithPropertyToken() {
+	void authenticateWithPropertyToken() {
 		SpringApplication app = new SpringApplication(TestConfig.class);
 		app.setWebApplicationType(WebApplicationType.NONE);
 		this.context = app.run("--spring.cloud.vault.authentication=github",
@@ -121,7 +121,7 @@ public class VaultConfigGitHubTests {
 	}
 
 	@Test
-	public void authenticateWithGithubCliToken() {
+	void authenticateWithGithubCliToken() {
 		// Mock Process for gh cli calls
 		MockedConstruction<ProcessBuilder> processBuilderMockedConstruction = mockConstruction(ProcessBuilder.class,
 				context -> new MockSettingsImpl<>().defaultAnswer(RETURNS_MOCKS), (builderMock, context) -> {
@@ -144,7 +144,7 @@ public class VaultConfigGitHubTests {
 	}
 
 	@Test
-	public void authenticationFailWhenNoTokenProvided() {
+	void authenticationFailWhenNoTokenProvided() {
 		MockedConstruction<ProcessBuilder> processBuilderMockedConstruction = mockConstruction(ProcessBuilder.class,
 				context -> new MockSettingsImpl<>().defaultAnswer(RETURNS_MOCKS), (builderMock, context) -> {
 					Process processMock = mock(Process.class);
@@ -169,7 +169,6 @@ public class VaultConfigGitHubTests {
 
 	@TestConfiguration
 	public static class TestConfig {
-
 	}
 
 }
