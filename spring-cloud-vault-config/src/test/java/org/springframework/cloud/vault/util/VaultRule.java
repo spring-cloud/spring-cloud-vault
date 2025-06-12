@@ -20,7 +20,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import org.junit.rules.ExternalResource;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
@@ -30,12 +31,7 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
 
-/**
- * Vault rule to ensure a running and prepared Vault.
- *
- * @author Mark Paluch
- */
-public class VaultRule extends ExternalResource {
+public class VaultRule implements BeforeEachCallback {
 
 	public static final Version VERSIONING_INTRODUCED_WITH = Version.parse("0.10.0");
 
@@ -76,6 +72,10 @@ public class VaultRule extends ExternalResource {
 	}
 
 	@Override
+	public void beforeEach(ExtensionContext context) {
+		before();
+	}
+
 	public void before() {
 
 		try (Socket socket = new Socket()) {
@@ -83,9 +83,9 @@ public class VaultRule extends ExternalResource {
 			socket.connect(new InetSocketAddress(InetAddress.getByName("localhost"), this.vaultEndpoint.getPort()));
 		}
 		catch (Exception ex) {
-			throw new IllegalStateException(
-					String.format("Vault is not running on localhost:%d which is required to run a test using @Rule %s",
-							this.vaultEndpoint.getPort(), getClass().getSimpleName()));
+			throw new IllegalStateException(String.format(
+					"Vault is not running on localhost:%d which is required to run a test using VaultExtension %s",
+					this.vaultEndpoint.getPort(), getClass().getSimpleName()));
 		}
 
 		if (!this.prepareVault.isAvailable()) {

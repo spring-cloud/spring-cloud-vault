@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.vault.util;
 
-import org.junit.Rule;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
  * Base class for integration tests using Vault.
@@ -25,7 +25,7 @@ import org.junit.Rule;
  */
 public abstract class IntegrationTestSupport {
 
-	@Rule
+	@RegisterExtension
 	public final VaultRule vaultRule = new VaultRule();
 
 	public final PrepareVault prepare() {
