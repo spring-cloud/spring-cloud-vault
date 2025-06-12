@@ -21,7 +21,6 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import reactor.core.publisher.Mono;
 
 import org.springframework.boot.actuate.health.AbstractReactiveHealthIndicator;
@@ -30,6 +29,7 @@ import org.springframework.boot.actuate.health.Health.Builder;
 import org.springframework.lang.Nullable;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.core.ReactiveVaultOperations;
+import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultHealth;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -51,9 +51,9 @@ public class VaultReactiveHealthIndicator extends AbstractReactiveHealthIndicato
 	private static Mono<? extends VaultHealthImpl> deserializeError(WebClientResponseException e) {
 
 		try {
-			ObjectMapper mapper = new ObjectMapper();
+			JacksonCompat.ObjectMapperAccessor mapper = JacksonCompat.instance().getObjectMapperAccessor();
 			// Response is already materialized so not blocking here.
-			return Mono.just(mapper.readValue(e.getResponseBodyAsByteArray(), VaultHealthImpl.class));
+			return Mono.just(mapper.deserialize(e.getResponseBodyAsByteArray(), VaultHealthImpl.class));
 		}
 		catch (Exception jsonError) {
 			UndeclaredThrowableException t = new UndeclaredThrowableException(jsonError);
