@@ -78,10 +78,6 @@ import software.amazon.awssdk.regions.Region;
  */
 class ClientAuthenticationFactory {
 
-	private static final boolean googleCredentialPresent = ClassUtils.isPresent(
-			"com.google.api.client.googleapis.auth.oauth2.GoogleCredential",
-			ClientAuthenticationFactory.class.getClassLoader());
-
 	private static final boolean googleCredentialsPresent = ClassUtils
 		.isPresent("com.google.auth.oauth2.GoogleCredentials", ClientAuthenticationFactory.class.getClassLoader());
 
@@ -125,6 +121,9 @@ class ClientAuthenticationFactory {
 
 			case GCP_GCE:
 				return gcpGceAuthentication(this.vaultProperties);
+
+			case GCP_IAM:
+				return gcpIamAuthentication(this.vaultProperties);
 
 			case KUBERNETES:
 				return kubernetesAuthentication(this.vaultProperties);
@@ -293,6 +292,16 @@ class ClientAuthenticationFactory {
 		}
 
 		return new GcpComputeAuthentication(builder.build(), this.restOperations, this.externalRestOperations);
+	}
+
+	private ClientAuthentication gcpIamAuthentication(VaultProperties vaultProperties) {
+
+		if (googleCredentialsPresent) {
+			return GcpIamCredentialsAuthenticationFactory.create(vaultProperties, this.restOperations);
+		}
+
+		throw new IllegalStateException(
+				"Cannot create authentication mechanism for GCP IAM. This method requires the google-auth-library-oauth2-http dependency.");
 	}
 
 	private ClientAuthentication kubernetesAuthentication(VaultProperties vaultProperties) {
