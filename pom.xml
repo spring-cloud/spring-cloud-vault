@@ -18,6 +18,7 @@
 
 	<name>Spring Cloud Vault</name>
 	<description>Configuration Integration with HashiCorp Vault</description>
+	<url>https://github.com/spring-cloud/spring-cloud-vault</url>
 
 	<modules>
 		<module>spring-cloud-vault-dependencies</module>
@@ -39,7 +40,24 @@
 		</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
-
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<id>mp911de</id>
+			<name>Mark Paluch</name>
+			<email>mpaluch at paluch.biz</email>
+			<organization>Broadcom, Inc.</organization>
+			<organizationUrl>https://www.spring.io</organizationUrl>
+			<roles>
+				<role>lead</role>
+			</roles>
+		</developer>
+	</developers>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring-cloud-commons.version>4.3.1-SNAPSHOT</spring-cloud-commons.version>
