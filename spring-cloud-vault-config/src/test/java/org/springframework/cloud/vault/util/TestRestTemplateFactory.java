@@ -37,11 +37,14 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Mark Paluch
  */
-public class TestRestTemplateFactory {
+public final class TestRestTemplateFactory {
 
 	public static final VaultEndpoint TEST_VAULT_ENDPOINT = new VaultEndpoint();
 
 	private static final AtomicReference<ClientHttpRequestFactory> factoryCache = new AtomicReference<>();
+
+	private TestRestTemplateFactory() {
+	}
 
 	/**
 	 * Create a new {@link RestTemplate} using the {@link SslConfiguration}. The

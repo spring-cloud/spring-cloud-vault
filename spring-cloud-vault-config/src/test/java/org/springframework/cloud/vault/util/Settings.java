@@ -28,7 +28,10 @@ import org.springframework.vault.support.VaultToken;
  *
  * @author Mark Paluch
  */
-public class Settings {
+public final class Settings {
+
+	private Settings() {
+	}
 
 	/**
 	 * @return the vault properties.

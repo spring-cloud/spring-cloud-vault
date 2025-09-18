@@ -25,7 +25,7 @@ import org.springframework.vault.core.VaultOperations;
 /**
  * @author Mark Paluch
  */
-class MySqlFixtures {
+final class MySqlFixtures {
 
 	static final int MYSQL_PORT = 3306;
 
@@ -38,6 +38,9 @@ class MySqlFixtures {
 
 	static final String CREATE_USER_AND_GRANT_SQL = "CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';"
 			+ "GRANT SELECT ON *.* TO '{{name}}'@'%';";
+
+	private MySqlFixtures() {
+	}
 
 	public static void setupMysql(VaultRule vaultRule) {
 

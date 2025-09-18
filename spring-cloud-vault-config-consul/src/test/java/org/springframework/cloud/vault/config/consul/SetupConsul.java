@@ -37,7 +37,7 @@ import static org.junit.Assume.assumeFalse;
  *
  * @author Mark Paluch
  */
-class SetupConsul {
+final class SetupConsul {
 
 	static final String CONSUL_HOST = "localhost";
 
@@ -49,6 +49,9 @@ class SetupConsul {
 	};
 
 	private static final String CONSUL_ACL_MASTER_TOKEN = "consul-master-token";
+
+	private SetupConsul() {
+	}
 
 	static void setupConsul(VaultOperations vaultOperations, String consulBackend) {
 
