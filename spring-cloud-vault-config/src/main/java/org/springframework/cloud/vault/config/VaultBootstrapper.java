@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.vault.config;
 
-import org.springframework.boot.BootstrapRegistryInitializer;
+import org.springframework.boot.bootstrap.BootstrapRegistryInitializer;
 import org.springframework.util.Assert;
 
 /**
