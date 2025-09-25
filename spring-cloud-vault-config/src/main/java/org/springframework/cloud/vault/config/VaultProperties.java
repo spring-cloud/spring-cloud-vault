@@ -128,11 +128,11 @@ public class VaultProperties implements EnvironmentAware {
 
 	private GcpIamProperties gcpIam = new GcpIamProperties();
 
+	private GithubProperties github = new GithubProperties();
+
 	private KubernetesProperties kubernetes = new KubernetesProperties();
 
 	private PcfProperties pcf = new PcfProperties();
-
-	private GithubProperties github = new GithubProperties();
 
 	private Ssl ssl = new Ssl();
 
@@ -943,6 +943,8 @@ public class VaultProperties implements EnvironmentAware {
 
 	/**
 	 * GitHub properties.
+	 *
+	 * @since 5.0
 	 */
 	public static class GithubProperties {
 
@@ -954,22 +956,37 @@ public class VaultProperties implements EnvironmentAware {
 		/**
 		 * GitHub personal token.
 		 */
-		private String token;
+		private @Nullable String token;
+
+		/**
+		 * Whether to attempt to retrieve a GitHub token from the GitHub CLI (gh) when no
+		 * explicit token is provided. Enabling this option requires that the GitHub CLI
+		 * is installed (i.e. available in the execution PATH) and authenticated.
+		 */
+		private boolean allowCliToken = false;
 
 		public String getGithubPath() {
-			return githubPath;
+			return this.githubPath;
 		}
 
 		public void setGithubPath(String githubPath) {
 			this.githubPath = githubPath;
 		}
 
-		public String getToken() {
-			return token;
+		public @Nullable String getToken() {
+			return this.token;
 		}
 
 		public void setToken(String token) {
 			this.token = token;
+		}
+
+		boolean isAllowCliToken() {
+			return this.allowCliToken;
+		}
+
+		void setAllowCliToken(boolean allowCliToken) {
+			this.allowCliToken = allowCliToken;
 		}
 
 	}

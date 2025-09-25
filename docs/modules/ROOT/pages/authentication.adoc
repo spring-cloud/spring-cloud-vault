@@ -545,6 +545,30 @@ See also:
 * https://www.vaultproject.io/docs/auth/gcp.html[Vault Documentation: Using the GCP auth backend]
 * https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt[GCP Documentation: projects.serviceAccounts.signJwt]
 
+[[vault.config.authentication.github]]
+== GitHub authentication
+
+You can authenticate against Vault using GitHub authentication by providing a personal access token.
+As a fallback, the token may also be retrieved the https://cli.github.com/[GitHub CLI] if installed and authenticated.
+
+.application.yml
+[source,yaml]
+----
+spring.cloud.vault:
+    authentication: GITHUB
+    github:
+        token: gho_…
+----
+
+* `authentication` setting this value to `GITHUB` selects the GitHub authentication method
+* `token` sets the static token to use. If missing or empty, then an attempt can be made to retrieve a token from `gh auth token` if the GitHub CLI is installed and authenticated and if the access is allowed through `spring.cloud.vault.github.allow-cli-token=true`.
+* `allow-cli-token` enables the fallback to the GitHub CLI to retrieve a token. Disabled by default to not invoke the GitHub CLI unexpectedly.
+
+See also:
+
+* https://developer.hashicorp.com/vault/api-docs/auth/github[Vault Documentation: GitGub]
+* https://cli.github.com/[GitHub CLI]
+
 [[vault.authentication.gcpiam]]
 [[vault.config.authentication.kubernetes]]
 == Kubernetes authentication

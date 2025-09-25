@@ -193,7 +193,7 @@ public class ClientAuthenticationFactoryUnitTests {
 	}
 
 	@Test
-	public void shouldSupportGitHubAuthentication() throws IOException {
+	public void shouldSupportGitHubAuthentication() {
 
 		VaultProperties properties = new VaultProperties();
 		properties.setAuthentication(VaultProperties.AuthenticationMethod.GITHUB);

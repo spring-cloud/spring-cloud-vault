@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
 
 import org.springframework.boot.system.SystemProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AppRoleProperties;
@@ -67,7 +68,6 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import software.amazon.awssdk.regions.Region;
 
 /**
  * Factory for {@link ClientAuthentication}.
@@ -102,47 +102,23 @@ class ClientAuthenticationFactory {
 	 */
 	ClientAuthentication createClientAuthentication() {
 
-		switch (this.vaultProperties.getAuthentication()) {
+		return switch (this.vaultProperties.getAuthentication()) {
+			case APPROLE -> appRoleAuthentication(this.vaultProperties);
+			case AWS_EC2 -> awsEc2Authentication(this.vaultProperties);
+			case AWS_IAM -> awsIamAuthentication(this.vaultProperties);
+			case AZURE_MSI -> azureMsiAuthentication(this.vaultProperties);
+			case CERT -> certificateAuthentication(this.vaultProperties);
+			case CUBBYHOLE -> cubbyholeAuthentication();
+			case GCP_GCE -> gcpGceAuthentication(this.vaultProperties);
+			case GCP_IAM -> gcpIamAuthentication(this.vaultProperties);
+			case GITHUB -> gitHubAuthentication(this.vaultProperties);
+			case KUBERNETES -> kubernetesAuthentication(this.vaultProperties);
+			case PCF -> pcfAuthentication(this.vaultProperties);
+			case TOKEN -> tokenAuthentication(this.vaultProperties);
+			default -> throw new UnsupportedOperationException(
+					String.format("Client authentication %s not supported", this.vaultProperties.getAuthentication()));
+		};
 
-			case APPROLE:
-				return appRoleAuthentication(this.vaultProperties);
-
-			case AWS_EC2:
-				return awsEc2Authentication(this.vaultProperties);
-
-			case AWS_IAM:
-				return awsIamAuthentication(this.vaultProperties);
-
-			case AZURE_MSI:
-				return azureMsiAuthentication(this.vaultProperties);
-
-			case CERT:
-				return certificateAuthentication(this.vaultProperties);
-
-			case CUBBYHOLE:
-				return cubbyholeAuthentication();
-
-			case GCP_GCE:
-				return gcpGceAuthentication(this.vaultProperties);
-
-			case GCP_IAM:
-				return gcpIamAuthentication(this.vaultProperties);
-
-			case GITHUB:
-				return gitHubAuthentication(this.vaultProperties);
-
-			case KUBERNETES:
-				return kubernetesAuthentication(this.vaultProperties);
-
-			case PCF:
-				return pcfAuthentication(this.vaultProperties);
-
-			case TOKEN:
-				return tokenAuthentication(this.vaultProperties);
-		}
-
-		throw new UnsupportedOperationException(
-				String.format("Client authentication %s not supported", this.vaultProperties.getAuthentication()));
 	}
 
 	private ClientAuthentication appRoleAuthentication(VaultProperties vaultProperties) {
@@ -311,59 +287,52 @@ class ClientAuthenticationFactory {
 	}
 
 	private ClientAuthentication gitHubAuthentication(VaultProperties vaultProperties) {
+
 		GitHubAuthenticationOptions options = GitHubAuthenticationOptions.builder()
 			.path(vaultProperties.getGithub().getGithubPath())
 			.token(getGitHubToken(vaultProperties))
 			.build();
+
 		return new GitHubAuthentication(options, this.restOperations);
 	}
 
 	private String getGitHubToken(VaultProperties vaultProperties) {
 
-		String token = vaultProperties.getGithub().getToken();
+		VaultProperties.GithubProperties github = vaultProperties.getGithub();
+		String token = github.getToken();
 		if (StringUtils.hasText(token)) {
 			return token;
 		}
 
 		// Try to get token from gh cli if installed
-		if (isGhCliInstalled()) {
-			try {
-				ProcessBuilder processBuilder = new ProcessBuilder("gh", "auth", "token");
-				Process process = processBuilder.start();
-				int exitCode = process.waitFor();
-				if (exitCode != 0) {
-					String error = new String(process.getErrorStream().readAllBytes());
-					throw new IllegalStateException(
-							String.format("Could not retrieve GitHub token using GitHub CLI: %s", error));
-				}
-				return new String(process.getInputStream().readAllBytes()).strip();
-			}
-			catch (Exception ex) {
-				if (Thread.currentThread().isInterrupted()) {
-					Thread.currentThread().interrupt();
-				}
-				throw new IllegalStateException("Could not retrieve GitHub token using GitHub CLI", ex);
-			}
+		if (github.isAllowCliToken()) {
+			return invokeGitHubCli("auth", "token");
 		}
-		else {
-			throw new IllegalStateException(
-					"Cannot create authentication mechanism for GITHUB. This method requires a Token supplied by spring.cloud.vault.token or GitHub CLI.");
-		}
+
+		throw new IllegalStateException("GitHub Token (spring.cloud.vault.github.token) must not be empty");
 	}
 
-	private boolean isGhCliInstalled() {
+	private static String invokeGitHubCli(String command, String subcommand) {
+
+		ProcessBuilder processBuilder = new ProcessBuilder("gh", command, subcommand);
+
 		try {
-			ProcessBuilder builder = new ProcessBuilder("gh", "--version");
-			builder.redirectErrorStream(true);
-			Process process = builder.start();
+			Process process = processBuilder.start();
 			int exitCode = process.waitFor();
-			return exitCode == 0;
-		}
-		catch (Exception e) {
-			if (Thread.currentThread().isInterrupted()) {
-				Thread.currentThread().interrupt();
+			if (exitCode != 0) {
+				String error = new String(process.getErrorStream().readAllBytes());
+				throw new IllegalStateException(String.format("""
+						Cannot not retrieve GitHub token using GitHub CLI
+						\tCommand: %s (Exit code %d)
+						\tError:   %s""", StringUtils.collectionToDelimitedString(processBuilder.command(), " "),
+						exitCode, error));
 			}
-			return false;
+			return new String(process.getInputStream().readAllBytes()).strip();
+		}
+		catch (InterruptedException | IOException ex) {
+			throw new IllegalStateException(String.format("""
+					Cannot not retrieve GitHub token using GitHub CLI
+					\tCommand: %s""", StringUtils.collectionToDelimitedString(processBuilder.command(), " ")), ex);
 		}
 	}
 
