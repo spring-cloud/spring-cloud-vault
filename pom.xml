@@ -103,7 +103,7 @@
 			<dependency>
 				<groupId>tools.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>3.0.0-rc10</version>
+				<version>3.0.0</version>
 			</dependency>
 
 			<!-- HTTP Client Libraries -->
