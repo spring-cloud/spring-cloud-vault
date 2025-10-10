@@ -62,7 +62,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring-cloud-commons.version>5.0.0-SNAPSHOT</spring-cloud-commons.version>
 		<bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
-		<google-cloud-iamcredentials.version>2.75.0</google-cloud-iamcredentials.version>
+		<google-cloud-iamcredentials.version>2.76.0</google-cloud-iamcredentials.version>
 		<google-api-services-iam.version>v2-rev20250502-2.0.0</google-api-services-iam.version>
 		<google-auth-library-oauth2-http.version>1.39.1</google-auth-library-oauth2-http.version>
 		<maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
