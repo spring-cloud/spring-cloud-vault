@@ -8,10 +8,10 @@ This section explains how to get you started with Vault and Spring Cloud Vault.
 To get started with Vault and this guide you need a *NIX-like operating systems that provides:
 
 * `wget`, `openssl` and `unzip`
-* at least Java 8 and a properly configured `JAVA_HOME` environment variable
+* at least Java 17 and a properly configured `JAVA_HOME` environment variable
 
 NOTE: This guide explains Vault setup from a Spring Cloud Vault perspective for integration testing.
-You can find a getting started guide directly on the Vault project site: https://learn.hashicorp.com/vault
+You can find a getting started guide directly on the Vault project site: https://developer.hashicorp.com/vault/tutorials
 
 *Install Vault*
 

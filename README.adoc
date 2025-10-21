@@ -5,7 +5,8 @@ Edit the files in the src/main/asciidoc/ directory instead.
 ////
 
 
-:docs: https://cloud.spring.io/spring-cloud-vault/spring-cloud-vault.html
+:backends: https://docs.spring.io/spring-cloud-vault/reference/secret-backends.html
+:auth: https://docs.spring.io/spring-cloud-vault/reference/authentication.html
 
 [[features]]
 = Features
@@ -15,24 +16,23 @@ Edit the files in the src/main/asciidoc/ directory instead.
 
 Specifically for Spring applications:
 
-// TODO: fix links
 * Retrieve secrets from Vault and initialize Spring Environment with remote property sources.
-* Obtain {docs}#vault.config.backends.kv[Key-Value secrets] secured with SSL.
+* Obtain {backends}#vault.config.backends.kv[Key-Value secrets] secured with SSL.
 * Generate credentials for
-{docs}#vault.config.backends.mysql[MySQL],
-{docs}#vault.config.backends.postgresql[PostgreSQL],
-{docs}#vault.config.backends.cassandra[Apache Cassandra],
-{docs}#vault.config.backends.mongodb[MongoDB],
-{docs}#vault.config.backends.consul[Consul],
-{docs}#vault.config.backends.aws[AWS], and {docs}#vault.config.backends.rabbitmq[RabbitMQ].
-* {docs}#vault.config.authentication.token[Token],
-{docs}#vault.config.authentication.appid[AppId],
-{docs}#vault.config.authentication.approle[AppRole],
-{docs}#vault.config.authentication.clientcert[Client Certificate],
-{docs}#vault.config.authentication.cubbyhole[Cubbyhole],
-{docs}#vault.config.authentication.awsec2[AWS-EC2] authentication,
-{docs}#vault.config.authentication.awsiam[AWS-IAM] authentication, and
-{docs}#vault.config.authentication.kubernetes[Kubernetes] authentication.
+{backends}#vault.config.backends.mysql[MySQL],
+{backends}#vault.config.backends.postgresql[PostgreSQL],
+{backends}#vault.config.backends.cassandra[Apache Cassandra],
+{backends}#vault.config.backends.mongodb[MongoDB],
+{backends}#vault.config.backends.consul[Consul],
+{backends}#vault.config.backends.aws[AWS], and {backends}#vault.config.backends.rabbitmq[RabbitMQ].
+* {auth}#vault.config.authentication.token[Token],
+{auth}#vault.config.authentication.appid[AppId],
+{auth}#vault.config.authentication.approle[AppRole],
+{auth}#vault.config.authentication.clientcert[Client Certificate],
+{auth}#vault.config.authentication.cubbyhole[Cubbyhole],
+{auth}#vault.config.authentication.awsec2[AWS-EC2] authentication,
+{auth}#vault.config.authentication.awsiam[AWS-IAM] authentication, and
+{auth}#vault.config.authentication.kubernetes[Kubernetes] authentication.
 
 * Bootstrap application context: a parent context for the main application that can be trained to do anything.
 
@@ -46,10 +46,10 @@ This section explains how to get you started with Vault and Spring Cloud Vault.
 To get started with Vault and this guide you need a *NIX-like operating systems that provides:
 
 * `wget`, `openssl` and `unzip`
-* at least Java 8 and a properly configured `JAVA_HOME` environment variable
+* at least Java 17 and a properly configured `JAVA_HOME` environment variable
 
 NOTE: This guide explains Vault setup from a Spring Cloud Vault perspective for integration testing.
-You can find a getting started guide directly on the Vault project site: https://learn.hashicorp.com/vault
+You can find a getting started guide directly on the Vault project site: https://developer.hashicorp.com/vault/tutorials
 
 *Install Vault*
 
