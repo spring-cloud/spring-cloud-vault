@@ -20,7 +20,7 @@
 	<description>Spring Cloud Vault Dependencies</description>
 
 	<properties>
-		<spring-vault.version>4.0.0-M3</spring-vault.version>
+		<spring-vault.version>4.0.0-RC1</spring-vault.version>
 		<maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
 	</properties>
 
