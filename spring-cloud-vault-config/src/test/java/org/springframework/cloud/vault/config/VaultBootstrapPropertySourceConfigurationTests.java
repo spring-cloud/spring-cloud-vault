@@ -86,7 +86,7 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 
 	@EnableConfigurationProperties(VaultProperties.class)
 	@Configuration(proxyBeanMethods = false)
-	private static class MockSecretLeaseContainerConfiguration {
+	private final static class MockSecretLeaseContainerConfiguration {
 
 		@Bean
 		SecretLeaseContainer secretLeaseContainer(VaultProperties properties) {
@@ -101,7 +101,7 @@ public class VaultBootstrapPropertySourceConfigurationTests {
 
 	@EnableConfigurationProperties(VaultProperties.class)
 	@Configuration(proxyBeanMethods = false)
-	private static class MockVaultOperationsConfiguration {
+	private final static class MockVaultOperationsConfiguration {
 
 		@Bean
 		VaultOperations vaultOperations() {

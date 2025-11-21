@@ -408,7 +408,7 @@ class ClientAuthenticationFactory {
 		}
 	}
 
-	private static class AwsCredentialProvider {
+	private static final class AwsCredentialProvider {
 
 		private static AwsCredentialsProvider getAwsCredentialsProvider() {
 

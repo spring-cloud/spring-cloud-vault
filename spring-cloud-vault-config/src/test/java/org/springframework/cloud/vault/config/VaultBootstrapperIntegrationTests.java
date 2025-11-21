@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class VaultBootstrapperIntegrationTests extends IntegrationTestSupport {
+public final class VaultBootstrapperIntegrationTests extends IntegrationTestSupport {
 
 	private ConfigurableApplicationContext context;
 
@@ -78,7 +78,7 @@ public class VaultBootstrapperIntegrationTests extends IntegrationTestSupport {
 
 	@SpringBootConfiguration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
-	private static class Config {
+	private static final class Config {
 
 	}
 

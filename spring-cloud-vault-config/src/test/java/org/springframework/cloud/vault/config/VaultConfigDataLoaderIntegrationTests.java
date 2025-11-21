@@ -114,7 +114,7 @@ public class VaultConfigDataLoaderIntegrationTests extends IntegrationTestSuppor
 
 	@SpringBootConfiguration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
-	private static class Config {
+	private static final class Config {
 
 	}
 

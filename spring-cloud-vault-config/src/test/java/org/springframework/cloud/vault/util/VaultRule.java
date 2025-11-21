@@ -106,7 +106,7 @@ public class VaultRule implements BeforeEachCallback {
 		return this.prepareVault;
 	}
 
-	private class PreparingSessionManager implements SessionManager {
+	private final class PreparingSessionManager implements SessionManager {
 
 		@Override
 		public VaultToken getSessionToken() {
