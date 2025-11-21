@@ -399,6 +399,7 @@ spring.cloud.vault:
         key-store-password: changeit
         key-store-type: JKS
         cert-auth-path: cert
+        role: my-dev-role
 ----
 
 See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the Cert auth backend]
