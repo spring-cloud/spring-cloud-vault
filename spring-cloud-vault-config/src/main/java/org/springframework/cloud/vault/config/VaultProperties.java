@@ -1153,6 +1153,13 @@ public class VaultProperties implements EnvironmentAware {
 		private String certAuthPath = "cert";
 
 		/**
+		 * Name of the role against which the login is being attempted.
+		 *
+		 * @since 5.0
+		 */
+		private String role = "";
+
+		/**
 		 * List of enabled SSL/TLS protocol.
 		 * @since 3.0.2
 		 */
@@ -1224,6 +1231,14 @@ public class VaultProperties implements EnvironmentAware {
 
 		public void setCertAuthPath(String certAuthPath) {
 			this.certAuthPath = certAuthPath;
+		}
+
+		public String getRole() {
+			return role;
+		}
+
+		public void setRole(String role) {
+			this.role = role;
 		}
 
 		public List<String> getEnabledProtocols() {
