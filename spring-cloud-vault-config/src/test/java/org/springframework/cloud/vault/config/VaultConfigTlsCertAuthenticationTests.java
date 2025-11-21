@@ -23,18 +23,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.assertj.core.util.Files;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.VaultRule;
+import org.springframework.cloud.vault.util.VaultTestContextRunner;
 import org.springframework.vault.core.VaultOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.springframework.cloud.vault.config.VaultProperties.AuthenticationMethod.CERT;
 import static org.springframework.cloud.vault.util.Settings.findWorkDir;
 
 /**
@@ -44,18 +48,21 @@ import static org.springframework.cloud.vault.util.Settings.findWorkDir;
  * referenced with {@code ../work/keystore.jks}.
  *
  * @author Mark Paluch
+ * @author Issam El-atif
  */
-
-@SpringBootTest(classes = VaultConfigTlsCertAuthenticationTests.TestApplication.class,
-		properties = { "spring.cloud.vault.authentication=cert",
-				"spring.cloud.vault.ssl.key-store=file:../work/client-cert.jks",
-				"spring.cloud.vault.ssl.key-store-password=changeit",
-				"spring.cloud.vault.application-name=VaultConfigTlsCertAuthenticationTests",
-				"spring.cloud.vault.reactive.enabled=false", "spring.cloud.bootstrap.enabled=true" })
+@ExtendWith(OutputCaptureExtension.class)
 public class VaultConfigTlsCertAuthenticationTests {
 
-	@Value("${vault.value}")
-	String configValue;
+	VaultTestContextRunner contextRunner = VaultTestContextRunner.of(CERT)
+		.testClass(getClass())
+		.bootstrap(true)
+		.reactive(false)
+		.configurations(TestConfig.class);
+
+	private static VaultOperations vaultOperations;
+
+	private static final String certificate = Files.contentOf(new File(findWorkDir(), "ca/certs/client.cert.pem"),
+			StandardCharsets.US_ASCII);
 
 	@BeforeAll
 	public static void beforeClass() {
@@ -69,7 +76,7 @@ public class VaultConfigTlsCertAuthenticationTests {
 			vaultRule.prepare().mountAuth(vaultProperties.getSsl().getCertAuthPath());
 		}
 
-		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
+		vaultOperations = vaultRule.prepare().getVaultOperations();
 
 		String rules = "{ \"name\": \"testpolicy\",\n" //
 				+ "  \"path\": {\n" //
@@ -82,10 +89,6 @@ public class VaultConfigTlsCertAuthenticationTests {
 		vaultOperations.write("secret/" + VaultConfigTlsCertAuthenticationTests.class.getSimpleName(),
 				Collections.singletonMap("vault.value", "foo"));
 
-		File workDir = findWorkDir();
-
-		String certificate = Files.contentOf(new File(workDir, "ca/certs/client.cert.pem"), StandardCharsets.US_ASCII);
-
 		Map<String, String> role = new HashMap<>();
 		role.put("certificate", certificate);
 		role.put("policies", "testpolicy");
@@ -93,17 +96,42 @@ public class VaultConfigTlsCertAuthenticationTests {
 		vaultOperations.write("auth/cert/certs/my-role", role);
 	}
 
-	@Test
-	public void contextLoads() {
-		assertThat(this.configValue).isEqualTo("foo");
+	@AfterEach
+	void cleanup() {
+		vaultOperations.delete("auth/cert/certs/another-role");
 	}
 
-	@SpringBootApplication
-	public static class TestApplication {
+	@Test
+	void authenticateUsingTlsCertificate() {
+		this.contextRunner
+			.run(context -> assertThat(context.getEnvironment().getProperty("vault.value")).isEqualTo("foo"));
+	}
 
-		public static void main(String[] args) {
-			SpringApplication.run(TestApplication.class, args);
-		}
+	@Test
+	void authenticateUsingNamedCertificateRole() {
+		Map<String, String> anotherRole = new HashMap<>();
+		anotherRole.put("certificate", certificate);
+		vaultOperations.write("auth/cert/certs/another-role", anotherRole);
+
+		this.contextRunner.property("spring.cloud.vault.ssl.role", "my-role")
+			.run(context -> assertThat(context.getEnvironment().getProperty("vault.value")).isEqualTo("foo"));
+	}
+
+	@Test
+	void authenticationFailsWhenMultipleCertsAndNoNamedRole(CapturedOutput capturedOutput) {
+		Map<String, String> anotherRole = new HashMap<>();
+		anotherRole.put("certificate", certificate);
+		vaultOperations.write("auth/cert/certs/another-role", anotherRole);
+
+		this.contextRunner.run(context -> {
+			assertThat(capturedOutput.getOut())
+				.contains("org.springframework.vault.VaultException: Status 403 Forbidden");
+			assertNull(context.getEnvironment().getProperty("vault.value"));
+		});
+	}
+
+	@TestConfiguration
+	public static class TestConfig {
 
 	}
 

@@ -378,11 +378,14 @@ class ClientAuthenticationFactory {
 
 	private ClientAuthentication certificateAuthentication(VaultProperties vaultProperties) {
 
-		ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions.builder()
-			.path(vaultProperties.getSsl().getCertAuthPath())
-			.build();
+		ClientCertificateAuthenticationOptions.ClientCertificateAuthenticationOptionsBuilder optionsBuilder = ClientCertificateAuthenticationOptions
+			.builder();
+		optionsBuilder.path(vaultProperties.getSsl().getCertAuthPath());
+		if (StringUtils.hasText(vaultProperties.getSsl().getRole())) {
+			optionsBuilder.role(vaultProperties.getSsl().getRole());
+		}
 
-		return new ClientCertificateAuthentication(options, this.restOperations);
+		return new ClientCertificateAuthentication(optionsBuilder.build(), this.restOperations);
 	}
 
 	private ClientAuthentication tokenAuthentication(VaultProperties vaultProperties) {
