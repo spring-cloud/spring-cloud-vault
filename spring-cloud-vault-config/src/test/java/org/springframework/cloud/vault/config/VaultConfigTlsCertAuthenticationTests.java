@@ -28,19 +28,17 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.VaultRule;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.cloud.vault.util.VaultTestContextRunner;
 import org.springframework.vault.core.VaultOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.springframework.cloud.vault.config.VaultProperties.AuthenticationMethod.CERT;
 import static org.springframework.cloud.vault.util.Settings.findWorkDir;
 
 /**
@@ -55,14 +53,11 @@ import static org.springframework.cloud.vault.util.Settings.findWorkDir;
 @ExtendWith(OutputCaptureExtension.class)
 public class VaultConfigTlsCertAuthenticationTests {
 
-	SpringApplication app = new SpringApplicationBuilder().sources(TestConfig.class)
-			.web(WebApplicationType.NONE)
-			.properties("spring.cloud.vault.authentication=cert",
-					"spring.cloud.vault.ssl.key-store=file:../work/client-cert.jks",
-					"spring.cloud.vault.ssl.key-store-password=changeit",
-					"spring.cloud.vault.application-name=VaultConfigTlsCertAuthenticationTests",
-					"spring.cloud.vault.reactive.enabled=false", "spring.cloud.bootstrap.enabled=true")
-			.build();
+	VaultTestContextRunner contextRunner = VaultTestContextRunner.of(CERT)
+		.testClass(getClass())
+		.bootstrap(true)
+		.reactive(false)
+		.configurations(TestConfig.class);
 
 	private static VaultOperations vaultOperations;
 
@@ -108,9 +103,8 @@ public class VaultConfigTlsCertAuthenticationTests {
 
 	@Test
 	void authenticateUsingTlsCertificate() {
-		ConfigurableApplicationContext context = this.app.run();
-
-		assertThat(context.getEnvironment().getProperty("vault.value")).isEqualTo("foo");
+		this.contextRunner
+			.run(context -> assertThat(context.getEnvironment().getProperty("vault.value")).isEqualTo("foo"));
 	}
 
 	@Test
@@ -119,9 +113,8 @@ public class VaultConfigTlsCertAuthenticationTests {
 		anotherRole.put("certificate", certificate);
 		vaultOperations.write("auth/cert/certs/another-role", anotherRole);
 
-		ConfigurableApplicationContext context = this.app.run("--spring.cloud.vault.ssl.role=my-role");
-
-		assertThat(context.getEnvironment().getProperty("vault.value")).isEqualTo("foo");
+		this.contextRunner.property("spring.cloud.vault.ssl.role", "my-role")
+			.run(context -> assertThat(context.getEnvironment().getProperty("vault.value")).isEqualTo("foo"));
 	}
 
 	@Test
@@ -130,10 +123,11 @@ public class VaultConfigTlsCertAuthenticationTests {
 		anotherRole.put("certificate", certificate);
 		vaultOperations.write("auth/cert/certs/another-role", anotherRole);
 
-		ConfigurableApplicationContext context = this.app.run();
-
-		assertThat(capturedOutput.getOut()).contains("org.springframework.vault.VaultException: Status 403 Forbidden");
-		assertNull(context.getEnvironment().getProperty("vault.value"));
+		this.contextRunner.run(context -> {
+			assertThat(capturedOutput.getOut())
+				.contains("org.springframework.vault.VaultException: Status 403 Forbidden");
+			assertNull(context.getEnvironment().getProperty("vault.value"));
+		});
 	}
 
 	@TestConfiguration
