@@ -50,6 +50,7 @@ import org.springframework.vault.authentication.AzureMsiAuthenticationOptions;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.ClientCertificateAuthentication;
 import org.springframework.vault.authentication.ClientCertificateAuthenticationOptions;
+import org.springframework.vault.authentication.ClientCertificateAuthenticationOptions.ClientCertificateAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.CubbyholeAuthentication;
 import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
 import org.springframework.vault.authentication.GcpComputeAuthentication;
@@ -378,14 +379,14 @@ class ClientAuthenticationFactory {
 
 	private ClientAuthentication certificateAuthentication(VaultProperties vaultProperties) {
 
-		ClientCertificateAuthenticationOptions.ClientCertificateAuthenticationOptionsBuilder optionsBuilder = ClientCertificateAuthenticationOptions
-			.builder();
-		optionsBuilder.path(vaultProperties.getSsl().getCertAuthPath());
+		ClientCertificateAuthenticationOptionsBuilder builder = ClientCertificateAuthenticationOptions.builder();
+		builder.path(vaultProperties.getSsl().getCertAuthPath());
+
 		if (StringUtils.hasText(vaultProperties.getSsl().getRole())) {
-			optionsBuilder.role(vaultProperties.getSsl().getRole());
+			builder.role(vaultProperties.getSsl().getRole());
 		}
 
-		return new ClientCertificateAuthentication(optionsBuilder.build(), this.restOperations);
+		return new ClientCertificateAuthentication(builder.build(), this.restOperations);
 	}
 
 	private ClientAuthentication tokenAuthentication(VaultProperties vaultProperties) {
