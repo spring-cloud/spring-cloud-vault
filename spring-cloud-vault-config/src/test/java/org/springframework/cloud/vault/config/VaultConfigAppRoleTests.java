@@ -26,9 +26,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.VaultRule;
+import org.springframework.cloud.vault.util.VaultTestContextRunner;
 import org.springframework.cloud.vault.util.Version;
 import org.springframework.vault.core.VaultOperations;
 
@@ -45,16 +45,12 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Mark Paluch
  */
-
-@SpringBootTest(classes = VaultConfigAppRoleTests.TestApplication.class,
-		properties = { "spring.cloud.vault.authentication=approle",
-				"spring.cloud.vault.application-name=VaultConfigAppRoleTests", "spring.cloud.bootstrap.enabled=true" })
-// see
-// https://github.com/spring-cloud/spring-cloud-commons/issues/214
 public class VaultConfigAppRoleTests {
 
-	@Value("${vault.value}")
-	String configValue;
+	VaultTestContextRunner contextRunner = VaultTestContextRunner.of(VaultConfigAppRoleTests.class)
+		.withAuthentication(VaultProperties.AuthenticationMethod.APPROLE)
+		.withConfiguration(VaultConfigAppRoleTests.TestApplication.class)
+		.withSettings(s -> s.bootstrap());
 
 	@BeforeAll
 	public static void beforeClass() {
@@ -107,11 +103,17 @@ public class VaultConfigAppRoleTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(this.configValue).isEqualTo("foo");
+		this.contextRunner.run(ctx -> {
+			TestApplication application = ctx.getBean(TestApplication.class);
+			assertThat(application.configValue).isEqualTo("foo");
+		});
 	}
 
 	@SpringBootApplication
 	public static class TestApplication {
+
+		@Value("${vault.value}")
+		String configValue;
 
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);

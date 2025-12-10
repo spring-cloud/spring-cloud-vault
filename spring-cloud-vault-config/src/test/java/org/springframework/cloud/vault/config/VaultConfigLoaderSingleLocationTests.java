@@ -45,8 +45,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 
-@SpringBootTest(classes = VaultConfigLoaderSingleLocationTests.TestApplication.class, properties = {
-		"spring.cloud.vault.uri=https://localhost:8200", "spring.config.import=vault:secret/config-location" })
+@SpringBootTest(classes = VaultConfigLoaderSingleLocationTests.TestApplication.class,
+		properties = { "spring.config.import=vault:secret/config-location" })
 public class VaultConfigLoaderSingleLocationTests {
 
 	@Autowired

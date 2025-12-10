@@ -25,17 +25,19 @@ import java.util.function.Consumer;
 
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.vault.config.VaultProperties.AuthenticationMethod;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * A utility class built on top of {@link SpringApplicationBuilder} that follows Spring
- * Boot’s testing patterns but designed for Spring Cloud Vault integration tests.
- *
+ * Boot's testing patterns but designed for Spring Cloud Vault integration tests.
  * <p>
  * Its goal is to eliminate repetitive boilerplate particularly when repeatedly
- * configuring startup properties.
+ * configuring startup properties and running tests by starting the application. In
+ * contrast to {@link ApplicationContextRunner}, this utility considers all available
+ * configurations as if the application was started as Spring Boot application.
  *
  * @author Issam EL-ATIF
  * @author Mark Paluch
@@ -48,7 +50,17 @@ public final class VaultTestContextRunner {
 
 	private final Map<String, Object> properties = new LinkedHashMap<>();
 
-	private final TestSettings testSettings = new TestSettings();
+	private TestSettings testSettings = new TestSettings();
+
+	private String[] profiles = new String[0];
+
+	VaultTestContextRunner(VaultTestContextRunner previous, Consumer<VaultTestContextRunner> configConsumer) {
+		this.configurationClasses.addAll(previous.configurationClasses);
+		this.properties.putAll(previous.properties);
+		this.profiles = Arrays.copyOf(previous.profiles, previous.profiles.length);
+		this.testSettings = new TestSettings(previous.testSettings);
+		configConsumer.accept(this);
+	}
 
 	private VaultTestContextRunner(Map<String, Object> properties) {
 		this.properties.putAll(properties);
@@ -73,57 +85,72 @@ public final class VaultTestContextRunner {
 	 * @return the {@link VaultTestContextRunner}.
 	 */
 	public static VaultTestContextRunner of(Class<?> testClass) {
-		return create().testClass(testClass);
+		return create().withApplicationName(testClass);
 	}
 
 	/**
 	 * Configure an authentication method to be used.
 	 * @param authenticationMethod the authentication method to use.
-	 * @return this builder.
+	 * @return a new instance of this builder.
 	 */
-	public VaultTestContextRunner auth(AuthenticationMethod authenticationMethod) {
-		return property("spring.cloud.vault.authentication", authenticationMethod.name());
+	public VaultTestContextRunner withAuthentication(AuthenticationMethod authenticationMethod) {
+		return withProperties("spring.cloud.vault.authentication", authenticationMethod.name());
 	}
 
 	/**
 	 * Configure the application name based on the given test class.
 	 * @param testClass the test class.
-	 * @return this builder.
+	 * @return a new instance of this builder.
 	 */
-	public VaultTestContextRunner testClass(Class<?> testClass) {
-		return property("spring.cloud.vault.application-name", testClass.getSimpleName());
+	public VaultTestContextRunner withApplicationName(Class<?> testClass) {
+		return withApplicationName(testClass.getSimpleName());
+	}
+
+	/**
+	 * Configure the application name.
+	 * @param applicationName the application name.
+	 * @return a new instance of this builder.
+	 */
+	public VaultTestContextRunner withApplicationName(String applicationName) {
+		return withProperties("spring.cloud.vault.application-name", applicationName);
+	}
+
+	/**
+	 * Configure application profiles.
+	 * @param profiles profile names to activate.
+	 * @return a new instance of this builder.
+	 */
+	public VaultTestContextRunner withProfiles(String... profiles) {
+		return new VaultTestContextRunner(this, r -> r.profiles = profiles);
 	}
 
 	/**
 	 * Configure configuration classes to be added.
 	 * @param configClasses configuration classes to add.
-	 * @return this builder.
+	 * @return a new instance of this builder.
 	 */
-	public VaultTestContextRunner configurations(Class<?>... configClasses) {
-		this.configurationClasses.addAll(Arrays.asList(configClasses));
-		return this;
+	public VaultTestContextRunner withConfiguration(Class<?>... configClasses) {
+		return new VaultTestContextRunner(this, r -> r.configurationClasses.addAll(Arrays.asList(configClasses)));
 	}
 
 	/**
 	 * Set a property to be used in the test context.
 	 * @param key the property key.
 	 * @param value the property value.
-	 * @return this builder.
+	 * @return a new instance of this builder.
 	 */
-	public VaultTestContextRunner property(String key, Object value) {
-		this.properties.put(key, value);
-		return this;
+	public VaultTestContextRunner withProperties(String key, Object value) {
+		return new VaultTestContextRunner(this, r -> r.properties.put(key, value));
 	}
 
 	/**
 	 * Provides access to {@link TestSettings} with the possibility to update test
 	 * settings.
 	 * @param settingsConsumer a function that consumes the test settings.
-	 * @return this builder.
+	 * @return a new instance of this builder.
 	 */
-	public VaultTestContextRunner settings(Consumer<TestSettings> settingsConsumer) {
-		settingsConsumer.accept(this.testSettings);
-		return this;
+	public VaultTestContextRunner withSettings(Consumer<TestSettings> settingsConsumer) {
+		return new VaultTestContextRunner(this, r -> settingsConsumer.accept(r.testSettings));
 	}
 
 	/**
@@ -131,18 +158,23 @@ public final class VaultTestContextRunner {
 	 * {@code consumer}.
 	 * @param consumer consumes the application context.
 	 */
-	public void run(Consumer<ConfigurableApplicationContext> consumer) {
+	public void run(Consumer<AssertableApplicationContext> consumer) {
 
-		property("spring.cloud.bootstrap.enabled", this.testSettings.bootstrap);
-		property("spring.cloud.vault.reactive.enabled", this.testSettings.reactive);
+		VaultTestContextRunner instance = new VaultTestContextRunner(this, r -> {
+
+			r.properties.put("spring.cloud.bootstrap.enabled", this.testSettings.bootstrap);
+			r.properties.put("spring.cloud.vault.reactive.enabled", this.testSettings.reactive);
+			r.properties.put("spring.cloud.vault.fail-fast", this.testSettings.failFast);
+			r.properties.put("spring.profiles.active", String.join(",", r.profiles));
+		});
 
 		SpringApplicationBuilder builder = new SpringApplicationBuilder();
-		builder.sources(this.configurationClasses.toArray(new Class<?>[0]))
+		builder.sources(instance.configurationClasses.toArray(new Class<?>[0]))
 			.web(WebApplicationType.NONE)
-			.properties(this.properties);
+			.properties(instance.properties);
 
 		try (ConfigurableApplicationContext context = builder.run()) {
-			consumer.accept(context);
+			consumer.accept(AssertableApplicationContext.get(() -> context));
 		}
 	}
 
@@ -154,6 +186,17 @@ public final class VaultTestContextRunner {
 		private boolean bootstrap = false;
 
 		private boolean reactive = false;
+
+		private boolean failFast = false;
+
+		TestSettings() {
+		}
+
+		TestSettings(TestSettings previous) {
+			this.bootstrap = previous.bootstrap;
+			this.reactive = previous.reactive;
+			this.failFast = previous.failFast;
+		}
 
 		/**
 		 * Enable Spring Cloud bootstrap context usage (disabled by default).
@@ -186,6 +229,15 @@ public final class VaultTestContextRunner {
 		 */
 		public TestSettings reactive(boolean reactive) {
 			this.reactive = reactive;
+			return this;
+		}
+
+		/**
+		 * Enable fail-fast (disabled by default).
+		 * @return this settings builder.
+		 */
+		public TestSettings failFast() {
+			this.failFast = true;
 			return this;
 		}
 

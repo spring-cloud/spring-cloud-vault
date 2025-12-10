@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.vault.util.VaultTestContextRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -31,15 +32,17 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Mark Paluch
  */
 @SpringBootApplication
-
 public class ApplicationFailFastTests {
 
 	@Test
 	public void contextLoadsWithFailFastUsingLeasing() {
 		try {
-			new SpringApplicationBuilder().sources(ApplicationFailFastTests.class)
-				.run("--server.port=0", "--spring.cloud.bootstrap.enabled=true", "--spring.cloud.vault.failFast=true",
-						"--spring.cloud.vault.config.lifecycle.enabled=true", "--spring.cloud.vault.port=9999");
+			VaultTestContextRunner.create()
+				.withSettings(it -> it.bootstrap(true).failFast())
+				.withProperties("spring.cloud.vault.config.lifecycle.enabled", "true")
+				.withProperties("spring.cloud.vault.port", 9999)
+				.run(ctx -> {
+				});
 			fail("failFast option did not produce an exception");
 		}
 		catch (Exception e) {
@@ -50,10 +53,14 @@ public class ApplicationFailFastTests {
 	@Test
 	public void contextLoadsWithFailFastWithoutLeasing() {
 		try {
-			new SpringApplicationBuilder().sources(ApplicationFailFastTests.class)
-				.run("--server.port=0", "--spring.cloud.bootstrap.enabled=true", "--spring.cloud.vault.failFast=true",
-						"--spring.cloud.vault.config.lifecycle.enabled=false",
-						"--spring.cloud.vault.session.lifecycle.enabled=false", "--spring.cloud.vault.port=9999");
+			VaultTestContextRunner.create()
+				.withSettings(it -> it.bootstrap(true).failFast())
+				.withProperties("spring.cloud.vault.config.lifecycle.enabled", false)
+				.withProperties("spring.cloud.vault.session.lifecycle.enabled", false)
+				.withProperties("spring.cloud.vault.port", 9999)
+				.withProperties("server.port", 0)
+				.run(ctx -> {
+				});
 			fail("failFast option did not produce an exception");
 		}
 		catch (Exception e) {

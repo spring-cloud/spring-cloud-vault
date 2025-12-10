@@ -49,11 +49,8 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Mark Paluch
  */
-
 @SpringBootTest(classes = VaultVersionedKvBackendConfigTests.TestApplication.class,
-		properties = { "spring.cloud.vault.host=foo", "spring.cloud.vault.port=80",
-				"spring.cloud.vault.uri=https://localhost:8200", "spring.cloud.vault.kv.enabled=true",
-				"spring.cloud.vault.kv.backend=versioned", "spring.cloud.vault.application-name=testVaultApp",
+		properties = { "spring.cloud.vault.kv.backend=versioned", "spring.cloud.vault.application-name=testVaultApp",
 				"spring.cloud.bootstrap.enabled=true" })
 public class VaultVersionedKvBackendConfigTests {
 

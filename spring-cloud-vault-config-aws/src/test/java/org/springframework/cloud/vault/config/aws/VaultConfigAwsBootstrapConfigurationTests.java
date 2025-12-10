@@ -37,9 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-// FIXME: 4.0.0
-@Disabled("NoClassDefFoundError: org/springframework/http/client/Netty4ClientHttpRequestFactory")
-
 @SpringBootTest(classes = CustomBootstrapConfiguration.class,
 		properties = { "VaultConfigAwsBootstrapConfigurationTests.custom.config=true",
 				"spring.cloud.vault.aws.role=foo", "spring.cloud.bootstrap.enabled=true" })

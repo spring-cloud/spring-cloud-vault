@@ -50,8 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 
 @SpringBootTest(classes = VaultConfigLoaderTests.TestApplication.class,
-		properties = { "spring.cloud.vault.uri=https://localhost:8200",
-				"spring.cloud.vault.application-name=config-data", "spring.config.import=vault:" })
+		properties = { "spring.cloud.vault.application-name=config-data", "spring.config.import=vault:" })
 public class VaultConfigLoaderTests {
 
 	@Value("${vault.value}")

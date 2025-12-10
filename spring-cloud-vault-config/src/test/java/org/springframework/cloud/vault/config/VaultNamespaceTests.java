@@ -55,7 +55,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Integration tests for Vault's namespace feature.
  */
-
 public class VaultNamespaceTests {
 
 	@ClassRule

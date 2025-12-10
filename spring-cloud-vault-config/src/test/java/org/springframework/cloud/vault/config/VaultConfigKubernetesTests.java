@@ -29,8 +29,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
+import org.springframework.cloud.vault.util.VaultTestContextRunner;
 import org.springframework.cloud.vault.util.Version;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.core.VaultOperations;
@@ -46,17 +46,17 @@ import static org.springframework.cloud.vault.util.Settings.findWorkDir;
  * Integration test using config infrastructure with Kubernetes authentication.
  *
  * @author Michal Budzyn
+ * @author Mark Paluch
  */
-
-@SpringBootTest(classes = VaultConfigKubernetesTests.TestApplication.class,
-		properties = { "spring.cloud.vault.authentication=kubernetes", "spring.cloud.vault.kubernetes.role=my-role",
-				"spring.cloud.vault.kubernetes.service-account-token-file=../work/minikube/hello-minikube-token",
-				"spring.cloud.vault.application-name=VaultConfigKubernetesTests",
-				"spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigKubernetesTests {
 
-	@Value("${vault.value}")
-	String configValue;
+	VaultTestContextRunner contextRunner = VaultTestContextRunner.of(VaultConfigKubernetesTests.class)
+		.withAuthentication(VaultProperties.AuthenticationMethod.KUBERNETES)
+		.withConfiguration(VaultConfigTlsCertAuthenticationMountPathTests.TestApplication.class)
+		.withProperties("spring.cloud.vault.kubernetes.service-account-token-file",
+				"../work/minikube/hello-minikube-token")
+		.withProperties("spring.cloud.vault.kubernetes.role", "my-role")
+		.withSettings(s -> s.bootstrap());
 
 	@BeforeAll
 	public static void beforeClass() {
@@ -100,11 +100,17 @@ public class VaultConfigKubernetesTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(this.configValue).isEqualTo("foo");
+		this.contextRunner.run(ctx -> {
+			TestApplication app = ctx.getBean(TestApplication.class);
+			assertThat(app.configValue).isEqualTo("foo");
+		});
 	}
 
 	@SpringBootApplication
 	public static class TestApplication {
+
+		@Value("${vault.value}")
+		String configValue;
 
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);

@@ -24,9 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.cloud.vault.util.VaultTestContextRunner;
 import org.springframework.vault.core.VaultOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,14 +40,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-
-@SpringBootTest(classes = VaultConfigWithContextTests.TestApplication.class,
-		properties = { "spring.cloud.vault.application-name=testVaultApp", "spring.cloud.bootstrap.enabled=true" })
-@ActiveProfiles("my-profile")
 public class VaultConfigWithContextTests {
 
-	@Value("${vault.value}")
-	String configValue;
+	VaultTestContextRunner contextRunner = VaultTestContextRunner.of(VaultConfigTlsCertAuthenticationTests.class)
+		.withConfiguration(VaultConfigWithContextTests.TestApplication.class)
+		.withApplicationName("testVaultApp")
+		.withProfiles("my-profile")
+		.withSettings(s -> s.bootstrap());
 
 	@BeforeAll
 	public static void beforeClass() {
@@ -57,19 +55,24 @@ public class VaultConfigWithContextTests {
 		vaultRule.before();
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
-
 		vaultOperations.write("secret/testVaultApp/my-profile", Collections.singletonMap("vault.value", "hello"));
-
 		vaultOperations.write("secret/testVaultApp", Collections.singletonMap("vault.value", "world"));
 	}
 
 	@Test
 	public void contextLoads() {
-		assertThat(this.configValue).isEqualTo("hello");
+		this.contextRunner.run(ctx -> {
+			TestApplication application = ctx.getBean(TestApplication.class);
+			assertThat(application.configValue).isEqualTo("hello");
+		});
+
 	}
 
 	@SpringBootApplication
 	public static class TestApplication {
+
+		@Value("${vault.value}")
+		String configValue;
 
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);

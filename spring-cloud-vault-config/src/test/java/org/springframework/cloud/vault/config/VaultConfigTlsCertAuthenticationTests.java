@@ -51,9 +51,9 @@ import static org.springframework.cloud.vault.util.Settings.findWorkDir;
 public class VaultConfigTlsCertAuthenticationTests {
 
 	VaultTestContextRunner contextRunner = VaultTestContextRunner.of(VaultConfigTlsCertAuthenticationTests.class)
-		.auth(VaultProperties.AuthenticationMethod.CERT)
-		.configurations(TestConfig.class)
-		.settings(s -> s.bootstrap());
+		.withAuthentication(VaultProperties.AuthenticationMethod.CERT)
+		.withConfiguration(TestConfig.class)
+		.withSettings(s -> s.bootstrap());
 
 	private static VaultOperations vaultOperations;
 
@@ -110,7 +110,7 @@ public class VaultConfigTlsCertAuthenticationTests {
 		anotherRole.put("policies", "another-policy");
 		vaultOperations.write("auth/cert/certs/another-role", anotherRole);
 
-		this.contextRunner.property("spring.cloud.vault.ssl.role", "my-role").run(context -> {
+		this.contextRunner.withProperties("spring.cloud.vault.ssl.role", "my-role").run(context -> {
 			VaultTemplate template = context.getBean(VaultTemplate.class);
 			VaultResponse tokenLookup = template.read("auth/token/lookup-self");
 			assertThat(tokenLookup.getRequiredData()).containsEntry("policies", List.of("default", "testpolicy"));

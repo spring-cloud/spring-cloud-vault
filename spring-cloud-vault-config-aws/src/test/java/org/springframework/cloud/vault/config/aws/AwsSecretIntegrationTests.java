@@ -43,8 +43,6 @@ import static org.springframework.cloud.vault.config.aws.VaultConfigAwsBootstrap
  *
  * @author Mark Paluch
  */
-// FIXME: 4.0.0
-@Disabled("NoClassDefFoundError: org/springframework/http/client/Netty4ClientHttpRequestFactory")
 public class AwsSecretIntegrationTests extends IntegrationTestSupport {
 
 	private static final String AWS_REGION = "eu-west-1";

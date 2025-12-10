@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
+import org.springframework.cloud.vault.util.VaultTestContextRunner;
 import org.springframework.cloud.vault.util.Version;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -46,15 +46,12 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Mark Paluch
  */
-
-@SpringBootTest(classes = VaultConfigCubbyholeAuthenticationTests.TestApplication.class,
-		properties = { "spring.cloud.vault.authentication=cubbyhole",
-				"spring.cloud.vault.kv.applicationName=VaultConfigCubbyholeAuthenticationTests",
-				"spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigCubbyholeAuthenticationTests {
 
-	@Value("${vault.value}")
-	String configValue;
+	VaultTestContextRunner contextRunner = VaultTestContextRunner.of(VaultConfigCubbyholeAuthenticationTests.class)
+		.withAuthentication(VaultProperties.AuthenticationMethod.CUBBYHOLE)
+		.withConfiguration(VaultConfigCubbyholeAuthenticationTests.TestApplication.class)
+		.withSettings(s -> s.bootstrap());
 
 	@BeforeAll
 	public static void beforeClass() {
@@ -88,11 +85,17 @@ public class VaultConfigCubbyholeAuthenticationTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(this.configValue).isEqualTo(getClass().getSimpleName());
+		this.contextRunner.run(ctx -> {
+			TestApplication application = ctx.getBean(TestApplication.class);
+			assertThat(application.configValue).isEqualTo(getClass().getSimpleName());
+		});
 	}
 
 	@SpringBootApplication
 	public static class TestApplication {
+
+		@Value("${vault.value}")
+		String configValue;
 
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);

@@ -25,8 +25,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
+import org.springframework.cloud.vault.util.VaultTestContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.vault.core.VaultOperations;
 
@@ -42,13 +42,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-
-@SpringBootTest(classes = VaultConfigWithVaultConfigurerTests.TestApplication.class, properties = {
-		"VaultConfigWithVaultConfigurerTests.custom.config=true", "spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigWithVaultConfigurerTests {
 
-	@Value("${vault.value}")
-	String configValue;
+	VaultTestContextRunner contextRunner = VaultTestContextRunner.of(VaultConfigWithVaultConfigurerTests.class)
+		.withConfiguration(VaultConfigWithVaultConfigurerTests.TestApplication.class)
+		.withSettings(s -> s.bootstrap());
 
 	@BeforeAll
 	public static void beforeClass() {
@@ -66,11 +64,19 @@ public class VaultConfigWithVaultConfigurerTests {
 
 	@Test
 	public void contextLoads() {
-		assertThat(this.configValue).isEqualTo("hello");
+
+		this.contextRunner.withProperties("VaultConfigWithVaultConfigurerTests.custom.config", true).run(ctx -> {
+			TestApplication application = ctx.getBean(TestApplication.class);
+			assertThat(application.configValue).isEqualTo("hello");
+		});
+
 	}
 
 	@SpringBootApplication
 	public static class TestApplication {
+
+		@Value("${vault.value}")
+		String configValue;
 
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);

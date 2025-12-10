@@ -37,7 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Ryan Hoegg
  * @author Mark Paluch
  */
-
 @SpringBootTest(classes = VaultPropertySourceLocatorIntegrationTests.TestApplication.class,
 		properties = { "spring.cloud.vault.kv.application-name=neuromancer,icebreaker",
 				"spring.cloud.bootstrap.enabled=false", "spring.config.import=vault://" })
