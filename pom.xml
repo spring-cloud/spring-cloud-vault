@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-build</artifactId>
-		<version>4.2.3-SNAPSHOT</version>
+		<version>4.2.5-SNAPSHOT</version>
 		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
@@ -60,7 +60,7 @@
 	</developers>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring-cloud-commons.version>4.2.4-SNAPSHOT</spring-cloud-commons.version>
+		<spring-cloud-commons.version>4.2.5-SNAPSHOT</spring-cloud-commons.version>
 		<bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
 
 		<google-api-services-iam.version>v1-rev20201112-1.31.0</google-api-services-iam.version>
