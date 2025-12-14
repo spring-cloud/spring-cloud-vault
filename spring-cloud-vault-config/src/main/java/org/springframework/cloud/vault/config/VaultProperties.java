@@ -115,8 +115,6 @@ public class VaultProperties implements EnvironmentAware {
 	@Nullable
 	private String token;
 
-	private AppIdProperties appId = new AppIdProperties();
-
 	private AppRoleProperties appRole = new AppRoleProperties();
 
 	private AwsEc2Properties awsEc2 = new AwsEc2Properties();
@@ -255,14 +253,6 @@ public class VaultProperties implements EnvironmentAware {
 
 	public void setToken(@Nullable String token) {
 		this.token = token;
-	}
-
-	public AppIdProperties getAppId() {
-		return this.appId;
-	}
-
-	public void setAppId(AppIdProperties appId) {
-		this.appId = appId;
 	}
 
 	public AppRoleProperties getAppRole() {
@@ -443,69 +433,6 @@ public class VaultProperties implements EnvironmentAware {
 
 		public void setServiceId(String serviceId) {
 			this.serviceId = serviceId;
-		}
-
-	}
-
-	/**
-	 * AppId properties.
-	 */
-	public static class AppIdProperties {
-
-		/**
-		 * Property value for UserId generation using a Mac-Address.
-		 *
-		 * @see org.springframework.vault.authentication.MacAddressUserId
-		 */
-		public static final String MAC_ADDRESS = "MAC_ADDRESS";
-
-		/**
-		 * Property value for UserId generation using an IP-Address.
-		 *
-		 * @see org.springframework.vault.authentication.IpAddressUserId
-		 */
-		public static final String IP_ADDRESS = "IP_ADDRESS";
-
-		/**
-		 * Mount path of the AppId authentication backend.
-		 */
-		private String appIdPath = "app-id";
-
-		/**
-		 * Network interface hint for the "MAC_ADDRESS" UserId mechanism.
-		 */
-		@Nullable
-		private String networkInterface;
-
-		/**
-		 * UserId mechanism. Can be either "MAC_ADDRESS", "IP_ADDRESS", a string or a
-		 * class name.
-		 */
-		private String userId = MAC_ADDRESS;
-
-		public String getAppIdPath() {
-			return this.appIdPath;
-		}
-
-		public void setAppIdPath(String appIdPath) {
-			this.appIdPath = appIdPath;
-		}
-
-		@Nullable
-		public String getNetworkInterface() {
-			return this.networkInterface;
-		}
-
-		public void setNetworkInterface(@Nullable String networkInterface) {
-			this.networkInterface = networkInterface;
-		}
-
-		public String getUserId() {
-			return this.userId;
-		}
-
-		public void setUserId(String userId) {
-			this.userId = userId;
 		}
 
 	}
