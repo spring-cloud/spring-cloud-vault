@@ -42,17 +42,22 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
+import org.springframework.vault.client.RestClientCustomizer;
 import org.springframework.vault.client.RestTemplateBuilder;
 import org.springframework.vault.client.RestTemplateCustomizer;
 import org.springframework.vault.client.RestTemplateFactory;
 import org.springframework.vault.client.RestTemplateRequestCustomizer;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
+import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultClientCustomizer;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.config.AbstractVaultConfiguration.ClientFactoryWrapper;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClient.Builder;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -76,13 +81,19 @@ public class VaultAutoConfiguration {
 
 	private final VaultEndpointProvider endpointProvider;
 
+	private final List<VaultClientCustomizer> vaultClientCustomizers;
+
 	private final List<RestTemplateCustomizer> customizers;
+
+	private final List<RestClientCustomizer> restClientCustomizers;
 
 	private final List<RestTemplateRequestCustomizer<?>> requestCustomizers;
 
 	public VaultAutoConfiguration(ConfigurableApplicationContext applicationContext, VaultProperties vaultProperties,
 			ObjectProvider<VaultEndpointProvider> endpointProvider,
+			ObjectProvider<List<VaultClientCustomizer>> vaultClientCustomizers,
 			ObjectProvider<List<RestTemplateCustomizer>> customizers,
+			ObjectProvider<List<RestClientCustomizer>> restClientCustomizers,
 			ObjectProvider<List<RestTemplateRequestCustomizer<?>>> requestCustomizers) {
 
 		this.applicationContext = applicationContext;
@@ -96,9 +107,12 @@ public class VaultAutoConfiguration {
 		}
 
 		this.endpointProvider = provider;
+		this.vaultClientCustomizers = new ArrayList<>(vaultClientCustomizers.getIfAvailable(Collections::emptyList));
+		AnnotationAwareOrderComparator.sort(this.vaultClientCustomizers);
 		this.customizers = new ArrayList<>(customizers.getIfAvailable(Collections::emptyList));
 		AnnotationAwareOrderComparator.sort(this.customizers);
-
+		this.restClientCustomizers = new ArrayList<>(restClientCustomizers.getIfAvailable(Collections::emptyList));
+		AnnotationAwareOrderComparator.sort(this.restClientCustomizers);
 		this.requestCustomizers = new ArrayList<>(requestCustomizers.getIfAvailable(Collections::emptyList));
 		AnnotationAwareOrderComparator.sort(this.requestCustomizers);
 	}
@@ -109,10 +123,11 @@ public class VaultAutoConfiguration {
 	 * @param requestFactory the {@link ClientHttpRequestFactory}.
 	 * @return the {@link RestTemplateBuilder}.
 	 * @since 2.3
+	 * @deprecated since 5.1, use {@link RestClient.Builder} instead.
 	 * @see #clientHttpRequestFactoryWrapper()
 	 */
+	@Deprecated(since = "5.1")
 	protected RestTemplateBuilder restTemplateBuilder(ClientHttpRequestFactory requestFactory) {
-
 		return this.configuration.createRestTemplateBuilder(requestFactory, this.endpointProvider, this.customizers,
 				this.requestCustomizers);
 	}
@@ -138,34 +153,57 @@ public class VaultAutoConfiguration {
 	 * @param clientFactoryWrapper the {@link ClientFactoryWrapper}.
 	 * @return the {@link RestTemplateFactory}.
 	 * @since 3.0
+	 * @deprecated since 5.1, use {@link RestClient.Builder} instead.
 	 * @see #clientHttpRequestFactoryWrapper()
 	 */
 	@Bean
 	@ConditionalOnMissingBean
+	@Deprecated(since = "4.1")
 	public RestTemplateFactory vaultRestTemplateFactory(ClientFactoryWrapper clientFactoryWrapper) {
 		return new DefaultRestTemplateFactory(clientFactoryWrapper.getClientHttpRequestFactory(),
 				this::restTemplateBuilder);
 	}
 
 	/**
-	 * Creates a {@link VaultTemplate}.
-	 * @param clientFactoryWrapper the {@link ClientFactoryWrapper}.
+	 * Creates a {@link VaultClient} using a {@link RestClient}.
+	 * @return the {@link VaultClient} bean.
+	 * @since 5.1
+	 * @see VaultClient
+	 */
+	@Bean
+	@ConditionalOnMissingBean(VaultClient.class)
+	public VaultClient vaultClient() {
+		RestClient restClient = getRestClient();
+		return this.configuration.createVaultClient(this.vaultClientCustomizers, restClient, this.endpointProvider);
+	}
+
+	private RestClient getRestClient() {
+		ClientFactoryWrapper clientFactoryWrapper = this.applicationContext.getBean(ClientFactoryWrapper.class);
+		RestTemplateBuilder restTemplateBuilder = restTemplateBuilder(
+				clientFactoryWrapper.getClientHttpRequestFactory());
+		Builder builder = RestClient.builder(restTemplateBuilder.build());
+		this.restClientCustomizers.forEach(it -> it.customize(builder));
+		return builder.build();
+	}
+
+	/**
+	 * Creates a {@link VaultTemplate} using a {@link VaultClient}.
+	 * @param vaultClient the {@link VaultClient}.
 	 * @return the {@link VaultTemplate} bean.
-	 * @see VaultAutoConfiguration#clientHttpRequestFactoryWrapper()
+	 * @since 5.1
+	 * @see VaultClient
 	 */
 	@Bean
 	@ConditionalOnMissingBean(VaultOperations.class)
-	public VaultTemplate vaultTemplate(ClientFactoryWrapper clientFactoryWrapper) {
+	public VaultTemplate vaultTemplate(VaultClient vaultClient) {
 
 		VaultProperties.AuthenticationMethod authentication = this.vaultProperties.getAuthentication();
-		RestTemplateBuilder restTemplateBuilder = restTemplateBuilder(
-				clientFactoryWrapper.getClientHttpRequestFactory());
 
 		if (authentication == VaultProperties.AuthenticationMethod.NONE) {
-			return new VaultTemplate(restTemplateBuilder);
+			return new VaultTemplate(vaultClient);
 		}
 
-		return new VaultTemplate(restTemplateBuilder, this.applicationContext.getBean(SessionManager.class));
+		return new VaultTemplate(vaultClient, this.applicationContext.getBean(SessionManager.class));
 	}
 
 	/**
@@ -192,8 +230,9 @@ public class VaultAutoConfiguration {
 	 * @param clientAuthentication the {@link ClientAuthentication}.
 	 * @param asyncTaskExecutorFactory the {@link ObjectFactory} for
 	 * {@link TaskSchedulerWrapper}.
-	 * @param restTemplateFactory the {@link RestTemplateFactory}.
+	 * @param vaultClient the {@link VaultClient}.
 	 * @return the {@link SessionManager} for Vault session management.
+	 * @since 5.1
 	 * @see SessionManager
 	 * @see LifecycleAwareSessionManager
 	 */
@@ -201,33 +240,28 @@ public class VaultAutoConfiguration {
 	@ConditionalOnMissingBean
 	@ConditionalOnAuthentication
 	public SessionManager vaultSessionManager(ClientAuthentication clientAuthentication,
-			ObjectFactory<TaskSchedulerWrapper> asyncTaskExecutorFactory, RestTemplateFactory restTemplateFactory) {
+			ObjectFactory<TaskSchedulerWrapper> asyncTaskExecutorFactory, VaultClient vaultClient) {
 
 		return this.configuration.createSessionManager(clientAuthentication,
-				() -> asyncTaskExecutorFactory.getObject().getTaskScheduler(), restTemplateFactory);
+				() -> asyncTaskExecutorFactory.getObject().getTaskScheduler(), vaultClient);
 	}
 
 	/**
-	 * @param clientFactoryWrapper the {@link ClientFactoryWrapper}.
-	 * @param restTemplateFactory the {@link RestTemplateFactory}.
+	 * @param vaultClient the {@link VaultClient}.
 	 * @return the {@link ClientAuthentication} to obtain a
 	 * {@link org.springframework.vault.support.VaultToken}.
+	 * @since 5.1
 	 * @see SessionManager
 	 * @see LifecycleAwareSessionManager
 	 */
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnAuthentication
-	public ClientAuthentication clientAuthentication(ClientFactoryWrapper clientFactoryWrapper,
-			RestTemplateFactory restTemplateFactory) {
+	public ClientAuthentication clientAuthentication(VaultClient vaultClient) {
 
-		RestTemplate externalRestOperations = new RestTemplate(clientFactoryWrapper.getClientHttpRequestFactory());
-
-		this.customizers.forEach(customizer -> customizer.customize(externalRestOperations));
-
-		RestTemplate restTemplate = restTemplateFactory.create();
-		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(this.vaultProperties, restTemplate,
-				externalRestOperations);
+		RestClient restClient = getRestClient();
+		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(this.vaultProperties, vaultClient,
+				restClient);
 
 		return factory.createClientAuthentication();
 	}

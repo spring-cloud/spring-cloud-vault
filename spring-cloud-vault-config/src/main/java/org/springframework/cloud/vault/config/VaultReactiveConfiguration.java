@@ -41,6 +41,9 @@ import org.springframework.vault.authentication.event.AuthenticationEvent;
 import org.springframework.vault.authentication.event.AuthenticationEventMulticaster;
 import org.springframework.vault.authentication.event.AuthenticationListener;
 import org.springframework.vault.client.ClientHttpConnectorFactory;
+import org.springframework.vault.client.ReactiveVaultClient;
+import org.springframework.vault.client.ReactiveVaultClient.Builder;
+import org.springframework.vault.client.ReactiveVaultClientCustomizer;
 import org.springframework.vault.client.ReactiveVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.VaultHttpHeaders;
@@ -76,6 +79,17 @@ final class VaultReactiveConfiguration {
 		return ClientHttpConnectorFactory.create(clientOptions, sslConfiguration);
 	}
 
+	ReactiveVaultClient createVaultClient(List<ReactiveVaultClientCustomizer> customizers, WebClient webClient,
+			ReactiveVaultEndpointProvider endpointProvider) {
+
+		Builder builder = ReactiveVaultClient.builder(webClient).endpoint(endpointProvider);
+		if (StringUtils.hasText(this.vaultProperties.getNamespace())) {
+			builder.defaultNamespace(this.vaultProperties.getNamespace());
+		}
+		customizers.forEach(it -> it.customize(builder));
+		return builder.build();
+	}
+
 	WebClientBuilder createWebClientBuilder(ClientHttpConnector connector,
 			ReactiveVaultEndpointProvider endpointProvider, List<WebClientCustomizer> customizers) {
 
@@ -106,13 +120,13 @@ final class VaultReactiveConfiguration {
 		return builder;
 	}
 
-	VaultTokenSupplier createVaultTokenSupplier(WebClientFactory webClientFactory,
+	VaultTokenSupplier createVaultTokenSupplier(ReactiveVaultClient reactiveVaultClient, WebClient webClient,
 			Supplier<AuthenticationStepsFactory> stepsFactorySupplier,
 			Supplier<ClientAuthentication> clientAuthenticationSupplier) {
 
 		AuthenticationStepsFactory authenticationStepsFactory = stepsFactorySupplier.get();
 		if (authenticationStepsFactory != null) {
-			return createAuthenticationStepsOperator(authenticationStepsFactory, webClientFactory);
+			return createAuthenticationStepsOperator(authenticationStepsFactory, reactiveVaultClient, webClient);
 		}
 
 		ClientAuthentication clientAuthentication = clientAuthenticationSupplier.get();
@@ -127,7 +141,7 @@ final class VaultReactiveConfiguration {
 
 			if (clientAuthentication instanceof AuthenticationStepsFactory) {
 				return createAuthenticationStepsOperator((AuthenticationStepsFactory) clientAuthentication,
-						webClientFactory);
+						reactiveVaultClient, webClient);
 			}
 
 			throw new IllegalStateException(String.format("Cannot construct VaultTokenSupplier from %s. "
@@ -140,15 +154,29 @@ final class VaultReactiveConfiguration {
 	}
 
 	private VaultTokenSupplier createAuthenticationStepsOperator(AuthenticationStepsFactory factory,
-			WebClientFactory webClientFactory) {
-		WebClient webClient = webClientFactory.create();
-		return new AuthenticationStepsOperator(factory.getAuthenticationSteps(), webClient);
+			ReactiveVaultClient reactiveVaultClient, WebClient webClient) {
+		return new AuthenticationStepsOperator(factory.getAuthenticationSteps(), reactiveVaultClient, webClient);
 	}
 
 	SessionManager createSessionManager(ReactiveSessionManager sessionManager) {
 		return sessionManager instanceof AuthenticationEventMulticaster
 				? new ReactiveMulticastingSessionManagerAdapter(sessionManager)
 				: new ReactiveSessionManagerAdapter(sessionManager);
+	}
+
+	ReactiveSessionManager createReactiveSessionManager(VaultTokenSupplier vaultTokenSupplier,
+			Supplier<TaskScheduler> taskScheduler, ReactiveVaultClient reactiveVaultClient) {
+
+		VaultProperties.SessionLifecycle lifecycle = this.vaultProperties.getSession().getLifecycle();
+
+		if (lifecycle.isEnabled()) {
+			ReactiveLifecycleAwareSessionManager.RefreshTrigger trigger = new ReactiveLifecycleAwareSessionManager.FixedTimeoutRefreshTrigger(
+					lifecycle.getRefreshBeforeExpiry(), lifecycle.getExpiryThreshold());
+			return new ReactiveLifecycleAwareSessionManager(vaultTokenSupplier, taskScheduler.get(),
+					reactiveVaultClient, trigger);
+		}
+
+		return CachingVaultTokenSupplier.of(vaultTokenSupplier);
 	}
 
 	ReactiveSessionManager createReactiveSessionManager(VaultTokenSupplier vaultTokenSupplier,

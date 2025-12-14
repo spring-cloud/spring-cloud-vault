@@ -37,8 +37,10 @@ import org.springframework.vault.authentication.event.AuthenticationEventMultica
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.client.RestTemplateBuilder;
 import org.springframework.vault.client.RestTemplateCustomizer;
-import org.springframework.vault.client.RestTemplateFactory;
 import org.springframework.vault.client.RestTemplateRequestCustomizer;
+import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultClient.Builder;
+import org.springframework.vault.client.VaultClientCustomizer;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.VaultHttpHeaders;
@@ -48,7 +50,7 @@ import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 /**
  * Support class for Vault configuration providing utility methods.
@@ -153,6 +155,17 @@ final class VaultConfiguration {
 		return vaultEndpoint;
 	}
 
+	VaultClient createVaultClient(List<VaultClientCustomizer> customizers, RestClient restClient,
+			VaultEndpointProvider endpointProvider) {
+
+		Builder builder = VaultClient.builder(restClient).endpoint(endpointProvider);
+		if (StringUtils.hasText(this.vaultProperties.getNamespace())) {
+			builder.defaultNamespace(this.vaultProperties.getNamespace());
+		}
+		customizers.forEach(it -> it.customize(builder));
+		return builder.build();
+	}
+
 	RestTemplateBuilder createRestTemplateBuilder(ClientHttpRequestFactory requestFactory,
 			VaultEndpointProvider endpointProvider, List<RestTemplateCustomizer> customizers,
 			List<RestTemplateRequestCustomizer<?>> requestCustomizers) {
@@ -170,14 +183,13 @@ final class VaultConfiguration {
 	}
 
 	SessionManager createSessionManager(ClientAuthentication clientAuthentication,
-			Supplier<TaskScheduler> taskSchedulerSupplier, RestTemplateFactory restTemplateFactory) {
+			Supplier<TaskScheduler> taskSchedulerSupplier, VaultClient vaultClient) {
 		VaultProperties.SessionLifecycle lifecycle = this.vaultProperties.getSession().getLifecycle();
 
 		if (lifecycle.isEnabled()) {
-			RestTemplate restTemplate = restTemplateFactory.create();
 			LifecycleAwareSessionManagerSupport.RefreshTrigger trigger = new LifecycleAwareSessionManagerSupport.FixedTimeoutRefreshTrigger(
 					lifecycle.getRefreshBeforeExpiry(), lifecycle.getExpiryThreshold());
-			return new LifecycleAwareSessionManager(clientAuthentication, taskSchedulerSupplier.get(), restTemplate,
+			return new LifecycleAwareSessionManager(clientAuthentication, taskSchedulerSupplier.get(), vaultClient,
 					trigger);
 		}
 
