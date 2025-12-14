@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.netty.http.client.HttpClient;
 
@@ -42,7 +43,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.client.reactive.ClientHttpConnector;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.AuthenticationStepsFactory;
 import org.springframework.vault.authentication.ClientAuthentication;
@@ -87,18 +87,15 @@ import static org.springframework.cloud.vault.config.VaultAutoConfiguration.Task
 @AutoConfigureBefore(VaultAutoConfiguration.class)
 public class VaultReactiveAutoConfiguration implements InitializingBean {
 
-	@Nullable
-	private final ConfigurableApplicationContext applicationContext;
+	@Nullable private final ConfigurableApplicationContext applicationContext;
 
 	private final VaultProperties vaultProperties;
 
 	private final VaultReactiveConfiguration configuration;
 
-	@Nullable
-	private final ReactiveVaultEndpointProvider reactiveEndpointProvider;
+	@Nullable private final ReactiveVaultEndpointProvider reactiveEndpointProvider;
 
-	@Nullable
-	private final VaultEndpointProvider endpointProvider;
+	@Nullable private final VaultEndpointProvider endpointProvider;
 
 	private final List<ReactiveVaultClientCustomizer> vaultClientCustomizers;
 

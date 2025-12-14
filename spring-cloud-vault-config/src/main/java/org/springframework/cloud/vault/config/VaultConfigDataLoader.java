@@ -28,6 +28,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -49,7 +50,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.PropertySource;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -437,8 +437,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 		return !Modifier.isFinal(field.getModifiers()) && field.getType().isAssignableFrom(Log.class);
 	}
 
-	@Nullable
-	static Class<?> forName(String name) {
+	@Nullable static Class<?> forName(String name) {
 		try {
 			return ClassUtils.forName(name, VaultConfigDataLocationResolver.class.getClassLoader());
 		}

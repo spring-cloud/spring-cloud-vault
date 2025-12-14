@@ -16,8 +16,9 @@
 
 package org.springframework.cloud.vault.config.databases;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.lang.Nullable;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -38,8 +39,7 @@ public class VaultCassandraProperties implements DatabaseSecretProperties {
 	/**
 	 * Role name for credentials.
 	 */
-	@Nullable
-	private String role;
+	@Nullable private String role;
 
 	/**
 	 * Enable static role usage.
@@ -73,8 +73,7 @@ public class VaultCassandraProperties implements DatabaseSecretProperties {
 	}
 
 	@Override
-	@Nullable
-	public String getRole() {
+	@Nullable public String getRole() {
 		return this.role;
 	}
 
