@@ -27,6 +27,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.bootstrap.BootstrapConfiguration;
+import org.springframework.vault.client.ReactiveVaultClientCustomizer;
 import org.springframework.vault.client.ReactiveVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.WebClientCustomizer;
@@ -56,8 +57,10 @@ public class VaultReactiveBootstrapConfiguration extends VaultReactiveAutoConfig
 	public VaultReactiveBootstrapConfiguration(VaultProperties vaultProperties,
 			ObjectProvider<ReactiveVaultEndpointProvider> reactiveEndpointProvider,
 			ObjectProvider<VaultEndpointProvider> endpointProvider,
+			ObjectProvider<List<ReactiveVaultClientCustomizer>> vaultClientCustomizers,
 			ObjectProvider<List<WebClientCustomizer>> webClientCustomizers) {
-		super(vaultProperties, reactiveEndpointProvider, endpointProvider, webClientCustomizers);
+		super(vaultProperties, reactiveEndpointProvider, endpointProvider, vaultClientCustomizers,
+				webClientCustomizers);
 	}
 
 }

@@ -30,7 +30,7 @@ import org.springframework.vault.authentication.GcpIamCredentialsAuthentication;
 import org.springframework.vault.authentication.GcpIamCredentialsAuthenticationOptions;
 import org.springframework.vault.authentication.GcpIamCredentialsAuthenticationOptions.GcpIamCredentialsAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.GoogleCredentialsSupplier;
-import org.springframework.web.client.RestOperations;
+import org.springframework.vault.client.VaultClient;
 
 /**
  * Utility to create {@link GcpIamCredentialsAuthentication} for the IAM Credentials
@@ -44,7 +44,7 @@ final class GcpIamCredentialsAuthenticationFactory {
 	private GcpIamCredentialsAuthenticationFactory() {
 	}
 
-	static ClientAuthentication create(VaultProperties vaultProperties, RestOperations restOperations) {
+	static ClientAuthentication create(VaultProperties vaultProperties, VaultClient vaultClient) {
 
 		GcpIamProperties gcp = vaultProperties.getGcpIam();
 
@@ -64,7 +64,7 @@ final class GcpIamCredentialsAuthenticationFactory {
 
 		GcpIamCredentialsAuthenticationOptions options = builder.build();
 
-		return new GcpIamCredentialsAuthentication(options, restOperations);
+		return new GcpIamCredentialsAuthentication(options, vaultClient);
 	}
 
 	private static GoogleCredentials getGoogleCredential(GcpIamProperties gcp) throws IOException {
