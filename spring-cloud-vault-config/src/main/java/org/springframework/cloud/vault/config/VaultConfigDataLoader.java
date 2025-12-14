@@ -53,6 +53,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationStepsFactory;
 import org.springframework.vault.authentication.ClientAuthentication;
@@ -60,9 +61,13 @@ import org.springframework.vault.authentication.ReactiveSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.VaultTokenSupplier;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
+import org.springframework.vault.client.ReactiveVaultClient;
+import org.springframework.vault.client.ReactiveVaultClients;
 import org.springframework.vault.client.RestTemplateBuilder;
 import org.springframework.vault.client.RestTemplateFactory;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
+import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultClient.Builder;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.WebClientBuilder;
 import org.springframework.vault.client.WebClientFactory;
@@ -73,7 +78,9 @@ import org.springframework.vault.core.env.LeaseAwareVaultPropertySource;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.event.LeaseErrorListener;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * {@link ConfigDataLoader} for Vault for {@link VaultConfigLocation}. This class
@@ -183,12 +190,13 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 		infra.registerClientHttpRequestFactoryWrapper();
 		infra.registerRestTemplateBuilder();
 		infra.registerVaultRestTemplateFactory();
+		infra.registerVaultClient();
 
 		VaultProperties.AuthenticationMethod authentication = vaultProperties.getAuthentication();
 
 		if (authentication == VaultProperties.AuthenticationMethod.NONE) {
 			registerIfAbsent(bootstrap, "vaultTemplate", VaultTemplate.class,
-					ctx -> new VaultTemplate(ctx.get(RestTemplateBuilder.class)));
+					ctx -> new VaultTemplate(ctx.get(VaultClient.class)));
 		}
 		else {
 
@@ -199,8 +207,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			}
 
 			registerIfAbsent(bootstrap, "vaultTemplate", VaultTemplate.class,
-					ctx -> new VaultTemplate(bootstrap.get(RestTemplateBuilder.class),
-							bootstrap.get(SessionManager.class)));
+					ctx -> new VaultTemplate(bootstrap.get(VaultClient.class), bootstrap.get(SessionManager.class)));
 		}
 	}
 
@@ -212,12 +219,13 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 		reactiveInfrastructure.registerClientHttpConnectorWrapper();
 		reactiveInfrastructure.registerWebClientBuilder();
 		reactiveInfrastructure.registerWebClientFactory();
+		reactiveInfrastructure.registerVaultClient();
 
 		VaultProperties.AuthenticationMethod authentication = vaultProperties.getAuthentication();
 
 		if (authentication == VaultProperties.AuthenticationMethod.NONE) {
 			registerIfAbsent(bootstrap, "reactiveVaultTemplate", ReactiveVaultTemplate.class,
-					ctx -> new ReactiveVaultTemplate(ctx.get(WebClientBuilder.class)));
+					ctx -> new ReactiveVaultTemplate(ctx.get(ReactiveVaultClient.class)));
 		}
 		else {
 
@@ -226,7 +234,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			reactiveInfrastructure.registerSessionManager();
 
 			registerIfAbsent(bootstrap, "reactiveVaultTemplate", ReactiveVaultTemplate.class,
-					ctx -> new ReactiveVaultTemplate(bootstrap.get(WebClientBuilder.class),
+					ctx -> new ReactiveVaultTemplate(bootstrap.get(ReactiveVaultClient.class),
 							bootstrap.get(ReactiveSessionManager.class)));
 		}
 	}
@@ -498,17 +506,28 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 									this.endpointProvider, Collections.emptyList(), Collections.emptyList())));
 		}
 
+		void registerVaultClient() {
+			registerIfAbsent(this.bootstrap, "vaultClient", VaultClient.class, ctx -> {
+
+				RestTemplate restTemplate = ctx.get(RestTemplateFactory.class).create();
+				Builder builder = VaultClient.builder(restTemplate).endpoint(this.endpointProvider);
+				if (StringUtils.hasText(this.vaultProperties.getNamespace())) {
+					builder.defaultNamespace(this.vaultProperties.getNamespace());
+				}
+				return builder.build();
+			});
+		}
+
 		void registerClientAuthentication() {
 			registerIfAbsent(this.bootstrap, "clientAuthentication", ClientAuthentication.class, ctx -> {
 
 				ClientHttpRequestFactory factory = this.bootstrap.get(ClientFactoryWrapper.class)
 					.getClientHttpRequestFactory();
-
-				RestTemplate externalRestTemplate = new RestTemplate(factory);
+				VaultClient vaultClient = ctx.get(VaultClient.class);
+				RestClient restClient = RestClient.builder().requestFactory(factory).build();
 
 				ClientAuthenticationFactory authenticationFactory = new ClientAuthenticationFactory(
-						this.vaultProperties, this.bootstrap.get(RestTemplateFactory.class).create(),
-						externalRestTemplate);
+						this.vaultProperties, vaultClient, restClient);
 				return authenticationFactory.createClientAuthentication();
 			});
 		}
@@ -517,8 +536,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			registerIfAbsent(this.bootstrap, "vaultSessionManager", SessionManager.class, ctx -> {
 				SessionManager sessionManager = this.configuration.createSessionManager(
 						ctx.get(ClientAuthentication.class),
-						() -> ctx.get(TaskSchedulerWrapper.class).getTaskScheduler(),
-						ctx.get(RestTemplateFactory.class));
+						() -> ctx.get(TaskSchedulerWrapper.class).getTaskScheduler(), ctx.get(VaultClient.class));
 				reconfigureLogger(sessionManager, this.logFactory);
 				return sessionManager;
 			}, ctx -> {
@@ -535,6 +553,8 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 		private final ConfigurableBootstrapContext bootstrap;
 
+		private final VaultProperties vaultProperties;
+
 		private final VaultReactiveConfiguration configuration;
 
 		private final VaultEndpointProvider endpointProvider;
@@ -544,6 +564,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 		ReactiveInfrastructure(ConfigurableBootstrapContext bootstrap, VaultProperties vaultProperties,
 				DeferredLogFactory logFactory) {
 			this.bootstrap = bootstrap;
+			this.vaultProperties = vaultProperties;
 			this.configuration = new VaultReactiveConfiguration(vaultProperties);
 			this.endpointProvider = SimpleVaultEndpointProvider
 				.of(new VaultConfiguration(vaultProperties).createVaultEndpoint());
@@ -570,22 +591,37 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 									Collections.emptyList())));
 		}
 
+		void registerVaultClient() {
+			registerIfAbsent(this.bootstrap, "reactiveVaultClient", ReactiveVaultClient.class, ctx -> {
+
+				WebClient webClient = ctx.get(WebClientFactory.class).create();
+				ReactiveVaultClient.Builder builder = ReactiveVaultClient.builder(webClient)
+					.endpoint(ReactiveVaultClients.wrap(this.endpointProvider));
+				if (StringUtils.hasText(this.vaultProperties.getNamespace())) {
+					builder.defaultNamespace(this.vaultProperties.getNamespace());
+				}
+				return builder.build();
+			});
+		}
+
 		void registerTokenSupplier() {
 
-			registerIfAbsent(this.bootstrap, "vaultTokenSupplier", VaultTokenSupplier.class,
-					ctx -> this.configuration.createVaultTokenSupplier(ctx.get(WebClientFactory.class), () -> {
-						if (this.bootstrap.isRegistered(AuthenticationStepsFactory.class)) {
-							return this.bootstrap.get(AuthenticationStepsFactory.class);
-						}
+			registerIfAbsent(this.bootstrap, "vaultTokenSupplier", VaultTokenSupplier.class, ctx -> {
+				return this.configuration.createVaultTokenSupplier(ctx.get(ReactiveVaultClient.class),
+						ctx.get(WebClientFactory.class).create(), () -> {
+							if (this.bootstrap.isRegistered(AuthenticationStepsFactory.class)) {
+								return this.bootstrap.get(AuthenticationStepsFactory.class);
+							}
 
-						return null;
-					}, () -> {
-						if (this.bootstrap.isRegistered(ClientAuthentication.class)) {
-							return this.bootstrap.get(ClientAuthentication.class);
-						}
+							return null;
+						}, () -> {
+							if (this.bootstrap.isRegistered(ClientAuthentication.class)) {
+								return this.bootstrap.get(ClientAuthentication.class);
+							}
 
-						return null;
-					}));
+							return null;
+						});
+			});
 		}
 
 		void registerReactiveSessionManager() {
@@ -593,7 +629,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			registerIfAbsent(this.bootstrap, "reactiveVaultSessionManager", ReactiveSessionManager.class,
 					ctx -> this.configuration.createReactiveSessionManager(ctx.get(VaultTokenSupplier.class),
 							() -> ctx.get(TaskSchedulerWrapper.class).getTaskScheduler(),
-							ctx.get(WebClientFactory.class)),
+							ctx.get(ReactiveVaultClient.class)),
 					ctx -> {
 					}, List.of("clientHttpConnectorWrapper"));
 		}
