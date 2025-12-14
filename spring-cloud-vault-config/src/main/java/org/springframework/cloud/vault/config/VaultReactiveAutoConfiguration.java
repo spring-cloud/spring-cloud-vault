@@ -50,14 +50,19 @@ import org.springframework.vault.authentication.ReactiveLifecycleAwareSessionMan
 import org.springframework.vault.authentication.ReactiveSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.VaultTokenSupplier;
+import org.springframework.vault.client.ReactiveVaultClient;
+import org.springframework.vault.client.ReactiveVaultClientCustomizer;
+import org.springframework.vault.client.ReactiveVaultClients;
 import org.springframework.vault.client.ReactiveVaultEndpointProvider;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.WebClientBuilder;
 import org.springframework.vault.client.WebClientCustomizer;
 import org.springframework.vault.client.WebClientFactory;
 import org.springframework.vault.core.ReactiveVaultOperations;
 import org.springframework.vault.core.ReactiveVaultTemplate;
+import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -95,25 +100,30 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 	@Nullable
 	private final VaultEndpointProvider endpointProvider;
 
+	private final List<ReactiveVaultClientCustomizer> vaultClientCustomizers;
+
 	private final List<WebClientCustomizer> customizers;
 
 	/**
 	 * @deprecated since 3.0.2, use
-	 * {@link #VaultReactiveAutoConfiguration(ConfigurableApplicationContext, VaultProperties, ObjectProvider, ObjectProvider, ObjectProvider)}
+	 * {@link #VaultReactiveAutoConfiguration(ConfigurableApplicationContext, VaultProperties, ObjectProvider, ObjectProvider, ObjectProvider, ObjectProvider)}
 	 * instead.
 	 */
 	@Deprecated
 	public VaultReactiveAutoConfiguration(VaultProperties vaultProperties,
 			ObjectProvider<ReactiveVaultEndpointProvider> reactiveEndpointProvider,
 			ObjectProvider<VaultEndpointProvider> endpointProvider,
+			ObjectProvider<List<ReactiveVaultClientCustomizer>> vaultClientCustomizers,
 			ObjectProvider<List<WebClientCustomizer>> webClientCustomizers) {
-		this(null, vaultProperties, reactiveEndpointProvider, endpointProvider, webClientCustomizers);
+		this(null, vaultProperties, reactiveEndpointProvider, endpointProvider, vaultClientCustomizers,
+				webClientCustomizers);
 	}
 
 	@Autowired
 	public VaultReactiveAutoConfiguration(@Nullable ConfigurableApplicationContext applicationContext,
 			VaultProperties vaultProperties, ObjectProvider<ReactiveVaultEndpointProvider> reactiveEndpointProvider,
 			ObjectProvider<VaultEndpointProvider> endpointProvider,
+			ObjectProvider<List<ReactiveVaultClientCustomizer>> vaultClientCustomizers,
 			ObjectProvider<List<WebClientCustomizer>> webClientCustomizers) {
 
 		this.applicationContext = applicationContext;
@@ -130,6 +140,8 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 			this.endpointProvider = null;
 		}
 
+		this.vaultClientCustomizers = new ArrayList<>(vaultClientCustomizers.getIfAvailable(Collections::emptyList));
+		AnnotationAwareOrderComparator.sort(this.vaultClientCustomizers);
 		this.customizers = new ArrayList<>(webClientCustomizers.getIfAvailable(Collections::emptyList));
 		AnnotationAwareOrderComparator.sort(this.customizers);
 	}
@@ -204,30 +216,57 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 	}
 
 	/**
+	 * Creates a {@link VaultTemplate} using a {@link VaultClient}.
+	 * @return the {@link VaultClient} bean.
+	 * @since 5.1
+	 * @see VaultClient
+	 */
+	@Bean
+	@ConditionalOnMissingBean(ReactiveVaultClient.class)
+	public ReactiveVaultClient reactiveVaultClient() {
+		WebClient webClient = getWebClient();
+		ReactiveVaultEndpointProvider endpointProvider;
+		if (this.reactiveEndpointProvider != null) {
+			endpointProvider = this.reactiveEndpointProvider;
+		}
+		else if (this.endpointProvider != null) {
+			endpointProvider = ReactiveVaultClients.wrap(this.endpointProvider);
+		}
+		else {
+			throw new IllegalStateException("No ReactiveVaultEndpointProvider or VaultEndpointProvider configured");
+		}
+		return this.configuration.createVaultClient(this.vaultClientCustomizers, webClient, endpointProvider);
+	}
+
+	private WebClient getWebClient() {
+		return webClientBuilder(getClientHttpConnector()).build();
+	}
+
+	/**
 	 * Creates a {@link ReactiveVaultTemplate}.
 	 * @param sessionManager object provider for {@link ReactiveSessionManager}.
 	 * @return the {@link ReactiveVaultTemplate} bean.
-	 * @see #reactiveVaultSessionManager(BeanFactory, ObjectFactory, WebClientFactory)
+	 * @since 5.1
 	 */
 	@Bean
 	@ConditionalOnMissingBean(ReactiveVaultOperations.class)
-	public ReactiveVaultTemplate reactiveVaultTemplate(ObjectProvider<ReactiveSessionManager> sessionManager) {
-
-		WebClientBuilder webClientBuilder = webClientBuilder(getClientHttpConnector());
+	public ReactiveVaultTemplate reactiveVaultTemplate(ReactiveVaultClient reactiveVaultClient,
+			ObjectProvider<ReactiveSessionManager> sessionManager) {
 
 		if (this.vaultProperties.getAuthentication() == VaultProperties.AuthenticationMethod.NONE) {
-			return new ReactiveVaultTemplate(webClientBuilder);
+			return new ReactiveVaultTemplate(reactiveVaultClient);
 		}
 
-		return new ReactiveVaultTemplate(webClientBuilder, sessionManager.getObject());
+		return new ReactiveVaultTemplate(reactiveVaultClient, sessionManager.getObject());
 	}
 
 	/**
 	 * @param beanFactory the {@link BeanFactory}.
 	 * @param asyncTaskExecutorFactory the {@link ObjectFactory} for
 	 * {@link TaskSchedulerWrapper}.
-	 * @param webClientFactory the web client factory
+	 * @param reactiveVaultClient the {@link ReactiveVaultClient}.
 	 * @return {@link ReactiveSessionManager} for reactive session use.
+	 * @since 5.1
 	 * @see ReactiveSessionManager
 	 * @see ReactiveLifecycleAwareSessionManager
 	 */
@@ -235,12 +274,12 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 	@ConditionalOnMissingBean
 	@ConditionalOnAuthentication
 	public ReactiveSessionManager reactiveVaultSessionManager(BeanFactory beanFactory,
-			ObjectFactory<TaskSchedulerWrapper> asyncTaskExecutorFactory, WebClientFactory webClientFactory) {
+			ObjectFactory<TaskSchedulerWrapper> asyncTaskExecutorFactory, ReactiveVaultClient reactiveVaultClient) {
 
 		VaultTokenSupplier vaultTokenSupplier = beanFactory.getBean("vaultTokenSupplier", VaultTokenSupplier.class);
 
 		return this.configuration.createReactiveSessionManager(vaultTokenSupplier,
-				() -> asyncTaskExecutorFactory.getObject().getTaskScheduler(), webClientFactory);
+				() -> asyncTaskExecutorFactory.getObject().getTaskScheduler(), reactiveVaultClient);
 	}
 
 	/**
@@ -256,20 +295,23 @@ public class VaultReactiveAutoConfiguration implements InitializingBean {
 
 	/**
 	 * @param beanFactory the {@link BeanFactory}.
-	 * @param webClientFactory the {@link WebClientFactory}.
+	 * @param reactiveVaultClient the {@link ReactiveVaultClient}.
 	 * @return the {@link VaultTokenSupplier} for reactive Vault session management
 	 * adapting {@link ClientAuthentication} that also implement
 	 * {@link AuthenticationStepsFactory}.
+	 * @since 5.1
 	 * @see AuthenticationStepsFactory
 	 */
 	@Bean
 	@ConditionalOnMissingBean(name = "vaultTokenSupplier")
 	@ConditionalOnAuthentication
-	public VaultTokenSupplier vaultTokenSupplier(ListableBeanFactory beanFactory, WebClientFactory webClientFactory) {
+	public VaultTokenSupplier vaultTokenSupplier(ListableBeanFactory beanFactory,
+			ReactiveVaultClient reactiveVaultClient) {
 
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
 
-		return this.configuration.createVaultTokenSupplier(webClientFactory,
+		WebClient webClient = getWebClient();
+		return this.configuration.createVaultTokenSupplier(reactiveVaultClient, webClient,
 				() -> beanFactory.getBeanProvider(AuthenticationStepsFactory.class, false).getIfAvailable(),
 				() -> beanFactory.getBeanProvider(ClientAuthentication.class, false).getIfAvailable());
 	}
