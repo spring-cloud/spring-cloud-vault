@@ -22,9 +22,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.env.EnumerablePropertySource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -43,8 +43,7 @@ class VaultPropertySource extends EnumerablePropertySource<VaultConfigOperations
 
 	private final Map<String, Object> properties = new LinkedHashMap<>();
 
-	@Nullable
-	private Secrets secrets;
+	@Nullable private Secrets secrets;
 
 	/**
 	 * Creates a new {@link VaultPropertySource}.

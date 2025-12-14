@@ -16,7 +16,8 @@
 
 package org.springframework.cloud.vault.config;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.vault.core.VaultOperations;
 
 /**
@@ -37,8 +38,7 @@ public interface VaultConfigOperations {
 	 * @return the configuration data. May be {@literal null}.
 	 * @throws IllegalStateException if {@link VaultProperties#failFast} is enabled.
 	 */
-	@Nullable
-	Secrets read(SecretBackendMetadata secretBackendMetadata);
+	@Nullable Secrets read(SecretBackendMetadata secretBackendMetadata);
 
 	/**
 	 * @return the underlying {@link VaultOperations}.

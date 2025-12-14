@@ -21,10 +21,11 @@ import java.time.Duration;
 import java.util.List;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.vault.config.VaultProperties.Ssl;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.StringUtils;

@@ -19,8 +19,9 @@ package org.springframework.cloud.vault.config;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.client.reactive.ClientHttpConnector;
-import org.springframework.lang.Nullable;
 import org.springframework.vault.client.WebClientBuilder;
 import org.springframework.vault.client.WebClientFactory;
 import org.springframework.web.reactive.function.client.WebClient;
