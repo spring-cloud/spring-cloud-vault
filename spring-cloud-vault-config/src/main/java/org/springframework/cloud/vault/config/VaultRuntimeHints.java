@@ -17,10 +17,11 @@
 package org.springframework.cloud.vault.config;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
@@ -42,58 +43,50 @@ import org.springframework.vault.core.env.LeaseAwareVaultPropertySource;
 class VaultRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 
 		ReflectionHints reflection = hints.reflection();
 
 		// reflection required for ConfigDataLoader, early logging capture
-		reflection.registerTypes(Arrays
-			.asList(SimpleSessionManager.class, LifecycleAwareSessionManager.class,
+		reflection.registerTypes(Stream
+			.of(SimpleSessionManager.class, LifecycleAwareSessionManager.class,
 					LifecycleAwareSessionManagerSupport.class, ClientHttpRequestFactoryFactory.class,
 					org.springframework.vault.core.env.VaultPropertySource.class, LeaseAwareVaultPropertySource.class)
-			.stream()
 			.map(TypeReference::of)
-			.collect(Collectors.toList()), builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
+			.collect(Collectors.toList()), builder -> builder.withMembers(MemberCategory.ACCESS_DECLARED_FIELDS));
 
 		reflection.registerTypes(
-				Arrays.asList(VaultKeyValueBackendProperties.class)
-					.stream()
-					.map(TypeReference::of)
-					.collect(Collectors.toList()),
-				builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS,
-						MemberCategory.INTROSPECT_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_METHODS,
-						MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+				Stream.of(VaultKeyValueBackendProperties.class).map(TypeReference::of).collect(Collectors.toList()),
+				builder -> builder.withMembers(MemberCategory.ACCESS_DECLARED_FIELDS,
+						MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 
 		reflection.registerType(
 				TypeReference.of("org.springframework.vault.core.lease.SecretLeaseContainer$LeaseRenewalScheduler"),
-				builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
+				builder -> builder.withMembers(MemberCategory.ACCESS_DECLARED_FIELDS));
 
 		reflection.registerType(
 				TypeReference.of("org.springframework.vault.core.lease.SecretLeaseEventPublisher$LoggingErrorListener"),
-				builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
+				builder -> builder.withMembers(MemberCategory.ACCESS_DECLARED_FIELDS));
 
 		reflection.registerType(TypeReference
 			.of("org.springframework.cloud.vault.config.VaultReactiveConfiguration$ReactiveSessionManagerAdapter"),
-				builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
+				builder -> builder.withMembers(MemberCategory.ACCESS_DECLARED_FIELDS));
 
 		if (VaultConfigDataLoader.webclientPresent && VaultConfigDataLoader.reactorPresent) {
-			reflection.registerTypes(Arrays.asList(ReactiveLifecycleAwareSessionManager.class)
-				.stream()
-				.map(TypeReference::of)
-				.collect(Collectors.toList()), builder -> builder.withMembers(MemberCategory.DECLARED_FIELDS));
+			reflection.registerTypes(
+					Stream.of(ReactiveLifecycleAwareSessionManager.class)
+						.map(TypeReference::of)
+						.collect(Collectors.toList()),
+					builder -> builder.withMembers(MemberCategory.ACCESS_DECLARED_FIELDS));
 		}
 
 		// presence checks
-		reflection.registerTypeIfPresent(classLoader, "reactor.core.publisher.Flux", MemberCategory.PUBLIC_CLASSES);
-		reflection.registerTypeIfPresent(classLoader, "org.springframework.web.reactive.function.client.WebClient",
-				MemberCategory.PUBLIC_CLASSES);
+		reflection.registerTypeIfPresent(classLoader, "reactor.core.publisher.Flux");
+		reflection.registerTypeIfPresent(classLoader, "org.springframework.web.reactive.function.client.WebClient");
 
-		reflection.registerTypeIfPresent(classLoader, "org.bouncycastle.crypto.signers.PSSSigner",
-				MemberCategory.PUBLIC_CLASSES);
-		reflection.registerTypeIfPresent(classLoader, "com.google.api.client.googleapis.auth.oauth2.GoogleCredential",
-				MemberCategory.PUBLIC_CLASSES);
-		reflection.registerTypeIfPresent(classLoader, "com.google.auth.oauth2.GoogleCredentials",
-				MemberCategory.PUBLIC_CLASSES);
+		reflection.registerTypeIfPresent(classLoader, "org.bouncycastle.crypto.signers.PSSSigner");
+		reflection.registerTypeIfPresent(classLoader, "com.google.api.client.googleapis.auth.oauth2.GoogleCredential");
+		reflection.registerTypeIfPresent(classLoader, "com.google.auth.oauth2.GoogleCredentials");
 
 		// reflection for pluggable config properties bindings
 		List<Object> pluggableDescriptors = new ArrayList<>();
@@ -111,8 +104,7 @@ class VaultRuntimeHints implements RuntimeHintsRegistrar {
 			.collect(Collectors.toList());
 
 		reflection.registerTypes(pluggableDescriptorReferences, builder -> {
-			builder.withMembers(MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS,
-					MemberCategory.INTROSPECT_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_METHODS);
+			builder.withMembers(MemberCategory.INVOKE_DECLARED_METHODS);
 		});
 	}
 
