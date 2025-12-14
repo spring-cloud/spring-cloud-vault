@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -32,7 +34,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
@@ -61,14 +62,11 @@ public class VaultBootstrapPropertySourceConfiguration implements InitializingBe
 
 	private final ConfigurableApplicationContext applicationContext;
 
-	@Nullable
-	private Collection<VaultSecretBackendDescriptor> vaultSecretBackendDescriptors;
+	@Nullable private Collection<VaultSecretBackendDescriptor> vaultSecretBackendDescriptors;
 
-	@Nullable
-	private Collection<VaultSecretBackendDescriptorFactory> vaultSecretBackendDescriptorFactories;
+	@Nullable private Collection<VaultSecretBackendDescriptorFactory> vaultSecretBackendDescriptorFactories;
 
-	@Nullable
-	private Collection<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> factories;
+	@Nullable private Collection<SecretBackendMetadataFactory<? super VaultSecretBackendDescriptor>> factories;
 
 	public VaultBootstrapPropertySourceConfiguration(VaultProperties vaultProperties,
 			ConfigurableApplicationContext applicationContext) {

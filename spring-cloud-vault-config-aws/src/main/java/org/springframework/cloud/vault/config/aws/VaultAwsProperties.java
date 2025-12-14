@@ -18,9 +18,10 @@ package org.springframework.cloud.vault.config.aws;
 
 import java.time.Duration;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
-import org.springframework.lang.Nullable;
 
 /**
  * Configuration properties for Vault using the AWS integration.
@@ -39,8 +40,7 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 	/**
 	 * Role name for credentials.
 	 */
-	@Nullable
-	private String role;
+	@Nullable private String role;
 
 	/**
 	 * aws backend path.
@@ -72,8 +72,7 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 	 * role.
 	 * @since 3.0.2
 	 */
-	@Nullable
-	private String roleArn;
+	@Nullable private String roleArn;
 
 	/**
 	 * TTL for sts tokens. Defaults to whatever the vault Role may have for Max. Also
@@ -91,8 +90,7 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 		this.enabled = enabled;
 	}
 
-	@Nullable
-	public String getRole() {
+	@Nullable public String getRole() {
 		return this.role;
 	}
 
@@ -141,8 +139,7 @@ public class VaultAwsProperties implements VaultSecretBackendDescriptor {
 		this.sessionTokenKeyProperty = sessionTokenKeyProperty;
 	}
 
-	@Nullable
-	public String getRoleArn() {
+	@Nullable public String getRoleArn() {
 		return this.roleArn;
 	}
 

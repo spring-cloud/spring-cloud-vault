@@ -16,9 +16,10 @@
 
 package org.springframework.cloud.vault.config.consul;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.vault.config.VaultSecretBackendDescriptor;
-import org.springframework.lang.Nullable;
 
 /**
  * Configuration properties for HashiCorp Consul.
@@ -36,8 +37,7 @@ public class VaultConsulProperties implements VaultSecretBackendDescriptor {
 	/**
 	 * Role name for credentials.
 	 */
-	@Nullable
-	private String role;
+	@Nullable private String role;
 
 	/**
 	 * Consul backend path.
@@ -58,8 +58,7 @@ public class VaultConsulProperties implements VaultSecretBackendDescriptor {
 		this.enabled = enabled;
 	}
 
-	@Nullable
-	public String getRole() {
+	@Nullable public String getRole() {
 		return this.role;
 	}
 
