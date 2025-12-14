@@ -21,12 +21,13 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.DeprecatedConfigurationProperty;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.AzureMsiAuthenticationOptions;
 import org.springframework.vault.authentication.LoginToken;
@@ -75,14 +76,12 @@ public class VaultProperties implements EnvironmentAware {
 	/**
 	 * Vault URI. Can be set with scheme, host and port.
 	 */
-	@Nullable
-	private String uri;
+	@Nullable private String uri;
 
 	/**
 	 * Vault namespace (requires Vault Enterprise).
 	 */
-	@Nullable
-	private String namespace;
+	@Nullable private String namespace;
 
 	/**
 	 * Reactive properties.
@@ -112,8 +111,7 @@ public class VaultProperties implements EnvironmentAware {
 	/**
 	 * Static vault token. Required if {@link #authentication} is {@code TOKEN}.
 	 */
-	@Nullable
-	private String token;
+	@Nullable private String token;
 
 	private AppRoleProperties appRole = new AppRoleProperties();
 
@@ -188,8 +186,7 @@ public class VaultProperties implements EnvironmentAware {
 		this.scheme = scheme;
 	}
 
-	@Nullable
-	public String getUri() {
+	@Nullable public String getUri() {
 		return this.uri;
 	}
 
@@ -197,8 +194,7 @@ public class VaultProperties implements EnvironmentAware {
 		this.uri = uri;
 	}
 
-	@Nullable
-	public String getNamespace() {
+	@Nullable public String getNamespace() {
 		return this.namespace;
 	}
 
@@ -246,8 +242,7 @@ public class VaultProperties implements EnvironmentAware {
 		this.failFast = failFast;
 	}
 
-	@Nullable
-	public String getToken() {
+	@Nullable public String getToken() {
 		return this.token;
 	}
 
@@ -455,14 +450,12 @@ public class VaultProperties implements EnvironmentAware {
 		/**
 		 * The RoleId.
 		 */
-		@Nullable
-		private String roleId;
+		@Nullable private String roleId;
 
 		/**
 		 * The SecretId.
 		 */
-		@Nullable
-		private String secretId;
+		@Nullable private String secretId;
 
 		public String getAppRolePath() {
 			return this.appRolePath;
@@ -480,8 +473,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.role = role;
 		}
 
-		@Nullable
-		public String getRoleId() {
+		@Nullable public String getRoleId() {
 			return this.roleId;
 		}
 
@@ -489,8 +481,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.roleId = roleId;
 		}
 
-		@Nullable
-		public String getSecretId() {
+		@Nullable public String getSecretId() {
 			return this.secretId;
 		}
 
@@ -524,8 +515,7 @@ public class VaultProperties implements EnvironmentAware {
 		 * Nonce used for AWS-EC2 authentication. An empty nonce defaults to nonce
 		 * generation.
 		 */
-		@Nullable
-		private String nonce;
+		@Nullable private String nonce;
 
 		public URI getIdentityDocument() {
 			return this.identityDocument;
@@ -551,8 +541,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.role = role;
 		}
 
-		@Nullable
-		public String getNonce() {
+		@Nullable public String getNonce() {
 			return this.nonce;
 		}
 
@@ -587,16 +576,14 @@ public class VaultProperties implements EnvironmentAware {
 		 * Name of the server used to set {@code X-Vault-AWS-IAM-Server-ID} header in the
 		 * headers of login requests.
 		 */
-		@Nullable
-		private String serverName;
+		@Nullable private String serverName;
 
 		/**
 		 * STS server URI.
 		 *
 		 * @since 2.2
 		 */
-		@Nullable
-		private URI endpointUri;
+		@Nullable private URI endpointUri;
 
 		public String getAwsPath() {
 			return this.awsPath;
@@ -610,8 +597,7 @@ public class VaultProperties implements EnvironmentAware {
 			return this.role;
 		}
 
-		@Nullable
-		public String getServerName() {
+		@Nullable public String getServerName() {
 			return this.serverName;
 		}
 
@@ -631,8 +617,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.serverName = serverName;
 		}
 
-		@Nullable
-		public URI getEndpointUri() {
+		@Nullable public URI getEndpointUri() {
 			return this.endpointUri;
 		}
 
@@ -984,15 +969,13 @@ public class VaultProperties implements EnvironmentAware {
 		 * Path to the instance certificate (PEM). Defaults to {@code CF_INSTANCE_CERT}
 		 * env variable.
 		 */
-		@Nullable
-		private Resource instanceCertificate;
+		@Nullable private Resource instanceCertificate;
 
 		/**
 		 * Path to the instance key (PEM). Defaults to {@code CF_INSTANCE_KEY} env
 		 * variable.
 		 */
-		@Nullable
-		private Resource instanceKey;
+		@Nullable private Resource instanceKey;
 
 		public String getPcfPath() {
 			return this.pcfPath;
@@ -1010,8 +993,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.role = role;
 		}
 
-		@Nullable
-		public Resource getInstanceCertificate() {
+		@Nullable public Resource getInstanceCertificate() {
 			return this.instanceCertificate;
 		}
 
@@ -1019,8 +1001,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.instanceCertificate = instanceCertificate;
 		}
 
-		@Nullable
-		public Resource getInstanceKey() {
+		@Nullable public Resource getInstanceKey() {
 			return this.instanceKey;
 		}
 
@@ -1038,42 +1019,36 @@ public class VaultProperties implements EnvironmentAware {
 		/**
 		 * Trust store that holds certificates and private keys.
 		 */
-		@Nullable
-		private Resource keyStore;
+		@Nullable private Resource keyStore;
 
 		/**
 		 * Password used to access the key store.
 		 */
-		@Nullable
-		private String keyStorePassword;
+		@Nullable private String keyStorePassword;
 
 		/**
 		 * Type of the key store.
 		 *
 		 * @since 3.0
 		 */
-		@Nullable
-		private String keyStoreType;
+		@Nullable private String keyStoreType;
 
 		/**
 		 * Trust store that holds SSL certificates.
 		 */
-		@Nullable
-		private Resource trustStore;
+		@Nullable private Resource trustStore;
 
 		/**
 		 * Password used to access the trust store.
 		 */
-		@Nullable
-		private String trustStorePassword;
+		@Nullable private String trustStorePassword;
 
 		/**
 		 * Type of the trust store.
 		 *
 		 * @since 3.0
 		 */
-		@Nullable
-		private String trustStoreType;
+		@Nullable private String trustStoreType;
 
 		/**
 		 * Mount path of the TLS cert authentication backend.
@@ -1099,8 +1074,7 @@ public class VaultProperties implements EnvironmentAware {
 		 */
 		private List<String> enabledCipherSuites = new ArrayList<>();
 
-		@Nullable
-		public Resource getKeyStore() {
+		@Nullable public Resource getKeyStore() {
 			return this.keyStore;
 		}
 
@@ -1108,8 +1082,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.keyStore = keyStore;
 		}
 
-		@Nullable
-		public String getKeyStorePassword() {
+		@Nullable public String getKeyStorePassword() {
 			return this.keyStorePassword;
 		}
 
@@ -1117,8 +1090,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.keyStorePassword = keyStorePassword;
 		}
 
-		@Nullable
-		public String getKeyStoreType() {
+		@Nullable public String getKeyStoreType() {
 			return this.keyStoreType;
 		}
 
@@ -1126,8 +1098,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.keyStoreType = keyStoreType;
 		}
 
-		@Nullable
-		public Resource getTrustStore() {
+		@Nullable public Resource getTrustStore() {
 			return this.trustStore;
 		}
 
@@ -1135,8 +1106,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.trustStore = trustStore;
 		}
 
-		@Nullable
-		public String getTrustStorePassword() {
+		@Nullable public String getTrustStorePassword() {
 			return this.trustStorePassword;
 		}
 
@@ -1144,8 +1114,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.trustStorePassword = trustStorePassword;
 		}
 
-		@Nullable
-		public String getTrustStoreType() {
+		@Nullable public String getTrustStoreType() {
 			return this.trustStoreType;
 		}
 
@@ -1237,8 +1206,7 @@ public class VaultProperties implements EnvironmentAware {
 		 *
 		 * @since 2.2
 		 */
-		@Nullable
-		private Duration minRenewal;
+		@Nullable private Duration minRenewal;
 
 		/**
 		 * The expiry threshold. {@link Lease} is renewed the given {@link Duration}
@@ -1246,8 +1214,7 @@ public class VaultProperties implements EnvironmentAware {
 		 *
 		 * @since 2.2
 		 */
-		@Nullable
-		private Duration expiryThreshold;
+		@Nullable private Duration expiryThreshold;
 
 		/**
 		 * Set the {@link LeaseEndpoints} to delegate renewal/revocation calls to.
@@ -1258,8 +1225,7 @@ public class VaultProperties implements EnvironmentAware {
 		 * {@link LeaseEndpoints#Legacy} for older versions (the default).
 		 * @since 2.2
 		 */
-		@Nullable
-		private LeaseEndpoints leaseEndpoints;
+		@Nullable private LeaseEndpoints leaseEndpoints;
 
 		/**
 		 * Sets the {@link LeaseStrategy} to be used with
@@ -1267,8 +1233,7 @@ public class VaultProperties implements EnvironmentAware {
 		 * to retain or drop tokens on renewal errors.
 		 * @since 4.1
 		 */
-		@Nullable
-		private PredefinedLeaseStrategy leaseStrategy;
+		@Nullable private PredefinedLeaseStrategy leaseStrategy;
 
 		public boolean isEnabled() {
 			return this.enabled;
@@ -1278,8 +1243,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.enabled = enabled;
 		}
 
-		@Nullable
-		public Duration getMinRenewal() {
+		@Nullable public Duration getMinRenewal() {
 			return this.minRenewal;
 		}
 
@@ -1287,8 +1251,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.minRenewal = minRenewal;
 		}
 
-		@Nullable
-		public Duration getExpiryThreshold() {
+		@Nullable public Duration getExpiryThreshold() {
 			return this.expiryThreshold;
 		}
 
@@ -1296,8 +1259,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.expiryThreshold = expiryThreshold;
 		}
 
-		@Nullable
-		public LeaseEndpoints getLeaseEndpoints() {
+		@Nullable public LeaseEndpoints getLeaseEndpoints() {
 			return this.leaseEndpoints;
 		}
 
@@ -1305,8 +1267,7 @@ public class VaultProperties implements EnvironmentAware {
 			this.leaseEndpoints = leaseEndpoints;
 		}
 
-		@Nullable
-		public PredefinedLeaseStrategy getLeaseStrategy() {
+		@Nullable public PredefinedLeaseStrategy getLeaseStrategy() {
 			return this.leaseStrategy;
 		}
 
