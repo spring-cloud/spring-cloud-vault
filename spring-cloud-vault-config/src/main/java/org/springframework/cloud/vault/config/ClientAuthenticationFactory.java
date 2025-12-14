@@ -65,8 +65,9 @@ import org.springframework.vault.authentication.PcfAuthentication;
 import org.springframework.vault.authentication.PcfAuthenticationOptions;
 import org.springframework.vault.authentication.ResourceCredentialSupplier;
 import org.springframework.vault.authentication.TokenAuthentication;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestClient;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -87,15 +88,14 @@ class ClientAuthenticationFactory {
 
 	private final VaultProperties vaultProperties;
 
-	private final RestOperations restOperations;
+	private final VaultClient vaultClient;
 
-	private final RestOperations externalRestOperations;
+	private final RestClient restClient;
 
-	ClientAuthenticationFactory(VaultProperties vaultProperties, RestOperations restOperations,
-			RestOperations externalRestOperations) {
+	ClientAuthenticationFactory(VaultProperties vaultProperties, VaultClient vaultClient, RestClient restClient) {
 		this.vaultProperties = vaultProperties;
-		this.restOperations = restOperations;
-		this.externalRestOperations = externalRestOperations;
+		this.vaultClient = vaultClient;
+		this.restClient = restClient;
 	}
 
 	/**
@@ -126,7 +126,7 @@ class ClientAuthenticationFactory {
 
 		AppRoleAuthenticationOptions options = getAppRoleAuthenticationOptions(vaultProperties);
 
-		return new AppRoleAuthentication(options, this.restOperations);
+		return new AppRoleAuthentication(options, this.vaultClient);
 	}
 
 	static AppRoleAuthenticationOptions getAppRoleAuthenticationOptions(VaultProperties vaultProperties) {
@@ -197,7 +197,7 @@ class ClientAuthenticationFactory {
 			.identityDocumentUri(awsEc2.getIdentityDocument()) //
 			.build();
 
-		return new AwsEc2Authentication(authenticationOptions, this.restOperations, this.externalRestOperations);
+		return new AwsEc2Authentication(authenticationOptions, this.vaultClient, this.restClient);
 	}
 
 	ClientAuthentication awsIamAuthentication(VaultProperties vaultProperties) {
@@ -228,7 +228,7 @@ class ClientAuthenticationFactory {
 
 		AwsIamAuthenticationOptions options = builder.credentialsProvider(credentialsProvider).build();
 
-		return new AwsIamAuthentication(options, this.restOperations);
+		return new AwsIamAuthentication(options, this.vaultClient);
 	}
 
 	private ClientAuthentication azureMsiAuthentication(VaultProperties vaultProperties) {
@@ -244,7 +244,7 @@ class ClientAuthenticationFactory {
 			.identityTokenServiceUri(azureMsi.getIdentityTokenService()) //
 			.build();
 
-		return new AzureMsiAuthentication(options, this.restOperations, this.externalRestOperations);
+		return new AzureMsiAuthentication(options, this.vaultClient, this.restClient);
 	}
 
 	private ClientAuthentication cubbyholeAuthentication() {
@@ -257,7 +257,7 @@ class ClientAuthenticationFactory {
 			.initialToken(VaultToken.of(this.vaultProperties.getToken())) //
 			.build();
 
-		return new CubbyholeAuthentication(options, this.restOperations);
+		return new CubbyholeAuthentication(options, this.vaultClient);
 	}
 
 	private ClientAuthentication gcpGceAuthentication(VaultProperties vaultProperties) {
@@ -274,13 +274,13 @@ class ClientAuthenticationFactory {
 			builder.serviceAccount(gcp.getServiceAccount());
 		}
 
-		return new GcpComputeAuthentication(builder.build(), this.restOperations, this.externalRestOperations);
+		return new GcpComputeAuthentication(builder.build(), this.vaultClient, this.restClient);
 	}
 
 	private ClientAuthentication gcpIamAuthentication(VaultProperties vaultProperties) {
 
 		if (googleCredentialsPresent) {
-			return GcpIamCredentialsAuthenticationFactory.create(vaultProperties, this.restOperations);
+			return GcpIamCredentialsAuthenticationFactory.create(vaultProperties, this.vaultClient);
 		}
 
 		throw new IllegalStateException(
@@ -294,7 +294,7 @@ class ClientAuthenticationFactory {
 			.token(getGitHubToken(vaultProperties))
 			.build();
 
-		return new GitHubAuthentication(options, this.restOperations);
+		return new GitHubAuthentication(options, this.vaultClient);
 	}
 
 	private String getGitHubToken(VaultProperties vaultProperties) {
@@ -351,7 +351,7 @@ class ClientAuthenticationFactory {
 			.jwtSupplier(new KubernetesServiceAccountTokenFile(kubernetes.getServiceAccountTokenFile()))
 			.build();
 
-		return new KubernetesAuthentication(options, this.restOperations);
+		return new KubernetesAuthentication(options, this.vaultClient);
 	}
 
 	private ClientAuthentication pcfAuthentication(VaultProperties vaultProperties) {
@@ -374,7 +374,7 @@ class ClientAuthenticationFactory {
 			builder.instanceKey(new ResourceCredentialSupplier(pcfProperties.getInstanceKey()));
 		}
 
-		return new PcfAuthentication(builder.build(), this.restOperations);
+		return new PcfAuthentication(builder.build(), this.vaultClient);
 	}
 
 	private ClientAuthentication certificateAuthentication(VaultProperties vaultProperties) {
@@ -386,7 +386,7 @@ class ClientAuthenticationFactory {
 			builder.role(vaultProperties.getSsl().getRole());
 		}
 
-		return new ClientCertificateAuthentication(builder.build(), this.restOperations);
+		return new ClientCertificateAuthentication(builder.build(), this.vaultClient);
 	}
 
 	private ClientAuthentication tokenAuthentication(VaultProperties vaultProperties) {

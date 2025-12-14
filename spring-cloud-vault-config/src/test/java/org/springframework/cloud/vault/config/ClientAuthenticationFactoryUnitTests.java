@@ -40,8 +40,9 @@ import org.springframework.vault.authentication.ClientCertificateAuthentication;
 import org.springframework.vault.authentication.GitHubAuthentication;
 import org.springframework.vault.authentication.PcfAuthentication;
 import org.springframework.vault.authentication.TokenAuthentication;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -56,6 +57,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 public class ClientAuthenticationFactoryUnitTests {
 
+	RestClient restClient = RestClient.create();
+
+	VaultClient vaultClient = VaultClient.builder(restClient).build();
+
 	@Test
 	public void shouldSupportAwsIam() {
 
@@ -67,8 +72,7 @@ public class ClientAuthenticationFactoryUnitTests {
 			properties.getAwsIam().setRegion(Region.AWS_GLOBAL.id());
 			properties.getAwsIam().setRole("bar");
 
-			ClientAuthenticationFactory factory = new ClientAuthenticationFactory(properties, new RestTemplate(),
-					new RestTemplate());
+			ClientAuthenticationFactory factory = new ClientAuthenticationFactory(properties, vaultClient, restClient);
 			AwsIamAuthentication authentication = (AwsIamAuthentication) factory.awsIamAuthentication(properties);
 			AwsIamAuthenticationOptions options = (AwsIamAuthenticationOptions) ReflectionTestUtils
 				.getField(authentication, "options");
@@ -199,8 +203,7 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.setAuthentication(VaultProperties.AuthenticationMethod.GITHUB);
 		properties.getGithub().setToken("token");
 
-		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
-				new RestTemplate())
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, vaultClient, restClient)
 			.createClientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(GitHubAuthentication.class);
@@ -215,8 +218,7 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.getPcf().setInstanceKey(new ClassPathResource("bootstrap.yml"));
 		properties.getPcf().setInstanceCertificate(new ClassPathResource("bootstrap.yml"));
 
-		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
-				new RestTemplate())
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, vaultClient, restClient)
 			.createClientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(PcfAuthentication.class);
@@ -229,8 +231,7 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.setAuthentication(VaultProperties.AuthenticationMethod.CERT);
 		properties.getSsl().setCertAuthPath("bert");
 
-		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
-				new RestTemplate())
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, vaultClient, restClient)
 			.createClientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(ClientCertificateAuthentication.class);
@@ -246,8 +247,8 @@ public class ClientAuthenticationFactoryUnitTests {
 		Files.write(vaultTokenPath, "hello".getBytes(StandardCharsets.UTF_8), StandardOpenOption.WRITE,
 				StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 		try {
-			ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
-					new RestTemplate())
+			ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, vaultClient,
+					restClient)
 				.createClientAuthentication();
 
 			assertThat(clientAuthentication).isInstanceOf(TokenAuthentication.class);
@@ -268,8 +269,7 @@ public class ClientAuthenticationFactoryUnitTests {
 		Path vaultTokenPath = Paths.get(SystemProperties.get("user.home"), ".vault-token");
 		Files.deleteIfExists(vaultTokenPath);
 
-		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(properties, new RestTemplate(),
-				new RestTemplate());
+		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(properties, vaultClient, restClient);
 
 		assertThatIllegalStateException().isThrownBy(factory::createClientAuthentication);
 	}
