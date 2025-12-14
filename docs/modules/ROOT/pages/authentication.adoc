@@ -138,7 +138,7 @@ spring.cloud.vault:
 ----
 
 .MyUserIdMechanism.java
-[source,yaml]
+[source,java]
 ----
 public class MyUserIdMechanism implements AppIdUserIdMechanism {
 
