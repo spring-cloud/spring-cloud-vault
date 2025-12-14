@@ -39,8 +39,11 @@ import org.springframework.vault.authentication.ReactiveSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.authentication.VaultTokenSupplier;
+import org.springframework.vault.client.ReactiveVaultClient;
+import org.springframework.vault.client.ReactiveVaultClientCustomizer;
 import org.springframework.vault.client.ReactiveVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpoint;
+import org.springframework.vault.client.WebClientCustomizer;
 import org.springframework.vault.client.WebClientFactory;
 import org.springframework.vault.core.ReactiveVaultOperations;
 import org.springframework.vault.core.ReactiveVaultTemplate;
@@ -62,6 +65,40 @@ public class VaultReactiveAutoConfigurationTests {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 		.withConfiguration(AutoConfigurations.of(VaultReactiveAutoConfiguration.class));
+
+	@Test
+	public void shouldApplyCustomizers() {
+
+		this.contextRunner.withUserConfiguration(TokenSupplierConfiguration.class)
+			.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false")
+			.withPropertyValues("spring.cloud.vault.config.lifecycle.enabled=false")
+			.withBean(WebClientCustomizer.class, () -> {
+				return builder -> {
+					builder.clientConnector((method, uri, requestCallback) -> {
+						throw new IllegalStateException("customized");
+					});
+				};
+			})
+			.run(context -> {
+				ReactiveVaultClient client = context.getBean(ReactiveVaultClient.class);
+				client.get().retrieve().body().as(StepVerifier::create).verifyErrorMessage("customized");
+			});
+
+		this.contextRunner.withUserConfiguration(TokenSupplierConfiguration.class)
+			.withPropertyValues("spring.cloud.vault.session.lifecycle.enabled=false")
+			.withPropertyValues("spring.cloud.vault.config.lifecycle.enabled=false")
+			.withBean(ReactiveVaultClientCustomizer.class, () -> {
+				return builder -> {
+					builder.clientConnector((method, uri, requestCallback) -> {
+						throw new IllegalStateException("customized");
+					});
+				};
+			})
+			.run(context -> {
+				ReactiveVaultClient client = context.getBean(ReactiveVaultClient.class);
+				client.get().retrieve().body().as(StepVerifier::create).verifyErrorMessage("customized");
+			});
+	}
 
 	@Test
 	public void shouldConfigureTemplate() {

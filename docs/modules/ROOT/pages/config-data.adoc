@@ -88,19 +88,20 @@ SpringApplication application = new SpringApplication(MyApplication.class);
 application.addBootstrapRegistryInitializer(registry -> registry.register(ClientFactoryWrapper.class, supplier));
 ----
 
-.Customizing `RestTemplateBuilder`
+.Customizing `VaultClient` or `ReactiveVaultClient`
 [source,java]
 ----
-InstanceSupplier<RestTemplateBuilder> supplier = context -> {
+InstanceSupplier<VaultClient> supplier = context -> {
 
-	return RestTemplateBuilder
+	return VaultClient
 			.builder()
 			.requestFactory(context.get(ClientFactoryWrapper.class).getClientHttpRequestFactory())
-			.defaultHeader("X-Vault-Namespace", "my-namespace");
+			.defaultNamespace("my-namespace")
+			.build();
 };
 
 SpringApplication application = new SpringApplication(MyApplication.class);
-application.addBootstrapRegistryInitializer(registry -> registry.register(RestTemplateBuilder.class, supplier));
+application.addBootstrapRegistryInitializer(registry -> registry.register(VaultClient.class, supplier));
 ----
 
 See also xref:secret-backends.adoc#vault.config.backends.configurer[Customize which secret backends to expose as PropertySource] and the source of `VaultConfigDataLoader` for customization hooks.

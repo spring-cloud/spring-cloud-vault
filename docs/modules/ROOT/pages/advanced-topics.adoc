@@ -1,5 +1,71 @@
+[[advanced-topics]]
+= Advanced Topics
+
+This section covers advanced configuration options for Spring Cloud Vault.
+
+[[rest-client-web-client-customization]]
+== RestClient and WebClient Customization
+
+Various Spring libraries provide customization hooks for HTTP clients such as `RestTemplate` (deprecated) via `RestTemplateCustomizer` respective `RestClient` via `RestClientCustomizer` beans.
+Dur to the architecture of the Spring portfolio, both Spring Vault and Spring Boot ship customizer interfaces.
+Spring Boot has a powerful mechanism to customize HTTP clients that is only available once the context has started.
+An aspect to consider is that Spring Vault may require HTTP client interaction before the application context has booted up. Spring Boot's customizations are inaccessible prior the context startup applying in particular when importing secrets from Vault through Config Data API imports (e.g. `spring.config.import=vault://`).
+Therefore, Spring Vault provides its own customizer interfaces to customize the `RestClient` and `WebClient`.
+
+Applying customizations through customizers allows retaining Spring Vault's client configuration such as message converters or endpoint providers while applying your own customizations on top of these settings.
+In total, Spring Vault provides you with three options to apply customizations:
+
+1. Define `RestClientCustomizer` bean or `WebClientCustomizer` beans (using Spring Vault's interfaces from the `org.springframework.vault.client` package, not the Spring Boot variants) to customize the respective client that is used by Spring Vault.
+Customizing `RestClient` and `WebClient` through these interfaces is limited to Vault interaction and client usage in Vault authentication implementations requiring HTTP communication to obtain Vault login credentials from external systems (e.g. AWS IAM, Azure Metadata Service).
+This approach is recommended if you want to apply the same customizations to all `RestClient` or `WebClient` instances in your application context.
+2. Define a `VaultClientCustomizer` or `ReactiveVaultClientCustomizer` bean to customize the `VaultClient` respective `ReactiveVaultClient` used by Spring Vault.
+3. Define a `VaultClient` or `ReactiveVaultClient` bean that uses a customized `RestClient` or `WebClient`.
+
+.Customizing `RestClient` through `RestClientCustomizer`
+[source,java]
+----
+@Configuration
+class MyConfiguration {
+
+    @Bean
+    public RestClientCustomizer restClientCustomizer() {
+       return builder -> builder.requestFactory(…)
+                                .baseUrl(…);
+    }
+}
+----
+
+.Customizing `VaultClient` through `VaultClientCustomizer`
+[source,java]
+----
+@Configuration
+class MyConfiguration {
+
+    @Bean
+    public VaultClientCustomizer vaultClientCustomizer() {
+       return builder -> builder.defaultNamespace(…)
+                                .defaultHeader(…);
+    }
+}
+----
+
+.Providing a `VaultClient` using Spring Boot's `RestClient.Builder` injection
+[source,java]
+----
+@Configuration
+class MyConfiguration {
+
+    @Bean
+    public VaultClient vaultClient(RestClient.Builder builder) {
+       return VaultClient.builder(builder.build()).endpoint(…).build();
+    }
+}
+----
+
+Note that customizations required for Config Data must be applied through xref:config-data.adoc#vault.configdata.customization[`BootstrapRegistryInitializer`] via `SpringApplication.addBootstrapRegistryInitializer(…)`.
+
 [[service-registry-configuration]]
-= Service Registry Configuration
+== Service Registry Configuration
 
 You can use a `DiscoveryClient` (such as from Spring Cloud Consul) to locate a Vault server by setting spring.cloud.vault.discovery.enabled=true (default `false`).
 The net result of that is that your apps need a application.yml (or an environment variable) with the appropriate discovery configuration.
@@ -39,7 +105,7 @@ Vault Enterprise allows using namespaces to isolate multiple Vaults on a single 
 Configuring a namespace by setting
 `spring.cloud.vault.namespace=…` enables the namespace header
 `X-Vault-Namespace` on every outgoing HTTP request when using the Vault
-`RestTemplate` or `WebClient`.
+`VaultClient` or `ReactiveVaultClient`.
 
 Please note that this feature is not supported by Vault Community edition and has no effect on Vault operations.
 
