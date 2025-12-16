@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.assertj.core.api.ThrowingConsumer;
+
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.context.assertj.AssertableApplicationContext;
@@ -158,7 +160,7 @@ public final class VaultTestContextRunner {
 	 * {@code consumer}.
 	 * @param consumer consumes the application context.
 	 */
-	public void run(Consumer<AssertableApplicationContext> consumer) {
+	public void run(ThrowingConsumer<AssertableApplicationContext> consumer) {
 
 		VaultTestContextRunner instance = new VaultTestContextRunner(this, r -> {
 

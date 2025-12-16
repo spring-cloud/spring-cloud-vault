@@ -3,5 +3,6 @@
 * xref:config-data.adoc[]
 * xref:authentication.adoc[]
 * xref:secret-backends.adoc[]
+* xref:ssl-bundles.adoc[]
 * xref:advanced-topics.adoc[Advanced Topics]
 * xref:appendix.adoc[]

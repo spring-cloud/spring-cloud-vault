@@ -37,7 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-
 @SpringBootTest(classes = CustomBootstrapConfiguration.class,
 		properties = { "VaultConfigDatabaseBootstrapConfigurationTests.custom.config=true",
 				"spring.cloud.vault.mysql.role=foo", "spring.cloud.vault.mysql.enabled=true",
