@@ -39,7 +39,7 @@ import org.springframework.web.client.RestTemplate;
  */
 public final class TestRestTemplateFactory {
 
-	public static final VaultEndpoint TEST_VAULT_ENDPOINT = new VaultEndpoint();
+	public static final VaultEndpoint TEST_VAULT_ENDPOINT = VaultEndpoint.create("127.0.0.1", 8200);
 
 	private static final AtomicReference<ClientHttpRequestFactory> factoryCache = new AtomicReference<>();
 

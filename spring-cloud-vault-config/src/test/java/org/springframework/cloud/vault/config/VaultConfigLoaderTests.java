@@ -102,7 +102,6 @@ public class VaultConfigLoaderTests {
 
 	@Test
 	public void shouldNotContainRestTemplateArtifacts() {
-
 		assertThat(this.applicationContext.getBeanNamesForType(RestTemplate.class)).isEmpty();
 	}
 
