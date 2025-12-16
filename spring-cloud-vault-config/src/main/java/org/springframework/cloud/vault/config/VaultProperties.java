@@ -1209,7 +1209,7 @@ public class VaultProperties implements EnvironmentAware {
 		@Nullable private Duration minRenewal;
 
 		/**
-		 * The expiry threshold. {@link Lease} is renewed the given {@link Duration}
+		 * The expiry threshold. {@code Lease} is renewed the given {@link Duration}
 		 * before it expires.
 		 *
 		 * @since 2.2
@@ -1221,7 +1221,7 @@ public class VaultProperties implements EnvironmentAware {
 		 * {@link LeaseEndpoints} encapsulates differences between Vault versions that
 		 * affect the location of renewal/revocation endpoints.
 		 *
-		 * Can be {@link LeaseEndpoints#SysLeases} for version 0.8 or above of Vault or
+		 * Can be {@link LeaseEndpoints#Leases} for version 0.8 or above of Vault or
 		 * {@link LeaseEndpoints#Legacy} for older versions (the default).
 		 * @since 2.2
 		 */
