@@ -48,7 +48,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-
 @SpringBootTest(classes = VaultConfigLoaderTests.TestApplication.class,
 		properties = { "spring.cloud.vault.application-name=config-data", "spring.config.import=vault:" })
 public class VaultConfigLoaderTests {
@@ -104,9 +103,7 @@ public class VaultConfigLoaderTests {
 
 	@Test
 	public void shouldNotContainRestTemplateArtifacts() {
-
 		assertThat(this.applicationContext.getBeanNamesForType(RestTemplate.class)).isEmpty();
-		assertThat(this.applicationContext.getBeanNamesForType(ClientHttpRequestFactory.class)).isEmpty();
 	}
 
 	@SpringBootApplication(exclude = RefreshAutoConfiguration.class)

@@ -74,8 +74,8 @@ public class PrepareVault {
 
 	/**
 	 * Create a token for the given {@code tokenId} and {@code policy}.
-	 * @param tokenId the must not be {@literal null}.
-	 * @param policy the must not be {@literal null}.
+	 * @param tokenId must not be {@literal null}.
+	 * @param policy must not be {@literal null}.
 	 * @return the token.
 	 */
 	public VaultToken createToken(String tokenId, String policy) {
@@ -100,7 +100,7 @@ public class PrepareVault {
 
 	/**
 	 * Mount an auth backend.
-	 * @param authBackend the must not be {@literal null}.
+	 * @param authBackend must not be {@literal null}.
 	 */
 	public void mountAuth(String authBackend) {
 
