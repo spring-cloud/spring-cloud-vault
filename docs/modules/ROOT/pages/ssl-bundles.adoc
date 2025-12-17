@@ -1,0 +1,220 @@
+[[vault.ssl-bundles]]
+= SSL Bundles
+
+Spring Boot provides support for centralized management of https://docs.spring.io/spring-boot/reference/features/ssl.html[SSL bundles], typically as JKS, PKCS12, or PEM files.
+
+Vault can act as https://developer.hashicorp.com/vault/docs/secrets/pki[certificate authority (CA)] and issue certificates that can be used to secure communication between services.
+By integrating Vault with Spring Boot, you can dynamically retrieve and manage X.509 certificates for your applications.
+
+Using Vault-managed SSL bundles removes the need to create and distribute certificates.
+It simplifies certificate issuance and rotation by reducing complexity down to a declarative configuration.
+
+Vault-managed SSL bundles can be configured in Spring Boot applications using the `spring.cloud.vault.ssl` and provide the following features:
+
+* Issuance of certificates on application startup by Vault.
+* Usage of Vault-issued certificates as `SslBundle` for securing e.g. HTTP clients and servers, including client certificate usage.
+* Usage of Vault as certificate authority to provide `SslBundle` for securing e.g. HTTP clients and servers, including client certificate usage through:
+** Issuing certificates
+** Using Vault's CA certificates as trust anchors
+* Automatic rotation (re-issuance) of certificates before expiration.
+* Optional caching of certificates across application restarts to reduce certificate count.
+
+[[vault.ssl-bundles.issuing]]
+== Issuing Certificates
+
+Issuing certificates requires a properly configured PKI secrets engine in Vault along with a role that defines the allowed parameters for certificate issuance.
+Spring Cloud Vault can interact with the PKI secrets engine to request certificates based on the role's configuration and additional parameters defined in the application's configuration through configuration properties or programmatically by registering a javadoc:org.springframework.cloud.vault.ssl.VaultSslBundleRegistrar[].
+
+[[vault.ssl-bundles.properties-configuration]]
+=== Property-based Configuration
+
+When using application properties, an SSL bundle to secure an embedded web server is typically configured as shown in this example:
+
+[source,yaml]
+----
+spring.cloud.vault:
+      ssl:
+        bundle:
+          www.example.com:
+            role-name: testrole
+server.ssl.bundle: www.example.com
+----
+
+The bundle `www.example.com` uses the bundle name as the common name (CN) of the issued certificate and uses the role's defaults regarding key types, key sizes, and TTLs.
+A managed SSL bundle is rotated automatically before expiration.
+You can configure the rotation threshold using the `expiry-threshold` property to rotate a certificate a certain time before its actual expiration to ensure continuous validity. Also, you can specify the `pki-mount` property to define the mount path of the PKI secrets engine if it differs from the default `pki`:
+
+[source,yaml]
+----
+spring.cloud.vault:
+      ssl:
+        lifecycle:
+          expiry-threshold: 5m
+          pki-mount: pki
+        bundle:
+          www.example.com:
+            role-name: testrole
+server.ssl.bundle: www.example.com
+----
+
+NOTE: Vault-managed SSL bundles generate a random passphrase for the underlying `KeyStore` each time SSL bundles are created or updated.
+Since applications do not need to access the `KeyStore` directly, the passphrase is less significant than in a manual configuration approach.
+
+A complete configuration example of the `spring.cloud.vault.ssl.bundle` properties is as follows:
+
+[source,yaml]
+----
+spring.cloud.vault:
+      ssl:
+        lifecycle:
+          expiry-threshold: 5m
+          pki-mount: pki
+          store:
+            enabled: true
+            path: versioned/my-app/certs
+        bundle:
+          web-server:
+            role-name: testrole
+            ttl: 1d
+            common-name: www.example.com
+            alt-names:
+              - localhost
+              - development.local
+            ip-sans:
+              - 127.0.0.1
+              - ::1
+            uri-sans:
+                - spiffe://example.org/service
+            other-sans:
+              - "1.3.6.1.4.1.311.20.2.3;utf8:devops@example.com"
+            protocol: TLS
+            options:
+              enabled-protocols:
+                - TLSv1.2
+                - TLSv1.3
+              ciphers:
+                - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+----
+
+* `lifecycle.expiry-threshold` expiry threshold before certificate rotation.
+* `lifecycle.pki-mount` sets the path of the PKI mount to use
+* `lifecycle.store.enabled` enables storing the issued certificate and private key in Vault's KV secrets engine to cache certificate bundles between application restarts. Can also be used when multiple instances of an application need to share the same certificate.
+* `lifecycle.store.path` sets the path in Vault's KV secrets engine to store the issued certificate and private key.
+* `bundle.<name>.role-name` sets the Vault role name to use for certificate issuance.
+* `bundle.<name>.ttl` sets the desired time-to-live (TTL) for the issued certificate.
+* `bundle.<name>.common-name` sets the common name (CN) for the issued certificate. Defaults to the bundle name.
+* `bundle.<name>.alt-names` sets the subject alternative names (SANs) for the issued certificate.
+* `bundle.<name>.ip-sans` sets the IP subject alternative names (IP SANs) for the issued certificate.
+* `bundle.<name>.uri-sans` sets the URI subject alternative names for the issued certificate.
+* `bundle.<name>.other-sans` sets the custom OID/UTF8-string subject alternative names for the issued certificate. The format is the same as OpenSSL: `<oid>;<type>:<value>` where the only current valid type is UTF8.
+* `bundle.<name>.protocol` sets the SSL/TLS protocol to use (e.g., TLS).
+* `bundle.<name>.options` sets additional SSL/TLS options, such as enabled protocols and cipher suites.
+
+[[vault.ssl-bundles.programmatic-configuration]]
+=== Programmatic SSL Bundle Configuration
+
+Alternatively, you can register a `VaultSslBundleRegistrar` bean to register a Vault-managed SSL bundle programmatically:
+
+[source,java]
+----
+@Bean
+VaultSslBundleRegistrar registrar() {
+	return registry -> {
+		registry.register("my-bundle", bundleSpec -> {
+			return bundleSpec.issueCertificate("testrole")
+					.sslProtocol("TLS")
+					.sslOptions(SslOptions.NONE)
+					.request(requestBuilder -> requestBuilder.commonName("www.example.com")
+							.ttl(Duration.ofDays(1)));
+		});
+	};
+}
+----
+
+[[vault.ssl-bundles.caching]]
+=== Caching Certificates
+
+To reduce the number of issued certificates and to share certificates across multiple instances of an application, Vault-managed SSL bundles can be cached in Vault's KV secrets engine.
+In scenarios when running multiple instances of the same application, caching ensures that all instances use the same certificate instead of each instance requesting its own certificate from Vault to avoid serving different certificates from the same domain.
+
+Spring Cloud Vault ships with a default javadoc:org.springframework.cloud.vault.ssl.CertificateBundleStore[] implementation that uses Vault's versioned Key/Value secret backend engine to store issued certificates and private keys securely.
+
+To enable caching, set the `spring.cloud.vault.ssl.lifecycle.store.enabled` property to `true`:
+
+[source,yaml]
+----
+spring.cloud.vault:
+      ssl:
+        lifecycle:
+          store:
+            enabled: true
+            path: versioned/my-app/certs
+----
+
+Cached certificates are stored as versioned secrets using the bundle name using the `path` configuration. Note that you don't need to specify the `data/` segment for the Key/Value backend version 2.
+Additionally, the store uses the expiry date for `delete-version-after` metadata to allow automatic cleanup of expired certificates.
+
+NOTE: Using cached certificates means that certificate rotation _may be_ shared across all application instances using the same cache path.
+However, rotation should be coordinated externally to avoid multiple instances rotating the certificate simultaneously.
+This might be a consequence of merely restarting applications in order or using external synchronization such as Zookeeper, a Redis Cache with locking, or a database-based lock.
+
+[[vault.ssl-bundles.trust-anchors]]
+== Vault Trust Anchors
+
+When using Vault as a certificate authority, you typically want to configure a trust store that contains CA certificates to validate peer certificates.
+Spring Cloud Vault supports configuring such trust stores using Vault-managed SSL bundles.
+Depending on your trust architecture, applications might need to trust different issuer CAs.
+Spring Cloud Vault supports `SslBundle` trust stores based on different Vault issuer certificates that contain the issuer CA certificate to validate peer certificates allowing solely relying on Vault as the primary certificate authority.
+
+[[vault.ssl-bundles.configuration.properties.issuer]]
+=== Property-based Configuration
+
+When using application properties, an SSL bundle to verify peer certificates is typically configured as shown in this example using the `spring.cloud.vault.ssl.trust-bundle` property namespace:
+
+[source,yaml]
+----
+spring.cloud.vault:
+      ssl:
+        trust-bundle:
+          ca-root:
+            issuer: default
+----
+
+Once the trust bundle `ca-root` is configured, you can use it to configure e.g. `RestClient` as follows:
+
+[source,java]
+----
+@Configuration
+public class RestClientSslConfiguration {
+
+	@Bean
+	RestClient restClient(RestClient.Builder builder, RestClientSsl ssl) {
+		return builder.apply(ssl.fromBundle("trust-bundle")).build();
+	}
+
+}
+----
+
+A complete configuration example of the `spring.cloud.vault.ssl.trust-bundle` properties is shown below:
+
+[source,yaml]
+----
+spring.cloud.vault:
+      ssl:
+        trust-bundle:
+          ca-root:
+            issuer: default
+            protocol: TLS
+            options:
+              enabled-protocols:
+                - TLSv1.2
+                - TLSv1.3
+              ciphers:
+                - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+----
+
+* `issuer-bundler.<name>.issuer` sets the Vault issuer name. Use `default` for the default issuer.
+* `bundle.<name>.protocol` sets the SSL/TLS protocol to use (e.g., TLS).
+* `bundle.<name>.options` sets additional SSL/TLS options, such as enabled protocols and cipher suites.
+
+Trust bundles use `lifecycle` properties as well to determine CA certificate refresh intervals though a CA certificate typically has a long validity period and so refreshes are less frequent.
