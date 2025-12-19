@@ -30,7 +30,7 @@ import org.springframework.vault.support.CertificateBundle;
 
 /**
  * {@link SslBundleRegistrar} that uses Vault's PKI secret backend to issue certificates
- * for managed SSL bundles with automatic rotation.
+ * and obtain issuer certificates for managed SSL bundles with automatic rotation.
  *
  * @author Mark Paluch
  * @since 5.1

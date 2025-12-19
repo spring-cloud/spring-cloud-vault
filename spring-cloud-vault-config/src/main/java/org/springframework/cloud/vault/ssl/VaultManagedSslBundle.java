@@ -27,8 +27,8 @@ import org.springframework.vault.support.VaultCertificateRequest;
  * @author Mark Paluch
  * @since 5.1
  */
-record VaultManagedSslBundle(String name, String roleName, @Nullable String sslProtocol, SslOptions sslOptions,
-		@Nullable String issuer, @Nullable VaultCertificateRequest certificateRequest) {
+record VaultManagedSslBundle(String name, @Nullable String roleName, @Nullable String sslProtocol,
+		SslOptions sslOptions, @Nullable String issuer, @Nullable VaultCertificateRequest certificateRequest) {
 
 	VaultManagedSslBundle(String name, String roleName, VaultCertificateRequest certificateRequest) {
 		this(name, roleName, null, SslOptions.NONE, null, certificateRequest);

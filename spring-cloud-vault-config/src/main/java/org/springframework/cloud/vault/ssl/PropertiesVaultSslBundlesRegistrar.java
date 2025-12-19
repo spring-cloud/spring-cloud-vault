@@ -34,9 +34,9 @@ class PropertiesVaultSslBundlesRegistrar implements VaultSslBundleRegistrar {
 	@Override
 	public void register(VaultSslBundleRegistry registry) {
 
-		this.bundles.getIssuerBundle().forEach((name, properties) -> {
+		this.bundles.getTrustBundle().forEach((name, properties) -> {
 			registry.register(name, spec -> {
-				return spec.issuer(properties.getIssuer())
+				return spec.trust(properties.getIssuer())
 					.sslOptions(properties.getSslOptions())
 					.sslProtocol(properties.getProtocol());
 			});
@@ -44,7 +44,7 @@ class PropertiesVaultSslBundlesRegistrar implements VaultSslBundleRegistrar {
 
 		this.bundles.getBundle().forEach((name, properties) -> {
 			registry.register(name, spec -> {
-				return spec.role(properties.getRoleName())
+				return spec.issueCertificate(properties.getRoleName())
 					.sslOptions(properties.getSslOptions())
 					.sslProtocol(properties.getProtocol())
 					.request(it -> {

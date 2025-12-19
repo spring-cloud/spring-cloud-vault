@@ -80,7 +80,7 @@ class VaultSslBundleAutoConfigurationIntegrationTests extends PkiIntegrationTest
 		VaultSslBundleRegistrar registrar() {
 			return registry -> {
 				registry.register("www.example.com", bundleSpec -> {
-					return bundleSpec.role("testrole");
+					return bundleSpec.issueCertificate("testrole");
 
 				});
 			};

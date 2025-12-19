@@ -125,12 +125,12 @@ class DefaultVaultSslBundleRegistry implements ListableVaultSslBundleRegistry {
 
 		ManagedSslBundle managedSslBundle = new ManagedSslBundle() {
 			@Override
-			public ManagedIssuerCertificateSpec issuer(String issuer) {
+			public ManagedIssuerCertificateSpec trust(String issuer) {
 				return new ManagedIssuerCertificateSpec(issuer);
 			}
 
 			@Override
-			public ManagedCertificateRequestSpec role(String roleName) {
+			public ManagedCertificateRequestSpec issueCertificate(String roleName) {
 				return new ManagedCertificateRequestSpec(roleName);
 			}
 		};

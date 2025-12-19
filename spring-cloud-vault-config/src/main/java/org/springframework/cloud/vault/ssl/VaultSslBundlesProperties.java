@@ -29,7 +29,7 @@ import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.ssl.SslOptions;
 
 /**
- * Configuration properties for Vault-managed SSL bundles.
+ * Configuration properties for Vault-managed SSL bundles using X.509 certificates.
  *
  * @author Mark Paluch
  * @since 5.1
@@ -40,14 +40,16 @@ public class VaultSslBundlesProperties {
 	private Lifecycle lifecycle = new Lifecycle();
 
 	/**
-	 * Map of named Vault-managed SSL bundles.
+	 * Map of named Vault-managed SSL bundles to issue private keys along with
+	 * certificates.
 	 */
 	private final Map<String, VaultSslBundle> bundle = new LinkedHashMap<>();
 
 	/**
-	 * Map of named Vault-managed SSL CA issuer certificat bundles.
+	 * Map of named Vault-managed trust bundles that contain CA issuer certificates for
+	 * trust anchor usage.
 	 */
-	private final Map<String, VaultIssuerCertificateBundle> issuerBundle = new LinkedHashMap<>();
+	private final Map<String, VaultIssuerCertificateBundle> trustBundle = new LinkedHashMap<>();
 
 	public Lifecycle getLifecycle() {
 		return lifecycle;
@@ -61,8 +63,8 @@ public class VaultSslBundlesProperties {
 		return this.bundle;
 	}
 
-	public Map<String, VaultIssuerCertificateBundle> getIssuerBundle() {
-		return this.issuerBundle;
+	public Map<String, VaultIssuerCertificateBundle> getTrustBundle() {
+		return this.trustBundle;
 	}
 
 	/**

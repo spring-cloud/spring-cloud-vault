@@ -27,11 +27,11 @@ import org.springframework.vault.support.VaultCertificateRequest;
 import org.springframework.vault.support.VaultCertificateRequest.VaultCertificateRequestBuilder;
 
 /**
- * Registry to register Vault-managed {@link org.springframework.boot.ssl.SslBundle
+ * Interface to register Vault-managed {@link org.springframework.boot.ssl.SslBundle
  * SslBundles}.
  * <p>
  * Vault-managed SSL bundles obtain their certificates from Vault using the
- * {@link org.springframework.vault.core.VaultPkiOperations PKI backend}. to manage
+ * {@link org.springframework.vault.core.VaultPkiOperations PKI backend} for
  * certificate renewal and rotation.
  *
  * @author Mark Paluch
@@ -69,18 +69,19 @@ public interface VaultSslBundleRegistry {
 	interface ManagedSslBundle {
 
 		/**
-		 * Configure the Vault PKI issuer to obtain the issuer certificate.
-		 * @param issuer name of the issuer role.
+		 * Configure a managed trust anchor SSL bundle by obtaining the CA certificate for
+		 * {@code issuer}.
+		 * @param issuer name of the issuer.
 		 * @return the {@link ManagedIssuerCertificate} to continue configuration.
 		 */
-		ManagedIssuerCertificate issuer(String issuer);
+		ManagedIssuerCertificate trust(String issuer);
 
 		/**
-		 * Configure the Vault PKI role name for the managed SSL bundle.
+		 * Configure a managed SSL bundle by issuing a certificate using {@code roleName}.
 		 * @param roleName name of the Vault role.
 		 * @return the {@link ManagedSslBundleSpec} to continue configuration.
 		 */
-		ManagedCertificateRequest role(String roleName);
+		ManagedCertificateRequest issueCertificate(String roleName);
 
 	}
 
