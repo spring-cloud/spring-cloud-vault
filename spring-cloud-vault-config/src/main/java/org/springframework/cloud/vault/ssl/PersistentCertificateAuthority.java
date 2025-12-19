@@ -19,6 +19,7 @@ package org.springframework.cloud.vault.ssl;
 import java.time.Duration;
 import java.time.Instant;
 
+import org.springframework.vault.support.Certificate;
 import org.springframework.vault.support.CertificateBundle;
 import org.springframework.vault.support.VaultCertificateRequest;
 
@@ -53,6 +54,11 @@ public class PersistentCertificateAuthority implements CertificateAuthority {
 		bundle = delegate.issueCertificate(bundleName, roleName, request);
 		store.registerBundle(bundleName, bundle);
 		return bundle;
+	}
+
+	@Override
+	public Certificate getIssuerCertificate(String bundleName, String issuer) {
+		return delegate.getIssuerCertificate(bundleName, issuer);
 	}
 
 	boolean isExpired(Instant notAfter) {

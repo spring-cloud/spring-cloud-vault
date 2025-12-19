@@ -17,6 +17,7 @@
 package org.springframework.cloud.vault.ssl;
 
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.boot.ssl.SslOptions;
 import org.springframework.vault.support.VaultCertificateRequest;
 
@@ -27,14 +28,39 @@ import org.springframework.vault.support.VaultCertificateRequest;
  * @since 5.1
  */
 record VaultManagedSslBundle(String name, String roleName, @Nullable String sslProtocol, SslOptions sslOptions,
-		VaultCertificateRequest certificateRequest) {
+		@Nullable String issuer, @Nullable VaultCertificateRequest certificateRequest) {
 
 	VaultManagedSslBundle(String name, String roleName, VaultCertificateRequest certificateRequest) {
-		this(name, roleName, null, SslOptions.NONE, certificateRequest);
+		this(name, roleName, null, SslOptions.NONE, null, certificateRequest);
+	}
+
+	VaultManagedSslBundle(String name, String issuer, @Nullable String sslProtocol, SslOptions sslOptions) {
+		this(name, null, sslProtocol, sslOptions, issuer, null);
+	}
+
+	VaultManagedSslBundle(String name, String roleName, @Nullable String sslProtocol, SslOptions sslOptions,
+			VaultCertificateRequest certificateRequest) {
+		this(name, roleName, sslProtocol, sslOptions, null, certificateRequest);
+	}
+
+	VaultManagedSslBundle(String name, String issuer) {
+		this(name, null, null, SslOptions.NONE, issuer, null);
+	}
+
+	public boolean isIssuerCertificate() {
+		return this.issuer != null;
+	}
+
+	public boolean isManagedCertificate() {
+		return this.certificateRequest != null;
 	}
 
 	@Override
 	public String toString() {
+
+		if (this.certificateRequest == null) {
+			return "Vault-managed SslBundle '%s' (issuer='%s')".formatted(name, issuer);
+		}
 		return "Vault-managed SslBundle '%s' (cn='%s', role='%s')".formatted(name, certificateRequest.getCommonName(),
 				roleName);
 	}

@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.boot.ssl.SslOptions;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultCertificateRequest;
@@ -42,45 +43,69 @@ class DefaultVaultSslBundleRegistry implements ListableVaultSslBundleRegistry {
 	@Override
 	public void register(String roleName, String bundleName, VaultCertificateRequest request) {
 		managedSslBundles.put(bundleName,
-				new VaultManagedSslBundle(bundleName, roleName, null, SslOptions.NONE, request));
+				new VaultManagedSslBundle(bundleName, roleName, null, SslOptions.NONE, null, request));
 	}
 
 	@Override
-	public void register(String bundleName,
-			Function<ManagedBundleRoleSpec, ManagedSslBundleSpec> bundleSpecConfigurer) {
+	public void register(String bundleName, Function<ManagedSslBundle, ManagedSslBundleSpec<?>> bundleSpecConfigurer) {
 
-		class ManagedSslCertificateSpec implements ManagedBundleRoleSpec, ManagedSslBundleSpec {
+		class ManagedIssuerCertificateSpec implements VaultSslBundleRegistry.ManagedIssuerCertificate {
 
-			private String roleName;
+			private final String issuerName;
 
 			private @Nullable String sslProtocol;
 
 			private SslOptions sslOptions = SslOptions.NONE;
 
-			private VaultCertificateRequest request = VaultCertificateRequest.builder().commonName(bundleName).build();
-
-			@Override
-			public ManagedSslBundleSpec role(String roleName) {
-				Assert.hasText(roleName, "Role name must not be empty");
-				this.roleName = roleName;
-				return this;
+			ManagedIssuerCertificateSpec(String issuerName) {
+				this.issuerName = issuerName;
 			}
 
 			@Override
-			public ManagedSslBundleSpec sslOptions(SslOptions sslOptions) {
+			public ManagedIssuerCertificateSpec sslOptions(SslOptions sslOptions) {
 				Assert.notNull(sslOptions, "SslOptions must not be null");
 				this.sslOptions = sslOptions;
 				return this;
 			}
 
 			@Override
-			public ManagedSslBundleSpec sslProtocol(String sslProtocol) {
+			public ManagedIssuerCertificateSpec sslProtocol(String sslProtocol) {
+				this.sslProtocol = sslProtocol;
+				return this;
+			}
+
+		}
+
+		class ManagedCertificateRequestSpec implements ManagedCertificateRequest {
+
+			private final String roleName;
+
+			private @Nullable String sslProtocol;
+
+			private SslOptions sslOptions = SslOptions.NONE;
+
+			private VaultCertificateRequest request;
+
+			ManagedCertificateRequestSpec(String roleName) {
+				this.roleName = roleName;
+				this.request = VaultCertificateRequest.builder().commonName(bundleName).build();
+			}
+
+			@Override
+			public ManagedCertificateRequestSpec sslOptions(SslOptions sslOptions) {
+				Assert.notNull(sslOptions, "SslOptions must not be null");
+				this.sslOptions = sslOptions;
+				return this;
+			}
+
+			@Override
+			public ManagedCertificateRequestSpec sslProtocol(String sslProtocol) {
 				this.sslProtocol = sslProtocol;
 				return this;
 			}
 
 			@Override
-			public ManagedSslBundleSpec request(Consumer<VaultCertificateRequestBuilder> requestConfigurer) {
+			public ManagedCertificateRequestSpec request(Consumer<VaultCertificateRequestBuilder> requestConfigurer) {
 				Assert.notNull(requestConfigurer, "Request configurer must not be null");
 				VaultCertificateRequestBuilder builder = VaultCertificateRequest.builder();
 				builder.commonName(bundleName);
@@ -90,7 +115,7 @@ class DefaultVaultSslBundleRegistry implements ListableVaultSslBundleRegistry {
 			}
 
 			@Override
-			public ManagedSslBundleSpec request(VaultCertificateRequest certificateRequest) {
+			public ManagedCertificateRequestSpec request(VaultCertificateRequest certificateRequest) {
 				Assert.notNull(certificateRequest, "VaultCertificateRequest must not be null");
 				this.request = certificateRequest;
 				return this;
@@ -98,11 +123,28 @@ class DefaultVaultSslBundleRegistry implements ListableVaultSslBundleRegistry {
 
 		}
 
-		ManagedSslCertificateSpec spec = new ManagedSslCertificateSpec();
-		bundleSpecConfigurer.apply(spec);
+		ManagedSslBundle managedSslBundle = new ManagedSslBundle() {
+			@Override
+			public ManagedIssuerCertificateSpec issuer(String issuer) {
+				return new ManagedIssuerCertificateSpec(issuer);
+			}
 
-		managedSslBundles.put(bundleName,
-				new VaultManagedSslBundle(bundleName, spec.roleName, spec.sslProtocol, spec.sslOptions, spec.request));
+			@Override
+			public ManagedCertificateRequestSpec role(String roleName) {
+				return new ManagedCertificateRequestSpec(roleName);
+			}
+		};
+
+		ManagedSslBundleSpec<?> spec = bundleSpecConfigurer.apply(managedSslBundle);
+
+		if (spec instanceof ManagedCertificateRequestSpec mcr) {
+			managedSslBundles.put(bundleName,
+					new VaultManagedSslBundle(bundleName, mcr.roleName, mcr.sslProtocol, mcr.sslOptions, mcr.request));
+		}
+		else if (spec instanceof ManagedIssuerCertificateSpec mic) {
+			managedSslBundles.put(bundleName,
+					new VaultManagedSslBundle(bundleName, mic.issuerName, mic.sslProtocol, mic.sslOptions));
+		}
 	}
 
 	@Override

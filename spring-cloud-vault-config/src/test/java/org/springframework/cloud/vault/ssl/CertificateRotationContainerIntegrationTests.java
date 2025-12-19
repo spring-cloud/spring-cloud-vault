@@ -27,7 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.vault.core.VaultPkiOperations;
-import org.springframework.vault.support.CertificateBundle;
+import org.springframework.vault.support.Certificate;
 import org.springframework.vault.support.VaultCertificateRequest;
 
 /**
@@ -42,6 +42,8 @@ class CertificateRotationContainerIntegrationTests extends PkiIntegrationTestSup
 	VaultManagedSslBundle request = new VaultManagedSslBundle("www.example.com", "testrole",
 			VaultCertificateRequest.builder().commonName("www.example.com").ttl(Duration.ofSeconds(80)).build());
 
+	VaultManagedSslBundle caChain = new VaultManagedSslBundle("trust-store", "default");
+
 	CertificateRotationContainer container;
 
 	@BeforeEach
@@ -52,9 +54,7 @@ class CertificateRotationContainerIntegrationTests extends PkiIntegrationTestSup
 		taskScheduler.start();
 
 		VaultPkiOperations pki = template.opsForPki();
-		container = new CertificateRotationContainer(taskScheduler, (certificateBundle, roleName, request) -> {
-			return pki.issueCertificate(roleName, request).getRequiredData();
-		});
+		container = new CertificateRotationContainer(taskScheduler, new VaultCertificateAuthority(pki));
 	}
 
 	@AfterEach
@@ -67,7 +67,7 @@ class CertificateRotationContainerIntegrationTests extends PkiIntegrationTestSup
 
 		container.start();
 
-		AtomicReference<CertificateBundle> bundleRef = new AtomicReference<>();
+		AtomicReference<Certificate> bundleRef = new AtomicReference<>();
 
 		container.addCertificateBundle(request, bundleRef::set);
 
@@ -83,7 +83,7 @@ class CertificateRotationContainerIntegrationTests extends PkiIntegrationTestSup
 	@Test
 	void shouldRequestCertificate() {
 
-		AtomicReference<CertificateBundle> bundleRef = new AtomicReference<>();
+		AtomicReference<Certificate> bundleRef = new AtomicReference<>();
 		container.addCertificateBundle(request, bundleRef::set);
 
 		assertThat(bundleRef).hasValue(null);
@@ -99,16 +99,34 @@ class CertificateRotationContainerIntegrationTests extends PkiIntegrationTestSup
 	}
 
 	@Test
+	void shouldRequestIssuerCertificate() {
+
+		AtomicReference<Certificate> bundleRef = new AtomicReference<>();
+		container.addCertificateBundle(caChain, bundleRef::set);
+
+		assertThat(bundleRef).hasValue(null);
+
+		container.start();
+		container.stop();
+
+		assertThat(bundleRef.get()).isNotNull();
+		assertThat(bundleRef).hasValueSatisfying(actual -> {
+			assertThat(actual.getX509Certificate().getSubjectX500Principal().getName(X500Principal.CANONICAL))
+				.contains("cn=intermediate ca certificate");
+		});
+	}
+
+	@Test
 	void shouldRotateCertificate() {
 
 		container.start();
-		AtomicReference<CertificateBundle> bundleRef = new AtomicReference<>();
+		AtomicReference<Certificate> bundleRef = new AtomicReference<>();
 		container.addCertificateBundle(request, bundleRef::set);
 
 		assertThat(bundleRef.get()).isNotNull();
-		CertificateBundle initial = bundleRef.get();
+		Certificate initial = bundleRef.get();
 		container.rotate(request);
-		CertificateBundle rotated = bundleRef.get();
+		Certificate rotated = bundleRef.get();
 		container.stop();
 
 		assertThat(initial).isNotEqualTo(rotated);

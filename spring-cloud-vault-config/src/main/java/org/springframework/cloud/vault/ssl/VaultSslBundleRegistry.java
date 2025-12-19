@@ -54,26 +54,62 @@ public interface VaultSslBundleRegistry {
 	/**
 	 * Register a Vault-managed SSL bundle given {@code bundleName} and a spec
 	 * {@code bundleSpecConfigurer}.
-	 * @param bundleName name of the bundle. The bundle name also serves as the common
-	 * name for the certificate request unless overridden in the
-	 * {@link VaultCertificateRequest}.
-	 * @param bundleSpecConfigurer a function receiving a {@link ManagedBundleRoleSpec} to
+	 * @param bundleName name of the bundle. When using a managed certificate, the bundle
+	 * name also serves as the common name for the certificate request unless overridden
+	 * in the {@link VaultCertificateRequest}.
+	 * @param bundleSpecConfigurer a function receiving a {@link ManagedSslBundle} to
 	 * configure the bundle.
 	 */
-	void register(String bundleName, Function<ManagedBundleRoleSpec, ManagedSslBundleSpec> bundleSpecConfigurer);
+	void register(String bundleName, Function<ManagedSslBundle, ManagedSslBundleSpec<?>> bundleSpecConfigurer);
 
 	/**
-	 * Interface to configure the role name for a managed SSL bundle and continue with SSL
-	 * options and the certificate request configuration.
+	 * Interface to configure the issuer or role name for a managed SSL bundle and
+	 * continue with SSL options and the certificate request configuration.
 	 */
-	interface ManagedBundleRoleSpec {
+	interface ManagedSslBundle {
+
+		/**
+		 * Configure the Vault PKI issuer to obtain the issuer certificate.
+		 * @param issuer name of the issuer role.
+		 * @return the {@link ManagedIssuerCertificate} to continue configuration.
+		 */
+		ManagedIssuerCertificate issuer(String issuer);
 
 		/**
 		 * Configure the Vault PKI role name for the managed SSL bundle.
 		 * @param roleName name of the Vault role.
 		 * @return the {@link ManagedSslBundleSpec} to continue configuration.
 		 */
-		ManagedSslBundleSpec role(String roleName);
+		ManagedCertificateRequest role(String roleName);
+
+	}
+
+	/**
+	 * Interface to configure SSL options and protocol for a managed SSL bundle.
+	 */
+	interface ManagedSslBundleSpec<M extends ManagedSslBundleSpec<M>> {
+
+		/**
+		 * Configure {@link SslOptions}.
+		 * @param sslOptions the SSL options, defaults to {@link SslOptions#NONE}.
+		 * @return this builder.
+		 */
+		M sslOptions(SslOptions sslOptions);
+
+		/**
+		 * SSL protocol name used for {@link SSLContext#getInstance(String)}.
+		 * @param sslProtocol name of the SSL protocol.
+		 * @return this builder.
+		 */
+		M sslProtocol(String sslProtocol);
+
+	}
+
+	/**
+	 * Interface to configure SSL options and protocol for a managed SSL bundle for issuer
+	 * certificates.
+	 */
+	interface ManagedIssuerCertificate extends ManagedSslBundleSpec<ManagedIssuerCertificate> {
 
 	}
 
@@ -81,21 +117,7 @@ public interface VaultSslBundleRegistry {
 	 * Interface to configure SSL options, protocol and the certificate request for a
 	 * managed SSL bundle.
 	 */
-	interface ManagedSslBundleSpec {
-
-		/**
-		 * Configure {@link SslOptions}.
-		 * @param sslOptions the SSL options, defaults to {@link SslOptions#NONE}.
-		 * @return this builder.
-		 */
-		ManagedSslBundleSpec sslOptions(SslOptions sslOptions);
-
-		/**
-		 * SSL protocol name used for {@link SSLContext#getInstance(String)}.
-		 * @param sslProtocol name of the SSL protocol.
-		 * @return this builder.
-		 */
-		ManagedSslBundleSpec sslProtocol(String sslProtocol);
+	interface ManagedCertificateRequest extends ManagedSslBundleSpec<ManagedCertificateRequest> {
 
 		/**
 		 * Configure the {@link VaultCertificateRequest} using the given
@@ -103,14 +125,14 @@ public interface VaultSslBundleRegistry {
 		 * @param requestConfigurer the request configurer callback.
 		 * @return this builder.
 		 */
-		ManagedSslBundleSpec request(Consumer<VaultCertificateRequestBuilder> requestConfigurer);
+		ManagedCertificateRequest request(Consumer<VaultCertificateRequestBuilder> requestConfigurer);
 
 		/**
 		 * Configure the {@link VaultCertificateRequest}.
 		 * @param certificateRequest the certificate request object.
 		 * @return this builder.
 		 */
-		ManagedSslBundleSpec request(VaultCertificateRequest certificateRequest);
+		ManagedCertificateRequest request(VaultCertificateRequest certificateRequest);
 
 	}
 

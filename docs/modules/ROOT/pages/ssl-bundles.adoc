@@ -106,6 +106,35 @@ spring.cloud.vault:
 * `bundle.<name>.protocol` sets the SSL/TLS protocol to use (e.g., TLS).
 * `bundle.<name>.options` sets additional SSL/TLS options, such as enabled protocols and cipher suites.
 
+[[vault.ssl-bundles.configuration.properties.issuer]]
+== Property-based Truststore (Issuer CA) SSL Bundle Configuration
+
+When using Vault-managed SSL bundles, you might also want to configure a truststore that contains the issuer CA certificates to validate peer certificates to solely rely on Vault as the primary certificate authority.
+Spring Cloud Vault supports configuring such truststores using Vault-managed SSL bundles as well.
+The configuration properties are similar to the previously described `spring.cloud.vault.ssl.bundle` properties but use the `spring.cloud.vault.ssl.issuer-bundle` prefix with a slightly different set of options.
+
+A complete configuration example of the `spring.cloud.vault.ssl.issuer-bundle` properties is as follows:
+
+[source,yaml]
+----
+spring.cloud.vault:
+      ssl:
+        issuer-bundle:
+          ca-root:
+            issuer: default
+            protocol: TLS
+            options:
+              enabled-protocols:
+                - TLSv1.2
+                - TLSv1.3
+              ciphers:
+                - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+----
+
+* `issuer-bundler.<name>.issuer` sets the Vault issuer name. Use `default` for the default issuer.
+* `bundle.<name>.protocol` sets the SSL/TLS protocol to use (e.g., TLS).
+* `bundle.<name>.options` sets additional SSL/TLS options, such as enabled protocols and cipher suites.
+
 [[vault.ssl-bundles.configuration.api]]
 == Programmatic SSL Bundle Configuration
 

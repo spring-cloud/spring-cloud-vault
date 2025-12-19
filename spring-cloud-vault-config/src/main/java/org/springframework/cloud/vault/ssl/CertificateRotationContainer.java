@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
@@ -36,6 +37,7 @@ import java.util.function.Consumer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.context.SmartLifecycle;
 import org.springframework.format.annotation.DurationFormat.Style;
 import org.springframework.format.datetime.standard.DurationFormatterUtils;
@@ -43,8 +45,9 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
-import org.springframework.vault.support.CertificateBundle;
+import org.springframework.vault.support.Certificate;
 
 /**
  * Container to manage certificate rotation for Vault-managed SSL bundles implementing
@@ -108,11 +111,11 @@ class CertificateRotationContainer implements SmartLifecycle {
 
 	private void start(CertificateRenewalRequest managed, CertificateRenewalScheduler renewalScheduler) {
 
-		ManagedCertificate managedCertificate = managed.issueCertificate();
+		ManagedCertificate managedCertificate = managed.getCertificate();
 		logger.debug("Certificate for %s obtained, serial number %s".formatted(managed.managedBundle(),
-				managedCertificate.bundle().getSerialNumber()));
+				managedCertificate.getSerialNumber()));
 		renewalScheduler.scheduleRotation(managedCertificate);
-		managed.certificateBundleConsumer().accept(managedCertificate.bundle());
+		managed.certificateConsumer().accept(managedCertificate.certificate());
 	}
 
 	/**
@@ -143,10 +146,10 @@ class CertificateRotationContainer implements SmartLifecycle {
 	}
 
 	public void addCertificateBundle(VaultManagedSslBundle managedCertificate,
-			Consumer<CertificateBundle> certificateBundleConsumer) {
+			Consumer<Certificate> certificateConsumer) {
 
 		CertificateRenewalRequest bundle = new CertificateRenewalRequest(managedCertificate, certificateAuthority,
-				certificateBundleConsumer);
+				certificateConsumer);
 		this.renewalRequests.add(bundle);
 
 		CertificateRenewalScheduler scheduler = new CertificateRenewalScheduler(this.taskScheduler, bundle,
@@ -174,10 +177,31 @@ class CertificateRotationContainer implements SmartLifecycle {
 		}
 	}
 
-	record CertificateRenewalRequest(VaultManagedSslBundle managedBundle, CertificateAuthority issuer,
-			Consumer<CertificateBundle> certificateBundleConsumer) {
+	static Duration getRenewalDelay(Clock clock, Instant expiration, Duration expiryThreshold) {
 
-		public ManagedCertificate issueCertificate() {
+		Duration expiresIn = Duration.between(clock.instant(), expiration);
+		long nextDelay = expiresIn.toSeconds() - expiryThreshold.getSeconds();
+
+		// apply jitter if the expiry is between the expiry threshold and twice the expiry
+		// threshold
+		if (!expiryThreshold.isZero() && expiresIn.compareTo(expiryThreshold) > 0
+				&& expiresIn.minus(expiryThreshold).compareTo(expiryThreshold) > 0) {
+			long jitter = Math.min(ThreadLocalRandom.current().nextLong(1, expiryThreshold.toSeconds()),
+					expiryThreshold.toSeconds());
+			nextDelay += jitter;
+		}
+
+		return Duration.ofSeconds(Math.max(0, nextDelay));
+	}
+
+	record CertificateRenewalRequest(VaultManagedSslBundle managedBundle, CertificateAuthority issuer,
+			Consumer<Certificate> certificateConsumer) {
+
+		public ManagedCertificate getCertificate() {
+			if (managedBundle().isIssuerCertificate()) {
+				return new ManagedCertificate(
+						issuer.getIssuerCertificate(managedBundle().name(), managedBundle().issuer()));
+			}
 			return new ManagedCertificate(issuer.issueCertificate(managedBundle().name(), managedBundle().roleName(),
 					managedBundle().certificateRequest()));
 		}
@@ -186,7 +210,7 @@ class CertificateRotationContainer implements SmartLifecycle {
 	/**
 	 * Renewal scheduler for a managed certificate request.
 	 */
-	static class CertificateRenewalScheduler {
+	class CertificateRenewalScheduler {
 
 		private static final AtomicReferenceFieldUpdater<CertificateRenewalScheduler, ManagedCertificate> CURRENT_UPDATER = AtomicReferenceFieldUpdater
 			.newUpdater(CertificateRenewalScheduler.class, ManagedCertificate.class, "currentBundleRef");
@@ -213,12 +237,12 @@ class CertificateRotationContainer implements SmartLifecycle {
 
 		void scheduleRotation(ManagedCertificate managedCertificate) {
 
-			long renewalSeconds = getRenewalSeconds(managedCertificate.expiry(), expiryThreshold);
+			Duration renewalSeconds = getRenewalDelay(taskScheduler.getClock(), managedCertificate.expiry(),
+					expiryThreshold);
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Scheduling certificate rotation for %s in %s, expiry %s ".formatted(managedRequest,
-						DurationFormatterUtils.print(Duration.ofSeconds(renewalSeconds), Style.COMPOSITE),
-						managedCertificate.expiry()));
+						DurationFormatterUtils.print(renewalSeconds, Style.COMPOSITE), managedCertificate.expiry()));
 			}
 
 			ManagedCertificate current = CURRENT_UPDATER.get(this);
@@ -266,16 +290,16 @@ class CertificateRotationContainer implements SmartLifecycle {
 			// Renew lease may call scheduleRenewal(…) with a different lease
 			// Id to alter set up its own renewal schedule. If it's the old
 			// lease, then renewLease() outcome controls the current LeaseId.
-			ManagedCertificate renewedCertificate = renewalRequest.issueCertificate();
+			ManagedCertificate renewedCertificate = renewalRequest.getCertificate();
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Certificate for %s rotated, serial number %s".formatted(managedRequest,
-						renewedCertificate.bundle().getSerialNumber()));
+						renewedCertificate.getSerialNumber()));
 			}
 			if (CURRENT_UPDATER.compareAndSet(CertificateRenewalScheduler.this, managedCertificate,
 					renewedCertificate)) {
 				scheduleRotation(renewedCertificate);
-				renewalRequest.certificateBundleConsumer().accept(renewedCertificate.bundle());
+				renewalRequest.certificateConsumer().accept(renewedCertificate.certificate());
 			}
 			else {
 				logger.debug("Race condition during certificate rotation of '%s'".formatted(managedRequest));
@@ -303,33 +327,52 @@ class CertificateRotationContainer implements SmartLifecycle {
 			}
 		}
 
-		private long getRenewalSeconds(Instant expiration, Duration expiryThreshold) {
-
-			Duration duration = Duration.between(Instant.now(), expiration);
-			return Math.max(0, duration.toSeconds() - expiryThreshold.getSeconds());
-		}
-
 	}
 
-	record ManagedCertificate(CertificateBundle bundle, X509Certificate certificate, Instant expiry) {
+	record ManagedCertificate(Certificate certificate, X509Certificate x509Certificate, Instant expiry) {
 
-		ManagedCertificate(CertificateBundle certificateBundle) {
-			this(certificateBundle, certificateBundle.getX509Certificate());
+		ManagedCertificate(Certificate certificate) {
+			this(certificate, certificate.getX509Certificate());
 		}
 
-		ManagedCertificate(CertificateBundle certificateBundle, X509Certificate certificate) {
-			this(certificateBundle, certificate, certificate.getNotAfter().toInstant());
+		ManagedCertificate(Certificate certificate, X509Certificate x509Certificate) {
+			this(certificate, x509Certificate, x509Certificate.getNotAfter().toInstant());
 		}
 
+		public String getSerialNumber() {
+
+			String serialNumber = certificate.getSerialNumber();
+			if (StringUtils.hasText(serialNumber)) {
+				return serialNumber;
+			}
+
+			byte[] serialBytes = x509Certificate.getSerialNumber().toByteArray();
+			while (serialBytes.length != 0 && serialBytes[0] == 0x00) {
+				byte[] tmp = new byte[serialBytes.length - 1];
+				System.arraycopy(serialBytes, 1, tmp, 0, tmp.length);
+				serialBytes = tmp;
+			}
+
+			if (serialBytes.length == 0) {
+				return "00";
+			}
+
+			StringBuilder sb = new StringBuilder();
+			for (byte serialByte : serialBytes) {
+				if (!sb.isEmpty()) {
+					sb.append(":");
+				}
+				sb.append(String.format("%02x", serialByte));
+			}
+			return sb.toString();
+		}
 	}
 
 	/**
 	 * This one-shot trigger creates only one execution time to trigger an execution only
 	 * once.
 	 */
-	static class OneShotTrigger implements Trigger {
-
-		private static final Clock CLOCK = Clock.systemDefaultZone();
+	class OneShotTrigger implements Trigger {
 
 		private static final AtomicIntegerFieldUpdater<OneShotTrigger> UPDATER = AtomicIntegerFieldUpdater
 			.newUpdater(OneShotTrigger.class, "status");
@@ -341,16 +384,16 @@ class CertificateRotationContainer implements SmartLifecycle {
 		// see AtomicIntegerFieldUpdater UPDATER
 		private volatile int status = 0;
 
-		private final long seconds;
+		private final Duration delay;
 
-		OneShotTrigger(long seconds) {
-			this.seconds = seconds;
+		OneShotTrigger(Duration delay) {
+			this.delay = delay;
 		}
 
 		@Override
 		public @Nullable Instant nextExecution(TriggerContext triggerContext) {
-			return UPDATER.compareAndSet(this, STATUS_ARMED, STATUS_FIRED) ? CLOCK.instant().plusSeconds(this.seconds)
-					: null;
+			return UPDATER.compareAndSet(this, STATUS_ARMED, STATUS_FIRED)
+					? taskScheduler.getClock().instant().plus(this.delay) : null;
 		}
 
 	}

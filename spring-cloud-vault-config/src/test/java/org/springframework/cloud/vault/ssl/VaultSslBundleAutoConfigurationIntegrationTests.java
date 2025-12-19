@@ -16,14 +16,11 @@
 
 package org.springframework.cloud.vault.ssl;
 
-import java.time.Duration;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.ssl.SslBundles;
-import org.springframework.boot.ssl.SslOptions;
 import org.springframework.cloud.vault.config.VaultConfigAppRoleTests;
 import org.springframework.cloud.vault.config.VaultProperties.AuthenticationMethod;
 import org.springframework.cloud.vault.util.Settings;

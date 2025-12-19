@@ -25,7 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.assertj.core.util.Files;
 import org.junit.jupiter.api.Test;
 import org.springframework.cloud.vault.util.Settings;
+import org.springframework.vault.support.Certificate;
 import org.springframework.vault.support.CertificateBundle;
+import org.springframework.vault.support.VaultCertificateRequest;
 
 /**
  * Unit tests for {@link PersistentCertificateAuthority}.
@@ -47,8 +49,18 @@ class PersistentCertificateAuthorityUnitTests {
 	void shouldIssueBundle() {
 
 		InMemoryCertificateBundleStore store = new InMemoryCertificateBundleStore();
-		PersistentCertificateAuthority sut = new PersistentCertificateAuthority(store,
-				(bundleName, roleName, request) -> bundle, Duration.ofHours(1));
+		PersistentCertificateAuthority sut = new PersistentCertificateAuthority(store, new CertificateAuthority() {
+			@Override
+			public CertificateBundle issueCertificate(String bundleName, String roleName,
+					VaultCertificateRequest request) {
+				return bundle;
+			}
+
+			@Override
+			public Certificate getIssuerCertificate(String bundleName, String issuer) {
+				return null;
+			}
+		}, Duration.ofHours(1));
 
 		assertThat(sut.issueCertificate("", "", null)).isEqualTo(bundle);
 	}
@@ -58,10 +70,18 @@ class PersistentCertificateAuthorityUnitTests {
 
 		InMemoryCertificateBundleStore store = new InMemoryCertificateBundleStore();
 		store.registerBundle("bundle", bundle);
-		PersistentCertificateAuthority sut = new PersistentCertificateAuthority(store,
-				(bundleName, roleName, request) -> {
-					throw new IllegalStateException("Should not be called");
-				}, Duration.ofHours(1));
+		PersistentCertificateAuthority sut = new PersistentCertificateAuthority(store, new CertificateAuthority() {
+			@Override
+			public CertificateBundle issueCertificate(String bundleName, String roleName,
+					VaultCertificateRequest request) {
+				throw new IllegalStateException("Should not be called");
+			}
+
+			@Override
+			public Certificate getIssuerCertificate(String bundleName, String issuer) {
+				return null;
+			}
+		}, Duration.ofHours(1));
 
 		assertThat(sut.issueCertificate("bundle", "", null)).isEqualTo(bundle);
 	}
@@ -75,8 +95,18 @@ class PersistentCertificateAuthorityUnitTests {
 		store.registerBundle("bundle", bundle);
 		Duration afterExpiry = Duration.between(Instant.now(), bundle.getX509Certificate().getNotAfter().toInstant())
 			.plusDays(10);
-		PersistentCertificateAuthority sut = new PersistentCertificateAuthority(store,
-				(bundleName, roleName, request) -> newOne, afterExpiry);
+		PersistentCertificateAuthority sut = new PersistentCertificateAuthority(store, new CertificateAuthority() {
+			@Override
+			public CertificateBundle issueCertificate(String bundleName, String roleName,
+					VaultCertificateRequest request) {
+				return newOne;
+			}
+
+			@Override
+			public Certificate getIssuerCertificate(String bundleName, String issuer) {
+				return null;
+			}
+		}, afterExpiry);
 
 		assertThat(sut.issueCertificate("bundle", "", null)).isSameAs(newOne).isNotSameAs(bundle);
 	}

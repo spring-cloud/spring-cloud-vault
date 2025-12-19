@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.vault.ssl;
 
+import org.springframework.vault.support.Certificate;
 import org.springframework.vault.support.CertificateBundle;
 import org.springframework.vault.support.VaultCertificateRequest;
 
@@ -25,7 +26,6 @@ import org.springframework.vault.support.VaultCertificateRequest;
  * @author Mark Paluch
  * @since 5.1
  */
-@FunctionalInterface
 public interface CertificateAuthority {
 
 	/**
@@ -37,5 +37,14 @@ public interface CertificateAuthority {
 	 * @return the issued (or re-issued) {@link CertificateBundle}.
 	 */
 	CertificateBundle issueCertificate(String bundleName, String roleName, VaultCertificateRequest request);
+
+	/**
+	 * Retrieve the issuer certificate for the given {@code bundleName} and
+	 * {@code issuer}.
+	 * @param bundleName name of the certificate bundle.
+	 * @param issuer issuer name.
+	 * @return the issuer {@link Certificate}.
+	 */
+	Certificate getIssuerCertificate(String bundleName, String issuer);
 
 }

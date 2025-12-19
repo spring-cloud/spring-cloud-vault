@@ -17,6 +17,7 @@
 package org.springframework.cloud.vault.ssl;
 
 import org.springframework.vault.core.VaultPkiOperations;
+import org.springframework.vault.support.Certificate;
 import org.springframework.vault.support.CertificateBundle;
 import org.springframework.vault.support.VaultCertificateRequest;
 
@@ -37,6 +38,11 @@ public class VaultCertificateAuthority implements CertificateAuthority {
 	@Override
 	public CertificateBundle issueCertificate(String bundleName, String roleName, VaultCertificateRequest request) {
 		return pki.issueCertificate(roleName, request).getRequiredData();
+	}
+
+	@Override
+	public Certificate getIssuerCertificate(String bundleName, String issuer) {
+		return pki.getIssuerCertificate(issuer).getRequiredData();
 	}
 
 }

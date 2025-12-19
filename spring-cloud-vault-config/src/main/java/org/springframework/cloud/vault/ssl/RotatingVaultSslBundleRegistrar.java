@@ -25,6 +25,7 @@ import org.springframework.boot.ssl.SslBundle;
 import org.springframework.boot.ssl.SslBundleKey;
 import org.springframework.boot.ssl.SslBundleRegistry;
 import org.springframework.boot.ssl.SslStoreBundle;
+import org.springframework.vault.support.Certificate;
 import org.springframework.vault.support.CertificateBundle;
 
 /**
@@ -65,15 +66,19 @@ class RotatingVaultSslBundleRegistrar implements SslBundleRegistrar {
 		}
 	}
 
-	private SslBundle toSslBundle(CertificateBundle bundle, VaultManagedSslBundle request) {
+	private SslBundle toSslBundle(Certificate certificate, VaultManagedSslBundle request) {
+		if (certificate instanceof CertificateBundle bundle) {
+			String random = UUID.randomUUID().toString();
+			SslBundleKey key = SslBundleKey.of(random, request.name());
+			KeyStore keyStore = bundle.createKeyStore(request.name(), true, random);
+			KeyStore trustStore = bundle.createTrustStore(true);
+			SslStoreBundle storeBundle = SslStoreBundle.of(keyStore, null, trustStore);
+			return SslBundle.of(storeBundle, key, request.sslOptions(), request.sslProtocol());
+		}
 
-		String random = UUID.randomUUID().toString();
-		SslBundleKey key = SslBundleKey.of(random, request.name());
-		KeyStore keyStore = bundle.createKeyStore(request.name(), true, random);
-		KeyStore trustStore = bundle.createTrustStore(true);
-
-		SslStoreBundle storeBundle = SslStoreBundle.of(keyStore, null, trustStore);
-		return SslBundle.of(storeBundle, key, request.sslOptions(), request.sslProtocol());
+		KeyStore trustStore = certificate.createTrustStore(true);
+		SslStoreBundle storeBundle = SslStoreBundle.of(null, null, trustStore);
+		return SslBundle.of(storeBundle, null, request.sslOptions(), request.sslProtocol());
 	}
 
 }

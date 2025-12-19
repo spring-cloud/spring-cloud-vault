@@ -44,6 +44,11 @@ public class VaultSslBundlesProperties {
 	 */
 	private final Map<String, VaultSslBundle> bundle = new LinkedHashMap<>();
 
+	/**
+	 * Map of named Vault-managed SSL CA issuer certificat bundles.
+	 */
+	private final Map<String, VaultIssuerCertificateBundle> issuerBundle = new LinkedHashMap<>();
+
 	public Lifecycle getLifecycle() {
 		return lifecycle;
 	}
@@ -54,6 +59,10 @@ public class VaultSslBundlesProperties {
 
 	public Map<String, VaultSslBundle> getBundle() {
 		return this.bundle;
+	}
+
+	public Map<String, VaultIssuerCertificateBundle> getIssuerBundle() {
+		return this.issuerBundle;
 	}
 
 	/**
@@ -139,10 +148,45 @@ public class VaultSslBundlesProperties {
 
 	}
 
+	public static class VaultSslBundleSupport {
+
+		/**
+		 * Options for the SSL connection.
+		 */
+		private @Nullable Options options;
+
+		/**
+		 * SSL Protocol to use.
+		 */
+		private String protocol = SslBundle.DEFAULT_PROTOCOL;
+
+		public Options getOptions() {
+			return options;
+		}
+
+		SslOptions getSslOptions() {
+			return (this.options != null) ? SslOptions.of(options.getCiphers(), options.getEnabledProtocols())
+					: SslOptions.NONE;
+		}
+
+		public void setOptions(@Nullable Options options) {
+			this.options = options;
+		}
+
+		public String getProtocol() {
+			return protocol;
+		}
+
+		public void setProtocol(String protocol) {
+			this.protocol = protocol;
+		}
+
+	}
+
 	/**
 	 * Properties for a Vault-managed SSL bundle.
 	 */
-	public static class VaultSslBundle {
+	public static class VaultSslBundle extends VaultSslBundleSupport {
 
 		/**
 		 * Role name to request certificates from Vault.
@@ -181,16 +225,6 @@ public class VaultSslBundlesProperties {
 		 * valid type is UTF8.
 		 */
 		private List<String> otherSans = new ArrayList<>();
-
-		/**
-		 * Options for the SSL connection.
-		 */
-		private final @Nullable Options options = new Options();
-
-		/**
-		 * SSL Protocol to use.
-		 */
-		private String protocol = SslBundle.DEFAULT_PROTOCOL;
 
 		public String getRoleName() {
 			return roleName;
@@ -248,21 +282,22 @@ public class VaultSslBundlesProperties {
 			this.otherSans = otherSans;
 		}
 
-		public Options getOptions() {
-			return options;
+	}
+
+	/**
+	 * Properties for a Vault CA Certificate SSL bundles exposing only the Issuer
+	 * Certificate in the trust store.
+	 */
+	public static class VaultIssuerCertificateBundle extends VaultSslBundleSupport {
+
+		private String issuer = "default";
+
+		public String getIssuer() {
+			return issuer;
 		}
 
-		SslOptions getSslOptions() {
-			return (this.options != null) ? SslOptions.of(options.getCiphers(), options.getEnabledProtocols())
-					: SslOptions.NONE;
-		}
-
-		public String getProtocol() {
-			return protocol;
-		}
-
-		public void setProtocol(String protocol) {
-			this.protocol = protocol;
+		public void setIssuer(String issuer) {
+			this.issuer = issuer;
 		}
 
 	}
