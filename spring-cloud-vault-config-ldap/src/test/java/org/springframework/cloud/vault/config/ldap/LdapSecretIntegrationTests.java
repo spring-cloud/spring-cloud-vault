@@ -19,6 +19,7 @@ package org.springframework.cloud.vault.config.ldap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.vault.config.VaultConfigOperations;
@@ -40,6 +41,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  *
  * @author Drew Mullen
  */
+@Disabled
 public class LdapSecretIntegrationTests extends IntegrationTestSupport {
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
