@@ -16,11 +16,12 @@
 
 package org.springframework.cloud.vault.config.ldap;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import org.springframework.cloud.vault.config.VaultConfigOperations;
 import org.springframework.cloud.vault.config.VaultConfigTemplate;
@@ -28,21 +29,20 @@ import org.springframework.cloud.vault.config.VaultProperties;
 import org.springframework.cloud.vault.config.ldap.VaultConfigLdapBootstrapConfiguration.LdapSecretBackendMetadataFactory;
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
 import org.springframework.cloud.vault.util.Settings;
+import org.springframework.vault.core.VaultOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
- * Integration tests for {@link VaultConfigTemplate} using the LDAP secret engine. These
- * tests require a running LDAP instance and properly configured Vault LDAP secret engine.
- * <p>
- * Note: This test will be skipped if the LDAP secret engine is not available or not
- * configured in Vault.
+ * Integration tests for {@link VaultConfigTemplate} using the LDAP secret engine with an
+ * in-memory UnboundID LDAP server.
  *
  * @author Drew Mullen
  */
-@Disabled
 public class LdapSecretIntegrationTests extends IntegrationTestSupport {
+
+	@RegisterExtension
+	public static final LdapServerExtension ldapServer = new LdapServerExtension();
 
 	private VaultProperties vaultProperties = Settings.createVaultProperties();
 
@@ -51,29 +51,49 @@ public class LdapSecretIntegrationTests extends IntegrationTestSupport {
 	private VaultLdapProperties ldapProperties = new VaultLdapProperties();
 
 	/**
-	 * Initialize the LDAP secret engine configuration. Tests will be skipped if the LDAP
-	 * secret engine is not available.
+	 * Initialize the LDAP secret engine configuration with the in-memory LDAP server.
 	 */
 	@BeforeEach
 	public void setUp() {
-		// Skip tests if LDAP secret engine is not mounted/available
-		assumeTrue(isLdapSecretEngineAvailable(), "LDAP secret engine is not available or configured");
-
 		this.ldapProperties.setEnabled(true);
 		this.ldapProperties.setBackend("ldap");
 
-		this.configOperations = new VaultConfigTemplate(this.vaultRule.prepare().getVaultOperations(),
-				this.vaultProperties);
+		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();
+
+		if (!prepare().hasSecretBackend(this.ldapProperties.getBackend())) {
+			prepare().mountSecret(this.ldapProperties.getBackend());
+		}
+
+		Map<String, Object> ldapConfig = new HashMap<>();
+		ldapConfig.put("binddn", "uid=vault-admin,ou=people," + ldapServer.getBaseDn());
+		ldapConfig.put("bindpass", "vault-admin-password");
+		ldapConfig.put("url", ldapServer.getLdapUrl());
+		ldapConfig.put("userdn", "ou=people," + ldapServer.getBaseDn());
+
+		vaultOperations.write(String.format("%s/config", this.ldapProperties.getBackend()), ldapConfig);
+
+		this.configOperations = new VaultConfigTemplate(vaultOperations, this.vaultProperties);
 	}
 
 	/**
-	 * Test for dynamic role credential retrieval. This test requires a configured dynamic
-	 * role in Vault's LDAP secret engine.
+	 * Test for dynamic role credential retrieval.
 	 */
 	@Test
 	public void shouldCreateDynamicCredentialsCorrectly() {
-		// This test requires a pre-configured dynamic role named "dynamic-role" in Vault
-		assumeTrue(isDynamicRoleAvailable("dynamic-role"), "Dynamic role 'dynamic-role' is not configured");
+		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();
+
+		Map<String, Object> dynamicRoleConfig = new HashMap<>();
+		dynamicRoleConfig.put("creation_ldif",
+				"dn: cn={{.Username}},ou=people," + ldapServer.getBaseDn() + "\n" + "objectClass: person\n"
+						+ "objectClass: top\n" + "cn: {{.Username}}\n" + "sn: {{.Username}}\n"
+						+ "userPassword: {{.Password}}");
+		dynamicRoleConfig.put("deletion_ldif",
+				"dn: cn={{.Username}},ou=people," + ldapServer.getBaseDn() + "\nchangetype: delete");
+		dynamicRoleConfig.put("default_ttl", "1h");
+		dynamicRoleConfig.put("max_ttl", "24h");
+
+		vaultOperations.write(String.format("%s/role/dynamic-role", this.ldapProperties.getBackend()),
+				dynamicRoleConfig);
 
 		this.ldapProperties.setRole("dynamic-role");
 		this.ldapProperties.setStaticRole(false);
@@ -86,13 +106,19 @@ public class LdapSecretIntegrationTests extends IntegrationTestSupport {
 	}
 
 	/**
-	 * Test for static role credential retrieval. This test requires a configured static
-	 * role in Vault's LDAP secret engine.
+	 * Test for static role credential retrieval.
 	 */
 	@Test
 	public void shouldCreateStaticCredentialsCorrectly() {
-		// This test requires a pre-configured static role named "static-role" in Vault
-		assumeTrue(isStaticRoleAvailable("static-role"), "Static role 'static-role' is not configured");
+		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();
+
+		Map<String, Object> staticRoleConfig = new HashMap<>();
+		staticRoleConfig.put("dn", "uid=static-user,ou=people," + ldapServer.getBaseDn());
+		staticRoleConfig.put("username", "static-user");
+		staticRoleConfig.put("rotation_period", "24h");
+
+		vaultOperations.write(String.format("%s/static-role/static-role", this.ldapProperties.getBackend()),
+				staticRoleConfig);
 
 		this.ldapProperties.setRole("static-role");
 		this.ldapProperties.setStaticRole(true);
@@ -102,46 +128,6 @@ public class LdapSecretIntegrationTests extends IntegrationTestSupport {
 			.getData();
 
 		assertThat(secretProperties).containsKeys("spring.ldap.username", "spring.ldap.password");
-	}
-
-	/**
-	 * Check if the LDAP secret engine is available in Vault. This can be determined by
-	 * attempting to read the LDAP config endpoint.
-	 */
-	private boolean isLdapSecretEngineAvailable() {
-		try {
-			this.vaultRule.prepare().getVaultOperations().read("ldap/config");
-			return true;
-		}
-		catch (Exception e) {
-			return false;
-		}
-	}
-
-	/**
-	 * Check if a dynamic role exists in Vault.
-	 */
-	private boolean isDynamicRoleAvailable(String roleName) {
-		try {
-			this.vaultRule.prepare().getVaultOperations().read("ldap/role/" + roleName);
-			return true;
-		}
-		catch (Exception e) {
-			return false;
-		}
-	}
-
-	/**
-	 * Check if a static role exists in Vault.
-	 */
-	private boolean isStaticRoleAvailable(String roleName) {
-		try {
-			this.vaultRule.prepare().getVaultOperations().read("ldap/static-role/" + roleName);
-			return true;
-		}
-		catch (Exception e) {
-			return false;
-		}
 	}
 
 }
