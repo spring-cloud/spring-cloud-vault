@@ -61,8 +61,8 @@ public class ConsulSecretIntegrationTests extends IntegrationTestSupport {
 		this.consul.setEnabled(true);
 		this.consul.setRole("readonly");
 
-		if (!prepare().hasSecretBackend(this.consul.getBackend())) {
-			prepare().mountSecret(this.consul.getBackend());
+		if (!prepare().hasSecretsEngine(this.consul.getBackend())) {
+			prepare().mountSecretsEngine(this.consul.getBackend());
 		}
 
 		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();

@@ -85,8 +85,8 @@ public class VaultConfigPostgreSqlTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		if (!vaultRule.prepare().hasSecretBackend("postgresql")) {
-			vaultRule.prepare().mountSecret("postgresql");
+		if (!vaultRule.prepare().hasSecretsEngine("postgresql")) {
+			vaultRule.prepare().mountSecretsEngine("postgresql");
 		}
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();

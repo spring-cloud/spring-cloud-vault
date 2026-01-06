@@ -69,8 +69,8 @@ public class ElasticsearchSecretIntegrationTests extends IntegrationTestSupport 
 		this.elasticsearch.setEnabled(true);
 		this.elasticsearch.setRole("readonly");
 
-		if (!prepare().hasSecretBackend(this.elasticsearch.getBackend())) {
-			prepare().mountSecret(this.elasticsearch.getBackend());
+		if (!prepare().hasSecretsEngine(this.elasticsearch.getBackend())) {
+			prepare().mountSecretsEngine(this.elasticsearch.getBackend());
 		}
 
 		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();

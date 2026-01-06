@@ -85,8 +85,8 @@ public class VaultConfigMySqlDatabasesBootstrapTests {
 		assumeTrue(CanConnect.to(new InetSocketAddress(MYSQL_HOST, MYSQL_PORT)));
 		assumeTrue(vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.7.1")));
 
-		if (!vaultRule.prepare().hasSecretBackend("database")) {
-			vaultRule.prepare().mountSecret("database");
+		if (!vaultRule.prepare().hasSecretsEngine("database")) {
+			vaultRule.prepare().mountSecretsEngine("database");
 		}
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();

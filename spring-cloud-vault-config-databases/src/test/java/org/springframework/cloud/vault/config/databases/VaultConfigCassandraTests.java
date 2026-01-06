@@ -81,8 +81,8 @@ public class VaultConfigCassandraTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		if (!vaultRule.prepare().hasSecretBackend("cassandra")) {
-			vaultRule.prepare().mountSecret("cassandra");
+		if (!vaultRule.prepare().hasSecretsEngine("cassandra")) {
+			vaultRule.prepare().mountSecretsEngine("cassandra");
 		}
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();

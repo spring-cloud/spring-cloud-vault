@@ -74,8 +74,8 @@ public class PostgreSqlSecretIntegrationTests extends IntegrationTestSupport {
 		this.postgreSql.setEnabled(true);
 		this.postgreSql.setRole("readonly");
 
-		if (!prepare().hasSecretBackend(this.postgreSql.getBackend())) {
-			prepare().mountSecret(this.postgreSql.getBackend());
+		if (!prepare().hasSecretsEngine(this.postgreSql.getBackend())) {
+			prepare().mountSecretsEngine(this.postgreSql.getBackend());
 		}
 
 		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();

@@ -103,8 +103,8 @@ public class VaultConfigConsulTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		if (!vaultRule.prepare().hasSecretBackend("consul")) {
-			vaultRule.prepare().mountSecret("consul");
+		if (!vaultRule.prepare().hasSecretsEngine("consul")) {
+			vaultRule.prepare().mountSecretsEngine("consul");
 		}
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
