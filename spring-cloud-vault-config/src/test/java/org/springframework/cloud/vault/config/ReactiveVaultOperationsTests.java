@@ -43,7 +43,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-
 @SpringBootTest(classes = ReactiveVaultOperationsTests.TestApplication.class,
 		properties = { "spring.cloud.bootstrap.enabled=true" })
 public class ReactiveVaultOperationsTests {

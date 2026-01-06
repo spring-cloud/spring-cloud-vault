@@ -37,7 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-
 @SpringBootTest(classes = VaultPropertySourceLocatorProfilesIntegrationTests.TestApplication.class,
 		properties = { "spring.application.name=my-profiles-app", "spring.cloud.vault.kv.profiles=hello, world",
 				"spring.cloud.vault.kv.default-context=", "spring.cloud.bootstrap.enabled=true" })

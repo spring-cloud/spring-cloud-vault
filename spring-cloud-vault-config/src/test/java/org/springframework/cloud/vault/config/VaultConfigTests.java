@@ -47,7 +47,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-
 @SpringBootTest(classes = VaultConfigTests.TestApplication.class,
 		properties = { "spring.cloud.vault.application-name=testVaultApp", "spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigTests {
