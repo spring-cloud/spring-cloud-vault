@@ -223,7 +223,7 @@ public class PrepareVault {
 
 		this.vaultOperations.opsForSys().unmount("secret");
 
-		VaultMount kv = VaultMount.builder().type("kv").config(Collections.singletonMap("versioned", false)).build();
+		VaultMount kv = VaultMount.builder().type("kv").options(Collections.singletonMap("version", "1")).build();
 		this.vaultOperations.opsForSys().mount("secret", kv);
 	}
 
@@ -232,9 +232,8 @@ public class PrepareVault {
 	 */
 	public void mountVersionedKvSecretsEngine() {
 
-		mountSecretsEngine("kv", "versioned", Collections.emptyMap());
-		this.vaultOperations.write("sys/mounts/versioned/tune",
-				Collections.singletonMap("options", Collections.singletonMap("version", "2")));
+		VaultMount kv = VaultMount.builder().type("kv").options(Collections.singletonMap("version", "2")).build();
+		this.vaultOperations.opsForSys().mount("versioned", kv);
 	}
 
 }
