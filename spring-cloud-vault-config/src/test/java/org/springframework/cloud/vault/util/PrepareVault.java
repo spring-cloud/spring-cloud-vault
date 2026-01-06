@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.vault.util;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
@@ -73,9 +74,39 @@ public class PrepareVault {
 	}
 
 	/**
+	 * Wait until Vault is available (not standby) in case Vault uses HA mode that
+	 * requires background cluster synchronization.
+	 */
+	void awaitAvailable() {
+
+		int attempts = 10;
+		Duration wait = Duration.ofMillis(500);
+
+		for (int i = 0; i < attempts; i++) {
+			VaultHealth health = this.vaultOperations.opsForSys().health();
+
+			if (!health.isStandby()) {
+				return;
+			}
+
+			if (health.isStandby()) {
+				try {
+					Thread.sleep(wait.toMillis());
+				}
+				catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+
+		throw new IllegalStateException(
+				"Vault did not become available within %s seconds".formatted(wait.multipliedBy(attempts).toSeconds()));
+	}
+
+	/**
 	 * Create a token for the given {@code tokenId} and {@code policy}.
-	 * @param tokenId the must not be {@literal null}.
-	 * @param policy the must not be {@literal null}.
+	 * @param tokenId the token, must not be {@literal null}.
+	 * @param policy the policy, must not be {@literal null}.
 	 * @return the token.
 	 */
 	public VaultToken createToken(String tokenId, String policy) {
@@ -100,7 +131,7 @@ public class PrepareVault {
 
 	/**
 	 * Mount an auth backend.
-	 * @param authBackend the must not be {@literal null}.
+	 * @param authBackend the authBackend must not be {@literal null}.
 	 */
 	public void mountAuth(String authBackend) {
 
@@ -110,8 +141,8 @@ public class PrepareVault {
 	}
 
 	/**
-	 * Check whether a auth-backend is enabled.
-	 * @param authBackend the must not be {@literal null}.
+	 * Check whether an auth-backend is enabled.
+	 * @param authBackend the auth backend, must not be {@literal null}.
 	 * @return whether the backend is mounted.
 	 */
 	public boolean hasAuth(String authBackend) {
@@ -122,15 +153,15 @@ public class PrepareVault {
 	}
 
 	/**
-	 * Mount an secret backend.
-	 * @param secretBackend must not be {@literal null} or empty.
+	 * Mount a secret backend.
+	 * @param secretBackend the secrets engine, must not be {@literal null} or empty.
 	 */
 	public void mountSecret(String secretBackend) {
 		mountSecret(secretBackend, secretBackend, Collections.emptyMap());
 	}
 
 	/**
-	 * Mount an secret backend {@code secretBackend} at {@code path}.
+	 * Mount a secrets engine {@code secretBackend} at {@code path}.
 	 * @param secretBackend must not be {@literal null} or empty.
 	 * @param path must not be {@literal null} or empty.
 	 * @param config must not be {@literal null}.
