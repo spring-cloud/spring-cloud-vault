@@ -35,8 +35,8 @@ import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
 
 /**
- * Vault preparation utility class. This class allows preparing Vault for
- * integration tests.
+ * Vault preparation utility class. This class allows preparing Vault for integration
+ * tests.
  *
  * @author Mark Paluch
  */
