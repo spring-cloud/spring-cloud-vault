@@ -40,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-
 @SpringBootTest(classes = VaultConfigKeyValueBackendDisabledTests.TestApplication.class,
 		properties = "spring.cloud.vault.kv.enabled=false")
 public class VaultConfigKeyValueBackendDisabledTests {

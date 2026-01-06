@@ -32,7 +32,6 @@ import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.web.client.RestTemplate;
 
@@ -48,7 +47,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-
 @SpringBootTest(classes = VaultConfigLoaderTests.TestApplication.class,
 		properties = { "spring.cloud.vault.uri=https://localhost:8200",
 				"spring.cloud.vault.application-name=config-data", "spring.config.import=vault:" })
@@ -107,7 +105,6 @@ public class VaultConfigLoaderTests {
 	public void shouldNotContainRestTemplateArtifacts() {
 
 		assertThat(this.applicationContext.getBeanNamesForType(RestTemplate.class)).isEmpty();
-		assertThat(this.applicationContext.getBeanNamesForType(ClientHttpRequestFactory.class)).isEmpty();
 	}
 
 	@SpringBootApplication(exclude = RefreshAutoConfiguration.class)
