@@ -91,6 +91,7 @@ public class VaultRule extends ExternalResource {
 		if (!this.prepareVault.isAvailable()) {
 
 			this.token = this.prepareVault.initializeVault();
+			this.prepareVault.awaitAvailable();
 			this.prepareVault.createToken(Settings.token().getToken(), "root");
 
 			if (this.prepareVault.getVersion().isGreaterThanOrEqualTo(VERSIONING_INTRODUCED_WITH)) {
