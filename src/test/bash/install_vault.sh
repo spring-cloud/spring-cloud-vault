@@ -30,8 +30,8 @@ function verbose() {
 
 function initialize() {
   # cleanup
-  mkdir -p ${VAULT_DIRECTORY}
-  mkdir -p ${DOWNLOAD_DIRECTORY}
+  mkdir -p "${VAULT_DIRECTORY}"
+  mkdir -p "${DOWNLOAD_DIRECTORY}"
 }
 
 function usage() {
@@ -78,7 +78,7 @@ function parse_options() {
 
 function unpack() {
 
-  cd ${VAULT_DIRECTORY}
+  cd "${VAULT_DIRECTORY}"
 
   if [[ -f vault ]]; then
     rm vault
@@ -102,7 +102,7 @@ function unpack() {
 function download() {
 
   if [[ ! -f "${DOWNLOAD_DIRECTORY}/${VAULT_ZIP}" ]]; then
-    cd ${DOWNLOAD_DIRECTORY}
+    cd "${DOWNLOAD_DIRECTORY}"
     # install Vault
     say "Downloading Vault from ${VAULT_URL}"
 
@@ -146,15 +146,15 @@ function main() {
 
   initialize
   parse_options "$@"
-  if [ "$(uname -m)" == aarch64 ]; then
+  if [ "$(uname -m)" == 'arm64' ]; then
     PLATFORM=arm64
   fi
-  if [ "$(uname -m)" == arm64 ]; then
+  if [ "$(uname -m)" == 'aarch64' ]; then
     PLATFORM=arm64
   fi
-  if [[ ${EDITION} == 'oss' ]]; then
+  if [[ "${EDITION}" == 'oss' ]]; then
     download_oss
-  elif [[ ${EDITION} == 'enterprise' ]]; then
+  elif [[ "${EDITION}" == 'enterprise' ]]; then
     download_enterprise
   else
     say "Ignoring edition option: ${EDITION} - oss and enterprise supported only"
