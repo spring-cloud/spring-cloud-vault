@@ -35,7 +35,8 @@ import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
 
 /**
- * Utility to prepare Vault for testing.
+ * Vault preparation utility class. This class allows preparing Vault for
+ * integration tests.
  *
  * @author Mark Paluch
  */
@@ -125,7 +126,7 @@ public class PrepareVault {
 
 	/**
 	 * Check whether Vault is available (vault created and unsealed).
-	 * @return whether Vault is available.
+	 * @return {@literal true} if Vault is available (vault created and unsealed).
 	 */
 	public boolean isAvailable() {
 		return this.adminOperations.isInitialized() && !this.adminOperations.health().isSealed();
@@ -137,7 +138,7 @@ public class PrepareVault {
 	 */
 	public void mountAuth(String authMethod) {
 
-		Assert.hasText(authMethod, "AuthBackend must not be empty");
+		Assert.hasText(authMethod, "Auth method must not be empty");
 		this.adminOperations.authMount(authMethod, VaultMount.create(authMethod));
 	}
 
@@ -154,7 +155,7 @@ public class PrepareVault {
 
 	/**
 	 * Mount a secrets engine at its default path {@code secretsEngine}.
-	 * @param secretsEngine the secrets engine name, must not be {@literal null}.
+	 * @param secretsEngine the secrets engine name, must not be {@literal null} or empty.
 	 */
 	public void mountSecretsEngine(String secretsEngine) {
 		mountSecretsEngine(secretsEngine, secretsEngine, Collections.emptyMap());
@@ -162,7 +163,7 @@ public class PrepareVault {
 
 	/**
 	 * Mount a secrets engine {@code secretsEngine} at {@code path}.
-	 * @param secretsEngine the secrets engine name, must not be {@literal null}.
+	 * @param secretsEngine the secrets engine name, must not be {@literal null} or empty.
 	 * @param path must not be {@literal null} or empty.
 	 * @param config must not be {@literal null}.
 	 */
@@ -178,8 +179,8 @@ public class PrepareVault {
 
 	/**
 	 * Check whether a secrets engine is enabled.
-	 * @param secretsEngine the secrets engine name, must not be {@literal null}.
-	 * @return whether the backend is mounted.
+	 * @param secretsEngine the secrets engine name, must not be {@literal null} or empty.
+	 * @return {@literal true} if a secrets engine is enabled.
 	 */
 	public boolean hasSecretsEngine(String secretsEngine) {
 
