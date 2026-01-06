@@ -95,8 +95,8 @@ public class VaultRule implements BeforeEachCallback {
 			this.prepareVault.createToken(Settings.token().getToken(), "root");
 
 			if (this.prepareVault.getVersion().isGreaterThanOrEqualTo(VERSIONING_INTRODUCED_WITH)) {
-				this.prepareVault.disableGenericVersioning();
-				this.prepareVault.mountVersionedKvBackend();
+				this.prepareVault.ensureUnversionedSecretsEngine();
+				this.prepareVault.mountVersionedKvSecretsEngine();
 			}
 
 			this.token = Settings.token();

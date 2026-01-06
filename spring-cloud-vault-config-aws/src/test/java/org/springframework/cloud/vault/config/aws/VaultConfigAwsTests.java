@@ -79,8 +79,8 @@ public class VaultConfigAwsTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		if (!vaultRule.prepare().hasSecretBackend("aws")) {
-			vaultRule.prepare().mountSecret("aws");
+		if (!vaultRule.prepare().hasSecretsEngine("aws")) {
+			vaultRule.prepare().mountSecretsEngine("aws");
 		}
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();

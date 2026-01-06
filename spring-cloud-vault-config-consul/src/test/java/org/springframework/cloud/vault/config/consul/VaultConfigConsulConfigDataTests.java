@@ -58,8 +58,8 @@ public class VaultConfigConsulConfigDataTests extends IntegrationTestSupport {
 
 		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();
 
-		if (!prepare().hasSecretBackend("consul")) {
-			prepare().mountSecret("consul");
+		if (!prepare().hasSecretsEngine("consul")) {
+			prepare().mountSecretsEngine("consul");
 		}
 
 		SetupConsul.setupConsul(vaultOperations, "consul");

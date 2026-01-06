@@ -77,8 +77,8 @@ public class RabbitMqSecretIntegrationTests extends IntegrationTestSupport {
 		this.rabbitmq.setEnabled(true);
 		this.rabbitmq.setRole("readonly");
 
-		if (!prepare().hasSecretBackend(this.rabbitmq.getBackend())) {
-			prepare().mountSecret(this.rabbitmq.getBackend());
+		if (!prepare().hasSecretsEngine(this.rabbitmq.getBackend())) {
+			prepare().mountSecretsEngine(this.rabbitmq.getBackend());
 		}
 
 		Map<String, String> connection = new HashMap<>();

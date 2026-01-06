@@ -44,8 +44,8 @@ final class MySqlFixtures {
 
 	public static void setupMysql(VaultRule vaultRule) {
 
-		if (!vaultRule.prepare().hasSecretBackend("database")) {
-			vaultRule.prepare().mountSecret("database");
+		if (!vaultRule.prepare().hasSecretsEngine("database")) {
+			vaultRule.prepare().mountSecretsEngine("database");
 		}
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();

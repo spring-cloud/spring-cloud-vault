@@ -91,8 +91,8 @@ public class VaultConfigRabbitMqTests {
 
 		assumeTrue(vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.2")));
 
-		if (!vaultRule.prepare().hasSecretBackend("rabbitmq")) {
-			vaultRule.prepare().mountSecret("rabbitmq");
+		if (!vaultRule.prepare().hasSecretsEngine("rabbitmq")) {
+			vaultRule.prepare().mountSecretsEngine("rabbitmq");
 		}
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();

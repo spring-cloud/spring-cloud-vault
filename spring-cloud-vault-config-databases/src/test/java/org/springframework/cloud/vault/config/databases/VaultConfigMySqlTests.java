@@ -72,8 +72,8 @@ public class VaultConfigMySqlTests {
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
 
-		if (!vaultRule.prepare().hasSecretBackend("mysql")) {
-			vaultRule.prepare().mountSecret("mysql");
+		if (!vaultRule.prepare().hasSecretsEngine("mysql")) {
+			vaultRule.prepare().mountSecretsEngine("mysql");
 		}
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();

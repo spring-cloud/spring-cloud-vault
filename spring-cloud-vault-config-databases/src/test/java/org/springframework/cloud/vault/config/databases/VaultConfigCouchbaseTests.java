@@ -79,8 +79,8 @@ public class VaultConfigCouchbaseTests {
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
 
-		if (!vaultRule.prepare().hasSecretBackend("database")) {
-			vaultRule.prepare().mountSecret("database");
+		if (!vaultRule.prepare().hasSecretsEngine("database")) {
+			vaultRule.prepare().mountSecretsEngine("database");
 		}
 
 		Map<String, String> config = new HashMap<>();

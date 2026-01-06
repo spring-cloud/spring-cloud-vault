@@ -72,8 +72,8 @@ public class MongoSecretIntegrationTests extends IntegrationTestSupport {
 		this.mongodb.setEnabled(true);
 		this.mongodb.setRole("readonly");
 
-		if (!prepare().hasSecretBackend(this.mongodb.getBackend())) {
-			prepare().mountSecret(this.mongodb.getBackend());
+		if (!prepare().hasSecretsEngine(this.mongodb.getBackend())) {
+			prepare().mountSecretsEngine(this.mongodb.getBackend());
 		}
 
 		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();

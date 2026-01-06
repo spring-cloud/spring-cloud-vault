@@ -66,8 +66,8 @@ public class CouchbaseSecretIntegrationTests extends IntegrationTestSupport {
 		this.couchbaseProperties.setEnabled(true);
 		this.couchbaseProperties.setRole("couchbase-readonly");
 
-		if (!prepare().hasSecretBackend(this.couchbaseProperties.getBackend())) {
-			prepare().mountSecret(this.couchbaseProperties.getBackend());
+		if (!prepare().hasSecretsEngine(this.couchbaseProperties.getBackend())) {
+			prepare().mountSecretsEngine(this.couchbaseProperties.getBackend());
 		}
 
 		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();

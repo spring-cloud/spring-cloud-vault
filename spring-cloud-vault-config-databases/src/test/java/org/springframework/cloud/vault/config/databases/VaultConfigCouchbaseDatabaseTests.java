@@ -76,8 +76,8 @@ public class VaultConfigCouchbaseDatabaseTests {
 		assumeTrue(CanConnect.to(new InetSocketAddress(COUCHBASE_HOST, COUCHBASE_PORT)));
 		assumeTrue(vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("1.3.0")));
 
-		if (!vaultRule.prepare().hasSecretBackend("database")) {
-			vaultRule.prepare().mountSecret("database");
+		if (!vaultRule.prepare().hasSecretsEngine("database")) {
+			vaultRule.prepare().mountSecretsEngine("database");
 		}
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();

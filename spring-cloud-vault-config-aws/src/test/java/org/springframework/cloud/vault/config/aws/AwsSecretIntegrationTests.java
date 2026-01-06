@@ -69,8 +69,8 @@ public class AwsSecretIntegrationTests extends IntegrationTestSupport {
 		this.aws.setEnabled(true);
 		this.aws.setRole("readonly");
 
-		if (!prepare().hasSecretBackend(this.aws.getBackend())) {
-			prepare().mountSecret(this.aws.getBackend());
+		if (!prepare().hasSecretsEngine(this.aws.getBackend())) {
+			prepare().mountSecretsEngine(this.aws.getBackend());
 		}
 
 		VaultOperations vaultOperations = prepare().getVaultOperations();
