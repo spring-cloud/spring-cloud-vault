@@ -89,8 +89,8 @@ public class VaultConfigMongoTests {
 
 		assumeTrue(vaultRule.prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.2")));
 
-		if (!vaultRule.prepare().hasSecretBackend("mongodb")) {
-			vaultRule.prepare().mountSecret("mongodb");
+		if (!vaultRule.prepare().hasSecretsEngine("mongodb")) {
+			vaultRule.prepare().mountSecretsEngine("mongodb");
 		}
 
 		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();

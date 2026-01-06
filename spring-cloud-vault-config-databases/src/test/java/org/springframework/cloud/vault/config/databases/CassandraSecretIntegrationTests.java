@@ -72,8 +72,8 @@ public class CassandraSecretIntegrationTests extends IntegrationTestSupport {
 		this.cassandra.setEnabled(true);
 		this.cassandra.setRole("readonly");
 
-		if (!prepare().hasSecretBackend(this.cassandra.getBackend())) {
-			prepare().mountSecret(this.cassandra.getBackend());
+		if (!prepare().hasSecretsEngine(this.cassandra.getBackend())) {
+			prepare().mountSecretsEngine(this.cassandra.getBackend());
 		}
 
 		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();

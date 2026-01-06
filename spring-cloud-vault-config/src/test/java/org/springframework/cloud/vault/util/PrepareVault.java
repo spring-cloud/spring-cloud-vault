@@ -35,6 +35,8 @@ import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
 
 /**
+ * Utility to prepare Vault for testing.
+ *
  * @author Mark Paluch
  */
 public class PrepareVault {
@@ -130,62 +132,60 @@ public class PrepareVault {
 	}
 
 	/**
-	 * Mount an auth backend.
-	 * @param authBackend the authBackend must not be {@literal null}.
+	 * Mount an auth method.
+	 * @param authMethod the authMethod must not be {@literal null}.
 	 */
-	public void mountAuth(String authBackend) {
+	public void mountAuth(String authMethod) {
 
-		Assert.hasText(authBackend, "AuthBackend must not be empty");
-
-		this.adminOperations.authMount(authBackend, VaultMount.create(authBackend));
+		Assert.hasText(authMethod, "AuthBackend must not be empty");
+		this.adminOperations.authMount(authMethod, VaultMount.create(authMethod));
 	}
 
 	/**
-	 * Check whether an auth-backend is enabled.
-	 * @param authBackend the auth backend, must not be {@literal null}.
+	 * Check whether an auth-method is enabled.
+	 * @param authMethod the auth backend, must not be {@literal null}.
 	 * @return whether the backend is mounted.
 	 */
-	public boolean hasAuth(String authBackend) {
+	public boolean hasAuth(String authMethod) {
 
-		Assert.hasText(authBackend, "AuthBackend must not be empty");
-
-		return this.adminOperations.getAuthMounts().containsKey(authBackend + "/");
+		Assert.hasText(authMethod, "Auth method must not be empty");
+		return this.adminOperations.getAuthMounts().containsKey(authMethod + "/");
 	}
 
 	/**
-	 * Mount a secret backend.
-	 * @param secretBackend the secrets engine, must not be {@literal null} or empty.
+	 * Mount a secrets engine at its default path {@code secretsEngine}.
+	 * @param secretsEngine the secrets engine name, must not be {@literal null}.
 	 */
-	public void mountSecret(String secretBackend) {
-		mountSecret(secretBackend, secretBackend, Collections.emptyMap());
+	public void mountSecretsEngine(String secretsEngine) {
+		mountSecretsEngine(secretsEngine, secretsEngine, Collections.emptyMap());
 	}
 
 	/**
-	 * Mount a secrets engine {@code secretBackend} at {@code path}.
-	 * @param secretBackend must not be {@literal null} or empty.
+	 * Mount a secrets engine {@code secretsEngine} at {@code path}.
+	 * @param secretsEngine the secrets engine name, must not be {@literal null}.
 	 * @param path must not be {@literal null} or empty.
 	 * @param config must not be {@literal null}.
 	 */
-	public void mountSecret(String secretBackend, String path, Map<String, Object> config) {
+	public void mountSecretsEngine(String secretsEngine, String path, Map<String, Object> config) {
 
-		Assert.hasText(secretBackend, "SecretBackend must not be empty");
+		Assert.hasText(secretsEngine, "Secrets engine must not be empty");
 		Assert.hasText(path, "Mount path must not be empty");
 		Assert.notNull(config, "Configuration must not be null");
 
-		VaultMount mount = VaultMount.builder().type(secretBackend).config(config).build();
+		VaultMount mount = VaultMount.builder().type(secretsEngine).config(config).build();
 		this.adminOperations.mount(path, mount);
 	}
 
 	/**
-	 * Check whether a auth-backend is enabled.
-	 * @param secretBackend the must not be {@literal null}.
+	 * Check whether a secrets engine is enabled.
+	 * @param secretsEngine the secrets engine name, must not be {@literal null}.
 	 * @return whether the backend is mounted.
 	 */
-	public boolean hasSecretBackend(String secretBackend) {
+	public boolean hasSecretsEngine(String secretsEngine) {
 
-		Assert.hasText(secretBackend, "SecretBackend must not be empty");
+		Assert.hasText(secretsEngine, "Secrets engine must not be empty");
 		Map<String, VaultMount> mounts = this.adminOperations.getMounts();
-		return mounts.containsKey(secretBackend) || mounts.containsKey(secretBackend + "/");
+		return mounts.containsKey(secretsEngine) || mounts.containsKey(secretsEngine + "/");
 	}
 
 	public VaultOperations getVaultOperations() {
@@ -216,9 +216,10 @@ public class PrepareVault {
 	}
 
 	/**
-	 * Disable Vault versioning Key-Value backend (kv version 2).
+	 * Disable Vault versioning Key-Value secrets engine (kv version 2) and mount the kv
+	 * secrets engine at {@code secret/}.
 	 */
-	public void disableGenericVersioning() {
+	public void ensureUnversionedSecretsEngine() {
 
 		this.vaultOperations.opsForSys().unmount("secret");
 
@@ -226,9 +227,12 @@ public class PrepareVault {
 		this.vaultOperations.opsForSys().mount("secret", kv);
 	}
 
-	public void mountVersionedKvBackend() {
+	/**
+	 * Mount the Key-Value secrets engine (kv version 2) at {@code versioned/}.
+	 */
+	public void mountVersionedKvSecretsEngine() {
 
-		mountSecret("kv", "versioned", Collections.emptyMap());
+		mountSecretsEngine("kv", "versioned", Collections.emptyMap());
 		this.vaultOperations.write("sys/mounts/versioned/tune",
 				Collections.singletonMap("options", Collections.singletonMap("version", "2")));
 	}

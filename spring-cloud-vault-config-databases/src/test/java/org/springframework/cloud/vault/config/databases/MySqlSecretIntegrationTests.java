@@ -71,8 +71,8 @@ public class MySqlSecretIntegrationTests extends IntegrationTestSupport {
 		this.mySql.setEnabled(true);
 		this.mySql.setRole("readonly");
 
-		if (!prepare().hasSecretBackend(this.mySql.getBackend())) {
-			prepare().mountSecret(this.mySql.getBackend());
+		if (!prepare().hasSecretsEngine(this.mySql.getBackend())) {
+			prepare().mountSecretsEngine(this.mySql.getBackend());
 		}
 
 		VaultOperations vaultOperations = this.vaultRule.prepare().getVaultOperations();
