@@ -22,6 +22,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.springframework.vault.authentication.UsernamePasswordAuthentication;
+import org.springframework.vault.authentication.UsernamePasswordAuthenticationOptions;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
@@ -114,6 +116,7 @@ class ClientAuthenticationFactory {
 			case GCP_IAM -> gcpIamAuthentication(this.vaultProperties);
 			case GITHUB -> gitHubAuthentication(this.vaultProperties);
 			case KUBERNETES -> kubernetesAuthentication(this.vaultProperties);
+			case LDAP -> ldapAuthentication(this.vaultProperties);
 			case PCF -> pcfAuthentication(this.vaultProperties);
 			case TOKEN -> tokenAuthentication(this.vaultProperties);
 			default -> throw new UnsupportedOperationException(
@@ -352,6 +355,22 @@ class ClientAuthenticationFactory {
 			.build();
 
 		return new KubernetesAuthentication(options, this.restOperations);
+	}
+
+	private ClientAuthentication ldapAuthentication(VaultProperties vaultProperties) {
+
+		VaultProperties.UsernamePasswordProperties ldap = vaultProperties.getLdap();
+
+		Assert.hasText(ldap.getUsername(), "Username (spring.cloud.vault.ldap.username) must not be empty");
+		Assert.hasText(ldap.getPassword().toString(), "Password (spring.cloud.vault.ldap.password) must not be empty");
+
+		UsernamePasswordAuthenticationOptions options = UsernamePasswordAuthenticationOptions.builder()
+			.path(ldap.getPath())
+			.username(ldap.getUsername())
+			.password(ldap.getPassword())
+			.build();
+
+		return new UsernamePasswordAuthentication(options, this.restOperations);
 	}
 
 	private ClientAuthentication pcfAuthentication(VaultProperties vaultProperties) {
