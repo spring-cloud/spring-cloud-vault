@@ -24,11 +24,13 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import software.amazon.awssdk.core.SdkSystemSetting;
 import software.amazon.awssdk.regions.Region;
 
 import org.springframework.boot.system.SystemProperties;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
@@ -53,8 +55,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Mark Paluch
  * @author Quincy Conduff
  * @author Issam El-atif
+ * @author Artem Gorianin
  */
 public class ClientAuthenticationFactoryUnitTests {
+
+	@TempDir
+	Path tempDir;
 
 	@Test
 	public void shouldSupportAwsIam() {
@@ -68,7 +74,7 @@ public class ClientAuthenticationFactoryUnitTests {
 			properties.getAwsIam().setRole("bar");
 
 			ClientAuthenticationFactory factory = new ClientAuthenticationFactory(properties, new RestTemplate(),
-					new RestTemplate());
+					new RestTemplate(), new DefaultResourceLoader());
 			AwsIamAuthentication authentication = (AwsIamAuthentication) factory.awsIamAuthentication(properties);
 			AwsIamAuthenticationOptions options = (AwsIamAuthenticationOptions) ReflectionTestUtils
 				.getField(authentication, "options");
@@ -200,7 +206,7 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.getGithub().setToken("token");
 
 		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
-				new RestTemplate())
+				new RestTemplate(), new DefaultResourceLoader())
 			.createClientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(GitHubAuthentication.class);
@@ -216,7 +222,7 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.getPcf().setInstanceCertificate(new ClassPathResource("bootstrap.yml"));
 
 		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
-				new RestTemplate())
+				new RestTemplate(), new DefaultResourceLoader())
 			.createClientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(PcfAuthentication.class);
@@ -230,7 +236,7 @@ public class ClientAuthenticationFactoryUnitTests {
 		properties.getSsl().setCertAuthPath("bert");
 
 		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
-				new RestTemplate())
+				new RestTemplate(), new DefaultResourceLoader())
 			.createClientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(ClientCertificateAuthentication.class);
@@ -247,7 +253,7 @@ public class ClientAuthenticationFactoryUnitTests {
 				StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 		try {
 			ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
-					new RestTemplate())
+					new RestTemplate(), new DefaultResourceLoader())
 				.createClientAuthentication();
 
 			assertThat(clientAuthentication).isInstanceOf(TokenAuthentication.class);
@@ -261,6 +267,44 @@ public class ClientAuthenticationFactoryUnitTests {
 	}
 
 	@Test
+	public void shouldSupportTokenFromOsFile() throws IOException {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.TOKEN);
+		Path tokenFile = tempDir.resolve("external-token-file.token");
+		Files.writeString(tokenFile, "file-token-999");
+
+		properties.setToken("file:" + tokenFile);
+
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate(), new DefaultResourceLoader())
+				.createClientAuthentication();
+
+		assertThat(clientAuthentication).isInstanceOf(TokenAuthentication.class);
+		VaultToken token = clientAuthentication.login();
+
+		assertThat(new String(token.toCharArray())).isEqualTo("file-token-999");
+	}
+
+	@Test
+	public void shouldSupportTokenFromClasspath() {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.TOKEN);
+
+
+		properties.setToken("classpath:external-token-classpath.token");
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate(), new DefaultResourceLoader())
+				.createClientAuthentication();
+
+		assertThat(clientAuthentication).isInstanceOf(TokenAuthentication.class);
+		VaultToken token = clientAuthentication.login();
+
+		assertThat(new String(token.toCharArray())).isEqualTo("hello");
+	}
+
+	@Test
 	public void tokenAuthShouldFailIfTokenFileNotExistsAndTokenEmpty() throws IOException {
 
 		VaultProperties properties = new VaultProperties();
@@ -269,7 +313,7 @@ public class ClientAuthenticationFactoryUnitTests {
 		Files.deleteIfExists(vaultTokenPath);
 
 		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(properties, new RestTemplate(),
-				new RestTemplate());
+				new RestTemplate(), new DefaultResourceLoader());
 
 		assertThatIllegalStateException().isThrownBy(factory::createClientAuthentication);
 	}

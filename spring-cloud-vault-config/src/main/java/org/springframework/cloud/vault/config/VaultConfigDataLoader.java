@@ -48,6 +48,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -508,7 +509,7 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 
 				ClientAuthenticationFactory authenticationFactory = new ClientAuthenticationFactory(
 						this.vaultProperties, this.bootstrap.get(RestTemplateFactory.class).create(),
-						externalRestTemplate);
+						externalRestTemplate, this.bootstrap.get(ResourceLoader.class));
 				return authenticationFactory.createClientAuthentication();
 			});
 		}

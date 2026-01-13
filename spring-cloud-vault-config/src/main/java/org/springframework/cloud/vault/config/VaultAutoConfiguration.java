@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.scheduling.TaskScheduler;
@@ -60,6 +61,7 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Spencer Gibb
  * @author Mark Paluch
+ * @author Artem Gorianin
  * @since 3.0
  */
 @Configuration(proxyBeanMethods = false)
@@ -210,6 +212,7 @@ public class VaultAutoConfiguration {
 	/**
 	 * @param clientFactoryWrapper the {@link ClientFactoryWrapper}.
 	 * @param restTemplateFactory the {@link RestTemplateFactory}.
+	 * @param resourceLoader the {@link ResourceLoader}.
 	 * @return the {@link ClientAuthentication} to obtain a
 	 * {@link org.springframework.vault.support.VaultToken}.
 	 * @see SessionManager
@@ -219,7 +222,7 @@ public class VaultAutoConfiguration {
 	@ConditionalOnMissingBean
 	@ConditionalOnAuthentication
 	public ClientAuthentication clientAuthentication(ClientFactoryWrapper clientFactoryWrapper,
-			RestTemplateFactory restTemplateFactory) {
+			RestTemplateFactory restTemplateFactory, ResourceLoader resourceLoader) {
 
 		RestTemplate externalRestOperations = new RestTemplate(clientFactoryWrapper.getClientHttpRequestFactory());
 
@@ -227,7 +230,7 @@ public class VaultAutoConfiguration {
 
 		RestTemplate restTemplate = restTemplateFactory.create();
 		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(this.vaultProperties, restTemplate,
-				externalRestOperations);
+				externalRestOperations, resourceLoader);
 
 		return factory.createClientAuthentication();
 	}

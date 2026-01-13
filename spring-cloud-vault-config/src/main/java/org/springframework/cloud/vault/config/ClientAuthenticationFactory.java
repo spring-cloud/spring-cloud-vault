@@ -17,11 +17,14 @@
 package org.springframework.cloud.vault.config;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicReference;
 
+import jakarta.validation.constraints.NotNull;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
@@ -31,6 +34,8 @@ import org.springframework.boot.system.SystemProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AppRoleProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AwsIamProperties;
 import org.springframework.cloud.vault.config.VaultProperties.AzureMsiProperties;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -78,6 +83,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @author Michal Budzyn
  * @author Quincy Conduff
  * @author Issam El-atif
+ * @author Artem Gorianin
  * @since 1.1
  */
 class ClientAuthenticationFactory {
@@ -91,11 +97,14 @@ class ClientAuthenticationFactory {
 
 	private final RestOperations externalRestOperations;
 
+	private final ResourceLoader resourceLoader;
+
 	ClientAuthenticationFactory(VaultProperties vaultProperties, RestOperations restOperations,
-			RestOperations externalRestOperations) {
+			RestOperations externalRestOperations, ResourceLoader resourceLoader) {
 		this.vaultProperties = vaultProperties;
 		this.restOperations = restOperations;
 		this.externalRestOperations = externalRestOperations;
+		this.resourceLoader = resourceLoader;
 	}
 
 	/**
@@ -392,7 +401,7 @@ class ClientAuthenticationFactory {
 	private ClientAuthentication tokenAuthentication(VaultProperties vaultProperties) {
 
 		if (StringUtils.hasText(vaultProperties.getToken())) {
-			return new TokenAuthentication(vaultProperties.getToken());
+			return new TokenAuthentication(resolveToken(vaultProperties.getToken()));
 		}
 
 		Path vaultTokenPath = Paths.get(SystemProperties.get("user.home"), ".vault-token");
@@ -439,5 +448,30 @@ class ClientAuthenticationFactory {
 		}
 
 	}
+	private String resolveToken(@NotNull String tokenOrLocation) {
+		// Heuristic: treat as resource if it contains ":" (file:, classpath:, http:, etc)
+		if (tokenOrLocation.contains(":")) {
+			try {
+				Resource resource = resourceLoader.getResource(tokenOrLocation);
 
+				if (!resource.exists()) {
+					throw new IllegalStateException("Vault token resource does not exist: " + tokenOrLocation);
+				}
+
+				try (InputStream in = resource.getInputStream()) {
+					String token = new String(in.readAllBytes(), StandardCharsets.UTF_8).trim();
+
+					if (!StringUtils.hasText(token)) {
+						throw new IllegalStateException("Vault token resource is empty: " + tokenOrLocation);
+					}
+
+					return token;
+				}
+			} catch (Exception ex) {
+				throw new IllegalStateException("Failed to load Vault token from " + tokenOrLocation, ex);
+			}
+		}
+		// Treat like a string token
+		return tokenOrLocation;
+	}
 }
