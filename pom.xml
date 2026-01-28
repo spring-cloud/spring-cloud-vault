@@ -103,7 +103,7 @@
 			<dependency>
 				<groupId>tools.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>3.0.3</version>
+				<version>3.0.4</version>
 			</dependency>
 
 			<!-- HTTP Client Libraries -->
@@ -190,7 +190,7 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.27.6</version>
+			<version>3.27.7</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
