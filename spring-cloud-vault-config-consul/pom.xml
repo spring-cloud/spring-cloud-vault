@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-vault-parent</artifactId>
-		<version>5.0.1-SNAPSHOT</version>
+		<version>5.0.1</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -16,7 +16,7 @@
 	<description>Spring Cloud Vault Config Consul support</description>
 
 	<properties>
-		<spring-cloud-consul.version>5.0.1-SNAPSHOT</spring-cloud-consul.version>
+		<spring-cloud-consul.version>5.0.1</spring-cloud-consul.version>
 	</properties>
 
 	<dependencies>
