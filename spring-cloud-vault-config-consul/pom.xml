@@ -16,7 +16,7 @@
 	<description>Spring Cloud Vault Config Consul support</description>
 
 	<properties>
-		<spring-cloud-consul.version>5.0.1-SNAPSHOT</spring-cloud-consul.version>
+		<spring-cloud-consul.version>5.0.2-SNAPSHOT</spring-cloud-consul.version>
 	</properties>
 
 	<dependencies>
