@@ -135,7 +135,13 @@ public class VaultProperties implements EnvironmentAware {
 
 	private UsernamePasswordProperties ldap = new UsernamePasswordProperties("ldap");
 
+	private UsernamePasswordProperties okta = new UsernamePasswordProperties("okta");
+
 	private PcfProperties pcf = new PcfProperties();
+
+	private UsernamePasswordProperties radius = new UsernamePasswordProperties("radius");
+
+	private UsernamePasswordProperties userpass = new UsernamePasswordProperties("userpass");
 
 	private Ssl ssl = new Ssl();
 
@@ -339,12 +345,36 @@ public class VaultProperties implements EnvironmentAware {
 		this.ldap = ldap;
 	}
 
+	public UsernamePasswordProperties getOkta() {
+		return okta;
+	}
+
+	public void setOkta(UsernamePasswordProperties okta) {
+		this.okta = okta;
+	}
+
 	public PcfProperties getPcf() {
 		return this.pcf;
 	}
 
 	public void setPcf(PcfProperties pcf) {
 		this.pcf = pcf;
+	}
+
+	public UsernamePasswordProperties getRadius() {
+		return radius;
+	}
+
+	public void setRadius(UsernamePasswordProperties radius) {
+		this.radius = radius;
+	}
+
+	public UsernamePasswordProperties getUserpass() {
+		return userpass;
+	}
+
+	public void setUserpass(UsernamePasswordProperties userpass) {
+		this.userpass = userpass;
 	}
 
 	public Ssl getSsl() {
@@ -392,8 +422,8 @@ public class VaultProperties implements EnvironmentAware {
 	 */
 	public enum AuthenticationMethod {
 
-		APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, GITHUB, KUBERNETES, LDAP, NONE, PCF,
-		TOKEN;
+		APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, GITHUB, KUBERNETES, LDAP, NONE, OKTA,
+		PCF, RADIUS, USERPASS, TOKEN;
 
 	}
 
