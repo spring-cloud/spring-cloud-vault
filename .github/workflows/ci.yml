@@ -1,0 +1,50 @@
+name: Spring Cloud Vault CI Job
+
+on:
+  push:
+    branches:
+      - main
+      - 4.3.x
+      - 4.2.x
+
+  # Scheduled builds run daily at midnight UTC
+  schedule:
+    - cron: '0 0 * * *'
+
+  # Manual trigger with optional branch override
+  workflow_dispatch:
+    inputs:
+      branches:
+        description: "Which branch should be built (can be a comma-separated list of branches)"
+        required: true
+        default: '4.2.x'
+        type: string
+
+jobs:
+  deploy:
+    uses: spring-cloud/spring-cloud-github-actions/.github/workflows/deploy.yml@main
+    with:
+      branches: ${{ inputs.branches }}
+      custom_build_command: |
+        export MAVEN_OPTS="-Xms256M -Xmx1024M -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 -Dhttps.protocols=TLSv1.2"
+        #!/bin/bash
+        echo "Kill Vault"
+        pkill vault && echo "Vault killed" || echo "No Vault process was running"
+        
+        echo "Install Vault"
+        ./src/test/bash/create_certificates.sh
+        ./src/test/bash/install_vault.sh
+        
+        echo "Run Vault"
+        ./src/test/bash/local_run_vault.sh &
+        echo "Vault Running"
+        
+        trap "{ pkill vault && echo 'Vault killed' || echo 'No Vault process was running'; }" EXIT
+        ./mvnw clean deploy -Pdocs,deploy,spring -B -U
+    secrets:
+      ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+      ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+      COMMERCIAL_ARTIFACTORY_USERNAME: ${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}
+      COMMERCIAL_ARTIFACTORY_PASSWORD: ${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
