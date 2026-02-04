@@ -40,7 +40,12 @@ jobs:
         echo "Vault Running"
         
         trap "{ pkill vault && echo 'Vault killed' || echo 'No Vault process was running'; }" EXIT
-        ./mvnw clean deploy -Pdocs,deploy,spring -B -U
+        if [[ "$SHOULD_DEPLOY" == "true" ]]; then
+          ./mvnw clean deploy -Pdocs,deploy,spring -B -U
+        else
+          echo "Will not deploy artifacts"
+        ./mvnw clean install -Pspring -B -U
+        fi
     secrets:
       ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
       ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
