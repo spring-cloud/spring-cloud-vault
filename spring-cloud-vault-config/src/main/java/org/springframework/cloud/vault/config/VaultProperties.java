@@ -133,7 +133,15 @@ public class VaultProperties implements EnvironmentAware {
 
 	private KubernetesProperties kubernetes = new KubernetesProperties();
 
+	private UsernamePasswordProperties ldap = new UsernamePasswordProperties("ldap");
+
+	private UsernamePasswordProperties okta = new UsernamePasswordProperties("okta");
+
 	private PcfProperties pcf = new PcfProperties();
+
+	private UsernamePasswordProperties radius = new UsernamePasswordProperties("radius");
+
+	private UsernamePasswordProperties userpass = new UsernamePasswordProperties("userpass");
 
 	private Ssl ssl = new Ssl();
 
@@ -329,12 +337,44 @@ public class VaultProperties implements EnvironmentAware {
 		this.kubernetes = kubernetes;
 	}
 
+	public UsernamePasswordProperties getLdap() {
+		return ldap;
+	}
+
+	public void setLdap(UsernamePasswordProperties ldap) {
+		this.ldap = ldap;
+	}
+
+	public UsernamePasswordProperties getOkta() {
+		return okta;
+	}
+
+	public void setOkta(UsernamePasswordProperties okta) {
+		this.okta = okta;
+	}
+
 	public PcfProperties getPcf() {
 		return this.pcf;
 	}
 
 	public void setPcf(PcfProperties pcf) {
 		this.pcf = pcf;
+	}
+
+	public UsernamePasswordProperties getRadius() {
+		return radius;
+	}
+
+	public void setRadius(UsernamePasswordProperties radius) {
+		this.radius = radius;
+	}
+
+	public UsernamePasswordProperties getUserpass() {
+		return userpass;
+	}
+
+	public void setUserpass(UsernamePasswordProperties userpass) {
+		this.userpass = userpass;
 	}
 
 	public Ssl getSsl() {
@@ -382,7 +422,8 @@ public class VaultProperties implements EnvironmentAware {
 	 */
 	public enum AuthenticationMethod {
 
-		APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, GITHUB, KUBERNETES, NONE, PCF, TOKEN;
+		APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, GITHUB, KUBERNETES, LDAP, NONE, OKTA,
+		PCF, RADIUS, USERPASS, TOKEN;
 
 	}
 
@@ -1256,6 +1297,72 @@ public class VaultProperties implements EnvironmentAware {
 
 		public void setEnabledCipherSuites(List<String> enabledCipherSuites) {
 			this.enabledCipherSuites = enabledCipherSuites;
+		}
+
+	}
+
+	/**
+	 * Common properties for userpass, LDAP, Okta, and RADIUS authentications.
+	 */
+	static class UsernamePasswordProperties {
+
+		/**
+		 * Mount path of the username/password authentication backend.
+		 */
+		private String path;
+
+		/**
+		 * Username for the user
+		 */
+		private String username;
+
+		/**
+		 * Password for the user
+		 */
+		private CharSequence password;
+
+		/**
+		 * TOTP for OKTA multifactor authentication
+		 */
+		private CharSequence totp;
+
+		/**
+		 * @param defaultPath the default path
+		 */
+		protected UsernamePasswordProperties(String defaultPath) {
+			this.path = defaultPath;
+		}
+
+		public String getPath() {
+			return path;
+		}
+
+		public void setPath(String path) {
+			this.path = path;
+		}
+
+		public String getUsername() {
+			return username;
+		}
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+
+		public CharSequence getPassword() {
+			return password;
+		}
+
+		public void setPassword(CharSequence password) {
+			this.password = password;
+		}
+
+		public CharSequence getTotp() {
+			return totp;
+		}
+
+		public void setTotp(CharSequence totp) {
+			this.totp = totp;
 		}
 
 	}
