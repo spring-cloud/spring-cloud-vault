@@ -37,7 +37,7 @@ import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.vault.core.VaultOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Integration tests using the postgresql secret backend. In case this test should fail

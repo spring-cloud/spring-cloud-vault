@@ -22,8 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assume;
-import org.junit.ClassRule;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -31,6 +30,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
+import org.springframework.cloud.vault.util.PrepareVault;
 import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.TestRestTemplateFactory;
 import org.springframework.cloud.vault.util.VaultRule;
@@ -58,9 +58,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class VaultNamespaceTests {
 
-	@ClassRule
-	public static VaultRule vaultRule = new VaultRule();
-
 	static final Policy POLICY = Policy.of(Policy.Rule.builder()
 		.path("/*")
 		.capabilities(Policy.BuiltinCapabilities.READ, Policy.BuiltinCapabilities.CREATE,
@@ -78,15 +75,15 @@ public class VaultNamespaceTests {
 
 	@BeforeEach
 	public void before() {
-		Assume.assumeTrue("Namespaces require enterprise version",
-				this.vaultRule.prepare().getVersion().isEnterprise());
+		PrepareVault prepareVault = VaultRule.prepare();
+		Assumptions.assumeTrue(prepareVault.getVersion().isEnterprise(), "Namespaces require enterprise version");
 
 		List<String> namespaces = new ArrayList<>(Arrays.asList("dev/", "marketing/"));
-		List<String> list = this.vaultRule.prepare().getVaultOperations().list("sys/namespaces");
+		List<String> list = prepareVault.getVaultOperations().list("sys/namespaces");
 		namespaces.removeAll(list);
 
 		for (String namespace : namespaces) {
-			this.vaultRule.prepare().getVaultOperations().write("sys/namespaces/" + namespace.replaceAll("/", ""));
+			prepareVault.getVaultOperations().write("sys/namespaces/" + namespace.replaceAll("/", ""));
 		}
 
 		this.maketingRestTemplate = RestTemplateBuilder.builder()

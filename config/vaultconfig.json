@@ -1,0 +1,15 @@
+{
+    "storage": {
+        "inmem": {}
+    },
+    "listener": {
+        "tcp": {
+            "address": "0.0.0.0:8200",
+            "tls_cert_file": "/tmp/localhost.cert.pem",
+            "tls_key_file": "/tmp/localhost.decrypted.key.pem"
+        }
+    },
+    "plugin_directory": "plugins",
+    "api_addr": "https://0.0.0.0:8200",
+    "disable_mlock": true
+}

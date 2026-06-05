@@ -37,7 +37,7 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Integration test using config infrastructure with token authentication.

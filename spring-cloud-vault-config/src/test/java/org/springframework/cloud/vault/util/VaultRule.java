@@ -16,13 +16,29 @@
 
 package org.springframework.cloud.vault.util;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.HashMap;
 
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.utility.MountableFile;
+import org.testcontainers.vault.VaultContainer;
 
+import org.springframework.cloud.vault.config.VaultProperties;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.SessionManager;
@@ -31,13 +47,18 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
 
-public class VaultRule implements BeforeEachCallback {
+public class VaultRule implements BeforeEachCallback,
+		/* ParameterResolver, */ ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+	static final Logger logger = LoggerFactory.getLogger(VaultRule.class);
 
 	public static final Version VERSIONING_INTRODUCED_WITH = Version.parse("0.10.0");
 
+	public static final VaultContainer vaultContainer = createContainer();
+
 	private final VaultEndpoint vaultEndpoint;
 
-	private final PrepareVault prepareVault;
+	private static PrepareVault prepareVault = null;
 
 	private VaultToken token;
 
@@ -48,7 +69,7 @@ public class VaultRule implements BeforeEachCallback {
 	 * @see VaultEndpoint
 	 */
 	public VaultRule() {
-		this(Settings.createSslConfiguration(), TestRestTemplateFactory.TEST_VAULT_ENDPOINT);
+		this(Settings.createSslConfiguration(), null);
 	}
 
 	/**
@@ -60,15 +81,90 @@ public class VaultRule implements BeforeEachCallback {
 	public VaultRule(SslConfiguration sslConfiguration, VaultEndpoint vaultEndpoint) {
 
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
-		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
 
 		ClientHttpRequestFactory requestFactory = TestRestTemplateFactory.create(sslConfiguration).getRequestFactory();
 
-		VaultTemplate vaultTemplate = new VaultTemplate(vaultEndpoint, requestFactory, new PreparingSessionManager());
+		startVault();
+		if (vaultEndpoint == null) {
+			this.vaultEndpoint = VaultEndpoint.create(vaultContainer.getHost(), vaultContainer.getMappedPort(8200));
+			// this.vaultEndpoint.setScheme("http"); // ignore ssl for now
+		}
+		else {
+			this.vaultEndpoint = vaultEndpoint;
+		}
+
+		VaultTemplate vaultTemplate = new VaultTemplate(this.vaultEndpoint, requestFactory,
+				new PreparingSessionManager());
 
 		this.token = Settings.token();
-		this.prepareVault = new PrepareVault(vaultTemplate);
-		this.vaultEndpoint = vaultEndpoint;
+		prepareVault = new PrepareVault(vaultTemplate);
+	}
+
+	public static PrepareVault prepare() {
+		return prepareVault;
+	}
+
+	public static void startVault() {
+		if (vaultContainer != null && !vaultContainer.isRunning()) {
+			vaultContainer.start();
+		}
+	}
+
+	@SuppressWarnings({ "rawtypes" })
+	public static VaultContainer createContainer() {
+		return createContainer("1.11.0");
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static VaultContainer createContainer(String version) {
+		Path config = Settings.findConfigDir().toPath();
+		String vaultConfig = null;
+		try {
+			vaultConfig = new FileSystemResource(config.resolve("vaultconfig.json"))
+				.getContentAsString(StandardCharsets.UTF_8);
+			vaultConfig = vaultConfig.replaceAll("\\n", "");
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		String dockerImageName = "hashicorp/vault:" + version;
+		VaultContainer container = (VaultContainer) new VaultContainer(dockerImageName)
+			// .withEnv("VAULT_LOG_LEVEL", "debug")
+			.withEnv("VAULT_LOCAL_CONFIG", vaultConfig)
+			.withCopyFileToContainer(MountableFile.forHostPath(config.resolve("ca/certs/localhost.cert.pem"), 0777),
+					"/tmp/localhost.cert.pem")
+			.withCopyFileToContainer(
+					MountableFile.forHostPath(config.resolve("ca/private/localhost.decrypted.key.pem"), 0777),
+					"/tmp/localhost.decrypted.key.pem")
+			.withCommand("server")
+			.withLogConsumer(new Slf4jLogConsumer(logger).withSeparateOutputStreams());
+		// because of the tls setup, resetting wait to default for now
+		container.setWaitStrategy(Wait.defaultWaitStrategy());
+		return container;
+	}
+
+	public static void initializeSystemProperties() {
+		startVault();
+		Integer mappedPort = vaultContainer.getMappedPort(8200);
+
+		System.setProperty(VaultProperties.PREFIX + ".port", String.valueOf(mappedPort));
+		System.setProperty(VaultProperties.PREFIX + ".host", vaultContainer.getHost());
+	}
+
+	@Override
+	public void initialize(ConfigurableApplicationContext context) {
+		startVault();
+
+		MutablePropertySources sources = context.getEnvironment().getPropertySources();
+
+		if (!sources.contains("vaultTestcontainer")) {
+			Integer mappedPort = vaultContainer.getMappedPort(8200);
+			HashMap<String, Object> map = new HashMap<>();
+			map.put(VaultProperties.PREFIX + ".port", String.valueOf(mappedPort));
+			map.put(VaultProperties.PREFIX + ".host", vaultContainer.getHost());
+
+			sources.addFirst(new MapPropertySource("vaultTestcontainer", map));
+		}
 	}
 
 	@Override
@@ -103,9 +199,15 @@ public class VaultRule implements BeforeEachCallback {
 		}
 	}
 
-	public PrepareVault prepare() {
-		return this.prepareVault;
-	}
+	/*
+	 * @Override public boolean supportsParameter(ParameterContext parameterContext,
+	 * ExtensionContext extensionContext) throws ParameterResolutionException { return
+	 * parameterContext.getParameter().getType().equals(PrepareVault.class); }
+	 *
+	 * @Override public Object resolveParameter(ParameterContext parameterContext,
+	 * ExtensionContext extensionContext) throws ParameterResolutionException { return
+	 * this.prepareVault; }
+	 */
 
 	private class PreparingSessionManager implements SessionManager {
 

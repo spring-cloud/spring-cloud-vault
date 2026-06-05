@@ -48,9 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @SpringBootTest(classes = VaultConfigTests.TestApplication.class,
-		properties = { "spring.cloud.vault.host=foo", "spring.cloud.vault.port=80",
-				"spring.cloud.vault.uri=https://localhost:8200", "spring.cloud.vault.application-name=testVaultApp",
-				"spring.cloud.bootstrap.enabled=true" })
+		properties = { "spring.cloud.vault.application-name=testVaultApp", "spring.cloud.bootstrap.enabled=true" })
 public class VaultConfigTests {
 
 	@Value("${vault.value}")
@@ -67,6 +65,7 @@ public class VaultConfigTests {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
+		VaultRule.initializeSystemProperties();
 
 		Map<String, Object> object = new HashMap<>();
 		object.put("vault.value", "foo");

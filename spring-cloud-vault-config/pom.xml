@@ -181,8 +181,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>vault</artifactId>
+			<version>1.21.4</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

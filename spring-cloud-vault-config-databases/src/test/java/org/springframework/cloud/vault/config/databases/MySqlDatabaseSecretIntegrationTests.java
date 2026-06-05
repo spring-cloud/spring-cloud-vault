@@ -31,7 +31,7 @@ import org.springframework.cloud.vault.util.Settings;
 import org.springframework.cloud.vault.util.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.cloud.vault.config.databases.VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory.forDatabase;
 
 /**

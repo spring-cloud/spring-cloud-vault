@@ -35,7 +35,7 @@ public class Settings {
 	 */
 	public static VaultProperties createVaultProperties() {
 
-		File workDir = findWorkDir();
+		File workDir = findConfigDir();
 
 		VaultProperties vaultProperties = new VaultProperties();
 		vaultProperties.getSsl().setTrustStorePassword("changeit");
@@ -50,36 +50,36 @@ public class Settings {
 	 */
 	public static SslConfiguration createSslConfiguration() {
 
-		File workDir = findWorkDir();
+		File workDir = findConfigDir();
 
 		return SslConfiguration.forTrustStore(new FileSystemResource(new File(workDir, "keystore.jks")),
 				"changeit".toCharArray());
 	}
 
 	/**
-	 * Find the {@code work} directory, starting at the {@code user.dir} directory. Search
-	 * is performed by walking the parent directories.
-	 * @return the {@link File} pointing to the {@code work} directory
-	 * @throws IllegalStateException If the {@code work} directory cannot be found.
+	 * Find the {@code config} directory, starting at the {@code user.dir} directory.
+	 * Search is performed by walking the parent directories.
+	 * @return the {@link File} pointing to the {@code config} directory
+	 * @throws IllegalStateException If the {@code config} directory cannot be found.
 	 */
-	public static File findWorkDir() {
-		return findWorkDir(new File(System.getProperty("user.dir")));
+	public static File findConfigDir() {
+		return findConfigDir(new File(System.getProperty("user.dir")));
 	}
 
 	/**
-	 * Find the {@code work} directory, starting at the given {@code directory}. Search is
-	 * performed by walking the parent directories.
-	 * @return the {@link File} pointing to the {@code work} directory
-	 * @throws IllegalStateException If the {@code work} directory cannot be found.
+	 * Find the {@code config} directory, starting at the given {@code directory}. Search
+	 * is performed by walking the parent directories.
+	 * @return the {@link File} pointing to the {@code config} directory
+	 * @throws IllegalStateException If the {@code config} directory cannot be found.
 	 */
-	public static File findWorkDir(File directory) {
+	public static File findConfigDir(File directory) {
 
 		File searchLevel = directory;
 		while (searchLevel.getParentFile() != null && searchLevel.getParentFile() != searchLevel) {
 
-			File work = new File(searchLevel, "work");
-			if (work.isDirectory() && work.exists()) {
-				return work;
+			File file = new File(searchLevel, "config");
+			if (file.isDirectory() && file.exists()) {
+				return file;
 			}
 
 			searchLevel = searchLevel.getParentFile();

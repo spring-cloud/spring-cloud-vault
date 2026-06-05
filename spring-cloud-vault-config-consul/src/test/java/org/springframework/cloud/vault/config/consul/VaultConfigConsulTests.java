@@ -45,8 +45,8 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Integration tests using the consul secret backend. In case this test should fail
@@ -135,8 +135,8 @@ public class VaultConfigConsulTests {
 		}
 		catch (HttpStatusCodeException e) {
 
-			assumeFalse("Skipping because Consul is not configured as we expect it to be",
-					e.getStatusCode().is4xxClientError());
+			assumeFalse(e.getStatusCode().is4xxClientError(),
+					"Skipping because Consul is not configured as we expect it to be");
 
 			throw e;
 		}

@@ -36,7 +36,7 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultMount;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.cloud.vault.util.Settings.findWorkDir;
+import static org.springframework.cloud.vault.util.Settings.findConfigDir;
 
 /**
  * Integration test using config infrastructure with TLS certificate authentication. In
@@ -82,7 +82,7 @@ public class VaultConfigTlsCertAuthenticationMountPathTests {
 		vaultOperations.write("secret/" + VaultConfigTlsCertAuthenticationMountPathTests.class.getSimpleName(),
 				Collections.singletonMap("vault.value", "foo"));
 
-		File workDir = findWorkDir();
+		File workDir = findConfigDir();
 
 		String certificate = Files.contentOf(new File(workDir, "ca/certs/client.cert.pem"), StandardCharsets.US_ASCII);
 

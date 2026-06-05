@@ -30,7 +30,7 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Utility to setup Consul.
@@ -72,8 +72,8 @@ class SetupConsul {
 		}
 		catch (HttpStatusCodeException e) {
 
-			assumeFalse("Skipping because Consul is not configured as we expect it to be",
-					e.getStatusCode().is4xxClientError());
+			assumeFalse(e.getStatusCode().is4xxClientError(),
+					"Skipping because Consul is not configured as we expect it to be");
 
 			throw e;
 		}

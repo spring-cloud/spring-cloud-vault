@@ -39,8 +39,8 @@ import org.springframework.vault.support.Policy.BuiltinCapabilities;
 import org.springframework.vault.support.Policy.Rule;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
-import static org.springframework.cloud.vault.util.Settings.findWorkDir;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.springframework.cloud.vault.util.Settings.findConfigDir;
 
 /**
  * Integration test using config infrastructure with Kubernetes authentication.
@@ -81,7 +81,7 @@ public class VaultConfigKubernetesTests {
 		vaultOperations.write("secret/" + VaultConfigKubernetesTests.class.getSimpleName(),
 				Collections.singletonMap("vault.value", "foo"));
 
-		File workDir = findWorkDir();
+		File workDir = findConfigDir();
 		String certificate = Files.contentOf(new File(workDir, "minikube/ca.crt"), StandardCharsets.US_ASCII);
 
 		String host = String.format("https://%s:8443", minikubeIp);
