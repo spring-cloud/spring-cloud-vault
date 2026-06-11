@@ -127,14 +127,15 @@ public class VaultRule implements BeforeEachCallback,
 		catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+		Path work = Settings.findWorkDir().toPath();
 		String dockerImageName = "hashicorp/vault:" + version;
 		VaultContainer container = (VaultContainer) new VaultContainer(dockerImageName)
 			// .withEnv("VAULT_LOG_LEVEL", "debug")
 			.withEnv("VAULT_LOCAL_CONFIG", vaultConfig)
-			.withCopyFileToContainer(MountableFile.forHostPath(config.resolve("ca/certs/localhost.cert.pem"), 0777),
+			.withCopyFileToContainer(MountableFile.forHostPath(work.resolve("ca/certs/localhost.cert.pem"), 0777),
 					"/tmp/localhost.cert.pem")
 			.withCopyFileToContainer(
-					MountableFile.forHostPath(config.resolve("ca/private/localhost.decrypted.key.pem"), 0777),
+					MountableFile.forHostPath(work.resolve("ca/private/localhost.decrypted.key.pem"), 0777),
 					"/tmp/localhost.decrypted.key.pem")
 			.withCommand("server")
 			.withLogConsumer(new Slf4jLogConsumer(logger).withSeparateOutputStreams());

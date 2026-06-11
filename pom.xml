@@ -209,6 +209,25 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.6.3</version>
+				<executions>
+					<execution>
+						<id>generate-certificates</id>
+						<phase>generate-sources</phase>
+						<configuration>
+							<executable>./src/test/bash/create_certificates.sh</executable>
+						</configuration>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<!-- Prevents child modules from inheriting this execution -->
+						<inherited>false</inherited>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 
 		<pluginManagement>
