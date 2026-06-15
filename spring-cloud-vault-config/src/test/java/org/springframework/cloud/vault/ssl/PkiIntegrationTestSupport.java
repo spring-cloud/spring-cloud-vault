@@ -52,11 +52,11 @@ public abstract class PkiIntegrationTestSupport extends IntegrationTestSupport {
 	@BeforeEach
 	public void setUp() {
 
-		if (!prepare().hasSecretBackend("pki")) {
-			prepare().mountSecret("pki");
+		if (!prepare().hasSecretsEngine("pki")) {
+			prepare().mountSecretsEngine("pki");
 		}
 
-		template = prepare().getVaultOperations();
+		this.template = prepare().getVaultOperations();
 
 		setup();
 	}
