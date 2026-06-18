@@ -29,7 +29,7 @@ public abstract class IntegrationTestSupport {
 	public final VaultRule vaultRule = new VaultRule();
 
 	public final PrepareVault prepare() {
-		return this.vaultRule.prepare();
+		return VaultRule.prepare();
 	}
 
 }

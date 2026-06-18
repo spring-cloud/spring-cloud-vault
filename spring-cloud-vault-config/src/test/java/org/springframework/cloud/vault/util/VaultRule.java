@@ -86,7 +86,7 @@ public class VaultRule implements BeforeEachCallback,
 
 		startVault();
 		if (vaultEndpoint == null) {
-			this.vaultEndpoint = VaultEndpoint.create(vaultContainer.getHost(), vaultContainer.getMappedPort(8200));
+			this.vaultEndpoint = vaultEndpoint();
 			// this.vaultEndpoint.setScheme("http"); // ignore ssl for now
 		}
 		else {
@@ -98,6 +98,10 @@ public class VaultRule implements BeforeEachCallback,
 
 		this.token = Settings.token();
 		prepareVault = new PrepareVault(vaultTemplate);
+	}
+
+	public static VaultEndpoint vaultEndpoint() {
+		return VaultEndpoint.create(vaultContainer.getHost(), vaultContainer.getMappedPort(8200));
 	}
 
 	public static PrepareVault prepare() {
@@ -185,19 +189,20 @@ public class VaultRule implements BeforeEachCallback,
 					this.vaultEndpoint.getPort(), getClass().getSimpleName()));
 		}
 
-		if (!this.prepareVault.isAvailable()) {
+		if (!prepareVault.isAvailable()) {
 
-			this.token = this.prepareVault.initializeVault();
-			this.prepareVault.awaitAvailable();
-			this.prepareVault.createToken(Settings.token().getToken(), "root");
+			this.token = prepareVault.initializeVault();
+			prepareVault.awaitAvailable();
+			prepareVault.createToken(Settings.token().getToken(), "root");
 
-			if (this.prepareVault.getVersion().isGreaterThanOrEqualTo(VERSIONING_INTRODUCED_WITH)) {
-				this.prepareVault.ensureUnversionedSecretsEngine();
-				this.prepareVault.mountVersionedKvSecretsEngine();
+			if (prepareVault.getVersion().isGreaterThanOrEqualTo(VERSIONING_INTRODUCED_WITH)) {
+				prepareVault.ensureUnversionedSecretsEngine();
+				prepareVault.mountVersionedKvSecretsEngine();
 			}
 
 			this.token = Settings.token();
 		}
+		initializeSystemProperties();
 	}
 
 	/*
@@ -207,7 +212,7 @@ public class VaultRule implements BeforeEachCallback,
 	 *
 	 * @Override public Object resolveParameter(ParameterContext parameterContext,
 	 * ExtensionContext extensionContext) throws ParameterResolutionException { return
-	 * this.prepareVault; }
+	 * prepareVault; }
 	 */
 
 	private class PreparingSessionManager implements SessionManager {

@@ -95,9 +95,10 @@ public class Settings {
 	public static File findConfigDir(File directory) {
 		return findDir(directory, "config");
 	}
+
 	/**
-	 * Find the {@code toFind} directory, starting at the given {@code dirToSearch}. Search is
-	 * performed by walking the parent directories.
+	 * Find the {@code toFind} directory, starting at the given {@code dirToSearch}.
+	 * Search is performed by walking the parent directories.
 	 * @return the {@link File} pointing to the {@code toFind} directory
 	 * @throws IllegalStateException If the {@code toFind} directory cannot be found.
 	 */

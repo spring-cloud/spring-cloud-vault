@@ -44,8 +44,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@SpringBootTest(classes = VaultConfigLoaderSingleLocationTests.TestApplication.class, properties = {
-		"spring.cloud.vault.uri=https://localhost:8200", "spring.config.import=vault:secret/config-location" })
+@SpringBootTest(classes = VaultConfigLoaderSingleLocationTests.TestApplication.class,
+		properties = { "spring.config.import=vault:secret/config-location" })
 public class VaultConfigLoaderSingleLocationTests {
 
 	@Autowired
@@ -59,12 +59,13 @@ public class VaultConfigLoaderSingleLocationTests {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
+		VaultRule.initializeSystemProperties();
 
 		Map<String, Object> object = new HashMap<>();
 		object.put("vault-key", "config-data works");
 		object.put("nested", Collections.singletonMap("key", "value"));
 
-		vaultRule.prepare().getVaultOperations().write("secret/config-location", object);
+		VaultRule.prepare().getVaultOperations().write("secret/config-location", object);
 	}
 
 	@Test

@@ -71,7 +71,7 @@ public class VaultConfigTests {
 		object.put("vault.value", "foo");
 		object.put("nested", Collections.singletonMap("key", "value"));
 
-		vaultRule.prepare().getVaultOperations().write("secret/testVaultApp", object);
+		VaultRule.prepare().getVaultOperations().write("secret/testVaultApp", object);
 	}
 
 	@Test
