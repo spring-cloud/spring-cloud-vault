@@ -39,7 +39,7 @@ import org.springframework.vault.support.Policy.BuiltinCapabilities;
 import org.springframework.vault.support.Policy.Rule;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.cloud.vault.util.Settings.findWorkDir;
 
 /**

@@ -37,7 +37,7 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Integration test using config infrastructure with token authentication.
@@ -51,10 +51,8 @@ import static org.junit.Assume.assumeTrue;
  */
 
 @SpringBootTest(classes = VaultVersionedKvBackendConfigTests.TestApplication.class,
-		properties = { "spring.cloud.vault.host=foo", "spring.cloud.vault.port=80",
-				"spring.cloud.vault.uri=https://localhost:8200", "spring.cloud.vault.kv.enabled=true",
-				"spring.cloud.vault.kv.backend=versioned", "spring.cloud.vault.application-name=testVaultApp",
-				"spring.cloud.bootstrap.enabled=true" })
+		properties = { "spring.cloud.vault.kv.enabled=true", "spring.cloud.vault.kv.backend=versioned",
+				"spring.cloud.vault.application-name=testVaultApp", "spring.cloud.bootstrap.enabled=true" })
 public class VaultVersionedKvBackendConfigTests {
 
 	@Value("${vault.value}")

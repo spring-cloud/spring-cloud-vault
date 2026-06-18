@@ -38,7 +38,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.vault.core.VaultOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Tests for {@link VaultConfigConsulConfigDataTests}.

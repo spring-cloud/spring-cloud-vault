@@ -34,7 +34,7 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Integration test using config infrastructure with Cubbyhole authentication.

@@ -73,11 +73,41 @@ public class Settings {
 	 * @throws IllegalStateException If the {@code work} directory cannot be found.
 	 */
 	public static File findWorkDir(File directory) {
+		return findDir(directory, "work");
+	}
 
-		File searchLevel = directory;
+	/**
+	 * Find the {@code work} directory, starting at the {@code user.dir} directory. Search
+	 * is performed by walking the parent directories.
+	 * @return the {@link File} pointing to the {@code work} directory
+	 * @throws IllegalStateException If the {@code work} directory cannot be found.
+	 */
+	public static File findConfigDir() {
+		return findConfigDir(new File(System.getProperty("user.dir")));
+	}
+
+	/**
+	 * Find the {@code work} directory, starting at the given {@code directory}. Search is
+	 * performed by walking the parent directories.
+	 * @return the {@link File} pointing to the {@code work} directory
+	 * @throws IllegalStateException If the {@code work} directory cannot be found.
+	 */
+	public static File findConfigDir(File directory) {
+		return findDir(directory, "config");
+	}
+
+	/**
+	 * Find the {@code toFind} directory, starting at the given {@code dirToSearch}.
+	 * Search is performed by walking the parent directories.
+	 * @return the {@link File} pointing to the {@code toFind} directory
+	 * @throws IllegalStateException If the {@code toFind} directory cannot be found.
+	 */
+	public static File findDir(File dirToSearch, String toFind) {
+
+		File searchLevel = dirToSearch;
 		while (searchLevel.getParentFile() != null && searchLevel.getParentFile() != searchLevel) {
 
-			File work = new File(searchLevel, "work");
+			File work = new File(searchLevel, toFind);
 			if (work.isDirectory() && work.exists()) {
 				return work;
 			}
@@ -86,7 +116,7 @@ public class Settings {
 		}
 
 		throw new IllegalStateException(String.format("Cannot find work directory in %s or any parent directories",
-				directory.getAbsoluteFile()));
+				dirToSearch.getAbsoluteFile()));
 	}
 
 	/**

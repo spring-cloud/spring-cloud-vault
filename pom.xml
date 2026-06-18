@@ -181,6 +181,13 @@
 			<version>3.18.1</version>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>vault</artifactId>
+			<version>1.21.4</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -208,6 +215,25 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.6.3</version>
+				<executions>
+					<execution>
+						<id>generate-certificates</id>
+						<phase>generate-sources</phase>
+						<configuration>
+							<executable>./src/test/bash/create_certificates.sh</executable>
+						</configuration>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<!-- Prevents child modules from inheriting this execution -->
+						<inherited>false</inherited>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 
@@ -302,14 +328,6 @@
 					</releases>
 				</repository>
 				<repository>
-					<id>spring-milestones</id>
-					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/libs-milestone-local</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-				<repository>
 					<id>spring-releases</id>
 					<name>Spring Releases</name>
 					<url>https://repo.spring.io/release</url>
@@ -331,17 +349,9 @@
 					</releases>
 				</pluginRepository>
 				<pluginRepository>
-					<id>spring-milestones</id>
-					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/libs-milestone-local</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</pluginRepository>
-				<pluginRepository>
 					<id>spring-releases</id>
 					<name>Spring Releases</name>
-					<url>https://repo.spring.io/libs-release-local</url>
+					<url>https://repo.spring.io/release</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>

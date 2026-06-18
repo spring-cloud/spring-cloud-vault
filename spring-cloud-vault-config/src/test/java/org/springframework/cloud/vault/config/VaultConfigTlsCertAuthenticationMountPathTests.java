@@ -61,6 +61,7 @@ public class VaultConfigTlsCertAuthenticationMountPathTests {
 
 		VaultRule vaultRule = new VaultRule();
 		vaultRule.before();
+		VaultRule.initializeSystemProperties();
 
 		VaultProperties vaultProperties = Settings.createVaultProperties();
 
@@ -73,7 +74,7 @@ public class VaultConfigTlsCertAuthenticationMountPathTests {
 				.authMount(vaultProperties.getSsl().getCertAuthPath(), VaultMount.builder().type("cert").build());
 		}
 
-		VaultOperations vaultOperations = vaultRule.prepare().getVaultOperations();
+		VaultOperations vaultOperations = VaultRule.prepare().getVaultOperations();
 
 		String rules = "path \"*\" {\n    capabilities = [\"read\"]\n}";
 
