@@ -22,6 +22,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.springframework.vault.authentication.UsernamePasswordAuthentication;
+import org.springframework.vault.authentication.UsernamePasswordAuthenticationOptions;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
@@ -114,7 +116,11 @@ class ClientAuthenticationFactory {
 			case GCP_IAM -> gcpIamAuthentication(this.vaultProperties);
 			case GITHUB -> gitHubAuthentication(this.vaultProperties);
 			case KUBERNETES -> kubernetesAuthentication(this.vaultProperties);
+			case LDAP -> ldapAuthentication(this.vaultProperties);
+			case OKTA -> oktaAuthentication(this.vaultProperties);
 			case PCF -> pcfAuthentication(this.vaultProperties);
+			case RADIUS -> radiusAuthentication(this.vaultProperties);
+			case USERPASS -> userpassAuthentication(this.vaultProperties);
 			case TOKEN -> tokenAuthentication(this.vaultProperties);
 			default -> throw new UnsupportedOperationException(
 					String.format("Client authentication %s not supported", this.vaultProperties.getAuthentication()));
@@ -354,6 +360,39 @@ class ClientAuthenticationFactory {
 		return new KubernetesAuthentication(options, this.restOperations);
 	}
 
+	private ClientAuthentication ldapAuthentication(VaultProperties vaultProperties) {
+
+		VaultProperties.UsernamePasswordProperties ldap = vaultProperties.getLdap();
+
+		Assert.hasText(ldap.getUsername(), "Username (spring.cloud.vault.ldap.username) must not be empty");
+		Assert.hasText(ldap.getPassword().toString(), "Password (spring.cloud.vault.ldap.password) must not be empty");
+
+		UsernamePasswordAuthenticationOptions options = UsernamePasswordAuthenticationOptions.builder()
+			.path(ldap.getPath())
+			.username(ldap.getUsername())
+			.password(ldap.getPassword())
+			.build();
+
+		return new UsernamePasswordAuthentication(options, this.restOperations);
+	}
+
+	private ClientAuthentication oktaAuthentication(VaultProperties vaultProperties) {
+
+		VaultProperties.UsernamePasswordProperties okta = vaultProperties.getOkta();
+
+		Assert.hasText(okta.getUsername(), "Username (spring.cloud.vault.okta.username) must not be empty");
+		Assert.hasText(okta.getPassword().toString(), "Password (spring.cloud.vault.okta.password) must not be empty");
+
+		UsernamePasswordAuthenticationOptions options = UsernamePasswordAuthenticationOptions.builder()
+			.path(okta.getPath())
+			.username(okta.getUsername())
+			.password(okta.getPassword())
+			.totp(okta.getTotp())
+			.build();
+
+		return new UsernamePasswordAuthentication(options, this.restOperations);
+	}
+
 	private ClientAuthentication pcfAuthentication(VaultProperties vaultProperties) {
 
 		VaultProperties.PcfProperties pcfProperties = vaultProperties.getPcf();
@@ -375,6 +414,40 @@ class ClientAuthenticationFactory {
 		}
 
 		return new PcfAuthentication(builder.build(), this.restOperations);
+	}
+
+	private ClientAuthentication radiusAuthentication(VaultProperties vaultProperties) {
+
+		VaultProperties.UsernamePasswordProperties radius = vaultProperties.getRadius();
+
+		Assert.hasText(radius.getUsername(), "Username (spring.cloud.vault.radius.username) must not be empty");
+		Assert.hasText(radius.getPassword().toString(),
+				"Password (spring.cloud.vault.radius.password) must not be empty");
+
+		UsernamePasswordAuthenticationOptions options = UsernamePasswordAuthenticationOptions.builder()
+			.path(radius.getPath())
+			.username(radius.getUsername())
+			.password(radius.getPassword())
+			.build();
+
+		return new UsernamePasswordAuthentication(options, this.restOperations);
+	}
+
+	private ClientAuthentication userpassAuthentication(VaultProperties vaultProperties) {
+
+		VaultProperties.UsernamePasswordProperties userpass = vaultProperties.getUserpass();
+
+		Assert.hasText(userpass.getUsername(), "Username (spring.cloud.vault.userpass.username) must not be empty");
+		Assert.hasText(userpass.getPassword().toString(),
+				"Password (spring.cloud.vault.userpass.password) must not be empty");
+
+		UsernamePasswordAuthenticationOptions options = UsernamePasswordAuthenticationOptions.builder()
+			.path(userpass.getPath())
+			.username(userpass.getUsername())
+			.password(userpass.getPassword())
+			.build();
+
+		return new UsernamePasswordAuthentication(options, this.restOperations);
 	}
 
 	private ClientAuthentication certificateAuthentication(VaultProperties vaultProperties) {
