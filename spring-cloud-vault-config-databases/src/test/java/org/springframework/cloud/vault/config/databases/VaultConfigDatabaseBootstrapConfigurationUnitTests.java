@@ -16,9 +16,13 @@
 
 package org.springframework.cloud.vault.config.databases;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.vault.config.SecretBackendMetadata;
+import org.springframework.core.env.CompositePropertySource;
+import org.springframework.core.env.MapPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,6 +46,43 @@ public class VaultConfigDatabaseBootstrapConfigurationUnitTests {
 		SecretBackendMetadata metadata = factory.createMetadata(properties);
 
 		assertThat(metadata.getPath()).isEqualTo("database/static-creds/my-role");
+	}
+
+	@Test
+	public void shouldContributePropertiesForSameRoleWithDifferentTargetProperties() {
+
+		VaultConfigDatabaseBootstrapConfiguration.DatabaseSecretBackendMetadataFactory factory = new VaultConfigDatabaseBootstrapConfiguration()
+			.databaseSecretBackendMetadataFactory();
+
+		VaultDatabaseProperties primary = databaseProperties("db1-dbuser", "spring.datasource.username",
+				"spring.datasource.password");
+		VaultDatabaseProperties secondary = databaseProperties("db1-dbuser", "spring.secondary-datasource.username",
+				"spring.secondary-datasource.password");
+
+		SecretBackendMetadata primaryMetadata = factory.createMetadata(primary);
+		SecretBackendMetadata secondaryMetadata = factory.createMetadata(secondary);
+		Map<String, Object> secret = Map.of("username", "vault-user", "password", "vault-password");
+
+		CompositePropertySource propertySource = new CompositePropertySource("vault");
+		propertySource.addPropertySource(new MapPropertySource(primaryMetadata.getName(),
+				primaryMetadata.getPropertyTransformer().transformProperties(secret)));
+		propertySource.addPropertySource(new MapPropertySource(secondaryMetadata.getName(),
+				secondaryMetadata.getPropertyTransformer().transformProperties(secret)));
+
+		assertThat(propertySource.getProperty("spring.datasource.username")).isEqualTo("vault-user");
+		assertThat(propertySource.getProperty("spring.datasource.password")).isEqualTo("vault-password");
+		assertThat(propertySource.getProperty("spring.secondary-datasource.username")).isEqualTo("vault-user");
+		assertThat(propertySource.getProperty("spring.secondary-datasource.password")).isEqualTo("vault-password");
+	}
+
+	private static VaultDatabaseProperties databaseProperties(String role, String usernameProperty,
+			String passwordProperty) {
+
+		VaultDatabaseProperties properties = new VaultDatabaseProperties();
+		properties.setRole(role);
+		properties.setUsernameProperty(usernameProperty);
+		properties.setPasswordProperty(passwordProperty);
+		return properties;
 	}
 
 }
