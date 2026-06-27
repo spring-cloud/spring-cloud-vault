@@ -85,7 +85,8 @@ public class VaultConfigDatabaseBootstrapConfiguration {
 
 				@Override
 				public String getName() {
-					return String.format("%s with Role %s", properties.getBackend(), properties.getRole());
+					return String.format("%s with Role %s using %s/%s", properties.getBackend(), properties.getRole(),
+							properties.getUsernameProperty(), properties.getPasswordProperty());
 				}
 
 				@Override
