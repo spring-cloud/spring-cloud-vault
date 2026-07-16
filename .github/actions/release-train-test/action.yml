@@ -18,7 +18,7 @@ runs:
 
     - name: Test Release
       shell: bash
-      run: ./mvnw --no-transfer-progress --batch-mode --settings release-train-settings.xml clean verify --activate-profiles releaseTrain -Xms256M -Xmx1024M -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 -Dhttps.protocols=TLSv1.2
+      run: ./mvnw --batch-mode --settings release-train-settings.xml clean verify --activate-profiles releaseTrain -Xms256M -Xmx1024M -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 -Dhttps.protocols=TLSv1.2
 
     - name: Stop Vault
       if: always()
