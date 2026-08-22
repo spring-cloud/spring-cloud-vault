@@ -17,6 +17,7 @@
 
 	<properties>
 		<spring-cloud-consul.version>5.0.4-SNAPSHOT</spring-cloud-consul.version>
+		<consul-api.version>1.4.5</consul-api.version>
 	</properties>
 
 	<dependencies>
@@ -57,6 +58,19 @@
 			<artifactId>spring-cloud-vault-config</artifactId>
 			<type>test-jar</type>
 		</dependency>
+
+		<dependency>
+			<groupId>com.ecwid.consul</groupId>
+			<artifactId>consul-api</artifactId>
+			<version>${consul-api.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
