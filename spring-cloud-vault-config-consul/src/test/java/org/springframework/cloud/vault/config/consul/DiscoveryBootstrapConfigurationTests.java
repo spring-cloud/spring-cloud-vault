@@ -19,24 +19,25 @@ package org.springframework.cloud.vault.config.consul;
 import java.net.InetSocketAddress;
 import java.util.List;
 
-import com.ecwid.consul.v1.ConsulClient;
-import com.ecwid.consul.v1.QueryParams;
-import com.ecwid.consul.v1.Response;
-import com.ecwid.consul.v1.agent.model.NewService;
-import com.ecwid.consul.v1.catalog.model.CatalogService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.consul.ConsulAutoConfiguration;
+import org.springframework.cloud.consul.ConsulClient;
+import org.springframework.cloud.consul.ConsulProperties;
+import org.springframework.cloud.consul.model.http.agent.NewService;
+import org.springframework.cloud.consul.model.http.catalog.CatalogService;
 import org.springframework.cloud.vault.util.CanConnect;
 import org.springframework.cloud.vault.util.IntegrationTestSupport;
+import org.springframework.http.ResponseEntity;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultHealth;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 /**
  * Tests for {@link DiscoveryBootstrapConfigurationTests}.
@@ -57,22 +58,24 @@ public class DiscoveryBootstrapConfigurationTests extends IntegrationTestSupport
 
 	@BeforeAll
 	public static void beforeClass() {
+		assumeThat(CanConnect.to(new InetSocketAddress(CONSUL_HOST, CONSUL_PORT))).isTrue();
 
-		assumeTrue(CanConnect.to(new InetSocketAddress(CONSUL_HOST, CONSUL_PORT)));
+		ConsulProperties consulProperties = new ConsulProperties();
+		consulProperties.setHost(CONSUL_HOST);
+		consulProperties.setPort(CONSUL_PORT);
+		ConsulClient client = ConsulAutoConfiguration.createNewConsulClient(consulProperties);
 
-		ConsulClient client = new ConsulClient();
+		ResponseEntity<List<CatalogService>> response = client.getCatalogService("vault");
 
-		Response<List<CatalogService>> response = client.getCatalogService("vault", QueryParams.DEFAULT);
-
-		if (response.getValue().isEmpty()) {
-
+		if (response.getStatusCode().is2xxSuccessful()
+				&& (response.getBody() == null || response.getBody().isEmpty())) {
 			NewService service = new NewService();
 			service.setAddress("localhost");
 			service.setPort(8200);
 			service.setId("vault");
 			service.setName("vault");
 
-			client.agentServiceRegister(service);
+			client.agentServiceRegister(null, service);
 		}
 	}
 
