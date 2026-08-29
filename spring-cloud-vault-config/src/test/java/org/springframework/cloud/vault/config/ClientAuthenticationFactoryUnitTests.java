@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.vault.authentication.UsernamePasswordAuthentication;
 import software.amazon.awssdk.core.SdkSystemSetting;
 import software.amazon.awssdk.regions.Region;
 
@@ -207,6 +208,43 @@ public class ClientAuthenticationFactoryUnitTests {
 	}
 
 	@Test
+	public void shouldSupportLdapAuthentication() {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.LDAP);
+		VaultProperties.UsernamePasswordProperties usernamePasswordProperties = new VaultProperties.UsernamePasswordProperties(
+				"ldap");
+		usernamePasswordProperties.setUsername("username");
+		usernamePasswordProperties.setPassword("password");
+		properties.setLdap(usernamePasswordProperties);
+
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate())
+			.createClientAuthentication();
+
+		assertThat(clientAuthentication).isInstanceOf(UsernamePasswordAuthentication.class);
+	}
+
+	@Test
+	public void shouldSupportOktaAuthentication() {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.OKTA);
+		VaultProperties.UsernamePasswordProperties usernamePasswordProperties = new VaultProperties.UsernamePasswordProperties(
+				"okta");
+		usernamePasswordProperties.setUsername("username");
+		usernamePasswordProperties.setPassword("password");
+		usernamePasswordProperties.setTotp("totp");
+		properties.setOkta(usernamePasswordProperties);
+
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate())
+			.createClientAuthentication();
+
+		assertThat(clientAuthentication).isInstanceOf(UsernamePasswordAuthentication.class);
+	}
+
+	@Test
 	public void shouldSupportPcfAuthentication() {
 
 		VaultProperties properties = new VaultProperties();
@@ -220,6 +258,42 @@ public class ClientAuthenticationFactoryUnitTests {
 			.createClientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(PcfAuthentication.class);
+	}
+
+	@Test
+	public void shouldSupportRadiusAuthentication() {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.RADIUS);
+		VaultProperties.UsernamePasswordProperties usernamePasswordProperties = new VaultProperties.UsernamePasswordProperties(
+				"radius");
+		usernamePasswordProperties.setUsername("username");
+		usernamePasswordProperties.setPassword("password");
+		properties.setRadius(usernamePasswordProperties);
+
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate())
+			.createClientAuthentication();
+
+		assertThat(clientAuthentication).isInstanceOf(UsernamePasswordAuthentication.class);
+	}
+
+	@Test
+	public void shouldSupportUserpassAuthentication() {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.USERPASS);
+		VaultProperties.UsernamePasswordProperties usernamePasswordProperties = new VaultProperties.UsernamePasswordProperties(
+				"userpass");
+		usernamePasswordProperties.setUsername("username");
+		usernamePasswordProperties.setPassword("password");
+		properties.setUserpass(usernamePasswordProperties);
+
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate())
+			.createClientAuthentication();
+
+		assertThat(clientAuthentication).isInstanceOf(UsernamePasswordAuthentication.class);
 	}
 
 	@Test
