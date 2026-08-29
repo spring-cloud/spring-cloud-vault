@@ -43,6 +43,7 @@ import org.springframework.vault.support.LeaseStrategy;
  * @author Grenville Wilson
  * @author Mårten Svantesson
  * @author Issam El-atif
+ * @author Toshiaki Maki
  */
 @ConfigurationProperties(VaultProperties.PREFIX)
 public class VaultProperties implements EnvironmentAware {
@@ -130,6 +131,8 @@ public class VaultProperties implements EnvironmentAware {
 	private GcpIamProperties gcpIam = new GcpIamProperties();
 
 	private GithubProperties github = new GithubProperties();
+
+	private JwtProperties jwt = new JwtProperties();
 
 	private KubernetesProperties kubernetes = new KubernetesProperties();
 
@@ -321,6 +324,14 @@ public class VaultProperties implements EnvironmentAware {
 		this.github = github;
 	}
 
+	public JwtProperties getJwt() {
+		return this.jwt;
+	}
+
+	public void setJwt(JwtProperties jwt) {
+		this.jwt = jwt;
+	}
+
 	public KubernetesProperties getKubernetes() {
 		return this.kubernetes;
 	}
@@ -382,7 +393,8 @@ public class VaultProperties implements EnvironmentAware {
 	 */
 	public enum AuthenticationMethod {
 
-		APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, GITHUB, KUBERNETES, NONE, PCF, TOKEN;
+		APPROLE, AWS_EC2, AWS_IAM, AZURE_MSI, CERT, CUBBYHOLE, GCP_GCE, GCP_IAM, GITHUB, JWT, KUBERNETES, NONE, PCF,
+		TOKEN;
 
 	}
 
@@ -1034,6 +1046,80 @@ public class VaultProperties implements EnvironmentAware {
 
 		public void setServiceAccountTokenFile(String serviceAccountTokenFile) {
 			this.serviceAccountTokenFile = serviceAccountTokenFile;
+		}
+
+	}
+
+	/**
+	 * JWT authentication properties.
+	 *
+	 * @author Toshiaki Maki
+	 * @since 5.0.2
+	 */
+	public static class JwtProperties {
+
+		/**
+		 * Mount path of the JWT authentication backend.
+		 */
+		private String jwtPath = "jwt";
+
+		/**
+		 * Name of the role against which the login is being attempted. Optional; when not
+		 * set, the JWT auth method's {@code default_role} configured on the Vault server
+		 * is used.
+		 */
+		@Nullable
+		private String role;
+
+		/**
+		 * Static JWT used for authentication. Mutually exclusive with {@link #tokenFile}.
+		 * Typically resolved from an environment variable via a property placeholder.
+		 */
+		@Nullable
+		private String token;
+
+		/**
+		 * Path to a file containing the JWT used for authentication. Mutually exclusive
+		 * with {@link #token}. Useful for platforms that mount the JWT as a file (e.g.
+		 * EKS IRSA via {@code AWS_WEB_IDENTITY_TOKEN_FILE}, Kubernetes projected service
+		 * account tokens). The file is re-read on each login to support token rotation.
+		 */
+		@Nullable
+		private String tokenFile;
+
+		public String getJwtPath() {
+			return this.jwtPath;
+		}
+
+		public void setJwtPath(String jwtPath) {
+			this.jwtPath = jwtPath;
+		}
+
+		@Nullable
+		public String getRole() {
+			return this.role;
+		}
+
+		public void setRole(@Nullable String role) {
+			this.role = role;
+		}
+
+		@Nullable
+		public String getToken() {
+			return this.token;
+		}
+
+		public void setToken(@Nullable String token) {
+			this.token = token;
+		}
+
+		@Nullable
+		public String getTokenFile() {
+			return this.tokenFile;
+		}
+
+		public void setTokenFile(@Nullable String tokenFile) {
+			this.tokenFile = tokenFile;
 		}
 
 	}
