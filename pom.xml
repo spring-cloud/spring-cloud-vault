@@ -27,6 +27,7 @@
 		<module>spring-cloud-vault-config-consul</module>
 		<module>spring-cloud-vault-config-rabbitmq</module>
 		<module>spring-cloud-vault-config-aws</module>
+		<module>spring-cloud-vault-config-ldap</module>
 		<module>spring-cloud-starter-vault-config</module>
 		<module>docs</module>
 	</modules>
