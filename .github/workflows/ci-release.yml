@@ -20,6 +20,27 @@ jobs:
   deploy:
     uses: spring-cloud/spring-cloud-github-actions/.github/workflows/deploy.yml@b6a6b1963b8762420526591c3d363bd7d09e7d4b # v1.1.1
     with:
+      custom_build_command: |
+        export MAVEN_OPTS="-Xms256M -Xmx1024M -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 -Dhttps.protocols=TLSv1.2"
+        #!/bin/bash
+        echo "Kill Vault"
+        pkill vault && echo "Vault killed" || echo "No Vault process was running"
+        
+        echo "Install Vault"
+        ./src/test/bash/create_certificates.sh
+        ./src/test/bash/install_vault.sh
+        
+        echo "Run Vault"
+        ./src/test/bash/local_run_vault.sh &
+        echo "Vault Running"
+        
+        trap "{ pkill vault && echo 'Vault killed' || echo 'No Vault process was running'; }" EXIT
+        if [[ "$SHOULD_DEPLOY" == "true" ]]; then
+          ./mvnw clean deploy -Pdocs,deploy,spring -B -U $MAVEN_FLAGS $MAVEN_SETTINGS $MAVEN_DEPLOY_FLAGS
+        else
+          echo "Will not deploy artifacts"
+        ./mvnw clean install -Pspring -B -U $MAVEN_FLAGS $MAVEN_SETTINGS
+        fi
       branches: ${{ inputs.branches }}
       # Commercial Artifactory only serves runners in the spring-enterprise-builds
       # group and refuses anything else with a 403, before authentication is even
