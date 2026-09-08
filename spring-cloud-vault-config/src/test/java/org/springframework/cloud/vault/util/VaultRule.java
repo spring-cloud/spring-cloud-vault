@@ -181,12 +181,13 @@ public class VaultRule implements BeforeEachCallback,
 
 		try (Socket socket = new Socket()) {
 
-			socket.connect(new InetSocketAddress(InetAddress.getByName("localhost"), this.vaultEndpoint.getPort()));
+			socket.connect(new InetSocketAddress(InetAddress.getByName(this.vaultEndpoint.getHost()),
+					this.vaultEndpoint.getPort()));
 		}
 		catch (Exception ex) {
-			throw new IllegalStateException(String.format(
-					"Vault is not running on localhost:%d which is required to run a test using VaultExtension %s",
-					this.vaultEndpoint.getPort(), getClass().getSimpleName()));
+			throw new IllegalStateException(
+					String.format("Vault is not running on %s:%d which is required to run a test using %s",
+							this.vaultEndpoint.getHost(), this.vaultEndpoint.getPort(), getClass().getSimpleName()));
 		}
 
 		if (!prepareVault.isAvailable()) {

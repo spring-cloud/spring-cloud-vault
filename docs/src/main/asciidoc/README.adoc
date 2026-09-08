@@ -37,20 +37,16 @@ include::../../../modules/ROOT/pages/quickstart.adoc[]
 [[build-requirements-for-vault]]
 == Build requirements for Vault
 
-Spring Cloud Vault Config requires SSL certificates and a running Vault instance listening on `localhost:8200`.
-Certificates and the Vault setup are scripted, the scripts are located in `src/test/bash`.
-
-The following scripts need to be run prior to building the project for the tests to pass.
+Docker is the only prerequisite for building Spring Cloud Vault.
+The tests start Vault themselves using https://testcontainers.com[Testcontainers], so no Vault installation is required and nothing needs to be listening on `localhost:8200`.
 
 [source,bash]
 ----
-$ ./src/test/bash/install_vault.sh
-$ ./src/test/bash/create_certificates.sh
-$ ./src/test/bash/local_run_vault.sh
+$ ./mvnw clean install
 ----
 
-Leave Vault uninitialized, the tests will initialize and unseal Vault.
-They will also create a root token `00000000-0000-0000-0000-000000000000`.
+The build generates the SSL certificates the tests need (`work/ca`, `work/keystore.jks` and `work/client-cert.jks`) by running `src/test/bash/create_certificates.sh` from the reactor root, so `openssl` and `keytool` need to be on the `PATH`.
+The tests initialize and unseal the Vault container and create a root token `00000000-0000-0000-0000-000000000000`.
 
 Changes to the documentation should be made to the adocs found under `docs/src/main/asciidoc/`
 

@@ -21,8 +21,6 @@ $ wget https://releases.hashicorp.com/vault/${vault_version}/vault_${vault_versi
 $ unzip vault_${vault_version}_${platform}.zip
 ----
 
-NOTE: These steps can be achieved by downloading and running https://github.com/spring-cloud/spring-cloud-vault/blob/master/src/test/bash/install_vault.sh[`install_vault.sh`].
-
 == Create SSL certificates for Vault
 
 Next, you're required to generate a set of certificates:
@@ -56,8 +54,6 @@ listener "tcp" {
 disable_mlock = true
 ----
 
-NOTE: You can find an example config file at  https://github.com/spring-clod/spring-cloud-vault/blob/master/src/test/bash/vault.conf[`vault.conf`].
-
 [source,bash]
 ----
 $ vault server -config=vault.conf
@@ -66,8 +62,8 @@ $ vault server -config=vault.conf
 Vault is started listening on `0.0.0.0:8200` using the `inmem` storage and `https`.
 Vault is sealed and not initialized when starting up.
 
-NOTE: If you want to run tests, leave Vault uninitialized.
-The tests will initialize Vault and create a root token `00000000-0000-0000-0000-000000000000`.
+NOTE: You do not need any of this to build Spring Cloud Vault itself.
+The project's own tests start Vault with https://testcontainers.com[Testcontainers], so Docker is the only prerequisite.
 
 If you want to use Vault for your application or give it a try then you need to initialize it first.
 

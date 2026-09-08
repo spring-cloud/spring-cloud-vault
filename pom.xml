@@ -60,6 +60,8 @@
 	</developers>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- Default so the certificate generation below can honour -Dmaven.test.skip=true -->
+		<maven.test.skip>false</maven.test.skip>
 		<spring-cloud-commons.version>4.3.3-SNAPSHOT</spring-cloud-commons.version>
 		<bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
 
@@ -221,11 +223,17 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>3.6.3</version>
 				<executions>
+					<!--
+						Generates the TLS certificates and keystores under work/ that the Vault
+						Testcontainer and the test clients share. Runs only in the reactor root, so a
+						single-module build (mvnw -pl <module> without -am) will not regenerate them.
+					-->
 					<execution>
 						<id>generate-certificates</id>
-						<phase>generate-sources</phase>
+						<phase>process-test-resources</phase>
 						<configuration>
 							<executable>./src/test/bash/create_certificates.sh</executable>
+							<skip>${maven.test.skip}</skip>
 						</configuration>
 						<goals>
 							<goal>exec</goal>

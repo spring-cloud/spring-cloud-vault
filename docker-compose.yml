@@ -1,8 +1,0 @@
-# Work in Progress
-vault:
-  image: cgswong/vault
-  volumes:
-    - ./src/test/resources:/config
-  ports:
-    - "8200:8200"
-  command: server -config /config/vault.conf

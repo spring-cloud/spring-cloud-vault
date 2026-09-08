@@ -59,8 +59,6 @@ $ wget https://releases.hashicorp.com/vault/${vault_version}/vault_${vault_versi
 $ unzip vault_${vault_version}_${platform}.zip
 ----
 
-NOTE: These steps can be achieved by downloading and running https://github.com/spring-cloud/spring-cloud-vault/blob/master/src/test/bash/install_vault.sh[`install_vault.sh`].
-
 == Create SSL certificates for Vault
 
 Next, you're required to generate a set of certificates:
@@ -94,8 +92,6 @@ listener "tcp" {
 disable_mlock = true
 ----
 
-NOTE: You can find an example config file at  https://github.com/spring-clod/spring-cloud-vault/blob/master/src/test/bash/vault.conf[`vault.conf`].
-
 [source,bash]
 ----
 $ vault server -config=vault.conf
@@ -104,8 +100,8 @@ $ vault server -config=vault.conf
 Vault is started listening on `0.0.0.0:8200` using the `inmem` storage and `https`.
 Vault is sealed and not initialized when starting up.
 
-NOTE: If you want to run tests, leave Vault uninitialized.
-The tests will initialize Vault and create a root token `00000000-0000-0000-0000-000000000000`.
+NOTE: You do not need any of this to build Spring Cloud Vault itself.
+The project's own tests start Vault with https://testcontainers.com[Testcontainers], so Docker is the only prerequisite.
 
 If you want to use Vault for your application or give it a try then you need to initialize it first.
 
@@ -296,20 +292,16 @@ Any disclosure to unintended parties allows Vault use with the associated token 
 [[build-requirements-for-vault]]
 == Build requirements for Vault
 
-Spring Cloud Vault Config requires SSL certificates and a running Vault instance listening on `localhost:8200`.
-Certificates and the Vault setup are scripted, the scripts are located in `src/test/bash`.
-
-The following scripts need to be run prior to building the project for the tests to pass.
+Docker is the only prerequisite for building Spring Cloud Vault.
+The tests start Vault themselves using https://testcontainers.com[Testcontainers], so no Vault installation is required and nothing needs to be listening on `localhost:8200`.
 
 [source,bash]
 ----
-$ ./src/test/bash/install_vault.sh
-$ ./src/test/bash/create_certificates.sh
-$ ./src/test/bash/local_run_vault.sh
+$ ./mvnw clean install
 ----
 
-Leave Vault uninitialized, the tests will initialize and unseal Vault.
-They will also create a root token `00000000-0000-0000-0000-000000000000`.
+The build generates the SSL certificates the tests need (`work/ca`, `work/keystore.jks` and `work/client-cert.jks`) by running `src/test/bash/create_certificates.sh` from the reactor root, so `openssl` and `keytool` need to be on the `PATH`.
+The tests initialize and unseal the Vault container and create a root token `00000000-0000-0000-0000-000000000000`.
 
 Changes to the documentation should be made to the adocs found under `docs/src/main/asciidoc/`
 

@@ -15,7 +15,6 @@ _site/
 *.iws
 .factorypath
 download/
-/vault/
 /consul/
 /rabbitmq/
 work
