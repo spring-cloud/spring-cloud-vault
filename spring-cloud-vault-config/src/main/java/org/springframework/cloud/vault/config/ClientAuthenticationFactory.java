@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
@@ -58,6 +59,8 @@ import org.springframework.vault.authentication.GcpComputeAuthenticationOptions;
 import org.springframework.vault.authentication.GcpComputeAuthenticationOptions.GcpComputeAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.GitHubAuthentication;
 import org.springframework.vault.authentication.GitHubAuthenticationOptions;
+import org.springframework.vault.authentication.JwtAuthentication;
+import org.springframework.vault.authentication.JwtAuthenticationOptions;
 import org.springframework.vault.authentication.KubernetesAuthentication;
 import org.springframework.vault.authentication.KubernetesAuthenticationOptions;
 import org.springframework.vault.authentication.KubernetesServiceAccountTokenFile;
@@ -78,6 +81,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @author Michal Budzyn
  * @author Quincy Conduff
  * @author Issam El-atif
+ * @author Toshiaki Maki
  * @since 1.1
  */
 class ClientAuthenticationFactory {
@@ -113,6 +117,7 @@ class ClientAuthenticationFactory {
 			case GCP_GCE -> gcpGceAuthentication(this.vaultProperties);
 			case GCP_IAM -> gcpIamAuthentication(this.vaultProperties);
 			case GITHUB -> gitHubAuthentication(this.vaultProperties);
+			case JWT -> jwtAuthentication(this.vaultProperties);
 			case KUBERNETES -> kubernetesAuthentication(this.vaultProperties);
 			case PCF -> pcfAuthentication(this.vaultProperties);
 			case TOKEN -> tokenAuthentication(this.vaultProperties);
@@ -335,6 +340,32 @@ class ClientAuthenticationFactory {
 					Cannot not retrieve GitHub token using GitHub CLI
 					\tCommand: %s""", StringUtils.collectionToDelimitedString(processBuilder.command(), " ")), ex);
 		}
+	}
+
+	private ClientAuthentication jwtAuthentication(VaultProperties vaultProperties) {
+
+		VaultProperties.JwtProperties jwt = vaultProperties.getJwt();
+
+		Assert.hasText(jwt.getJwtPath(), "Mount path (spring.cloud.vault.jwt.jwt-path) must not be empty");
+
+		boolean hasToken = StringUtils.hasText(jwt.getToken());
+		boolean hasTokenFile = StringUtils.hasText(jwt.getTokenFile());
+		Assert.isTrue(hasToken ^ hasTokenFile,
+				"Exactly one of spring.cloud.vault.jwt.token or spring.cloud.vault.jwt.token-file must be set");
+
+		// ResourceCredentialSupplier re-reads the file on each get() call (invoked on
+		// every JwtAuthentication.login()), so re-logins pick up rotated tokens.
+		Supplier<String> jwtSupplier = hasToken ? jwt::getToken : new ResourceCredentialSupplier(jwt.getTokenFile());
+
+		JwtAuthenticationOptions.JwtAuthenticationOptionsBuilder builder = JwtAuthenticationOptions.builder()
+			.path(jwt.getJwtPath())
+			.jwtSupplier(jwtSupplier);
+
+		if (StringUtils.hasText(jwt.getRole())) {
+			builder.role(jwt.getRole());
+		}
+
+		return new JwtAuthentication(builder.build(), this.restOperations);
 	}
 
 	private ClientAuthentication kubernetesAuthentication(VaultProperties vaultProperties) {
