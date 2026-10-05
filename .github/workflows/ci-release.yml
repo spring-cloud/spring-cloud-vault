@@ -36,7 +36,7 @@ jobs:
         
         trap "{ pkill vault && echo 'Vault killed' || echo 'No Vault process was running'; }" EXIT
         if [[ "$SHOULD_DEPLOY" == "true" ]]; then
-          ./mvnw clean deploy -Pdocs,deploy,spring -B -U $MAVEN_FLAGS $MAVEN_SETTINGS $MAVEN_DEPLOY_FLAGS
+          ./mvnw clean deploy $DEPLOY_PROFILES -B -U $MAVEN_FLAGS $MAVEN_SETTINGS $MAVEN_DEPLOY_FLAGS
         else
           echo "Will not deploy artifacts"
         ./mvnw clean install -Pspring -B -U $MAVEN_FLAGS $MAVEN_SETTINGS
