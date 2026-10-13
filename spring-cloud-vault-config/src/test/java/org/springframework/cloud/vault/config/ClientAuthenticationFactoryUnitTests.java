@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import software.amazon.awssdk.core.SdkSystemSetting;
 import software.amazon.awssdk.regions.Region;
 
@@ -38,12 +39,15 @@ import org.springframework.vault.authentication.AwsIamAuthenticationOptions;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.ClientCertificateAuthentication;
 import org.springframework.vault.authentication.GitHubAuthentication;
+import org.springframework.vault.authentication.JwtAuthentication;
+import org.springframework.vault.authentication.JwtAuthenticationOptions;
 import org.springframework.vault.authentication.PcfAuthentication;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -53,6 +57,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Mark Paluch
  * @author Quincy Conduff
  * @author Issam El-atif
+ * @author Toshiaki Maki
  */
 public class ClientAuthenticationFactoryUnitTests {
 
@@ -272,6 +277,84 @@ public class ClientAuthenticationFactoryUnitTests {
 				new RestTemplate());
 
 		assertThatIllegalStateException().isThrownBy(factory::createClientAuthentication);
+	}
+
+	@Test
+	public void shouldSupportJwtWithStaticToken() {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.JWT);
+		properties.getJwt().setRole("my-role");
+		properties.getJwt().setToken("eyJ.static-jwt");
+
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate())
+			.createClientAuthentication();
+
+		assertThat(clientAuthentication).isInstanceOf(JwtAuthentication.class);
+
+		JwtAuthenticationOptions options = (JwtAuthenticationOptions) ReflectionTestUtils.getField(clientAuthentication,
+				"options");
+		assertThat(options.getPath()).isEqualTo("jwt");
+		assertThat(options.getRole()).isEqualTo("my-role");
+		assertThat(options.getJwtSupplier().get()).isEqualTo("eyJ.static-jwt");
+	}
+
+	@Test
+	public void shouldSupportJwtWithTokenFile(@TempDir Path tmp) throws IOException {
+
+		Path tokenFile = tmp.resolve("oidc-token");
+		Files.writeString(tokenFile, "eyJ.file-jwt");
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.JWT);
+		properties.getJwt().setJwtPath("custom-jwt");
+		properties.getJwt().setTokenFile(tokenFile.toString());
+
+		ClientAuthentication clientAuthentication = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate())
+			.createClientAuthentication();
+
+		assertThat(clientAuthentication).isInstanceOf(JwtAuthentication.class);
+
+		JwtAuthenticationOptions options = (JwtAuthenticationOptions) ReflectionTestUtils.getField(clientAuthentication,
+				"options");
+		assertThat(options.getPath()).isEqualTo("custom-jwt");
+		assertThat(options.getRole()).isNull();
+		assertThat(options.getJwtSupplier().get()).isEqualTo("eyJ.file-jwt");
+	}
+
+	@Test
+	public void shouldFailJwtWhenBothTokenAndTokenFileSet(@TempDir Path tmp) throws IOException {
+
+		Path tokenFile = tmp.resolve("oidc-token");
+		Files.writeString(tokenFile, "eyJ.file-jwt");
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.JWT);
+		properties.getJwt().setToken("eyJ.static-jwt");
+		properties.getJwt().setTokenFile(tokenFile.toString());
+
+		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate());
+
+		assertThatIllegalArgumentException().isThrownBy(factory::createClientAuthentication)
+			.withMessage(
+					"Exactly one of spring.cloud.vault.jwt.token or spring.cloud.vault.jwt.token-file must be set");
+	}
+
+	@Test
+	public void shouldFailJwtWhenNoTokenSourceSet() {
+
+		VaultProperties properties = new VaultProperties();
+		properties.setAuthentication(VaultProperties.AuthenticationMethod.JWT);
+
+		ClientAuthenticationFactory factory = new ClientAuthenticationFactory(properties, new RestTemplate(),
+				new RestTemplate());
+
+		assertThatIllegalArgumentException().isThrownBy(factory::createClientAuthentication)
+			.withMessage(
+					"Exactly one of spring.cloud.vault.jwt.token or spring.cloud.vault.jwt.token-file must be set");
 	}
 
 }

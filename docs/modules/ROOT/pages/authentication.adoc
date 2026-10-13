@@ -570,6 +570,33 @@ See also:
 * https://developer.hashicorp.com/vault/api-docs/auth/github[Vault Documentation: GitGub]
 * https://cli.github.com/[GitHub CLI]
 
+[[vault.config.authentication.jwt]]
+== JWT authentication
+
+JWT authentication allows to authenticate with Vault using a JSON Web Token issued by an OIDC-compatible platform (e.g. GitHub Actions, EKS IRSA, GitLab CI/CD).
+The JWT can be provided inline or read from a file.
+
+.application.yml with all JWT authentication properties
+[source,yaml]
+----
+spring.cloud.vault:
+    authentication: JWT
+    jwt:
+        role: my-role
+        jwt-path: jwt
+        token: ${VAULT_JWT_TOKEN:}
+        token-file: ${AWS_WEB_IDENTITY_TOKEN_FILE:}
+----
+
+* `role` sets the Role. Optional; if empty, the JWT auth method's `default_role` is used.
+* `jwt-path` sets the path of the JWT auth method mount.
+* `token` sets a static JWT to use.
+* `token-file` points to a file containing the JWT. The file is re-read on each login to support token rotation.
+
+NOTE: `token` and `token-file` are mutually exclusive — exactly one must be set.
+
+See also: https://developer.hashicorp.com/vault/docs/auth/jwt[Vault Documentation: JWT/OIDC]
+
 [[vault.authentication.gcpiam]]
 [[vault.config.authentication.kubernetes]]
 == Kubernetes authentication
