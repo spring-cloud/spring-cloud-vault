@@ -7,20 +7,20 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dependencies-parent</artifactId>
-		<version>5.0.4-INTERNAL-SNAPSHOT</version>
+		<version>5.0.4</version>
 		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
 
 	<artifactId>spring-cloud-vault-dependencies</artifactId>
-	<version>5.0.3-INTERNAL-SNAPSHOT</version>
+	<version>5.0.3</version>
 	<packaging>pom</packaging>
 
 	<name>Spring Cloud Vault Dependencies</name>
 	<description>Spring Cloud Vault Dependencies</description>
 
 	<properties>
-		<spring-vault.version>4.0.4-INTERNAL-SNAPSHOT</spring-vault.version>
+		<spring-vault.version>4.0.4</spring-vault.version>
 		<maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
 	</properties>
 
