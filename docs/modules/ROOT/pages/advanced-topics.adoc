@@ -76,8 +76,6 @@ SSL-secured Vault communication will validate the Vault SSL certificate with the
 * `enabled-protocols` sets the list of enabled SSL/TLS protocols (since 3.0.2).
 * `enabled-cipher-suites` sets the list of enabled SSL/TLS cipher suites (since 3.0.2).
 
-Please note that configuring `spring.cloud.vault.ssl.*` can be only applied when either Apache Http Components or the OkHttp client is on your class-path.
-
 [[vault-lease-renewal]]
 == Lease lifecycle management (renewal and revocation)
 
@@ -103,10 +101,10 @@ This is not recommended as leases can expire and Spring Cloud Vault cannot longe
 ----
 spring.cloud.vault:
     config.lifecycle:
-    	enabled: true
-    	min-renewal: 10s
-    	expiry-threshold: 1m
-    	lease-endpoints: Legacy
+        enabled: true
+        min-renewal: 10s
+        expiry-threshold: 1m
+        lease-endpoints: Legacy
 
 ----
 
