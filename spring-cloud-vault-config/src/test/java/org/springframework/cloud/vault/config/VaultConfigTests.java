@@ -19,6 +19,8 @@ package org.springframework.cloud.vault.config;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -30,9 +32,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.vault.util.VaultRule;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.core.lease.ManagedSecret;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,6 +75,7 @@ public class VaultConfigTests {
 		object.put("nested", Collections.singletonMap("key", "value"));
 
 		vaultRule.prepare().getVaultOperations().write("secret/testVaultApp", object);
+		vaultRule.prepare().getVaultOperations().write("secret/managed", object);
 	}
 
 	@Test
@@ -99,6 +104,15 @@ public class VaultConfigTests {
 	}
 
 	@Test
+	public void shouldRegisterManagedSecret() throws Exception {
+
+		TestApplication app = this.applicationContext.getBean(TestApplication.class);
+		String secret = app.secret.get(5, TimeUnit.SECONDS);
+
+		assertThat(secret).isEqualTo("foo");
+	}
+
+	@Test
 	public void shouldNotContainRestTemplateArtifacts() {
 
 		// Beans are registered in parent (bootstrap) context.
@@ -111,8 +125,17 @@ public class VaultConfigTests {
 	@SpringBootApplication
 	public static class TestApplication {
 
+		final CompletableFuture<String> secret = new CompletableFuture<>();
+
 		public static void main(String[] args) {
 			SpringApplication.run(TestApplication.class, args);
+		}
+
+		@Bean
+		ManagedSecret mySecret() {
+			return ManagedSecret.rotating("secret/managed", it -> {
+				TestApplication.this.secret.complete(it.getString("vault.value"));
+			}, this.secret::completeExceptionally);
 		}
 
 	}
