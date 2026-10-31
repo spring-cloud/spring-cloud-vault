@@ -43,6 +43,11 @@ if [  ! -x "${KEYTOOL}" ] ; then
    exit 1
 fi
 
+# Backdate certificates so that certificates issued from them by Vault (which backdates
+# notBefore by 30s by default) never start before their signer, regardless of how soon
+# the tests run after this script. GNU date first, BSD/macOS date as fallback.
+START_DATE=$(date -u -d '1 day ago' +%Y%m%d%H%M%SZ 2>/dev/null || date -u -v-1d +%Y%m%d%H%M%SZ)
+
 mkdir -p ${CA_DIR}/private ${CA_DIR}/certs ${CA_DIR}/crl ${CA_DIR}/csr ${CA_DIR}/newcerts ${CA_DIR}/intermediate
 
 echo "[INFO] Generating CA private key"
@@ -51,17 +56,25 @@ openssl genrsa -passout pass:changeit -aes256 -out ${CA_DIR}/private/ca.key.pem 
 
 chmod 400 ${CA_DIR}/private/ca.key.pem
 
-echo "[INFO] Generating CA certificate"
-openssl req -config ${DIR}/openssl.cnf \
-      -key ${CA_DIR}/private/ca.key.pem \
-      -new -x509 -days 7300 -sha256 -extensions v3_ca \
-      -out ${CA_DIR}/certs/ca.cert.pem \
-      -passin pass:changeit \
-      -subj "/C=NN/ST=Unknown/L=Unknown/O=spring-cloud-vault-config/CN=CA Certificate"
-
 echo "[INFO] Prepare CA database"
 echo 1000 > ${CA_DIR}/serial
 touch ${CA_DIR}/index.txt
+
+echo "[INFO] Generating CA certificate"
+openssl req -config ${DIR}/openssl.cnf \
+      -key ${CA_DIR}/private/ca.key.pem \
+      -new -sha256 \
+      -out ${CA_DIR}/csr/ca.csr.pem \
+      -passin pass:changeit \
+      -subj "/C=NN/ST=Unknown/L=Unknown/O=spring-cloud-vault-config/CN=CA Certificate"
+
+openssl ca -config ${DIR}/openssl.cnf \
+      -selfsign -keyfile ${CA_DIR}/private/ca.key.pem \
+      -startdate ${START_DATE} -days 7300 -notext -md sha256 -extensions v3_ca \
+      -passin pass:changeit \
+      -batch \
+      -in ${CA_DIR}/csr/ca.csr.pem \
+      -out ${CA_DIR}/certs/ca.cert.pem
 
 echo "[INFO] Generating server private key"
 openssl genrsa -aes256 \
@@ -90,7 +103,7 @@ openssl req -config <(cat ${DIR}/openssl.cnf \
 
 echo "[INFO] Signing certificate request"
 openssl ca -config ${DIR}/openssl.cnf \
-      -extensions server_cert -days 7300 -notext -md sha256 \
+      -extensions server_cert -startdate ${START_DATE} -days 7300 -notext -md sha256 \
       -passin pass:changeit \
       -batch \
       -in ${CA_DIR}/csr/localhost.csr.pem \
@@ -116,7 +129,7 @@ openssl req -config ${DIR}/openssl.cnf \
 
 echo "[INFO] Signing certificate request"
 openssl ca -config ${DIR}/openssl.cnf \
-      -extensions usr_cert -days 7300 -notext -md sha256 \
+      -extensions usr_cert -startdate ${START_DATE} -days 7300 -notext -md sha256 \
       -passin pass:changeit \
       -batch \
       -in ${CA_DIR}/csr/client.csr.pem \
@@ -156,7 +169,7 @@ openssl req -config ${DIR}/intermediate.cnf \
 
 echo "[INFO] Signing intermediate certificate request"
 openssl ca -config ${DIR}/openssl.cnf \
-      -days 7300 -notext -md sha256 -extensions v3_intermediate_ca \
+      -startdate ${START_DATE} -days 7300 -notext -md sha256 -extensions v3_intermediate_ca \
       -passin pass:changeit \
       -batch \
       -in ${CA_DIR}/csr/intermediate.csr.pem \
