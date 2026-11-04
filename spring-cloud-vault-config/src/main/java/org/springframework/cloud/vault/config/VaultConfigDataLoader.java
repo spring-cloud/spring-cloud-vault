@@ -63,8 +63,6 @@ import org.springframework.vault.authentication.VaultTokenSupplier;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.client.ReactiveVaultClient;
 import org.springframework.vault.client.ReactiveVaultClients;
-import org.springframework.vault.client.RestTemplateBuilder;
-import org.springframework.vault.client.RestTemplateFactory;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultClient.Builder;
@@ -79,7 +77,6 @@ import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.event.LeaseErrorListener;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -188,8 +185,6 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 		ImperativeInfrastructure infra = new ImperativeInfrastructure(bootstrap, vaultProperties, this.logFactory);
 
 		infra.registerClientHttpRequestFactoryWrapper();
-		infra.registerRestTemplateBuilder();
-		infra.registerVaultRestTemplateFactory();
 		infra.registerVaultClient();
 
 		VaultProperties.AuthenticationMethod authentication = vaultProperties.getAuthentication();
@@ -489,27 +484,13 @@ public class VaultConfigDataLoader implements ConfigDataLoader<VaultConfigLocati
 			});
 		}
 
-		void registerRestTemplateBuilder() {
-			// not a bean
-			this.bootstrap.registerIfAbsent(RestTemplateBuilder.class,
-					ctx -> this.configuration.createRestTemplateBuilder(
-							ctx.get(ClientFactoryWrapper.class).getClientHttpRequestFactory(), this.endpointProvider,
-							Collections.emptyList(), Collections.emptyList()));
-		}
-
-		void registerVaultRestTemplateFactory() {
-			registerIfAbsent(this.bootstrap, "vaultRestTemplateFactory", RestTemplateFactory.class,
-					ctx -> new DefaultRestTemplateFactory(
-							ctx.get(ClientFactoryWrapper.class).getClientHttpRequestFactory(),
-							requestFactory -> this.configuration.createRestTemplateBuilder(requestFactory,
-									this.endpointProvider, Collections.emptyList(), Collections.emptyList())));
-		}
-
 		void registerVaultClient() {
 			registerIfAbsent(this.bootstrap, "vaultClient", VaultClient.class, ctx -> {
 
-				RestTemplate restTemplate = ctx.get(RestTemplateFactory.class).create();
-				Builder builder = VaultClient.builder(restTemplate).endpoint(this.endpointProvider);
+				ClientHttpRequestFactory factory = ctx.get(ClientFactoryWrapper.class).getClientHttpRequestFactory();
+				RestClient restClient = RestClient.builder().requestFactory(factory).build();
+
+				Builder builder = VaultClient.builder(restClient).endpoint(this.endpointProvider);
 				if (StringUtils.hasText(this.vaultProperties.getNamespace())) {
 					builder.defaultNamespace(this.vaultProperties.getNamespace());
 				}

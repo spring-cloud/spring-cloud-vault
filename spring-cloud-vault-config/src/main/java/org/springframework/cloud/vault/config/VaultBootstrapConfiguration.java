@@ -26,8 +26,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.vault.client.RestClientCustomizer;
-import org.springframework.vault.client.RestTemplateCustomizer;
-import org.springframework.vault.client.RestTemplateRequestCustomizer;
 import org.springframework.vault.client.VaultClientCustomizer;
 import org.springframework.vault.client.VaultEndpointProvider;
 
@@ -48,11 +46,8 @@ public class VaultBootstrapConfiguration extends VaultAutoConfiguration {
 	public VaultBootstrapConfiguration(ConfigurableApplicationContext applicationContext,
 			VaultProperties vaultProperties, ObjectProvider<VaultEndpointProvider> endpointProvider,
 			ObjectProvider<List<VaultClientCustomizer>> vaultClientCustomizers,
-			ObjectProvider<List<RestTemplateCustomizer>> customizers,
-			ObjectProvider<List<RestClientCustomizer>> restClientCustomizers,
-			ObjectProvider<List<RestTemplateRequestCustomizer<?>>> requestCustomizers) {
-		super(applicationContext, vaultProperties, endpointProvider, vaultClientCustomizers, customizers,
-				restClientCustomizers, requestCustomizers);
+			ObjectProvider<List<RestClientCustomizer>> restClientCustomizers) {
+		super(applicationContext, vaultProperties, endpointProvider, vaultClientCustomizers, restClientCustomizers);
 	}
 
 }

@@ -43,10 +43,6 @@ import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.client.RestClientCustomizer;
-import org.springframework.vault.client.RestTemplateBuilder;
-import org.springframework.vault.client.RestTemplateCustomizer;
-import org.springframework.vault.client.RestTemplateFactory;
-import org.springframework.vault.client.RestTemplateRequestCustomizer;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultClientCustomizer;
@@ -58,7 +54,6 @@ import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClient.Builder;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for Spring Vault support.
@@ -83,19 +78,12 @@ public class VaultAutoConfiguration {
 
 	private final List<VaultClientCustomizer> vaultClientCustomizers;
 
-	private final List<RestTemplateCustomizer> customizers;
-
 	private final List<RestClientCustomizer> restClientCustomizers;
-
-	private final List<RestTemplateRequestCustomizer<?>> requestCustomizers;
 
 	public VaultAutoConfiguration(ConfigurableApplicationContext applicationContext, VaultProperties vaultProperties,
 			ObjectProvider<VaultEndpointProvider> endpointProvider,
 			ObjectProvider<List<VaultClientCustomizer>> vaultClientCustomizers,
-			ObjectProvider<List<RestTemplateCustomizer>> customizers,
-			ObjectProvider<List<RestClientCustomizer>> restClientCustomizers,
-			ObjectProvider<List<RestTemplateRequestCustomizer<?>>> requestCustomizers) {
-
+			ObjectProvider<List<RestClientCustomizer>> restClientCustomizers) {
 		this.applicationContext = applicationContext;
 		this.vaultProperties = vaultProperties;
 		this.configuration = new VaultConfiguration(vaultProperties);
@@ -105,31 +93,11 @@ public class VaultAutoConfiguration {
 		if (provider == null) {
 			provider = SimpleVaultEndpointProvider.of(this.configuration.createVaultEndpoint());
 		}
-
 		this.endpointProvider = provider;
 		this.vaultClientCustomizers = new ArrayList<>(vaultClientCustomizers.getIfAvailable(Collections::emptyList));
 		AnnotationAwareOrderComparator.sort(this.vaultClientCustomizers);
-		this.customizers = new ArrayList<>(customizers.getIfAvailable(Collections::emptyList));
-		AnnotationAwareOrderComparator.sort(this.customizers);
 		this.restClientCustomizers = new ArrayList<>(restClientCustomizers.getIfAvailable(Collections::emptyList));
 		AnnotationAwareOrderComparator.sort(this.restClientCustomizers);
-		this.requestCustomizers = new ArrayList<>(requestCustomizers.getIfAvailable(Collections::emptyList));
-		AnnotationAwareOrderComparator.sort(this.requestCustomizers);
-	}
-
-	/**
-	 * Create a {@link RestTemplateBuilder} initialized with {@link VaultEndpointProvider}
-	 * and {@link ClientHttpRequestFactory}. May be overridden by subclasses.
-	 * @param requestFactory the {@link ClientHttpRequestFactory}.
-	 * @return the {@link RestTemplateBuilder}.
-	 * @since 2.3
-	 * @deprecated since 5.1, use {@link RestClient.Builder} instead.
-	 * @see #clientHttpRequestFactoryWrapper()
-	 */
-	@Deprecated(since = "5.1")
-	protected RestTemplateBuilder restTemplateBuilder(ClientHttpRequestFactory requestFactory) {
-		return this.configuration.createRestTemplateBuilder(requestFactory, this.endpointProvider, this.customizers,
-				this.requestCustomizers);
 	}
 
 	/**
@@ -148,23 +116,6 @@ public class VaultAutoConfiguration {
 	}
 
 	/**
-	 * Create a {@link RestTemplateFactory} bean that is used to produce
-	 * {@link RestTemplate}.
-	 * @param clientFactoryWrapper the {@link ClientFactoryWrapper}.
-	 * @return the {@link RestTemplateFactory}.
-	 * @since 3.0
-	 * @deprecated since 5.1, use {@link RestClient.Builder} instead.
-	 * @see #clientHttpRequestFactoryWrapper()
-	 */
-	@Bean
-	@ConditionalOnMissingBean
-	@Deprecated(since = "4.1")
-	public RestTemplateFactory vaultRestTemplateFactory(ClientFactoryWrapper clientFactoryWrapper) {
-		return new DefaultRestTemplateFactory(clientFactoryWrapper.getClientHttpRequestFactory(),
-				this::restTemplateBuilder);
-	}
-
-	/**
 	 * Creates a {@link VaultClient} using a {@link RestClient}.
 	 * @return the {@link VaultClient} bean.
 	 * @since 5.1
@@ -179,9 +130,7 @@ public class VaultAutoConfiguration {
 
 	private RestClient getRestClient() {
 		ClientFactoryWrapper clientFactoryWrapper = this.applicationContext.getBean(ClientFactoryWrapper.class);
-		RestTemplateBuilder restTemplateBuilder = restTemplateBuilder(
-				clientFactoryWrapper.getClientHttpRequestFactory());
-		Builder builder = RestClient.builder(restTemplateBuilder.build());
+		Builder builder = RestClient.builder().requestFactory(clientFactoryWrapper.getClientHttpRequestFactory());
 		this.restClientCustomizers.forEach(it -> it.customize(builder));
 		return builder.build();
 	}

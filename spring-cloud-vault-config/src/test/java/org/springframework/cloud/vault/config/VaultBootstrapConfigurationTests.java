@@ -53,7 +53,7 @@ public class VaultBootstrapConfigurationTests {
 				assertThat(context).doesNotHaveBean(SessionManager.class);
 				assertThat(context).doesNotHaveBean(ClientAuthentication.class);
 				assertThat(context).hasSingleBean(VaultTemplate.class);
-				assertThat(context).hasSingleBean(RestTemplateFactory.class);
+				assertThat(context).doesNotHaveBean(RestTemplateFactory.class);
 			});
 	}
 

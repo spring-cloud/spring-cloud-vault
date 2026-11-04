@@ -36,15 +36,11 @@ import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.authentication.event.AuthenticationEventMulticaster;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
-import org.springframework.vault.client.RestTemplateBuilder;
-import org.springframework.vault.client.RestTemplateCustomizer;
-import org.springframework.vault.client.RestTemplateRequestCustomizer;
-import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultClient.Builder;
 import org.springframework.vault.client.VaultClientCustomizer;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultEndpointProvider;
-import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.support.ClientOptions;
@@ -165,22 +161,6 @@ final class VaultConfiguration {
 		}
 		customizers.forEach(it -> it.customize(builder));
 		return builder.build();
-	}
-
-	RestTemplateBuilder createRestTemplateBuilder(ClientHttpRequestFactory requestFactory,
-			VaultEndpointProvider endpointProvider, List<RestTemplateCustomizer> customizers,
-			List<RestTemplateRequestCustomizer<?>> requestCustomizers) {
-		RestTemplateBuilder builder = RestTemplateBuilder.builder()
-			.requestFactory(requestFactory)
-			.endpointProvider(endpointProvider);
-
-		customizers.forEach(builder::customizers);
-		requestCustomizers.forEach(builder::requestCustomizers);
-
-		if (StringUtils.hasText(this.vaultProperties.getNamespace())) {
-			builder.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, this.vaultProperties.getNamespace());
-		}
-		return builder;
 	}
 
 	SessionManager createSessionManager(ClientAuthentication clientAuthentication,

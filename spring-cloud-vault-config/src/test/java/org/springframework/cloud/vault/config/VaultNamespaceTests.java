@@ -38,7 +38,8 @@ import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.client.ClientHttpConnectorFactory;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
-import org.springframework.vault.client.RestTemplateBuilder;
+import org.springframework.vault.client.SimpleVaultEndpointProvider;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.WebClientBuilder;
 import org.springframework.vault.core.ReactiveVaultTemplate;
@@ -49,6 +50,7 @@ import org.springframework.vault.support.Policy;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
+import org.springframework.web.client.RestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -66,7 +68,7 @@ public class VaultNamespaceTests {
 				Policy.BuiltinCapabilities.UPDATE)
 		.build());
 
-	RestTemplateBuilder maketingRestTemplate;
+	RestClient marketingRestClient;
 
 	WebClientBuilder marketingWebClientBuilder = WebClientBuilder.builder()
 		.httpConnector(ClientHttpConnectorFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
@@ -88,13 +90,18 @@ public class VaultNamespaceTests {
 			this.vaultRule.prepare().getVaultOperations().write("sys/namespaces/" + namespace.replaceAll("/", ""));
 		}
 
-		this.maketingRestTemplate = RestTemplateBuilder.builder()
+		this.marketingRestClient = RestClient.builder()
 			.requestFactory(
 					ClientHttpRequestFactoryFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
-			.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
-			.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
+			.baseUrl(TestRestTemplateFactory.TEST_VAULT_ENDPOINT.toString())
+			.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing")
+			.build();
 
-		VaultTemplate marketing = new VaultTemplate(this.maketingRestTemplate,
+		VaultClient vaultClient = VaultClient.builder(this.marketingRestClient)
+			.endpoint(SimpleVaultEndpointProvider.of(TestRestTemplateFactory.TEST_VAULT_ENDPOINT))
+			.build();
+
+		VaultTemplate marketing = new VaultTemplate(vaultClient,
 				new SimpleSessionManager(new TokenAuthentication(Settings.token())));
 
 		mountKv(marketing, "marketing-secrets");
@@ -120,8 +127,12 @@ public class VaultNamespaceTests {
 	@Test
 	public void shouldReportHealth() {
 
-		VaultTemplate marketing = new VaultTemplate(this.maketingRestTemplate,
-				new SimpleSessionManager(new TokenAuthentication(this.marketingToken)));
+		VaultClient vaultClient = VaultClient.builder(this.marketingRestClient)
+			.endpoint(SimpleVaultEndpointProvider.of(TestRestTemplateFactory.TEST_VAULT_ENDPOINT))
+			.build();
+
+		VaultTemplate marketing = new VaultTemplate(vaultClient,
+				new SimpleSessionManager(new TokenAuthentication(Settings.token())));
 
 		Health.Builder builder = Health.unknown();
 		new VaultHealthIndicator(marketing).doHealthCheck(builder);
