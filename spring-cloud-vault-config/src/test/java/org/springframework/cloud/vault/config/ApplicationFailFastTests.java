@@ -24,7 +24,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.vault.util.VaultTestContextRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Tests for fail fast option.
@@ -36,36 +36,26 @@ public class ApplicationFailFastTests {
 
 	@Test
 	public void contextLoadsWithFailFastUsingLeasing() {
-		try {
-			VaultTestContextRunner.create()
+		assertThatThrownBy(() -> VaultTestContextRunner.create()
 				.withSettings(it -> it.bootstrap(true).failFast())
 				.withProperties("spring.cloud.vault.config.lifecycle.enabled", "true")
 				.withProperties("spring.cloud.vault.port", 9999)
 				.run(ctx -> {
-				});
-			fail("failFast option did not produce an exception");
-		}
-		catch (Exception e) {
-			assertThat(e.getMessage()).isNotEmpty();
-		}
+				}))
+				.hasMessageNotEmpty();
 	}
 
 	@Test
 	public void contextLoadsWithFailFastWithoutLeasing() {
-		try {
-			VaultTestContextRunner.create()
+		assertThatThrownBy(() -> VaultTestContextRunner.create()
 				.withSettings(it -> it.bootstrap(true).failFast())
 				.withProperties("spring.cloud.vault.config.lifecycle.enabled", false)
 				.withProperties("spring.cloud.vault.session.lifecycle.enabled", false)
 				.withProperties("spring.cloud.vault.port", 9999)
 				.withProperties("server.port", 0)
 				.run(ctx -> {
-				});
-			fail("failFast option did not produce an exception");
-		}
-		catch (Exception e) {
-			assertThat(e.getMessage()).isNotEmpty();
-		}
+				}))
+				.hasMessageNotEmpty();
 	}
 
 	@Test
