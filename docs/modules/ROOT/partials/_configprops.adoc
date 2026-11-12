@@ -1,9 +1,6 @@
 |===
 |Name | Default | Description
 
-|spring.cloud.vault.app-id.app-id-path | `+++app-id+++` | Mount path of the AppId authentication backend.
-|spring.cloud.vault.app-id.network-interface |  | Network interface hint for the "MAC_ADDRESS" UserId mechanism.
-|spring.cloud.vault.app-id.user-id | `+++MAC_ADDRESS+++` | UserId mechanism. Can be either "MAC_ADDRESS", "IP_ADDRESS", a string or a class name.
 |spring.cloud.vault.app-role.app-role-path | `+++approle+++` | Mount path of the AppRole authentication backend.
 |spring.cloud.vault.app-role.role |  | Name of the role, optional, used for pull-mode.
 |spring.cloud.vault.app-role.role-id |  | The RoleId.
@@ -39,8 +36,8 @@
 |spring.cloud.vault.cassandra.static-role | `+++false+++` | Enable static role usage. @since 2.2
 |spring.cloud.vault.cassandra.username-property | `+++spring.data.cassandra.username+++` | Target property for the obtained username.
 |spring.cloud.vault.config.lifecycle.enabled | `+++true+++` | Enable lifecycle management.
-|spring.cloud.vault.config.lifecycle.expiry-threshold |  | The expiry threshold. {@link Lease} is renewed the given {@link Duration} before it expires. @since 2.2
-|spring.cloud.vault.config.lifecycle.lease-endpoints |  | Set the {@link LeaseEndpoints} to delegate renewal/revocation calls to. {@link LeaseEndpoints} encapsulates differences between Vault versions that affect the location of renewal/revocation endpoints. Can be {@link LeaseEndpoints#SysLeases} for version 0.8 or above of Vault or {@link LeaseEndpoints#Legacy} for older versions (the default). @since 2.2
+|spring.cloud.vault.config.lifecycle.expiry-threshold |  | The expiry threshold. {@code Lease} is renewed the given {@link Duration} before it expires. @since 2.2
+|spring.cloud.vault.config.lifecycle.lease-endpoints |  | Set the {@link LeaseEndpoints} to delegate renewal/revocation calls to. {@link LeaseEndpoints} encapsulates differences between Vault versions that affect the location of renewal/revocation endpoints. Can be {@link LeaseEndpoints#Leases} for version 0.8 or above of Vault or {@link LeaseEndpoints#Legacy} for older versions (the default). @since 2.2
 |spring.cloud.vault.config.lifecycle.lease-strategy |  | Sets the {@link LeaseStrategy} to be used with {@link org.springframework.vault.core.lease.SecretLeaseContainer#setLeaseStrategy(LeaseStrategy)} to retain or drop tokens on renewal errors. @since 4.1
 |spring.cloud.vault.config.lifecycle.min-renewal |  | The time period that is at least required before renewing a lease. @since 2.2
 |spring.cloud.vault.config.order | `+++0+++` | Used to set a {@link org.springframework.core.env.PropertySource} priority. This is useful to use Vault as an override on other property sources. @see org.springframework.core.PriorityOrdered
@@ -128,13 +125,19 @@
 |spring.cloud.vault.session.lifecycle.enabled | `+++true+++` | Enable session lifecycle management.
 |spring.cloud.vault.session.lifecycle.expiry-threshold | `+++7s+++` | The expiry threshold for a {@link LoginToken}. The threshold represents a minimum TTL duration to consider a login token as valid. Tokens with a shorter TTL are considered expired and are not used anymore. Should be greater than {@code refreshBeforeExpiry} to prevent token expiry.
 |spring.cloud.vault.session.lifecycle.refresh-before-expiry | `+++5s+++` | The time period that is at least required before renewing the {@link LoginToken}.
+|spring.cloud.vault.ssl.bundle |  | Map of named Vault-managed SSL bundles to issue private keys along with certificates.
 |spring.cloud.vault.ssl.cert-auth-path | `+++cert+++` | Mount path of the TLS cert authentication backend.
 |spring.cloud.vault.ssl.enabled-cipher-suites |  | List of enabled SSL/TLS cipher suites. @since 3.0.2
 |spring.cloud.vault.ssl.enabled-protocols |  | List of enabled SSL/TLS protocol. @since 3.0.2
 |spring.cloud.vault.ssl.key-store |  | Trust store that holds certificates and private keys.
 |spring.cloud.vault.ssl.key-store-password |  | Password used to access the key store.
 |spring.cloud.vault.ssl.key-store-type |  | Type of the key store. @since 3.0
+|spring.cloud.vault.ssl.lifecycle.expiry-threshold | `+++1m+++` | Expiry threshold to trigger certificate renewal before actual expiry.
+|spring.cloud.vault.ssl.lifecycle.pki-mount | `+++pki+++` | Mount path of the PKI backend in Vault.
+|spring.cloud.vault.ssl.lifecycle.store.enabled | `+++false+++` | Whether to enable caching of certificates using a versioned key/value secret backend.
+|spring.cloud.vault.ssl.lifecycle.store.path | `+++secret+++` | Path to the certificate store used to store the certificate bundle.
 |spring.cloud.vault.ssl.role |  | Name of the role against which the login is being attempted. @since 5.0
+|spring.cloud.vault.ssl.trust-bundle |  | Map of named Vault-managed trust bundles that contain CA issuer certificates for trust anchor usage.
 |spring.cloud.vault.ssl.trust-store |  | Trust store that holds SSL certificates.
 |spring.cloud.vault.ssl.trust-store-password |  | Password used to access the trust store.
 |spring.cloud.vault.ssl.trust-store-type |  | Type of the trust store. @since 3.0
