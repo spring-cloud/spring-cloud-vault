@@ -31,7 +31,10 @@ import org.springframework.vault.support.VaultToken;
  *
  * @author Mark Paluch
  */
-class VaultContainers {
+final class VaultContainers {
+
+	private VaultContainers() {
+	}
 
 	/**
 	 * Create a {@link VaultContainer} with default {@link TestSettings} and register
